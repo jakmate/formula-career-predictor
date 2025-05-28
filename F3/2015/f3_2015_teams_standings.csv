@@ -1,0 +1,25 @@
+Pos,Team,CAT R1,CAT R2,RBR R1,RBR R2,SIL R1,SIL R2,HUN R1,HUN R2,SPA R1,SPA R2,MNZ R1,MNZ R2,SOC R1,SOC R2,BHR R1,BHR R2,YMC R1,YMC R2,Points
+1,ART Grand Prix,10,10,15,Ret,13,11,18,15,6,3,,,13,12,8,8,Ret,19,477
+1,ART Grand Prix,5,1,6,2,1,8,3,5,3,Ret,4,1,9,7,1,6,1,7,477
+1,ART Grand Prix,1,7,3,DSQ,6,2,2,2,2,2,2,2,2,2,3,2,4,3,477
+2,Trident,15,12,21,9,9,17,16,Ret,12,7,16,Ret,10,5,6,12,10,9,282
+2,Trident,2,8,1,3,4,7,1,4,5,1,Ret,3,1,8,4,1,5,4,282
+2,Trident,16,11,9,1,11,10,,,Ret,15,14,12,18,13,20,15,20,18,282
+3,Arden International,7,6,Ret,DNS,7,1,7,1,Ret,13,3,4,Ret,DNS,14,18,Ret,10,275
+3,Arden International,3,5,4,4,2,6,4,Ret,1,Ret,1,Ret,3,6,2,4,2,6,275
+3,Arden International,19,23,16,15,14,16,17,19,8,Ret,15,Ret,Ret,20,Ret,16,18,23,275
+4,Koiranen GP,17,21,17,12,12,14,15,11,15,9,,,15,18,Ret,14,9,12,187
+4,Koiranen GP,6,2,20†,10,5,4,6,6,13,16,5,5,8,1,5,7,3,5,187
+4,Koiranen GP,13,9,13,7,3,5,5,3,Ret,Ret,DSQ,Ret,7,Ret,11,3,6,24,187
+5,Carlin,8,4,2,Ret,18,23,8,Ret,4,Ret,Ret,11,6,4,9,5,7,2,147
+5,Carlin,4,3,5,13,17,15,Ret,17,Ret,12,,,5,3,7,Ret,Ret,22,147
+5,Carlin,22†,22,Ret,11,20,21,11,10,11,11,10,9,12,15,15,11,14,17,147
+6,Jenzer Motorsport,21,18,11,Ret,16,19,9,7,Ret,10,Ret,14,Ret,14,Ret,Ret,11,8,55
+6,Jenzer Motorsport,14,13,12,DSQ,10,9,10,9,Ret,4,6,6,Ret,Ret,12,Ret,16,14,55
+6,Jenzer Motorsport,Ret,14,8,8,8,3,13,8,9,8,9,7,11,DNS,10,9,12,11,55
+7,Campos Racing,11,15,18,14,21,22,20,16,14,18,13,15,20,19,17,13,19,21,51
+7,Campos Racing,12,20,14,Ret,Ret,13,19,18,7,5,7,10,4,9,Ret,10,8,1,51
+7,Campos Racing,20,19,Ret,16,23,24,21,Ret,,,12,13,17,16,18,17,Ret,20,51
+8,Status Grand Prix,Ret,24,19,5,15,12,12,12,Ret,14,DSQ,Ret,14,10,16,Ret,13,15,29
+8,Status Grand Prix,9,16,10,6,19,18,14,13,10,6,8,16,19,11,19,19,15,13,29
+8,Status Grand Prix,18,17,7,Ret,22,20,22,14,Ret,17,11,8,16,17,13,Ret,17,16,29

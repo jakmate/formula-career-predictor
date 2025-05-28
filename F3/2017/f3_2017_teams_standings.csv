@@ -1,0 +1,19 @@
+Pos,Team,CAT R1,CAT R2,RBR R1,RBR R2,SIL R1,SIL R2,HUN R1,HUN R2,SPA R1,SPA R2,MNZ[f] R1,MNZ[f] R2,JER R1,JER R2,YMC R1,YMC R2,Points
+1,ART Grand Prix,1,4,1,3,1,2,1,5,1,2,1,С,1,3,2,4,578
+1,ART Grand Prix,4,5,2,5,2,4,2,11,2,4,2,С,2,4,8,5,578
+1,ART Grand Prix,5,6,3,6,4,8,3,Ret,3,7,3,С,3,5,14,8,578
+2,Trident,6,2,5,2,7,1,5,1,5,1,5,С,7,2,7,1,286
+2,Trident,12,9,6,4,8,7,6,2,6,3,6,С,9,7,9,2,286
+2,Trident,13,11,9,9,9,13,7,3,7,8,9,С,12,14,10,7,286
+3,Jenzer Motorsport,3,1,7,8,3,5,4,8,4,6,16†,С,8,1,3,6,164
+3,Jenzer Motorsport,7,3,10,16,6,6,Ret,Ret,12,14,Ret,С,15,12,5,17,164
+3,Jenzer Motorsport,,,,,,,,,15,Ret,Ret,С,17,16,12,13,164
+4,Arden International,2,14,Ret,14,5,3,9,6,9,9,12,С,6,10,1,13,91
+4,Arden International,15,15,Ret,15,11,12,15,10,11,11,15†,С,11,11,6,18,91
+4,Arden International,18,17,Ret,18,13,Ret,Ret,Ret,13,12,Ret,С,14,19,17†,Ret,91
+5,Campos Racing,8,7,8,1,10,10,11,7,8,5,4,С,10,9,13,11,56
+5,Campos Racing,10,10,11,10,12,11,13,9,14,10,8,С,18,15,Ret,16,56
+5,Campos Racing,11,16,15,11,16,Ret,14,Ret,Ret,Ret,11,С,19,17,DNS,Ret,56
+6,DAMS,9,8,13,12,14,9,10,12,16,13,7,С,4,8,4,3,48
+6,DAMS,14,13,14,13,15,14,12,13,Ret,15,10,С,13,15,11,10,48
+6,DAMS,16,Ret,Ret,Ret,Ret,15,Ret,Ret,Ret,16,13,С,16,Ret,16,15,48

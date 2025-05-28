@@ -1,0 +1,19 @@
+Pos,Team,CAT R1,CAT R2,LEC R1,LEC R2,RBR R1,RBR R2,SIL R1,SIL R2,HUN R1,HUN R2,SPA R1,SPA R2,MNZ R1,MNZ R2,SOC R1,SOC R2,YMC R1,YMC R2,Points
+1,ART Grand Prix,1,2,1,1,1,1,1,4,1,2,3,1,2,3,2,4,3,1,640
+1,ART Grand Prix,2,3,2,5,5,6,2,5,3,3,5,2,3,4,3,16,4,2,640
+1,ART Grand Prix,3,7,8,7,13,7,3,7,6,12,6,3,5,DSQ,7,18,5,4,640
+2,Trident,7,1,3,2,3,2,4,1,4,7,1,5,1,1,5,1,2,5,433
+2,Trident,9,14,5,4,4,4,7,2,5,8,2,6,6,2,14,9,8,10,433
+2,Trident,11,16,6,6,6,Ret,8,3,12,9,4,8,7,5,15,11,11,Ret,433
+3,Campos Racing,4,8,4,8,2,3,6,6,2,4,12,13,4,7,1,8,1,3,195
+3,Campos Racing,10,9,13,11,9,15,12,11,9,10,15,16,14,8,6,14,9,16,195
+3,Campos Racing,15,12,14,Ret,14,16,13,16,14,11,19,Ret,Ret,14,Ret,15,18,Ret,195
+4,MP Motorsport,5,5,12,13,10,5,5,9,8,1,14,7,8,9,4,3,14,7,94
+4,MP Motorsport,18,6,DSQ,14,11,8,11,14,Ret,Ret,17,12,10,10,17,12,17,11,94
+4,MP Motorsport,Ret,13,DSQ,Ret,18†,11,15,Ret,WD,WD,18,Ret,13,15,DNP,DNP,19,13,94
+5,Jenzer Motorsport,6,4,9,10,8,12,14,10,7,5,10,9,15,6,9,5,8,6,65
+5,Jenzer Motorsport,8,17,17,12,12,13,Ret,15,11,8,11,10,16,11,10,7,10,8,65
+5,Jenzer Motorsport,Ret,Ret,19,16,19,Ret,Ret,Ret,13,17,20,15,17,Ret,12,10,13,Ret,65
+6,Arden International,12,11,7,3,15,10,9,13,10,13,8,11,12,12,8,2,15,9,43
+6,Arden International,14,15,15,15,16,14,Ret,Ret,15,15,13,14,Ret,13,11,6,16,14,43
+6,Arden International,16,Ret,16,Ret,Ret,Ret,Ret,Ret,Ret,18,16,17,Ret,Ret,16,13,20,15,43
