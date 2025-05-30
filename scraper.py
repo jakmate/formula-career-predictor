@@ -6,9 +6,18 @@ import csv
 BASE_URL = "https://en.wikipedia.org/wiki/"
 
 
-def process_championship(soup, championship_type, year, file_suffix, formula):
+def process_championship(soup, championship_type, year, file_suffix, formula, series_type="main"):
     # Determine heading ID based on year and championship type
-    if year == 2013 and formula == 2 and championship_type == 'Drivers\'':
+    if series_type == "f3_euro":
+        if championship_type == 'Teams\'':
+            return
+        if year == 2012:
+            heading_id = "Championship_standings"
+        elif year == 2013 and championship_type == 'Teams\'':
+            heading_id = "Ravenol_Team_Trophy"
+        else:
+            heading_id = f"{championship_type}_championship"
+    elif year == 2013 and formula == 2 and championship_type == 'Drivers\'':
         heading_id = f"{championship_type}_championship"
     elif year < 2013:
         heading_id = f"{championship_type}_Championship"
@@ -17,10 +26,13 @@ def process_championship(soup, championship_type, year, file_suffix, formula):
     else:
         heading_id = f"{championship_type}_Championship_standings"
 
-    heading = soup.find("h3", {"id": heading_id.replace(" ", "_")})
+    if series_type == "f3_euro" and year == 2012:
+        heading = soup.find("h2", {"id": heading_id})
+    else:
+        heading = soup.find("h3", {"id": heading_id.replace(" ", "_")})
 
     if not heading:
-        print(f"No {championship_type} heading found for {year}")
+        print(f"No {championship_type} heading found for {year} {series_type}")
         return
 
     table = heading.find_next("table", {"class": "wikitable"})
@@ -29,22 +41,47 @@ def process_championship(soup, championship_type, year, file_suffix, formula):
         for _ in range(3):
             table = table.find_next("table", {"class": "wikitable"})
     if not table:
-        print(f"No {championship_type} table found for {year}")
+        print(f"No {championship_type} table found for {year} {series_type}")
         return
 
     all_rows = table.find_all("tr")
     if len(all_rows) < 3:
-        print(f"Not enough rows in {championship_type} table for {year}")
+        print(f"Not enough rows in {championship_type} table for {year} {series_type}")
         return
 
-    # Create directiories
-    dir_path = os.path.join(f"F{formula}", str(year))
+    # Create directories - use different folder for F3 European
+    if series_type == "f3_euro":
+        dir_path = os.path.join("F3_European", str(year))
+        filename = f"f3_euro_{year}_{file_suffix}.csv"
+    else:
+        dir_path = os.path.join(f"F{formula}", str(year))
+        filename = f"f{formula}_{year}_{file_suffix}.csv"
+    
     os.makedirs(dir_path, exist_ok=True)
-    filename = f"f{formula}_{year}_{file_suffix}.csv"
     full_path = os.path.join(dir_path, filename)
 
     with open(full_path, "w", newline='', encoding="utf-8") as f:
         writer = csv.writer(f)
+
+        # Handle F3 European simple format (Pos, Team/Driver, Points only)
+        if series_type == "f3_euro" and championship_type == "Teams'":
+            # Simple 3-column format for F3 European teams
+            writer.writerow(["Pos", "Team", "Points"])
+            
+            # Skip header row and footer rows
+            data_rows = all_rows[1:]
+            
+            for row in data_rows:
+                cells = row.find_all(["th", "td"])
+                if len(cells) >= 3:
+                    pos = cells[0].get_text(strip=True)
+                    team = cells[1].get_text(strip=True)
+                    points = cells[2].get_text(strip=True)
+                    
+                    # Skip rows that aren't actual standings (like "Guest team ineligible")
+                    if pos and not pos.lower().startswith('guest'):
+                        writer.writerow([pos, team, points])
+            return
 
         # Check if it's team or driver standings
         is_team_standings = "team" in file_suffix.lower()
@@ -54,7 +91,8 @@ def process_championship(soup, championship_type, year, file_suffix, formula):
         # Get all header cells from both rows
         race_headers = race_header_row.find_all("th")
 
-        if (year > 2012 and formula == 3) or (year > 2016 and formula == 2):
+        # F3 European uses different header structure
+        if series_type == "f3_euro" or (year > 2012 and formula == 3) or (year > 2016 and formula == 2):
             round_header_row = all_rows[1]
             round_headers = round_header_row.find_all("th")
 
@@ -70,7 +108,7 @@ def process_championship(soup, championship_type, year, file_suffix, formula):
         # Start after Pos, Driver/Team (and No.)
         col_index = 3 if has_no_column else 2
 
-        # Processall race headers
+        # Process all race headers
         for i, th in enumerate(race_headers[col_index:], col_index):
             race_name = th.get_text(strip=True)
             # Stop when we hit the Points column
@@ -80,7 +118,7 @@ def process_championship(soup, championship_type, year, file_suffix, formula):
             colspan = int(th.get('colspan', 1))
 
             # Get corresponding round headers for this race
-            if year > 2016 or (year > 2012 and formula == 3):
+            if series_type == "f3_euro" or year > 2016 or (year > 2012 and formula == 3):
                 race_rounds = []
                 round_start_idx = col_index + i - col_index - 2
                 for j in range(colspan):
@@ -108,7 +146,7 @@ def process_championship(soup, championship_type, year, file_suffix, formula):
         writer.writerow(combined_headers)
 
         # Data processing - skip header rows and footer rows
-        data_rows = all_rows[2:] if (year > 2012 and formula == 3) or (
+        data_rows = all_rows[2:] if series_type == "f3_euro" or (year > 2012 and formula == 3) or (
             year > 2016 and formula == 2) else all_rows[1:]
 
         # Remove footer rows (usually last 2-3 rows contain sources/notes)
@@ -196,8 +234,16 @@ def process_championship(soup, championship_type, year, file_suffix, formula):
             writer.writerow(row_data)
 
 
-def process_entries(soup, year, formula):
-    if year == 2018 and formula == 2:
+def process_entries(soup, year, formula, series_type="main"):
+    # Determine heading based on series type and year
+    if series_type == "f3_euro":
+        if year == 2018:
+            heading = soup.find("h2", {"id": "Entries"})
+        elif year < 2016:
+            heading = soup.find("h2", {"id": "Drivers_and_teams"})
+        else:
+            heading = soup.find("h2", {"id": "Teams_and_drivers"})
+    elif year == 2018 and formula == 2:
         heading = soup.find("h2", {"id": "Entries"})
     elif year <= 2018 or (formula == 3 and year == 2019):
         heading = soup.find("h2", {"id": "Teams_and_drivers"})
@@ -205,23 +251,28 @@ def process_entries(soup, year, formula):
         heading = soup.find("h2", {"id": "Entries"})
 
     if not heading:
-        print(f"No entries heading found for {formula} {year}")
+        print(f"No entries heading found for {formula} {year} {series_type}")
         return
 
     table = heading.find_next("table", {"class": "wikitable"})
     if not table:
-        print(f"No table found for {formula} {year}")
+        print(f"No table found for {formula} {year} {series_type}")
         return
 
     all_rows = table.find_all("tr")
     if len(all_rows) < 3:
-        print(f"Not enough rows in table for {formula} {year}")
+        print(f"Not enough rows in table for {formula} {year} {series_type}")
         return
 
     # Create directories
-    dir_path = os.path.join(f"F{formula}", str(year))
+    if series_type == "f3_euro":
+        dir_path = os.path.join("F3_European", str(year))
+        filename = f"f3_euro_{year}_entries.csv"
+    else:
+        dir_path = os.path.join(f"F{formula}", str(year))
+        filename = f"f{formula}_{year}_entries.csv"
+    
     os.makedirs(dir_path, exist_ok=True)
-    filename = f"f{formula}_{year}_entries.csv"
     full_path = os.path.join(dir_path, filename)
 
     with open(full_path, "w", newline='', encoding="utf-8") as f:
@@ -273,6 +324,7 @@ def process_entries(soup, year, formula):
             entrant_rowspan = max(entrant_rowspan - 1, 0)
 
 
+# Original F2 and F3/GP3 processing
 for num in [2, 3]:
     for year in range(2010, 2026):
         if (year <= 2016 and num == 2) or (year <= 2018 and num == 3):
@@ -298,3 +350,19 @@ for num in [2, 3]:
 
         except Exception as e:
             print(f"Error processing {year}: {str(e)}")
+
+# F3 European Championship processing (2012-2018)
+for year in range(2012, 2019):
+    url = f"{BASE_URL}{year}_FIA_Formula_3_European_Championship"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        process_entries(soup, year, 3, "f3_euro")
+        process_championship(soup, "Teams'", year, "teams_standings", 3, "f3_euro")
+        process_championship(soup, "Drivers'", year, "drivers_standings", 3, "f3_euro")
+
+    except Exception as e:
+        print(f"Error processing F3 European {year}: {str(e)}")
