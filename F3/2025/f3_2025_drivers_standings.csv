@@ -1,35 +1,35 @@
 Pos,Driver,ALB SR,ALB FR,BHR FR,BHR SR,IMO SR,IMO FR,MON FR,MON SR,CAT SR,CAT FR,RBR FR,RBR SR,SIL SR,SIL FR,SPA FR,SPA SR,HUN SR,HUN FR,MNZ FR,MNZ SR,Points
-1,Rafael Câmara,Ret,1P F,12,1P F,11,3P,7,Ret,,,,,,,,,,,,,77
-2,Tim Tramnitz,NC,5,6,3,1,6,5,5,,,,,,,,,,,,,64
-3,Nikola Tsolov,8,Ret,1,5,3,9,24,1P F,,,,,,,,,,,,,61
-4,Noah Strømsted,Ret,2,10,6,6F,2F,Ret,18,,,,,,,,,,,,,52
-5,Tuukka Taponen,14,20,3,4,7,4,2,7,,,,,,,,,,,,,51
-6,Callum Voisin,9,Ret,4,2,26,18,10,4,,,,,,,,,,,,,40
-7,Roman Bilinski,3,9,20,13,5,8,11,2,,,,,,,,,,,,,38
-8,Santiago Ramos,1,16,Ret,14,27†,1,Ret,16,,,,,,,,,,,,,35
-9,Martinius Stenshorne,2F,8,5,18,13,11,1F,8,,,,,,,,,,,,,35
-10,Mari Boya,13,17,15,8,Ret,5,8,3,,,,,,,,,,,,,32
-11,Alessandro Giusti,11,25,7,7,10,7,4,10,,,,,,,,,,,,,25
-12,Théophile Naël,7,3,Ret,15,20,26,16,22†,,,,,,,,,,,,,19
-13,Laurens van Hoepen,Ret,12,16,12,17,10,3,6,,,,,,,,,,,,,17
+1,Rafael Câmara,Ret,1P F,12,1P F,11,3P,7,Ret,Ret,P,,,,,,,,,,,79
+2,Nikola Tsolov,8,Ret,1,5,3,9,24,1P F,3,,,,,,,,,,,,69
+3,Tim Tramnitz,NC,5,6,3,1,6,5,5,Ret,,,,,,,,,,,,64
+4,Noah Strømsted,Ret,2,10,6,6F,2F,Ret,18,Ret,,,,,,,,,,,,52
+5,Tuukka Taponen,14,20,3,4,7,4,2,7,Ret,,,,,,,,,,,,51
+6,Santiago Ramos,1,16,Ret,14,27†,1,Ret,16,2F,,,,,,,,,,,,45
+7,Callum Voisin,9,Ret,4,2,26,18,10,4,16,,,,,,,,,,,,40
+8,Roman Bilinski,3,9,20,13,5,8,11,2,Ret,,,,,,,,,,,,38
+9,Mari Boya,13,17,15,8,Ret,5,8,3,7,,,,,,,,,,,,36
+10,Martinius Stenshorne,2F,8,5,18,13,11,1F,8,Ret,,,,,,,,,,,,35
+11,Alessandro Giusti,11,25,7,7,10,7,4,10,6,,,,,,,,,,,,30
+12,Théophile Naël,7,3,Ret,15,20,26,16,22†,5,,,,,,,,,,,,25
+13,Laurens van Hoepen,Ret,12,16,12,17,10,3,6,4,,,,,,,,,,,,24
 14,Nikita Bedrin,6,4,,,,,,,,,,,,,,,,,,,17
-15,Charlie Wurz,Ret,6,9,11,23,16,6,Ret,,,,,,,,,,,,,15
-16,Tasanapol Inthraphuvasak,4,7,18,16,19,17,23,12,,,,,,,,,,,,,13
-17,Bruno del Pino,Ret,23,19,9,2,27,22,NC,,,,,,,,,,,,,11
-18,Louis Sharp,18,14,14,23,4,12,9,9,,,,,,,,,,,,,11
-19,Freddie Slater,,,2F,Ret,,,,,,,,,,,,,,,,,10
-20,Matías Zagazeta,5,22,17,29,Ret,22,17,15,,,,,,,,,,,,,6
-21,Ugo Ugochukwu,12,10,Ret,27,8,14,13,14,,,,,,,,,,,,,4
-22,Christian Ho,15,Ret,8,10,21,21,15,13,,,,,,,,,,,,,4
-23,Noel León,10,13,11,17,9,28†,Ret,Ret,,,,,,,,,,,,,3
-24,James Wharton,Ret,21,13,28,22,13,21,11,,,,,,,,,,,,,0
-25,Joshua Dufek,22,11,Ret,22,14,15,14,17,,,,,,,,,,,,,0
-26,Brad Benavides,,,,,12,24,12,Ret,,,,,,,,,,,,,0
-27,Nicola Lacorte,17,24,Ret,20,15,25,Ret,Ret,,,,,,,,,,,,,0
-28,Javier Sagrera,Ret,15,23,24,,,,,,,,,,,,,,,,,0
-29,Gerrard Xie,16,18,21,26,24,20,18,19,,,,,,,,,,,,,0
-30,Brando Badoer,19,26,22,21,16,19,20,Ret,,,,,,,,,,,,,0
-31,James Hedley,,,,,18,23,Ret,WD,,,,,,,,,,,,,0
-32,Ivan Domingues,21,19,Ret,19,25,Ret,Ret,20,,,,,,,,,,,,,0
-33,Nicola Marinangeli,20,27,Ret,25,Ret,Ret,19,21,,,,,,,,,,,,,0
-—,Jesse Carrasquedo Jr.,,,,,,,,,,,,,,,,,,,,,0
+15,Tasanapol Inthraphuvasak,4,7,18,16,19,17,23,12,9,,,,,,,,,,,,15
+16,Charlie Wurz,Ret,6,9,11,23,16,6,Ret,14,,,,,,,,,,,,15
+17,Bruno del Pino,Ret,23,19,9,2,27,22,NC,12,,,,,,,,,,,,11
+18,Louis Sharp,18,14,14,23,4,12,9,9,13,,,,,,,,,,,,11
+19,Ivan Domingues,21,19,Ret,19,25,Ret,Ret,20,1,,,,,,,,,,,,10
+20,Freddie Slater,,,2F,Ret,,,,,,,,,,,,,,,,,10
+21,Matías Zagazeta,5,22,17,29,Ret,22,17,15,18,,,,,,,,,,,,6
+22,Christian Ho,15,Ret,8,10,21,21,15,13,11,,,,,,,,,,,,4
+23,Ugo Ugochukwu,12,10,Ret,27,8,14,13,14,22,,,,,,,,,,,,4
+24,Noel León,10,13,11,17,9,28†,Ret,Ret,10,,,,,,,,,,,,4
+25,James Wharton,Ret,21,13,28,22,13,21,11,8,,,,,,,,,,,,3
+26,Joshua Dufek,22,11,Ret,22,14,15,14,17,,,,,,,,,,,,,0
+27,Brad Benavides,,,,,12,24,12,Ret,15,,,,,,,,,,,,0
+28,Nicola Lacorte,17,24,Ret,20,15,25,Ret,Ret,19,,,,,,,,,,,,0
+29,Javier Sagrera,Ret,15,23,24,,,,,,,,,,,,,,,,,0
+30,Brando Badoer,19,26,22,21,16,19,20,Ret,17,,,,,,,,,,,,0
+31,Gerrard Xie,16,18,21,26,24,20,18,19,20,,,,,,,,,,,,0
+32,James Hedley,,,,,18,23,Ret,WD,,,,,,,,,,,,,0
+33,Nicola Marinangeli,20,27,Ret,25,Ret,Ret,19,21,21,,,,,,,,,,,,0
+34,Jesse Carrasquedo Jr.,,,,,,,,,23,,,,,,,,,,,,0

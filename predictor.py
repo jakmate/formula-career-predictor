@@ -1,3 +1,6 @@
+from datetime import datetime
+import json
+import re
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -178,7 +181,7 @@ def create_target_using_f2_data(f3_df, f2_df):
 
 
 def engineer_features(df):
-    """Create features for ML model."""
+    """Create features for ML model with F3 European consideration."""
     if df.empty:
         return pd.DataFrame()
 
@@ -190,9 +193,15 @@ def engineer_features(df):
     features_df['points'] = pd.to_numeric(
         df['Points'], errors='coerce').fillna(0)
     features_df['years_in_f3'] = df['years_in_f3']
+    features_df['series_type'] = df.get('series_type', 'Unknown')
+    features_df['is_f3_european'] = (
+        features_df['series_type'] == 'F3_European').astype(int)
 
     race_cols = get_race_columns(df)
     wins, podiums, points_finishes, dnfs, races_completed = [], [], [], [], []
+
+    # Calculate championship competitiveness (position relative to field size)
+    field_sizes = []
 
     for _, row in df.iterrows():
         driver_wins = 0
@@ -200,6 +209,14 @@ def engineer_features(df):
         driver_points = 0
         driver_dnfs = 0
         driver_races = 0
+
+        # Calculate field size for this year/series
+        year_series_data = df[
+            (df['year'] == row['year']) &
+            (df.get('series_type', 'F3_Main') == row.get('series_type', 'F3_Main'))  # noqa: E501
+        ]
+        field_size = len(year_series_data)
+        field_sizes.append(field_size)
 
         for col in race_cols:
             if col not in row or pd.isna(row[col]):
@@ -209,16 +226,20 @@ def engineer_features(df):
             if not result:
                 continue
 
-            # Handle DNF/DNS cases
             if any(x in result for x in ['Ret', 'DNS', 'WD', 'NC', 'DSQ']):
                 driver_dnfs += 1
                 driver_races += 1
                 continue
 
             try:
-                # Extract finishing position
-                pos = int(result.split()[0].replace(
-                    '†', '').replace('F', '').replace('P', ''))
+                pos = int(
+                    result.split()[0].replace(
+                        '†',
+                        '').replace(
+                        'F',
+                        '').replace(
+                        'P',
+                        ''))
                 driver_races += 1
 
                 if pos == 1:
@@ -230,7 +251,7 @@ def engineer_features(df):
                     driver_points += 1
                 elif pos <= 10:
                     driver_points += 1
-            except:  # noqa: E722
+            except BaseException:
                 continue
 
         wins.append(driver_wins)
@@ -244,8 +265,9 @@ def engineer_features(df):
     features_df['points_finishes'] = points_finishes
     features_df['dnfs'] = dnfs
     features_df['races_completed'] = races_completed
+    features_df['field_size'] = field_sizes
+    features_df = add_driver_features(features_df, f3_df)
 
-    # Calculate rates
     features_df['win_rate'] = features_df['wins'] / \
         features_df['races_completed']
     features_df['podium_rate'] = features_df['podiums'] / \
@@ -260,6 +282,90 @@ def engineer_features(df):
     return features_df
 
 
+def calculate_years_in_f3_combined(df):
+    """Calculate years in F3"""
+    df = df.sort_values(by=['Driver', 'year'])
+
+    # Group consecutive years for each driver
+    df['years_in_f3'] = 0
+
+    for driver in df['Driver'].unique():
+        driver_data = df[df['Driver'] == driver].copy()
+
+        # Calculate cumulative years, treating F3 and F3 European as continuous
+        years_count = 0
+        prev_year = None
+
+        for idx, row in driver_data.iterrows():
+            current_year = row['year']
+
+            if prev_year is None or current_year == prev_year + 1:
+                years_count += 1
+
+            df.loc[idx, 'years_in_f3'] = years_count
+            prev_year = current_year
+
+    return df
+
+
+def add_driver_features(features_df, f3_df):
+    """Add age and academy features from cached JSON profiles."""
+    profiles_dir = "driver_profiles"
+
+    def get_driver_filename(driver_name):
+        safe_name = re.sub(r'[^\w\s-]', '', driver_name)
+        safe_name = re.sub(r'[-\s]+', '_', safe_name)
+        return f"{safe_name.lower()}.json"
+
+    def calculate_age(dob_str, competition_year):
+        if not dob_str:
+            return None
+        try:
+            if len(dob_str) == 10:
+                dob = datetime.strptime(dob_str, '%Y-%m-%d')
+                season_start = datetime(competition_year, 1, 1)
+                age = (season_start - dob).days / 365.25
+                return round(age, 1)
+        except BaseException:
+            return None
+
+    # Load cached profiles
+    profiles = {}
+    if os.path.exists(profiles_dir):
+        for driver in f3_df['Driver'].unique():
+            profile_file = os.path.join(
+                profiles_dir, get_driver_filename(driver))
+            if os.path.exists(profile_file):
+                try:
+                    with open(profile_file, 'r', encoding='utf-8') as f:
+                        profiles[driver] = json.load(f)
+                except BaseException:
+                    profiles[driver] = {'dob': None, 'academy': None}
+            else:
+                profiles[driver] = {'dob': None, 'academy': None}
+
+    # Add features
+    ages = []
+    has_academy = []
+
+    for _, row in features_df.iterrows():
+        driver = row['driver']
+        year = row['year']
+
+        profile = profiles.get(driver, {})
+
+        age = calculate_age(profile.get('dob'), year)
+        ages.append(age)
+
+        academy = profile.get('academy')
+        has_academy.append(1 if academy else 0)
+
+    features_df['age'] = ages
+    features_df['has_academy'] = has_academy
+
+    return features_df
+
+
 def train_model(df):
     """Train ML models to predict F2 progression."""
     if df.empty:
@@ -270,7 +376,7 @@ def train_model(df):
     feature_cols = [
         'final_position', 'win_rate', 'podium_rate',
         'dnf_rate', 'points_per_race', 'top_10_rate',
-        'years_in_f3'
+        'years_in_f3', 'age', 'has_academy'
     ]
 
     X = df_clean[feature_cols].fillna(0)
