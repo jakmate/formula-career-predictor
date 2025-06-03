@@ -1,14 +1,25 @@
+import torch.optim as optim
+import torch.nn as nn
+import torch
+from sklearn.utils import class_weight
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Input
+from tensorflow.keras.models import Sequential
 from datetime import datetime
 import json
 import re
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_validate
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
+import xgboost as xgb
 import os
 import glob
 
@@ -75,14 +86,14 @@ def load_and_combine_data(series='F3'):
                             entries_df = entries_df.rename(
                                 columns={old_name: new_name})
 
-                    # Clean driver names if Driver column exists
+                    # Clean driver names
                     if 'Driver' in entries_df.columns:
                         entries_df['Driver'] = entries_df['Driver'].str.strip()
                     if 'Driver' in df.columns:
                         df['Driver'] = df['Driver'].str.strip()
 
-                    # Merge team data if both Driver and Team columns exist
-                    if 'Driver' in entries_df.columns and 'Team' in entries_df.columns:  # noqa: E501
+                    # Merge team data if both Driver and Team
+                    if 'Driver' in entries_df.columns and 'Team' in entries_df.columns:
                         df = df.merge(
                             entries_df[['Driver', 'Team']],
                             left_on='Driver', right_on='Driver', how='left'
@@ -152,9 +163,9 @@ def create_target_using_f2_data(f3_df, f2_df):
             moved_drivers[(driver, last_f3_year)] = np.nan
             continue
 
-        # Check next 2 years for F2 participation
+        # Check next years for F2 participation
         moved = 0
-        for offset in [1, 2]:
+        for offset in [1]:
             target_year = last_f3_year + offset
             if target_year > max_f2_year:
                 break
@@ -164,7 +175,7 @@ def create_target_using_f2_data(f3_df, f2_df):
                 (f2_participation_df['year'] == target_year)
             ]
 
-            if not participation.empty and participation['participated'].iloc[0]:  # noqa: E501
+            if not participation.empty and participation['participated'].iloc[0]:
                 moved = 1
                 break
 
@@ -178,6 +189,150 @@ def create_target_using_f2_data(f3_df, f2_df):
             f3_df.at[idx, 'moved_to_f2'] = moved_drivers[(driver, year)]
 
     return f3_df
+
+
+def calculate_teammate_performance(df):
+    """Calculate performance metrics relative to teammates."""
+    if 'Team' not in df.columns:
+        return df
+
+    # Group by year and team to find teammates
+    team_performance = []
+
+    for (year, team), team_df in df.groupby(['year', 'Team']):
+        if len(team_df) < 2:  # Skip teams with only one driver
+            continue
+
+        race_cols = get_race_columns(team_df)
+        if not race_cols:
+            continue
+
+        for _, driver_row in team_df.iterrows():
+            driver = driver_row['Driver']
+
+            # Get teammates (excluding current driver)
+            teammates_df = team_df[team_df['Driver'] != driver]
+
+            if teammates_df.empty:
+                continue
+
+            # Calculate head-to-head record
+            h2h_wins = 0
+            h2h_total = 0
+            better_finishes = 0
+            total_comparable = 0
+
+            for race_col in race_cols:
+                driver_result = str(driver_row[race_col]).strip()
+                if not driver_result or driver_result in [
+                        'DNS', 'WD', 'NC', 'EX', 'DSQ']:
+                    continue
+
+                try:
+                    driver_pos = int(
+                        driver_result.split()[0].replace(
+                            '†', '').replace(
+                            'Ret', '999'))
+                except BaseException:
+                    continue
+
+                # Compare with each teammate
+                for _, teammate_row in teammates_df.iterrows():
+                    teammate_result = str(teammate_row[race_col]).strip()
+                    if not teammate_result or teammate_result in [
+                            'DNS', 'WD', 'NC', 'EX', 'DSQ']:
+                        continue
+
+                    try:
+                        teammate_pos = int(
+                            teammate_result.split()[0].replace(
+                                '†', '').replace(
+                                'Ret', '999'))
+
+                        h2h_total += 1
+                        total_comparable += 1
+
+                        if driver_pos < teammate_pos:  # Lower pos number = better finish
+                            h2h_wins += 1
+                            better_finishes += 1
+
+                    except BaseException:
+                        continue
+
+            # Calculate metrics
+            h2h_rate = h2h_wins / h2h_total if h2h_total > 0 else 0.5
+
+            # Calculate average position difference
+            pos_differences = []
+            for race_col in race_cols:
+                driver_result = str(driver_row[race_col]).strip()
+                if not driver_result or driver_result in [
+                        'DNS', 'WD', 'NC', 'EX', 'DSQ']:
+                    continue
+
+                try:
+                    driver_pos = int(
+                        driver_result.split()[0].replace(
+                            '†', '').replace(
+                            'Ret', '25'))
+                except BaseException:
+                    continue
+
+                teammate_positions = []
+                for _, teammate_row in teammates_df.iterrows():
+                    teammate_result = str(teammate_row[race_col]).strip()
+                    if not teammate_result or teammate_result in [
+                            'DNS', 'WD', 'NC', 'EX', 'DSQ']:
+                        continue
+
+                    try:
+                        teammate_pos = int(
+                            teammate_result.split()[0].replace(
+                                '†', '').replace(
+                                'Ret', '25'))
+                        teammate_positions.append(teammate_pos)
+                    except BaseException:
+                        continue
+
+                if teammate_positions:
+                    avg_teammate_pos = np.mean(teammate_positions)
+                    pos_differences.append(
+                        avg_teammate_pos - driver_pos)  # Positive = driver better
+
+            avg_pos_difference = np.mean(
+                pos_differences) if pos_differences else 0
+
+            team_performance.append({
+                'Driver': driver,
+                'year': year,
+                'Team': team,
+                'teammate_h2h_rate': h2h_rate,
+                'avg_pos_vs_teammates': avg_pos_difference,
+                'teammate_battles': h2h_total
+            })
+
+    # Convert to DataFrame and merge with original
+    team_perf_df = pd.DataFrame(team_performance)
+    if not team_perf_df.empty:
+        df = df.merge(team_perf_df[['Driver',
+                                    'year',
+                                    'teammate_h2h_rate',
+                                    'avg_pos_vs_teammates',
+                                    'teammate_battles']],
+                      on=['Driver',
+                          'year'],
+                      how='left')
+
+        # Fill NaN values for drivers without teammates
+        df['teammate_h2h_rate'] = df['teammate_h2h_rate'].fillna(0.5)
+        df['avg_pos_vs_teammates'] = df['avg_pos_vs_teammates'].fillna(0)
+        df['teammate_battles'] = df['teammate_battles'].fillna(0)
+    else:
+        df['teammate_h2h_rate'] = 0.5
+        df['avg_pos_vs_teammates'] = 0
+        df['teammate_battles'] = 0
+
+    return df
 
 
 def engineer_features(df):
@@ -213,7 +368,7 @@ def engineer_features(df):
         # Calculate field size for this year/series
         year_series_data = df[
             (df['year'] == row['year']) &
-            (df.get('series_type', 'F3_Main') == row.get('series_type', 'F3_Main'))  # noqa: E501
+            (df.get('series_type', 'F3_Main') == row.get('series_type', 'F3_Main'))
         ]
         field_size = len(year_series_data)
         field_sizes.append(field_size)
@@ -266,6 +421,12 @@ def engineer_features(df):
     features_df['dnfs'] = dnfs
     features_df['races_completed'] = races_completed
     features_df['field_size'] = field_sizes
+
+    # Teammate performance metrics
+    features_df['teammate_h2h_rate'] = df.get('teammate_h2h_rate', 0.5)
+    features_df['avg_pos_vs_teammates'] = df.get('avg_pos_vs_teammates', 0)
+    features_df['teammate_battles'] = df.get('teammate_battles', 0)
+
     features_df = add_driver_features(features_df, f3_df)
 
     features_df['win_rate'] = features_df['wins'] / \
@@ -366,8 +527,8 @@ def add_driver_features(features_df, f3_df):
     return features_df
 
 
-def train_model(df):
-    """Train ML models to predict F2 progression."""
+def train_model_with_cv(df):
+    """Train ML models with proper cross-validation and SMOTE in pipelines."""
     if df.empty:
         print("No data available for training")
         return {}, None, None, None
@@ -376,7 +537,8 @@ def train_model(df):
     feature_cols = [
         'final_position', 'win_rate', 'podium_rate',
         'dnf_rate', 'points_per_race', 'top_10_rate',
-        'years_in_f3', 'age', 'has_academy'
+        'years_in_f3', 'age', 'has_academy',
+        'teammate_h2h_rate', 'avg_pos_vs_teammates',
     ]
 
     X = df_clean[feature_cols].fillna(0)
@@ -385,47 +547,116 @@ def train_model(df):
     print(f"Dataset size: {len(X)} drivers")
     print(f"F2 progressions: {y.sum()} ({y.mean():.2%})")
 
+    # Split data for final evaluation
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=69, stratify=y
     )
 
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-
-    models = {
-        'Random Forest': RandomForestClassifier(random_state=69,
-                                                class_weight='balanced'),
-        'Logistic Regression': LogisticRegression(random_state=69,
-                                                  class_weight='balanced'),
-        'MLP': MLPClassifier(random_state=69)
+    # Define pipelines with SMOTE
+    pipelines = {
+        'Random Forest': ImbPipeline([
+            ('smote', SMOTE(random_state=69)),
+            ('classifier', RandomForestClassifier(
+                random_state=69,
+                class_weight='balanced'))
+        ]),
+        'Logistic Regression': ImbPipeline([
+            ('smote', SMOTE(random_state=69)),
+            ('scaler', StandardScaler()),
+            ('classifier', LogisticRegression(random_state=69,
+                                              class_weight='balanced',
+                                              max_iter=10000))
+        ]),
+        'XGBoost': ImbPipeline([
+            ('smote', SMOTE(random_state=69)),
+            ('classifier', xgb.XGBClassifier(
+                random_state=69,
+                eval_metric='logloss',
+                scale_pos_weight=len(y_train[y_train == 0]) / len(y_train[y_train == 1])
+            ))
+        ]),
+        'MLP': ImbPipeline([
+            ('smote', SMOTE(random_state=69)),
+            ('classifier', MLPClassifier(random_state=69, max_iter=10000))
+        ])
     }
 
+    # Cross-validation setup
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=69)
+    scoring = ['roc_auc', 'precision', 'recall', 'f1']
+
     results = {}
-    for name, model in models.items():
-        print(f"\n{name} Results:")
-        print("-" * 30)
+    cv_results = {}
 
-        if name == 'Logistic Regression':
-            model.fit(X_train_scaled, y_train)
-            y_pred = model.predict(X_test_scaled)
-        else:
-            model.fit(X_train, y_train)
-            y_pred = model.predict(X_test)
+    for name, pipeline in pipelines.items():
+        print(f"\n{name} Cross-Validation Results:")
+        print("-" * 50)
 
+        # Perform cross-validation
+        cv_scores = cross_validate(
+            pipeline, X_train, y_train,
+            cv=cv, scoring=scoring,
+            return_train_score=False,
+            n_jobs=-1
+        )
+
+        # Store CV results
+        cv_results[name] = cv_scores
+
+        # Print CV results
+        for metric in scoring:
+            scores = cv_scores[f'test_{metric}']
+            print(
+                f"{metric.upper()}: {scores.mean():.4f} (+/- {scores.std() * 2:.4f})")
+
+        # Fit on full training set for final evaluation
+        pipeline.fit(X_train, y_train)
+        y_pred = pipeline.predict(X_test)
+
+        probas_test = pipeline.predict_proba(X_test)[:, 1]
+        df_calib = pd.DataFrame(
+            {'proba': probas_test, 'true': y_test.reset_index(drop=True)})
+        bins = np.linspace(0.0, 1.0, 11)
+        df_calib['bin'] = pd.cut(
+            df_calib['proba'],
+            bins=bins,
+            include_lowest=True)
+        bin_stats = df_calib.groupby('bin')['true'].mean()
+        calib_map = {interval: rate for interval, rate in bin_stats.items()}
+        pipeline.calibration_map = calib_map
+        pipeline.calibration_bins = bins
+
+        print("\nFinal Test Set Results:")
         print(classification_report(y_test, y_pred))
         print("Confusion Matrix:")
         print(confusion_matrix(y_test, y_pred))
 
-        if hasattr(model, 'feature_importances_'):
+        # Feature importance for tree-based models
+        if hasattr(pipeline.named_steps['classifier'], 'feature_importances_'):
             importance = pd.DataFrame({
                 'feature': feature_cols,
-                'importance': model.feature_importances_
+                'importance': pipeline.named_steps['classifier'].feature_importances_
             }).sort_values('importance', ascending=False)
             print("\nFeature Importance:")
-            print(importance)
+            print(importance.head(10))
 
-        results[name] = model
+        results[name] = pipeline
+
+    # Summary of CV results
+    print("\n" + "=" * 70)
+    print("CROSS-VALIDATION SUMMARY")
+    print("=" * 70)
+
+    cv_summary = pd.DataFrame({
+        name: {
+            f'{metric}_mean': cv_results[name][f'test_{metric}'].mean(),
+            f'{metric}_std': cv_results[name][f'test_{metric}'].std()
+        }
+        for name in pipelines.keys()
+        for metric in scoring
+    }).T
+
+    print(cv_summary.round(4))
 
     return results, X_test, y_test, feature_cols
 
@@ -455,28 +686,297 @@ def predict_current_drivers(models, df, feature_cols):
 
     X_current = f3_2025_drivers[feature_cols].fillna(0)
 
-    for name, model in models.items():
+    for name, pipeline in models.items():
         print(f"\n{name} Predictions:")
         print("-" * 50)
 
-        if name != 'Logistic Regression':
-            probas = model.predict_proba(X_current)[:, 1]
-            predictions = model.predict(X_current)
-        else:
-            scaler = StandardScaler()
-            X_scaled = scaler.fit_transform(X_current)
-            probas = model.predict_proba(X_scaled)[:, 1]
-            predictions = model.predict(X_scaled)
+        raw_probas = pipeline.predict_proba(X_current)[:, 1]
+        bins = pipeline.calibration_bins
+        calib_map = pipeline.calibration_map
+
+        actual_pct = []
+        for p in raw_probas:
+            bin_interval = pd.cut([p], bins=bins, include_lowest=True)[0]
+            actual_pct.append(calib_map.get(bin_interval, p))
+
+        predictions = pipeline.predict(X_current)
 
         results = pd.DataFrame({
             'Driver': f3_2025_drivers['driver'],
             'Position': f3_2025_drivers['final_position'],
             'Points': f3_2025_drivers['points'],
-            'F2_Probability': probas,
+            'Win %': f3_2025_drivers['win_rate'],
+            'Podium %': f3_2025_drivers['podium_rate'],
+            'Top 10 %': f3_2025_drivers['top_10_rate'],
+            'DNF %': f3_2025_drivers['dnf_rate'],
+            'Points / Races': f3_2025_drivers['points_per_race'],
+            'Experience': f3_2025_drivers['years_in_f3'],
+            'Age': f3_2025_drivers['age'],
+            'Academy': f3_2025_drivers['has_academy'],
+            'H2H_Rate': f3_2025_drivers['teammate_h2h_rate'],
+            'Avg_Pos_Diff': f3_2025_drivers['avg_pos_vs_teammates'],
+            'Raw_Probability': raw_probas,
+            'Empirical_%': np.array(actual_pct) * 100.0,
             'Prediction': predictions
-        }).sort_values('F2_Probability', ascending=False)
+        }).sort_values('Empirical_%', ascending=False)
 
-        print(results.to_string(index=False, float_format='%.3f'))
+        print(results.head(10).to_string(index=False, float_format='%.3f'))
+
+
+# Deep Neural Network with TensorFlow/Keras
+
+def create_deep_nn_model(
+        input_dim,
+        hidden_layers=[
+            128,
+            64,
+            32],
+        dropout_rate=0.3):
+    """Create a deep neural network for F2 progression prediction."""
+    model = Sequential()
+
+    # Input layer (fixed warning)
+    model.add(Input(shape=(input_dim,)))
+    model.add(Dense(hidden_layers[0], activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(dropout_rate))
+
+    # Hidden layers
+    for units in hidden_layers[1:]:
+        model.add(Dense(units, activation='relu'))
+        model.add(BatchNormalization())
+        model.add(Dropout(dropout_rate))
+
+    # Output layer
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(
+        optimizer=Adam(learning_rate=0.001),
+        loss='binary_crossentropy',
+        metrics=['accuracy', 'precision', 'recall']
+    )
+
+    return model
+
+
+class RacingPredictor(nn.Module):
+    def __init__(self, input_dim, hidden_dims=[128, 64, 32], dropout_rate=0.3):
+        super(RacingPredictor, self).__init__()
+
+        layers = []
+        prev_dim = input_dim
+
+        for hidden_dim in hidden_dims:
+            layers.extend([
+                nn.Linear(prev_dim, hidden_dim),
+                nn.ReLU(),
+                nn.BatchNorm1d(hidden_dim),
+                nn.Dropout(dropout_rate)
+            ])
+            prev_dim = hidden_dim
+
+        layers.append(nn.Linear(prev_dim, 1))
+        layers.append(nn.Sigmoid())
+
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.network(x)
+
+
+def train_deep_models(df):
+    """Enhanced training function with deep learning models."""
+    df_clean = df.dropna(subset=['moved_to_f2', 'final_position', 'points'])
+
+    feature_cols = [
+        'final_position', 'win_rate', 'podium_rate',
+        'dnf_rate', 'points_per_race', 'top_10_rate',
+        'years_in_f3', 'age', 'has_academy',
+        'teammate_h2h_rate', 'avg_pos_vs_teammates',
+    ]
+
+    X = df_clean[feature_cols].fillna(0)
+    y = df_clean['moved_to_f2']
+
+    # Scale features for neural networks
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_scaled, y, test_size=0.2, random_state=69, stratify=y
+    )
+
+    # Calculate class weights for imbalanced data
+    class_weights = class_weight.compute_class_weight(
+        'balanced', classes=np.unique(y_train), y=y_train
+    )
+    class_weight_dict = {0: class_weights[0], 1: class_weights[1]}
+
+    results = {}
+
+    # Deep Neural Network
+    print("\nTraining Deep Neural Network...")
+    dnn_model = create_deep_nn_model(X_train.shape[1])
+
+    callbacks = [
+        EarlyStopping(patience=10, restore_best_weights=True),
+        ReduceLROnPlateau(patience=5, factor=0.5)
+    ]
+
+    dnn_model.fit(
+        X_train, y_train,
+        validation_split=0.2,
+        epochs=100,
+        batch_size=32,
+        class_weight=class_weight_dict,
+        callbacks=callbacks,
+        verbose=0
+    )
+
+    raw_probas_dnn = dnn_model.predict(X_test, verbose=0).flatten()
+    # build a small DataFrame to bin raw_probas vs true labels
+    df_calib_dnn = pd.DataFrame({
+        'proba': raw_probas_dnn,
+        'true': y_test.reset_index(drop=True)
+    })
+    bins = np.linspace(0.0, 1.0, 11)
+    df_calib_dnn['bin'] = pd.cut(
+        df_calib_dnn['proba'],
+        bins=bins,
+        include_lowest=True)
+    bin_stats = df_calib_dnn.groupby('bin')['true'].mean()
+    calib_map = {interval: rate for interval, rate in bin_stats.items()}
+    # attach to the model
+    dnn_model.calibration_bins = bins
+    dnn_model.calibration_map = calib_map
+
+    # now compute classification report
+    dnn_pred = (raw_probas_dnn > 0.5).astype(int)
+    print("DNN Classification Report:")
+    print(classification_report(y_test, dnn_pred))
+    results['Deep_NN'] = dnn_model
+
+    # PyTorch Model
+    print("\nTraining PyTorch Model...")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Convert to PyTorch tensors
+    X_train_torch = torch.FloatTensor(X_train).to(device)
+    y_train_torch = torch.FloatTensor(y_train.values).to(device)
+    X_test_torch = torch.FloatTensor(X_test).to(device)
+
+    # Create PyTorch model
+    pytorch_model = RacingPredictor(X_train.shape[1]).to(device)
+
+    # Calculate class weights for PyTorch
+    pos_weight = torch.tensor(
+        [len(y_train[y_train == 0]) / len(y_train[y_train == 1])]).to(device)
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    optimizer = optim.Adam(pytorch_model.parameters(), lr=0.001)
+
+    # Training loop
+    pytorch_model.train()
+    for epoch in range(100):
+        optimizer.zero_grad()
+        outputs = pytorch_model(X_train_torch).squeeze()
+        loss = criterion(outputs, y_train_torch)
+        loss.backward()
+        optimizer.step()
+
+        if epoch % 20 == 0:
+            print(f'PyTorch Epoch {epoch}, Loss: {loss.item():.4f}')
+
+    # Evaluate PyTorch model
+    pytorch_model.eval()
+    with torch.no_grad():
+        raw_probas_torch = pytorch_model(X_test_torch).cpu().numpy().flatten()
+
+    df_calib_torch = pd.DataFrame({
+        'proba': raw_probas_torch,
+        'true': y_test.reset_index(drop=True)
+    })
+    df_calib_torch['bin'] = pd.cut(
+        df_calib_torch['proba'],
+        bins=bins,
+        include_lowest=True)
+    bin_stats_t = df_calib_torch.groupby('bin')['true'].mean()
+    calib_map_t = {interval: rate for interval, rate in bin_stats_t.items()}
+    pytorch_model.calibration_bins = bins
+    pytorch_model.calibration_map = calib_map_t
+
+    pytorch_pred = (raw_probas_torch > 0.5).astype(int)
+    print("PyTorch Classification Report:")
+    print(classification_report(y_test, pytorch_pred))
+    results['PyTorch'] = pytorch_model
+
+    return results, X_test, y_test, feature_cols, scaler
+
+
+def predict_with_deep_models(models, df, feature_cols, scaler):
+    """Make predictions using deep learning models."""
+    f3_2025_drivers = df[df['year'] == 2025].copy()
+
+    if f3_2025_drivers.empty:
+        current_year = df['year'].max()
+        f3_2025_drivers = df[df['year'] == current_year].copy()
+
+    if f3_2025_drivers.empty:
+        print("No current data found for predictions")
+        return
+
+    X_current = f3_2025_drivers[feature_cols].fillna(0)
+    X_current_scaled = scaler.transform(X_current)
+
+    print("\nDeep Learning Predictions for F3 2025 drivers:")
+    print("=" * 70)
+
+    for name, model in models.items():
+        try:
+            if name == 'Deep_NN':
+                # Ensure proper shape for TensorFlow models
+                if X_current_scaled.shape[0] == 0:
+                    print(f"No data for {name} predictions")
+                    continue
+                raw_probas = model.predict(
+                    X_current_scaled, verbose=0).flatten()
+            elif name == 'PyTorch':
+                model.eval()
+                with torch.no_grad():
+                    X_torch = torch.FloatTensor(X_current_scaled)
+                    raw_probas = model(X_torch).cpu().numpy().flatten()
+
+            bins = model.calibration_bins
+            calib_map = model.calibration_map
+
+            empirical_pct = []
+            for p in raw_probas:
+                b = pd.cut([p], bins=bins, include_lowest=True)[0]
+                empirical_pct.append(calib_map.get(b, p))
+
+            results = pd.DataFrame({
+                'Driver': f3_2025_drivers['driver'],
+                'Position': f3_2025_drivers['final_position'],
+                'Points': f3_2025_drivers['points'],
+                'Win %': f3_2025_drivers['win_rate'],
+                'Podium %': f3_2025_drivers['podium_rate'],
+                'Top 10 %': f3_2025_drivers['top_10_rate'],
+                'DNF %': f3_2025_drivers['dnf_rate'],
+                'Points / Races': f3_2025_drivers['points_per_race'],
+                'Experience': f3_2025_drivers['years_in_f3'],
+                'Age': f3_2025_drivers['age'],
+                'Academy': f3_2025_drivers['has_academy'],
+                'H2H_Rate': f3_2025_drivers['teammate_h2h_rate'],
+                'Avg_Pos_Diff': f3_2025_drivers['avg_pos_vs_teammates'],
+                'Raw_Probability': raw_probas,
+                'Empirical_%': np.array(empirical_pct) * 100.0,
+            }).sort_values('Empirical_%', ascending=False)
+
+            print(f"\n{name} Top Predictions:")
+            print(results.head(10).to_string(index=False, float_format='%.3f'))
+
+        except Exception as e:
+            print(f"Error with {name} model: {e}")
+            continue
 
 
 print("Loading F3 data...")
@@ -489,6 +989,9 @@ if f3_df.empty or f2_df.empty:
     print("No F2/F3 data found. Check file paths.")
     exit()
 
+print("Calculating teammate performance metrics...")
+f3_df = calculate_teammate_performance(f3_df)
+
 print("Calculating years in F3 for each driver...")
 f3_df = f3_df.sort_values(by=['Driver', 'year'])
 f3_df['years_in_f3'] = f3_df.groupby('Driver').cumcount() + 1
@@ -500,8 +1003,11 @@ print("Engineering features...")
 features_df = engineer_features(f3_df)
 features_df['moved_to_f2'] = f3_df['moved_to_f2']
 
-print("Training models...")
-models, X_test, y_test, feature_cols = train_model(features_df)
+print("Training models with cross-validation...")
+models, X_test, y_test, feature_cols = train_model_with_cv(features_df)
+deep_models, X_test_dl, y_test_dl, feature_cols_dl, scaler = train_deep_models(
+    features_df)
 
 print("Making predictions for F3 2025 drivers...")
 predict_current_drivers(models, features_df, feature_cols)
+predict_with_deep_models(deep_models, features_df, feature_cols_dl, scaler)

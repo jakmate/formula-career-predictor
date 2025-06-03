@@ -28,17 +28,36 @@ class DriverProfileScraper:
         safe_name = re.sub(r'[-\s]+', '_', safe_name)
         return f"{safe_name.lower()}.json"
 
+    def is_racing_driver_page(self, soup):
+        """Check if the Wikipedia page is about a racing driver."""
+        # Racing-related keywords that indicate this is a driver page
+        racing_keywords = [
+            'formula', 'racing driver', 'motorsport', 'grand prix',
+            'championship', 'circuit', 'f1', 'f2', 'f3', 'indycar',
+            'nascar', 'lemans', 'endurance racing', 'karting',
+            'single-seater', 'open-wheel', 'touring car'
+        ]
+
+        # Check if any racing keywords appear in the first few paragraphs
+        first_paragraphs = ' '.join([p.get_text().lower()
+                                    for p in soup.find_all('p')[:3]])
+
+        return any(keyword in first_paragraphs for keyword in racing_keywords)
+
     def search_wikipedia_page(self, driver_name):
-        """Search for driver's Wikipedia page."""
+        """Search driver's Wikipedia page, prioritizing racing driver disambiguation."""
         search_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
 
-        # Try different name variations
+        # Try different name variations, prioritizing racing driver
+        # disambiguation
         name_variations = [
             driver_name,
-            driver_name.replace(" ", "_"),
             f"{driver_name}_(racing_driver)",
-            f"{driver_name}_(driver)"
+            driver_name.replace(" ", "_")
         ]
+
+        best_match = None
+        best_url = None
 
         for variation in name_variations:
             try:
@@ -46,13 +65,35 @@ class DriverProfileScraper:
                 if response.status_code == 200:
                     data = response.json()
                     if 'extract' in data and len(data['extract']) > 50:
-                        return data.get(
+                        page_url = data.get(
                             'content_urls', {}).get(
                             'desktop', {}).get('page')
-            except BaseException:
+
+                        if page_url:
+                            # Get the full page to check if it's about racing
+                            page_response = requests.get(page_url)
+                            if page_response.status_code == 200:
+                                soup = BeautifulSoup(
+                                    page_response.text, 'html.parser')
+
+                                # If this is a racing driver page, return it
+                                # immediately
+                                if self.is_racing_driver_page(soup):
+                                    return page_url
+
+                                # Otherwise, store as backup if we haven't
+                                # found anything better
+                                if best_match is None:
+                                    best_match = data
+                                    best_url = page_url
+
+            except Exception as e:
+                print(f"Error checking variation {variation}: {e}")
                 continue
 
-        return None
+        # Return the best match we found, even if not confirmed as racing
+        # driver
+        return best_url
 
     def scrape_driver_profile(self, driver_name):
         """Scrape individual driver profile from Wikipedia."""
@@ -85,6 +126,11 @@ class DriverProfileScraper:
             response = requests.get(wiki_url)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Double-check this is a racing driver page
+            if not self.is_racing_driver_page(soup):
+                print(
+                    f"Warning: {driver_name} page may not be about racing driver")
 
             # Extract date of birth
             dob = self.extract_dob(soup)
@@ -119,7 +165,6 @@ class DriverProfileScraper:
 
     def extract_dob(self, soup):
         """Extract date of birth from Wikipedia page."""
-        # Try multiple selectors for DOB
         selectors = [
             '.bday',  # Standard birthday class
             # Sort values with years
@@ -156,8 +201,7 @@ class DriverProfileScraper:
                     if match:
                         try:
                             if pattern == dob_patterns[0]:  # YYYY-MM-DD
-                                return f"""{match.group(1)}
-                                -{match.group(2)}-{match.group(3)}"""
+                                return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"  # noqa: 501
                             else:  # Convert month names to numbers
                                 month_map = {
                                     'january': '01', 'february': '02',
@@ -197,7 +241,7 @@ class DriverProfileScraper:
         """Extract specific academy/junior team information."""
         page_text = soup.get_text().lower()
 
-        # Define specific academy names to search for
+        # Academy names to search for
         specific_academies = [
             "ferrari driver academy",
             "red bull junior team",
@@ -218,7 +262,6 @@ class DriverProfileScraper:
             "force india development programme"
         ]
 
-        # Search for specific academies first
         for academy in specific_academies:
             if academy in page_text:
                 return academy.title()
@@ -243,7 +286,7 @@ class DriverProfileScraper:
             else:
                 return None
 
-            # Calculate age at start of season (assume January 1st)
+            # Calculate age at start of season
             season_start = datetime(competition_year, 1, 1)
             age = (season_start - dob).days / 365.25
             return round(age, 1)
@@ -290,7 +333,6 @@ def get_all_drivers_from_data():
     """Extract all driver names from F2 and F3 data files."""
     all_drivers = set()
 
-    # Scan F2 and F3 directories
     for series in ['F2', 'F3']:
         series_dirs = glob.glob(f"{series}/*")
 
@@ -318,7 +360,7 @@ def get_all_drivers_from_data():
             if os.path.exists(entries_file):
                 try:
                     df = pd.read_csv(entries_file)
-                    # Handle different column names
+                    # Handle different driver column names
                     driver_cols = ['Driver', 'Driver name', 'Drivers']
                     for col in driver_cols:
                         if col in df.columns:
