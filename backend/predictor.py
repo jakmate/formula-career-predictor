@@ -1,27 +1,27 @@
+import glob
+import json
+import os
+import numpy as np
+import pandas as pd
+import re
 import torch.optim as optim
 import torch.nn as nn
 import torch
-from sklearn.utils import class_weight
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Input
-from tensorflow.keras.models import Sequential
+import xgboost as xgb
 from datetime import datetime
-import json
-import re
-import pandas as pd
-import numpy as np
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from keras.optimizers import Adam
+from keras.layers import Dense, Dropout, BatchNormalization, Input
+from keras.models import Sequential
+from sklearn.utils import class_weight
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_validate
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline as ImbPipeline
-import xgboost as xgb
-import os
-import glob
 
 
 def get_race_columns(df):
@@ -527,11 +527,11 @@ def add_driver_features(features_df, f3_df):
     return features_df
 
 
-def train_model_with_cv(df):
-    """Train ML models with proper cross-validation and SMOTE in pipelines."""
+def train_models(df):
+    """Combined training function for all model types with proper cross-validation."""
     if df.empty:
         print("No data available for training")
-        return {}, None, None, None
+        return {}, {}, None, None, None
 
     df_clean = df.dropna(subset=['moved_to_f2', 'final_position', 'points'])
     feature_cols = [
@@ -547,31 +547,35 @@ def train_model_with_cv(df):
     print(f"Dataset size: {len(X)} drivers")
     print(f"F2 progressions: {y.sum()} ({y.mean():.2%})")
 
+    # Scale features for neural networks
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
     # Split data for final evaluation
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=69, stratify=y
     )
+    X_train_scaled, X_test_scaled, _, _ = train_test_split(
+        X_scaled, y, test_size=0.2, random_state=69, stratify=y
+    )
 
-    # Define pipelines with SMOTE
-    pipelines = {
+    # Traditional ML pipelines
+    traditional_pipelines = {
         'Random Forest': ImbPipeline([
             ('smote', SMOTE(random_state=69)),
             ('classifier', RandomForestClassifier(
-                random_state=69,
-                class_weight='balanced'))
+                random_state=69, class_weight='balanced'))
         ]),
         'Logistic Regression': ImbPipeline([
             ('smote', SMOTE(random_state=69)),
             ('scaler', StandardScaler()),
-            ('classifier', LogisticRegression(random_state=69,
-                                              class_weight='balanced',
-                                              max_iter=10000))
+            ('classifier', LogisticRegression(
+                random_state=69, class_weight='balanced', max_iter=10000))
         ]),
         'XGBoost': ImbPipeline([
             ('smote', SMOTE(random_state=69)),
             ('classifier', xgb.XGBClassifier(
-                random_state=69,
-                eval_metric='logloss',
+                random_state=69, eval_metric='logloss',
                 scale_pos_weight=len(y_train[y_train == 0]) / len(y_train[y_train == 1])
             ))
         ]),
@@ -585,35 +589,36 @@ def train_model_with_cv(df):
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=69)
     scoring = ['roc_auc', 'precision', 'recall', 'f1']
 
-    results = {}
-    cv_results = {}
+    traditional_results = {}
+    deep_results = {}
 
-    for name, pipeline in pipelines.items():
+    # Train traditional models
+    print("\n" + "=" * 50)
+    print("TRAINING TRADITIONAL MODELS")
+    print("=" * 50)
+
+    for name, pipeline in traditional_pipelines.items():
         print(f"\n{name} Cross-Validation Results:")
-        print("-" * 50)
+        print("-" * 40)
 
-        # Perform cross-validation
+        # Cross-validation
         cv_scores = cross_validate(
             pipeline, X_train, y_train,
             cv=cv, scoring=scoring,
-            return_train_score=False,
-            n_jobs=-1
+            return_train_score=False, n_jobs=-1
         )
 
-        # Store CV results
-        cv_results[name] = cv_scores
-
-        # Print CV results
         for metric in scoring:
             scores = cv_scores[f'test_{metric}']
             print(
                 f"{metric.upper()}: {scores.mean():.4f} (+/- {scores.std() * 2:.4f})")
 
-        # Fit on full training set for final evaluation
+        # Fit and evaluate on test set
         pipeline.fit(X_train, y_train)
         y_pred = pipeline.predict(X_test)
-
         probas_test = pipeline.predict_proba(X_test)[:, 1]
+
+        # Calibration
         df_calib = pd.DataFrame(
             {'proba': probas_test, 'true': y_test.reset_index(drop=True)})
         bins = np.linspace(0.0, 1.0, 11)
@@ -621,106 +626,248 @@ def train_model_with_cv(df):
             df_calib['proba'],
             bins=bins,
             include_lowest=True)
-        bin_stats = df_calib.groupby('bin')['true'].mean()
-        calib_map = {interval: rate for interval, rate in bin_stats.items()}
-        pipeline.calibration_map = calib_map
+        bin_stats = df_calib.groupby('bin', observed=False)['true'].mean()
+        pipeline.calibration_map = {
+            interval: rate for interval,
+            rate in bin_stats.items()}
         pipeline.calibration_bins = bins
 
-        print("\nFinal Test Set Results:")
+        print("\nTest Set Results:")
         print(classification_report(y_test, y_pred))
-        print("Confusion Matrix:")
-        print(confusion_matrix(y_test, y_pred))
 
-        # Feature importance for tree-based models
-        if hasattr(pipeline.named_steps['classifier'], 'feature_importances_'):
-            importance = pd.DataFrame({
-                'feature': feature_cols,
-                'importance': pipeline.named_steps['classifier'].feature_importances_
-            }).sort_values('importance', ascending=False)
-            print("\nFeature Importance:")
-            print(importance.head(10))
+        traditional_results[name] = pipeline
 
-        results[name] = pipeline
+    # Train deep learning models
+    print("\n" + "=" * 50)
+    print("TRAINING DEEP LEARNING MODELS")
+    print("=" * 50)
 
-    # Summary of CV results
+    # Calculate class weights for neural networks
+    class_weights = class_weight.compute_class_weight(
+        'balanced', classes=np.unique(y_train), y=y_train
+    )
+    class_weight_dict = {0: class_weights[0], 1: class_weights[1]}
+
+    # Keras DNN
+    print("\nTraining Keras Deep Neural Network...")
+    dnn_model = create_deep_nn_model(X_train_scaled.shape[1])
+
+    callbacks = [
+        EarlyStopping(patience=10, restore_best_weights=True),
+        ReduceLROnPlateau(patience=5, factor=0.5)
+    ]
+
+    dnn_model.fit(
+        X_train_scaled, y_train,
+        validation_split=0.2,
+        epochs=100, batch_size=32,
+        class_weight=class_weight_dict,
+        callbacks=callbacks, verbose=0
+    )
+
+    # Evaluate and calibrate
+    raw_probas_dnn = dnn_model.predict(X_test_scaled, verbose=0).flatten()
+    df_calib_dnn = pd.DataFrame(
+        {'proba': raw_probas_dnn, 'true': y_test.reset_index(drop=True)})
+    df_calib_dnn['bin'] = pd.cut(
+        df_calib_dnn['proba'],
+        bins=bins,
+        include_lowest=True)
+    bin_stats_dnn = df_calib_dnn.groupby('bin', observed=False)['true'].mean()
+    dnn_model.calibration_map = {
+        interval: rate for interval,
+        rate in bin_stats_dnn.items()}
+    dnn_model.calibration_bins = bins
+
+    dnn_pred = (raw_probas_dnn > 0.5).astype(int)
+    print("Keras DNN Classification Report:")
+    print(classification_report(y_test, dnn_pred))
+    deep_results['Keras_DNN'] = dnn_model
+
+    # PyTorch Model
+    print("\nTraining PyTorch Model...")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Convert to PyTorch tensors
+    X_train_torch = torch.FloatTensor(X_train_scaled).to(device)
+    y_train_torch = torch.FloatTensor(y_train.values).to(device)
+    X_test_torch = torch.FloatTensor(X_test_scaled).to(device)
+
+    pytorch_model = RacingPredictor(X_train_scaled.shape[1]).to(device)
+
+    # Calculate class weights for PyTorch
+    n_neg = (y_train == 0).sum()
+    n_pos = (y_train == 1).sum()
+    pos_weight = torch.tensor([n_neg / n_pos]).to(device)
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    optimizer = optim.Adam(pytorch_model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='min', factor=0.5, patience=5)
+
+    # Validation split
+    val_size = int(0.2 * len(X_train_torch))
+    indices = torch.randperm(len(X_train_torch))
+    train_idx, val_idx = indices[val_size:], indices[:val_size]
+
+    X_train_sub = X_train_torch[train_idx]
+    y_train_sub = y_train_torch[train_idx]
+    X_val = X_train_torch[val_idx]
+    y_val = y_train_torch[val_idx]
+
+    # Training loop
+    best_val_loss = float('inf')
+    patience_counter = 0
+
+    for epoch in range(100):
+        pytorch_model.train()
+        optimizer.zero_grad()
+
+        outputs = pytorch_model(X_train_sub).squeeze()
+        loss = criterion(outputs, y_train_sub)
+        loss.backward()
+        optimizer.step()
+
+        # Validation
+        pytorch_model.eval()
+        with torch.no_grad():
+            val_outputs = pytorch_model(X_val).squeeze()
+            val_loss = criterion(val_outputs, y_val)
+
+        scheduler.step(val_loss)
+
+        # Early stopping
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            patience_counter = 0
+            torch.save(pytorch_model.state_dict(), 'pytorch_model.pt')
+        else:
+            patience_counter += 1
+            if patience_counter >= 10:
+                break
+
+    # Load best model and evaluate
+    pytorch_model.load_state_dict(torch.load('pytorch_model.pt'))
+    pytorch_model.eval()
+
+    with torch.no_grad():
+        logits = pytorch_model(X_test_torch)
+        raw_probas_torch = torch.sigmoid(logits).cpu().numpy().flatten()
+
+    # Calibrate PyTorch model
+    df_calib_torch = pd.DataFrame(
+        {'proba': raw_probas_torch, 'true': y_test.reset_index(drop=True)})
+    df_calib_torch['bin'] = pd.cut(
+        df_calib_torch['proba'],
+        bins=bins,
+        include_lowest=True)
+    bin_stats_torch = df_calib_torch.groupby(
+        'bin', observed=False)['true'].mean()
+    pytorch_model.calibration_map = {
+        interval: rate for interval,
+        rate in bin_stats_torch.items()}
+    pytorch_model.calibration_bins = bins
+
+    pytorch_pred = (raw_probas_torch > 0.5).astype(int)
+    print("PyTorch Classification Report:")
+    print(classification_report(y_test, pytorch_pred))
+    deep_results['PyTorch'] = pytorch_model
+
+    # Summary
     print("\n" + "=" * 70)
-    print("CROSS-VALIDATION SUMMARY")
+    print("TRAINING COMPLETE")
     print("=" * 70)
+    print(f"Traditional Models: {list(traditional_results.keys())}")
+    print(f"Deep Learning Models: {list(deep_results.keys())}")
 
-    cv_summary = pd.DataFrame({
-        name: {
-            f'{metric}_mean': cv_results[name][f'test_{metric}'].mean(),
-            f'{metric}_std': cv_results[name][f'test_{metric}'].std()
-        }
-        for name in pipelines.keys()
-        for metric in scoring
-    }).T
-
-    print(cv_summary.round(4))
-
-    return results, X_test, y_test, feature_cols
+    return traditional_results, deep_results, X_test, y_test, feature_cols, scaler
 
 
-def predict_current_drivers(models, df, feature_cols):
-    """Make predictions for F3 2025 drivers (F2 2026 progression)."""
-    if df.empty:
-        print("No data available for prediction")
-        return
-
-    # Look for F3 2025 data specifically
-    f3_2025_drivers = df[df['year'] == 2025].copy()
-
-    if f3_2025_drivers.empty:
-        print("No F3 2025 data found for predictions")
-        # Fallback to latest year
+def predict_drivers(all_models, df, feature_cols, scaler=None):
+    """Make predictions for F3 2025 drivers"""
+    current_year = 2025
+    current_df = df[df['year'] == current_year].copy()
+    if current_df.empty:
         current_year = df['year'].max()
-        f3_2025_drivers = df[df['year'] == current_year].copy()
-        print(f"Using {current_year} F3 data instead")
-
-    if f3_2025_drivers.empty:
-        print("No current year data found")
+        current_df = df[df['year'] == current_year].copy()
+    if current_df.empty:
+        print("No current data found for predictions")
         return
 
-    print("\nPredictions for F3 2025 drivers:")
-    print("=" * 70)
+    X_current = current_df[feature_cols].fillna(0)
 
-    X_current = f3_2025_drivers[feature_cols].fillna(0)
+    for model_type, models in all_models.items():
+        print(f"\n{model_type} Predictions:")
+        print("=" * 70)
 
-    for name, pipeline in models.items():
-        print(f"\n{name} Predictions:")
-        print("-" * 50)
+        # Scale features for deep learning models
+        if model_type == 'Deep Learning' and scaler is not None:
+            X_processed = scaler.transform(X_current)
+        else:
+            X_processed = X_current
 
-        raw_probas = pipeline.predict_proba(X_current)[:, 1]
-        bins = pipeline.calibration_bins
-        calib_map = pipeline.calibration_map
+        for name, model in models.items():
+            try:
+                # Get raw probabilities based on model type
+                if model_type == 'Deep Learning':
+                    if name == 'Deep_NN':  # Keras model
+                        raw_probas = model.predict(
+                            X_processed, verbose=0).flatten()
+                    else:  # PyTorch model
+                        model.eval()
+                        with torch.no_grad():
+                            X_torch = torch.FloatTensor(X_processed)
+                            if torch.cuda.is_available():
+                                X_torch = X_torch.cuda()
+                            logits = model(X_torch)
+                            raw_probas = torch.sigmoid(
+                                logits).cpu().numpy().flatten()
+                else:  # Traditional models
+                    raw_probas = model.predict_proba(X_processed)[:, 1]
 
-        actual_pct = []
-        for p in raw_probas:
-            bin_interval = pd.cut([p], bins=bins, include_lowest=True)[0]
-            actual_pct.append(calib_map.get(bin_interval, p))
+                # Apply calibration
+                bins = model.calibration_bins
+                calib_map = model.calibration_map
+                empirical_pct = []
+                for p in raw_probas:
+                    bin_interval = pd.cut(
+                        [p], bins=bins, include_lowest=True)[0]
+                    empirical_pct.append(
+                        calib_map.get(
+                            bin_interval, p) * 100.0)
 
-        predictions = pipeline.predict(X_current)
+                # Create results DataFrame
+                results = pd.DataFrame({
+                    'Driver': current_df['driver'],
+                    'Position': current_df['final_position'],
+                    'Points': current_df['points'],
+                    'Win %': current_df['win_rate'],
+                    'Podium %': current_df['podium_rate'],
+                    'Top 10 %': current_df['top_10_rate'],
+                    'DNF %': current_df['dnf_rate'],
+                    'Points / Races': current_df['points_per_race'],
+                    'Experience': current_df['years_in_f3'],
+                    'Age': current_df['age'],
+                    'Academy': current_df['has_academy'],
+                    'H2H_Rate': current_df['teammate_h2h_rate'],
+                    'Avg_Pos_Diff': current_df['avg_pos_vs_teammates'],
+                    'Raw_Probability': raw_probas,
+                    'Empirical_%': empirical_pct,
+                    'Prediction': (raw_probas > 0.5).astype(int)
+                }).sort_values('Empirical_%', ascending=False)
 
-        results = pd.DataFrame({
-            'Driver': f3_2025_drivers['driver'],
-            'Position': f3_2025_drivers['final_position'],
-            'Points': f3_2025_drivers['points'],
-            'Win %': f3_2025_drivers['win_rate'],
-            'Podium %': f3_2025_drivers['podium_rate'],
-            'Top 10 %': f3_2025_drivers['top_10_rate'],
-            'DNF %': f3_2025_drivers['dnf_rate'],
-            'Points / Races': f3_2025_drivers['points_per_race'],
-            'Experience': f3_2025_drivers['years_in_f3'],
-            'Age': f3_2025_drivers['age'],
-            'Academy': f3_2025_drivers['has_academy'],
-            'H2H_Rate': f3_2025_drivers['teammate_h2h_rate'],
-            'Avg_Pos_Diff': f3_2025_drivers['avg_pos_vs_teammates'],
-            'Raw_Probability': raw_probas,
-            'Empirical_%': np.array(actual_pct) * 100.0,
-            'Prediction': predictions
-        }).sort_values('Empirical_%', ascending=False)
+                # Print results
+                print(f"\n{name} Predictions:")
+                print("-" * 50)
+                print(
+                    results.head(10).to_string(
+                        index=False,
+                        float_format='%.3f'))
 
-        print(results.head(10).to_string(index=False, float_format='%.3f'))
+            except Exception as e:
+                print(f"Error with {name} model: {e}")
+                continue
+
+    return results
 
 
 # Deep Neural Network with TensorFlow/Keras
@@ -776,207 +923,10 @@ class RacingPredictor(nn.Module):
             prev_dim = hidden_dim
 
         layers.append(nn.Linear(prev_dim, 1))
-        layers.append(nn.Sigmoid())
-
         self.network = nn.Sequential(*layers)
 
     def forward(self, x):
         return self.network(x)
-
-
-def train_deep_models(df):
-    """Enhanced training function with deep learning models."""
-    df_clean = df.dropna(subset=['moved_to_f2', 'final_position', 'points'])
-
-    feature_cols = [
-        'final_position', 'win_rate', 'podium_rate',
-        'dnf_rate', 'points_per_race', 'top_10_rate',
-        'years_in_f3', 'age', 'has_academy',
-        'teammate_h2h_rate', 'avg_pos_vs_teammates',
-    ]
-
-    X = df_clean[feature_cols].fillna(0)
-    y = df_clean['moved_to_f2']
-
-    # Scale features for neural networks
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y, test_size=0.2, random_state=69, stratify=y
-    )
-
-    # Calculate class weights for imbalanced data
-    class_weights = class_weight.compute_class_weight(
-        'balanced', classes=np.unique(y_train), y=y_train
-    )
-    class_weight_dict = {0: class_weights[0], 1: class_weights[1]}
-
-    results = {}
-
-    # Deep Neural Network
-    print("\nTraining Deep Neural Network...")
-    dnn_model = create_deep_nn_model(X_train.shape[1])
-
-    callbacks = [
-        EarlyStopping(patience=10, restore_best_weights=True),
-        ReduceLROnPlateau(patience=5, factor=0.5)
-    ]
-
-    dnn_model.fit(
-        X_train, y_train,
-        validation_split=0.2,
-        epochs=100,
-        batch_size=32,
-        class_weight=class_weight_dict,
-        callbacks=callbacks,
-        verbose=0
-    )
-
-    raw_probas_dnn = dnn_model.predict(X_test, verbose=0).flatten()
-    # build a small DataFrame to bin raw_probas vs true labels
-    df_calib_dnn = pd.DataFrame({
-        'proba': raw_probas_dnn,
-        'true': y_test.reset_index(drop=True)
-    })
-    bins = np.linspace(0.0, 1.0, 11)
-    df_calib_dnn['bin'] = pd.cut(
-        df_calib_dnn['proba'],
-        bins=bins,
-        include_lowest=True)
-    bin_stats = df_calib_dnn.groupby('bin')['true'].mean()
-    calib_map = {interval: rate for interval, rate in bin_stats.items()}
-    # attach to the model
-    dnn_model.calibration_bins = bins
-    dnn_model.calibration_map = calib_map
-
-    # now compute classification report
-    dnn_pred = (raw_probas_dnn > 0.5).astype(int)
-    print("DNN Classification Report:")
-    print(classification_report(y_test, dnn_pred))
-    results['Deep_NN'] = dnn_model
-
-    # PyTorch Model
-    print("\nTraining PyTorch Model...")
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    # Convert to PyTorch tensors
-    X_train_torch = torch.FloatTensor(X_train).to(device)
-    y_train_torch = torch.FloatTensor(y_train.values).to(device)
-    X_test_torch = torch.FloatTensor(X_test).to(device)
-
-    # Create PyTorch model
-    pytorch_model = RacingPredictor(X_train.shape[1]).to(device)
-
-    # Calculate class weights for PyTorch
-    pos_weight = torch.tensor(
-        [len(y_train[y_train == 0]) / len(y_train[y_train == 1])]).to(device)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    optimizer = optim.Adam(pytorch_model.parameters(), lr=0.001)
-
-    # Training loop
-    pytorch_model.train()
-    for epoch in range(100):
-        optimizer.zero_grad()
-        outputs = pytorch_model(X_train_torch).squeeze()
-        loss = criterion(outputs, y_train_torch)
-        loss.backward()
-        optimizer.step()
-
-        if epoch % 20 == 0:
-            print(f'PyTorch Epoch {epoch}, Loss: {loss.item():.4f}')
-
-    # Evaluate PyTorch model
-    pytorch_model.eval()
-    with torch.no_grad():
-        raw_probas_torch = pytorch_model(X_test_torch).cpu().numpy().flatten()
-
-    df_calib_torch = pd.DataFrame({
-        'proba': raw_probas_torch,
-        'true': y_test.reset_index(drop=True)
-    })
-    df_calib_torch['bin'] = pd.cut(
-        df_calib_torch['proba'],
-        bins=bins,
-        include_lowest=True)
-    bin_stats_t = df_calib_torch.groupby('bin')['true'].mean()
-    calib_map_t = {interval: rate for interval, rate in bin_stats_t.items()}
-    pytorch_model.calibration_bins = bins
-    pytorch_model.calibration_map = calib_map_t
-
-    pytorch_pred = (raw_probas_torch > 0.5).astype(int)
-    print("PyTorch Classification Report:")
-    print(classification_report(y_test, pytorch_pred))
-    results['PyTorch'] = pytorch_model
-
-    return results, X_test, y_test, feature_cols, scaler
-
-
-def predict_with_deep_models(models, df, feature_cols, scaler):
-    """Make predictions using deep learning models."""
-    f3_2025_drivers = df[df['year'] == 2025].copy()
-
-    if f3_2025_drivers.empty:
-        current_year = df['year'].max()
-        f3_2025_drivers = df[df['year'] == current_year].copy()
-
-    if f3_2025_drivers.empty:
-        print("No current data found for predictions")
-        return
-
-    X_current = f3_2025_drivers[feature_cols].fillna(0)
-    X_current_scaled = scaler.transform(X_current)
-
-    print("\nDeep Learning Predictions for F3 2025 drivers:")
-    print("=" * 70)
-
-    for name, model in models.items():
-        try:
-            if name == 'Deep_NN':
-                # Ensure proper shape for TensorFlow models
-                if X_current_scaled.shape[0] == 0:
-                    print(f"No data for {name} predictions")
-                    continue
-                raw_probas = model.predict(
-                    X_current_scaled, verbose=0).flatten()
-            elif name == 'PyTorch':
-                model.eval()
-                with torch.no_grad():
-                    X_torch = torch.FloatTensor(X_current_scaled)
-                    raw_probas = model(X_torch).cpu().numpy().flatten()
-
-            bins = model.calibration_bins
-            calib_map = model.calibration_map
-
-            empirical_pct = []
-            for p in raw_probas:
-                b = pd.cut([p], bins=bins, include_lowest=True)[0]
-                empirical_pct.append(calib_map.get(b, p))
-
-            results = pd.DataFrame({
-                'Driver': f3_2025_drivers['driver'],
-                'Position': f3_2025_drivers['final_position'],
-                'Points': f3_2025_drivers['points'],
-                'Win %': f3_2025_drivers['win_rate'],
-                'Podium %': f3_2025_drivers['podium_rate'],
-                'Top 10 %': f3_2025_drivers['top_10_rate'],
-                'DNF %': f3_2025_drivers['dnf_rate'],
-                'Points / Races': f3_2025_drivers['points_per_race'],
-                'Experience': f3_2025_drivers['years_in_f3'],
-                'Age': f3_2025_drivers['age'],
-                'Academy': f3_2025_drivers['has_academy'],
-                'H2H_Rate': f3_2025_drivers['teammate_h2h_rate'],
-                'Avg_Pos_Diff': f3_2025_drivers['avg_pos_vs_teammates'],
-                'Raw_Probability': raw_probas,
-                'Empirical_%': np.array(empirical_pct) * 100.0,
-            }).sort_values('Empirical_%', ascending=False)
-
-            print(f"\n{name} Top Predictions:")
-            print(results.head(10).to_string(index=False, float_format='%.3f'))
-
-        except Exception as e:
-            print(f"Error with {name} model: {e}")
-            continue
 
 
 print("Loading F3 data...")
@@ -1003,11 +953,13 @@ print("Engineering features...")
 features_df = engineer_features(f3_df)
 features_df['moved_to_f2'] = f3_df['moved_to_f2']
 
-print("Training models with cross-validation...")
-models, X_test, y_test, feature_cols = train_model_with_cv(features_df)
-deep_models, X_test_dl, y_test_dl, feature_cols_dl, scaler = train_deep_models(
+print("Training all models...")
+models, deep_models, X_test, y_test, feature_cols, scaler = train_models(
     features_df)
 
 print("Making predictions for F3 2025 drivers...")
-predict_current_drivers(models, features_df, feature_cols)
-predict_with_deep_models(deep_models, features_df, feature_cols_dl, scaler)
+all_models = {
+    'Traditional': models,
+    'Deep Learning': deep_models
+}
+predict_drivers(all_models, features_df, feature_cols, scaler)
