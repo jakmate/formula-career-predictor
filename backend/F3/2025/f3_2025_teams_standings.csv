@@ -4,7 +4,7 @@ Pos,Team,ALB SR,ALB FR,BHR FR,BHR SR,IMO SR,IMO FR,MON FR,MON SR,CAT SR,CAT FR,R
 1,Trident,Ret,6,12,11,23,16,Ret,Ret,Ret,13,,,,,,,,,,,176
 2,Campos Racing,4,7,1,5,3,5,8,1P F,3,5,,,,,,,,,,,130
 2,Campos Racing,8,17,15,8,19,9,23,3,7,11,,,,,,,,,,,130
-2,Campos Racing,13,Ret,18,16,Ret,17,24,12,9,23,,,,,,,,,,,130
+2,Campos Racing,13,Ret,18,16,Ret,17,24,12,9,22,,,,,,,,,,,130
 3,MP Motorsport,11,5,6,3,1,6,4,5,6,3,,,,,,,,,,,126
 3,MP Motorsport,NC,23,7,7,2,7,5,10,12,7,,,,,,,,,,,126
 3,MP Motorsport,Ret,25,19,9,10,27,22,NC,Ret,17,,,,,,,,,,,126
@@ -19,9 +19,9 @@ Pos,Team,ALB SR,ALB FR,BHR FR,BHR SR,IMO SR,IMO FR,MON FR,MON SR,CAT SR,CAT FR,R
 6,ART Grand Prix,Ret,21,16,28,22,13,21,11,Ret,19,,,,,,,,,,,90
 7,HitechTGR,2F,8,5,18,13,11,1F,8,20,9,,,,,,,,,,,37
 7,HitechTGR,16,11,21,22,14,15,14,17,23,21,,,,,,,,,,,37
-7,HitechTGR,22,18,Ret,26,24,20,18,19,Ret,22,,,,,,,,,,,37
-8,AIX Racing,6,4,2F,24,12,23,12,21,15,24,,,,,,,,,,,27
-8,AIX Racing,20,15,23,25,18,24,19,Ret,21,25,,,,,,,,,,,27
+7,HitechTGR,22,18,Ret,26,24,20,18,19,Ret,25,,,,,,,,,,,37
+8,AIX Racing,6,4,2F,24,12,23,12,21,15,23,,,,,,,,,,,27
+8,AIX Racing,20,15,23,25,18,24,19,Ret,21,24,,,,,,,,,,,27
 8,AIX Racing,Ret,27,Ret,Ret,Ret,Ret,Ret,WD,24†,Ret,,,,,,,,,,,27
 9,DAMS Lucas Oil,5,22,8,10,15,21,15,13,11,14,,,,,,,,,,,10
 9,DAMS Lucas Oil,15,24,17,20,21,22,17,15,18,15,,,,,,,,,,,10

@@ -109,7 +109,7 @@ def load_and_combine_data(series='F3'):
     return pd.DataFrame()
 
 
-def create_target_using_f2_data(f3_df, f2_df):
+def create_target_variable(f3_df, f2_df):
     """Create target variable for F2 participation after last F3 season."""
     if f3_df.empty or f2_df.empty:
         f3_df['moved_to_f2'] = np.nan
@@ -527,6 +527,63 @@ def add_driver_features(features_df, f3_df):
     return features_df
 
 
+def create_deep_nn_model(
+        input_dim,
+        hidden_layers=[
+            128,
+            64,
+            32],
+        dropout_rate=0.3):
+    """Create a deep neural network for F2 progression prediction."""
+    model = Sequential()
+
+    # Input layer
+    model.add(Input(shape=(input_dim,)))
+    model.add(Dense(hidden_layers[0], activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(dropout_rate))
+
+    # Hidden layers
+    for units in hidden_layers[1:]:
+        model.add(Dense(units, activation='relu'))
+        model.add(BatchNormalization())
+        model.add(Dropout(dropout_rate))
+
+    # Output layer
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(
+        optimizer=Adam(learning_rate=0.001),
+        loss='binary_crossentropy',
+        metrics=['accuracy', 'precision', 'recall']
+    )
+
+    return model
+
+
+class RacingPredictor(nn.Module):
+    def __init__(self, input_dim, hidden_dims=[128, 64, 32], dropout_rate=0.3):
+        super(RacingPredictor, self).__init__()
+
+        layers = []
+        prev_dim = input_dim
+
+        for hidden_dim in hidden_dims:
+            layers.extend([
+                nn.Linear(prev_dim, hidden_dim),
+                nn.ReLU(),
+                nn.BatchNorm1d(hidden_dim),
+                nn.Dropout(dropout_rate)
+            ])
+            prev_dim = hidden_dim
+
+        layers.append(nn.Linear(prev_dim, 1))
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.network(x)
+
+
 def train_models(df):
     """Combined training function for all model types with proper cross-validation."""
     if df.empty:
@@ -870,65 +927,6 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
     return results
 
 
-# Deep Neural Network with TensorFlow/Keras
-
-def create_deep_nn_model(
-        input_dim,
-        hidden_layers=[
-            128,
-            64,
-            32],
-        dropout_rate=0.3):
-    """Create a deep neural network for F2 progression prediction."""
-    model = Sequential()
-
-    # Input layer (fixed warning)
-    model.add(Input(shape=(input_dim,)))
-    model.add(Dense(hidden_layers[0], activation='relu'))
-    model.add(BatchNormalization())
-    model.add(Dropout(dropout_rate))
-
-    # Hidden layers
-    for units in hidden_layers[1:]:
-        model.add(Dense(units, activation='relu'))
-        model.add(BatchNormalization())
-        model.add(Dropout(dropout_rate))
-
-    # Output layer
-    model.add(Dense(1, activation='sigmoid'))
-
-    model.compile(
-        optimizer=Adam(learning_rate=0.001),
-        loss='binary_crossentropy',
-        metrics=['accuracy', 'precision', 'recall']
-    )
-
-    return model
-
-
-class RacingPredictor(nn.Module):
-    def __init__(self, input_dim, hidden_dims=[128, 64, 32], dropout_rate=0.3):
-        super(RacingPredictor, self).__init__()
-
-        layers = []
-        prev_dim = input_dim
-
-        for hidden_dim in hidden_dims:
-            layers.extend([
-                nn.Linear(prev_dim, hidden_dim),
-                nn.ReLU(),
-                nn.BatchNorm1d(hidden_dim),
-                nn.Dropout(dropout_rate)
-            ])
-            prev_dim = hidden_dim
-
-        layers.append(nn.Linear(prev_dim, 1))
-        self.network = nn.Sequential(*layers)
-
-    def forward(self, x):
-        return self.network(x)
-
-
 print("Loading F3 data...")
 f3_df = load_and_combine_data('F3')
 
@@ -944,10 +942,10 @@ f3_df = calculate_teammate_performance(f3_df)
 
 print("Calculating years in F3 for each driver...")
 f3_df = f3_df.sort_values(by=['Driver', 'year'])
-f3_df['years_in_f3'] = f3_df.groupby('Driver').cumcount() + 1
+f3_df['years_in_f3'] = f3_df.groupby('Driver').cumcount()
 
 print("Creating target variable based on F2 participation...")
-f3_df = create_target_using_f2_data(f3_df, f2_df)
+f3_df = create_target_variable(f3_df, f2_df)
 
 print("Engineering features...")
 features_df = engineer_features(f3_df)

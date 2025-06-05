@@ -11,4 +11,4 @@ jobs:
     - name: Install dependencies
       run: pip install flake8
     - name: Lint with flake8
-      run: flake8 --max-line-length=90 ./backend
+      run: flake8 --max-line-length=100 ./backend

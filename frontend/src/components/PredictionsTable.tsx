@@ -39,7 +39,7 @@ const PredictionsTable = () => {
     try {
       const response = await fetch(`${API_BASE}/models`);
       const data = await response.json();
-      const allModels = [...data.traditional_models, ...data.deep_learning_models];
+      const allModels = [...data.ml_models, ...data.deep_learning_models];
       setModels(allModels);
       if (allModels.length > 0 && !selectedModel) {
         setSelectedModel(allModels[0]);
