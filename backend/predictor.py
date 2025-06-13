@@ -12,16 +12,17 @@ from datetime import datetime
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.optimizers import Adam
 from keras.layers import Dense, Dropout, BatchNormalization, Input
 from keras.models import Sequential
-from sklearn.utils import class_weight
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_validate
+from keras.optimizers import Adam
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_validate
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
+from sklearn.utils import class_weight
 
 
 def get_race_columns(df):
@@ -50,62 +51,89 @@ def get_race_columns(df):
 
 
 def load_and_combine_data(series='F3'):
-    """Load and combine data for a racing series across years."""
+    """Load and combine data for a racing series across years, including F3 European."""
     all_data = []
-    series_dirs = glob.glob(f"{series}/*")
+    
+    # Define series directories to check
+    if series == 'F3':
+        series_patterns = ['F3', 'F3_European']
+    else:
+        series_patterns = [series]
+    
+    for series_pattern in series_patterns:
+        series_dirs = glob.glob(f"{series_pattern}/*")
+        
+        for year_dir in series_dirs:
+            year = os.path.basename(year_dir)
+            try:
+                year_int = int(year)
+                
+                # Determine file naming pattern based on series
+                if series_pattern == 'F3_European':
+                    driver_file = os.path.join(
+                        year_dir,
+                        f"f3_euro_{year}_drivers_standings.csv"
+                    )
+                    entries_file = os.path.join(
+                        year_dir,
+                        f"f3_euro_{year}_entries.csv"
+                    )
+                    series_type = 'F3_European'
+                else:
+                    driver_file = os.path.join(
+                        year_dir,
+                        f"{series.lower()}_{year}_drivers_standings.csv"
+                    )
+                    entries_file = os.path.join(
+                        year_dir,
+                        f"{series.lower()}_{year}_entries.csv"
+                    )
+                    series_type = 'F3_Main'
+                
+                if os.path.exists(driver_file):
+                    df = pd.read_csv(driver_file)
+                    df['year'] = year_int
+                    df['series'] = series
+                    df['series_type'] = series_type
+                    
+                    # Load entries data if available
+                    if os.path.exists(entries_file):
+                        entries_df = pd.read_csv(entries_file)
 
-    for year_dir in series_dirs:
-        year = os.path.basename(year_dir)
-        try:
-            year_int = int(year)
-            driver_file = os.path.join(
-                year_dir,
-                f"{series.lower()}_{year}_drivers_standings.csv"
-            )
-            if os.path.exists(driver_file):
-                df = pd.read_csv(driver_file)
-                df['year'] = year_int
-                df['series'] = series
+                        # Handle different column name variations
+                        column_mapping = {
+                            'Driver name': 'Driver',
+                            'Drivers': 'Driver',
+                            'Entrant': 'Team'
+                        }
 
-                entries_file = os.path.join(
-                    year_dir,
-                    f"{series.lower()}_{year}_entries.csv"
-                )
-                if os.path.exists(entries_file):
-                    entries_df = pd.read_csv(entries_file)
+                        for old_name, new_name in column_mapping.items():
+                            if old_name in entries_df.columns:
+                                entries_df = entries_df.rename(
+                                    columns={old_name: new_name})
 
-                    # Handle different column name variations
-                    column_mapping = {
-                        'Driver name': 'Driver',
-                        'Drivers': 'Driver',
-                        'Entrant': 'Team'
-                    }
+                        # Clean driver names
+                        if 'Driver' in entries_df.columns:
+                            entries_df['Driver'] = entries_df['Driver'].astype(str).str.strip()
+                        if 'Driver' in df.columns:
+                            df['Driver'] = df['Driver'].astype(str).str.strip()
 
-                    for old_name, new_name in column_mapping.items():
-                        if old_name in entries_df.columns:
-                            entries_df = entries_df.rename(
-                                columns={old_name: new_name})
+                        # Merge team data if both Driver and Team columns exist
+                        if 'Driver' in entries_df.columns and 'Team' in entries_df.columns:
+                            df = df.merge(
+                                entries_df[['Driver', 'Team']],
+                                left_on='Driver', right_on='Driver', how='left'
+                            )
 
-                    # Clean driver names
-                    if 'Driver' in entries_df.columns:
-                        entries_df['Driver'] = entries_df['Driver'].str.strip()
-                    if 'Driver' in df.columns:
-                        df['Driver'] = df['Driver'].str.strip()
-
-                    # Merge team data if both Driver and Team
-                    if 'Driver' in entries_df.columns and 'Team' in entries_df.columns:
-                        df = df.merge(
-                            entries_df[['Driver', 'Team']],
-                            left_on='Driver', right_on='Driver', how='left'
-                        )
-
-                all_data.append(df)
-        except Exception as e:
-            print(f"Error processing {year_dir}: {e}")
-            continue
+                    all_data.append(df)
+                    
+            except Exception as e:
+                print(f"Error processing {year_dir}: {e}")
+                continue
 
     if all_data:
-        return pd.concat(all_data, ignore_index=True)
+        combined_df = pd.concat(all_data, ignore_index=True)
+        return combined_df
     return pd.DataFrame()
 
 
@@ -343,14 +371,11 @@ def engineer_features(df):
     features_df = pd.DataFrame()
     features_df['year'] = df['year']
     features_df['driver'] = df['Driver']
-    features_df['final_position'] = df['Pos'].astype(
-        str).str.extract(r'(\d+)').astype(float)
-    features_df['points'] = pd.to_numeric(
-        df['Points'], errors='coerce').fillna(0)
+    features_df['final_position'] = df['Pos'].astype(str).str.extract(r'(\d+)').astype(float)
+    features_df['points'] = pd.to_numeric(df['Points'], errors='coerce').fillna(0)
     features_df['years_in_f3'] = df['years_in_f3']
     features_df['series_type'] = df.get('series_type', 'Unknown')
-    features_df['is_f3_european'] = (
-        features_df['series_type'] == 'F3_European').astype(int)
+    features_df['is_f3_european'] = (features_df['series_type'] == 'F3_European').astype(int)
 
     race_cols = get_race_columns(df)
     wins, podiums, points_finishes, dnfs, races_completed = [], [], [], [], []
@@ -388,13 +413,8 @@ def engineer_features(df):
 
             try:
                 pos = int(
-                    result.split()[0].replace(
-                        '†',
-                        '').replace(
-                        'F',
-                        '').replace(
-                        'P',
-                        ''))
+                    result.split()[0].replace('†', '').replace(
+                        'F', '').replace('P', ''))
                 driver_races += 1
 
                 if pos == 1:
@@ -676,18 +696,9 @@ def train_models(df):
         probas_test = pipeline.predict_proba(X_test)[:, 1]
 
         # Calibration
-        df_calib = pd.DataFrame(
-            {'proba': probas_test, 'true': y_test.reset_index(drop=True)})
-        bins = np.linspace(0.0, 1.0, 11)
-        df_calib['bin'] = pd.cut(
-            df_calib['proba'],
-            bins=bins,
-            include_lowest=True)
-        bin_stats = df_calib.groupby('bin', observed=False)['true'].mean()
-        pipeline.calibration_map = {
-            interval: rate for interval,
-            rate in bin_stats.items()}
-        pipeline.calibration_bins = bins
+        iso_reg = IsotonicRegression(out_of_bounds='clip')
+        iso_reg.fit(probas_test, y_test)
+        pipeline.calibrator = iso_reg
 
         print("\nTest Set Results:")
         print(classification_report(y_test, y_pred))
@@ -724,17 +735,9 @@ def train_models(df):
 
     # Evaluate and calibrate
     raw_probas_dnn = dnn_model.predict(X_test_scaled, verbose=0).flatten()
-    df_calib_dnn = pd.DataFrame(
-        {'proba': raw_probas_dnn, 'true': y_test.reset_index(drop=True)})
-    df_calib_dnn['bin'] = pd.cut(
-        df_calib_dnn['proba'],
-        bins=bins,
-        include_lowest=True)
-    bin_stats_dnn = df_calib_dnn.groupby('bin', observed=False)['true'].mean()
-    dnn_model.calibration_map = {
-        interval: rate for interval,
-        rate in bin_stats_dnn.items()}
-    dnn_model.calibration_bins = bins
+    iso_reg_dnn = IsotonicRegression(out_of_bounds='clip')
+    iso_reg_dnn.fit(raw_probas_dnn, y_test)
+    dnn_model.calibrator = iso_reg_dnn
 
     dnn_pred = (raw_probas_dnn > 0.5).astype(int)
     print("Keras DNN Classification Report:")
@@ -811,25 +814,15 @@ def train_models(df):
         raw_probas_torch = torch.sigmoid(logits).cpu().numpy().flatten()
 
     # Calibrate PyTorch model
-    df_calib_torch = pd.DataFrame(
-        {'proba': raw_probas_torch, 'true': y_test.reset_index(drop=True)})
-    df_calib_torch['bin'] = pd.cut(
-        df_calib_torch['proba'],
-        bins=bins,
-        include_lowest=True)
-    bin_stats_torch = df_calib_torch.groupby(
-        'bin', observed=False)['true'].mean()
-    pytorch_model.calibration_map = {
-        interval: rate for interval,
-        rate in bin_stats_torch.items()}
-    pytorch_model.calibration_bins = bins
+    iso_reg_torch = IsotonicRegression(out_of_bounds='clip')
+    iso_reg_torch.fit(raw_probas_torch, y_test)
+    pytorch_model.calibrator = iso_reg_torch
 
     pytorch_pred = (raw_probas_torch > 0.5).astype(int)
     print("PyTorch Classification Report:")
     print(classification_report(y_test, pytorch_pred))
     deep_results['PyTorch'] = pytorch_model
 
-    # Summary
     print("\n" + "=" * 70)
     print("TRAINING COMPLETE")
     print("=" * 70)
@@ -866,9 +859,8 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
             try:
                 # Get raw probabilities based on model type
                 if model_type == 'Deep Learning':
-                    if name == 'Deep_NN':  # Keras model
-                        raw_probas = model.predict(
-                            X_processed, verbose=0).flatten()
+                    if name == 'Keras_DNN':  # Keras model
+                        raw_probas = model.predict(X_processed, verbose=0).flatten()
                     else:  # PyTorch model
                         model.eval()
                         with torch.no_grad():
@@ -876,21 +868,13 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                             if torch.cuda.is_available():
                                 X_torch = X_torch.cuda()
                             logits = model(X_torch)
-                            raw_probas = torch.sigmoid(
-                                logits).cpu().numpy().flatten()
+                            raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
                 else:  # Traditional models
                     raw_probas = model.predict_proba(X_processed)[:, 1]
 
                 # Apply calibration
-                bins = model.calibration_bins
-                calib_map = model.calibration_map
-                empirical_pct = []
-                for p in raw_probas:
-                    bin_interval = pd.cut(
-                        [p], bins=bins, include_lowest=True)[0]
-                    empirical_pct.append(
-                        calib_map.get(
-                            bin_interval, p) * 100.0)
+                calibrated_probas = model.calibrator.transform(raw_probas)
+                empirical_pct = calibrated_probas * 100.0
 
                 # Create results DataFrame
                 results = pd.DataFrame({
@@ -912,11 +896,9 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                     'Prediction': (raw_probas > 0.5).astype(int)
                 }).sort_values('Empirical_%', ascending=False)
 
-                # Print results
                 print(f"\n{name} Predictions:")
                 print("-" * 50)
-                print(
-                    results.head(10).to_string(
+                print(results.head(10).to_string(
                         index=False,
                         float_format='%.3f'))
 
