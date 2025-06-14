@@ -53,21 +53,21 @@ def get_race_columns(df):
 def load_and_combine_data(series='F3'):
     """Load and combine data for a racing series across years, including F3 European."""
     all_data = []
-    
+
     # Define series directories to check
     if series == 'F3':
         series_patterns = ['F3', 'F3_European']
     else:
         series_patterns = [series]
-    
+
     for series_pattern in series_patterns:
         series_dirs = glob.glob(f"{series_pattern}/*")
-        
+
         for year_dir in series_dirs:
             year = os.path.basename(year_dir)
             try:
                 year_int = int(year)
-                
+
                 # Determine file naming pattern based on series
                 if series_pattern == 'F3_European':
                     driver_file = os.path.join(
@@ -89,13 +89,13 @@ def load_and_combine_data(series='F3'):
                         f"{series.lower()}_{year}_entries.csv"
                     )
                     series_type = 'F3_Main'
-                
+
                 if os.path.exists(driver_file):
                     df = pd.read_csv(driver_file)
                     df['year'] = year_int
                     df['series'] = series
                     df['series_type'] = series_type
-                    
+
                     # Load entries data if available
                     if os.path.exists(entries_file):
                         entries_df = pd.read_csv(entries_file)
@@ -126,7 +126,7 @@ def load_and_combine_data(series='F3'):
                             )
 
                     all_data.append(df)
-                    
+
             except Exception as e:
                 print(f"Error processing {year_dir}: {e}")
                 continue

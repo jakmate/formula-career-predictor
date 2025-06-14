@@ -1,28 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import { RefreshCw, Calendar, TrendingUp, Trophy, Target } from 'lucide-react';
-
-interface Driver {
-  driver: string;
-  position: number;
-  points: number;
-  win_rate: number;
-  podium_rate: number;
-  top_10_rate: number;
-  experience: number;
-  empirical_percentage: number;
-  prediction: number;
-}
+import { RefreshCw } from 'lucide-react';
+import { ProbabilityBar } from './ProbabilityBar';
+import { ErrorDisplay } from './ErrorDisplay';
+import type { SystemStatus } from '../types/SystemStatus';
+import { Header } from './Header';
+import type { Driver } from '../types/Driver';
 
 interface ModelResults {
   model_name: string;
   predictions: Driver[];
   accuracy_metrics: { total_predictions: number };
-}
-
-interface SystemStatus {
-  last_scrape?: string;
-  last_training?: string;
-  models_available?: string[];
 }
 
 const PredictionsTable = () => {
@@ -108,68 +95,16 @@ const PredictionsTable = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-6 border border-white/20">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-                <Trophy className="text-yellow-400" />
-                F3 to F2 Progression Predictions
-              </h1>
-              <p className="text-blue-200">AI-powered analysis of Formula 3 drivers likely to advance to Formula 2</p>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3">
-              <select 
-                value={selectedModel} 
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white backdrop-blur-sm focus:outline-none focus:border-blue-400"
-              >
-                <option value="">Select Model</option>
-                {models.map(model => (
-                  <option key={model} value={model} className="text-gray-800">{model}</option>
-                ))}
-              </select>
-              
-              <button 
-                onClick={handleRefresh}
-                disabled={loading}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Updating...' : 'Refresh Data'}
-              </button>
-            </div>
-          </div>
-          
-          {status && (
-            <div className="mt-4 flex flex-wrap gap-4 text-sm text-blue-200">
-              {status.last_scrape && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Last scrape: {new Date(status.last_scrape).toLocaleString()}
-                </div>
-              )}
-              {status.last_training && (
-                <div className="flex items-center gap-1">
-                  <TrendingUp className="w-4 h-4" />
-                  Last training: {new Date(status.last_training).toLocaleString()}
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Target className="w-4 h-4" />
-                Models: {status.models_available?.length || 0}
-              </div>
-            </div>
-          )}
-        </div>
+        <Header 
+          selectedModel={selectedModel}
+          setSelectedModel={setSelectedModel}
+          models={models}
+          loading={loading}
+          status={status}
+          onRefresh={handleRefresh}
+        />
 
-        {/* Error Display */}
-        {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 text-red-200">
-            {error}
-          </div>
-        )}
+        {error && <ErrorDisplay error={error} />}
 
         {/* Predictions Table */}
         <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
@@ -214,20 +149,7 @@ const PredictionsTable = () => {
                       <td className="p-4 text-white">{(driver.top_10_rate * 100).toFixed(1)}%</td>
                       <td className="p-4 text-white">{driver.experience} years</td>
                       <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 h-2 bg-white/20 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full transition-all duration-500 ${
-                                driver.empirical_percentage > 70 ? 'bg-green-400' :
-                                driver.empirical_percentage > 40 ? 'bg-yellow-400' : 'bg-red-400'
-                              }`}
-                              style={{ width: `${Math.min(driver.empirical_percentage, 100)}%` }}
-                            />
-                          </div>
-                          <span className="text-white text-sm font-medium">
-                            {driver.empirical_percentage.toFixed(1)}%
-                          </span>
-                        </div>
+                        <ProbabilityBar percentage={driver.empirical_percentage} />
                       </td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
