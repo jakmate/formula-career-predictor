@@ -26,9 +26,15 @@ from sklearn.utils import class_weight
 
 
 def get_race_columns(df):
-    """Identify race result columns based on track code patterns."""
-    track_codes = set()
+    """Identify race result columns based on track code patterns and data presence."""
+    # Only consider columns that have non-null data in this DataFrame subset
+    columns_with_data = []
     for col in df.columns:
+        if df[col].notna().any():  # Column has at least one non-null value
+            columns_with_data.append(col)
+    
+    track_codes = set()
+    for col in columns_with_data:
         parts = col.split()
         if parts:
             first_part = parts[0]
@@ -38,7 +44,7 @@ def get_race_columns(df):
                     track_codes.add(code_candidate)
 
     race_columns = []
-    for col in df.columns:
+    for col in columns_with_data:
         parts = col.split()
         if parts:
             first_part = parts[0]
@@ -51,7 +57,7 @@ def get_race_columns(df):
 
 
 def load_and_combine_data(series='F3'):
-    """Load and combine data for a racing series across years, including F3 European."""
+    """Load and combine data for a racing series across years."""
     all_data = []
 
     # Define series directories to check
@@ -259,8 +265,7 @@ def calculate_teammate_performance(df):
                 try:
                     driver_pos = int(
                         driver_result.split()[0].replace(
-                            '†', '').replace(
-                            'Ret', '999'))
+                            '†', '').replace('Ret', '999'))
                 except BaseException:
                     continue
 
@@ -274,8 +279,7 @@ def calculate_teammate_performance(df):
                     try:
                         teammate_pos = int(
                             teammate_result.split()[0].replace(
-                                '†', '').replace(
-                                'Ret', '999'))
+                                '†', '').replace('Ret', '999'))
 
                         h2h_total += 1
                         total_comparable += 1
@@ -301,8 +305,7 @@ def calculate_teammate_performance(df):
                 try:
                     driver_pos = int(
                         driver_result.split()[0].replace(
-                            '†', '').replace(
-                            'Ret', '25'))
+                            '†', '').replace('Ret', '25'))
                 except BaseException:
                     continue
 
@@ -316,8 +319,7 @@ def calculate_teammate_performance(df):
                     try:
                         teammate_pos = int(
                             teammate_result.split()[0].replace(
-                                '†', '').replace(
-                                'Ret', '25'))
+                                '†', '').replace('Ret', '25'))
                         teammate_positions.append(teammate_pos)
                     except BaseException:
                         continue
@@ -364,7 +366,7 @@ def calculate_teammate_performance(df):
 
 
 def engineer_features(df):
-    """Create features for ML model with F3 European consideration."""
+    """Create features for ML models"""
     if df.empty:
         return pd.DataFrame()
 
@@ -377,18 +379,32 @@ def engineer_features(df):
     features_df['series_type'] = df.get('series_type', 'Unknown')
     features_df['is_f3_european'] = (features_df['series_type'] == 'F3_European').astype(int)
 
-    race_cols = get_race_columns(df)
-    wins, podiums, points_finishes, dnfs, races_completed = [], [], [], [], []
+    race_cols_cache = {}
+    wins, podiums, points_finishes, dnfs, races_completed, completion_rates = [], [], [], [], [], []
 
     # Calculate championship competitiveness (position relative to field size)
     field_sizes = []
 
     for _, row in df.iterrows():
+        # Create cache key for this year/series combination
+        cache_key = (row['year'], row.get('series_type', 'F3_Main'))
+        
+        if cache_key not in race_cols_cache:
+            # Get all rows for this year/series to determine race columns
+            year_series_data = df[
+                (df['year'] == row['year']) &
+                (df.get('series_type', 'F3_Main') == row.get('series_type', 'F3_Main'))
+            ]
+            race_cols_cache[cache_key] = get_race_columns(year_series_data)
+
+        race_cols = race_cols_cache[cache_key]
+
         driver_wins = 0
         driver_podiums = 0
         driver_points = 0
         driver_dnfs = 0
         driver_races = 0
+        total_scheduled_races = len(race_cols)
 
         # Calculate field size for this year/series
         year_series_data = df[
@@ -406,16 +422,18 @@ def engineer_features(df):
             if not result:
                 continue
 
-            if any(x in result for x in ['Ret', 'DNS', 'WD', 'NC', 'DSQ']):
-                driver_dnfs += 1
+            if result not in ['', 'DNS', 'WD', 'NC']:
                 driver_races += 1
+
+            if any(x in result for x in ['Ret', 'DNS', 'WD', 'NC', 'DSQ']):
+                if result not in ['DNS', 'WD', 'NC']:
+                    driver_dnfs += 1
                 continue
 
             try:
                 pos = int(
                     result.split()[0].replace('†', '').replace(
                         'F', '').replace('P', ''))
-                driver_races += 1
 
                 if pos == 1:
                     driver_wins += 1
@@ -429,17 +447,21 @@ def engineer_features(df):
             except BaseException:
                 continue
 
+        completion_rate = driver_races / total_scheduled_races if total_scheduled_races > 0 else 0
+
         wins.append(driver_wins)
         podiums.append(driver_podiums)
         points_finishes.append(driver_points)
         dnfs.append(driver_dnfs)
         races_completed.append(driver_races if driver_races > 0 else 1)
+        completion_rates.append(completion_rate)
 
     features_df['wins'] = wins
     features_df['podiums'] = podiums
     features_df['points_finishes'] = points_finishes
     features_df['dnfs'] = dnfs
     features_df['races_completed'] = races_completed
+    features_df['completion_rate'] = completion_rates
     features_df['field_size'] = field_sizes
 
     # Teammate performance metrics
@@ -616,6 +638,7 @@ def train_models(df):
         'dnf_rate', 'points_per_race', 'top_10_rate',
         'years_in_f3', 'age', 'has_academy',
         'teammate_h2h_rate', 'avg_pos_vs_teammates',
+        'completion_rate'
     ]
 
     X = df_clean[feature_cols].fillna(0)
@@ -799,14 +822,14 @@ def train_models(df):
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             patience_counter = 0
-            torch.save(pytorch_model.state_dict(), 'pytorch_model.pt')
+            best_state_dict = pytorch_model.state_dict().copy()
         else:
             patience_counter += 1
             if patience_counter >= 10:
                 break
 
     # Load best model and evaluate
-    pytorch_model.load_state_dict(torch.load('pytorch_model.pt'))
+    pytorch_model.load_state_dict(best_state_dict)
     pytorch_model.eval()
 
     with torch.no_grad():
@@ -891,6 +914,7 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                     'Academy': current_df['has_academy'],
                     'H2H_Rate': current_df['teammate_h2h_rate'],
                     'Avg_Pos_Diff': current_df['avg_pos_vs_teammates'],
+                    'Completion %': current_df['completion_rate'],
                     'Raw_Probability': raw_probas,
                     'Empirical_%': empirical_pct,
                     'Prediction': (raw_probas > 0.5).astype(int)
