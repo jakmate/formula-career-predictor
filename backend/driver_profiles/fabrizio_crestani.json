@@ -1,6 +1,9 @@
 {
   "name": "Fabrizio Crestani",
-  "dob": null,
+  "dob": "1987-12-17",
   "academy": null,
-  "scraped": false
+  "nationality": "Italian",
+  "wiki_url": "https://en.wikipedia.org/wiki/Fabrizio_Crestani",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:13:48.853002"
 }

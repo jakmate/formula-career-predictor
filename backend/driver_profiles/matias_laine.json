@@ -1,6 +1,9 @@
 {
   "name": "Matias Laine",
-  "dob": null,
+  "dob": "1990-04-25",
   "academy": null,
-  "scraped": false
+  "nationality": "Finnish",
+  "wiki_url": "https://en.wikipedia.org/wiki/Matias_Laine",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:12:34.411271"
 }

@@ -1,6 +1,9 @@
 {
   "name": "Matt Parry",
-  "dob": null,
+  "dob": "1994-01-14",
   "academy": null,
-  "scraped": false
+  "nationality": "British",
+  "wiki_url": "https://en.wikipedia.org/wiki/Matt_Parry",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:15:06.674148"
 }

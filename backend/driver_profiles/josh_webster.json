@@ -1,6 +1,9 @@
 {
   "name": "Josh Webster",
-  "dob": null,
+  "dob": "1994-02-06",
   "academy": null,
-  "scraped": false
+  "nationality": "British",
+  "wiki_url": "https://en.wikipedia.org/wiki/Josh_Webster",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:20:26.834204"
 }

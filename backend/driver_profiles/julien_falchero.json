@@ -1,6 +1,9 @@
 {
   "name": "Julien Falchero",
-  "dob": null,
+  "dob": "1997-03-02",
   "academy": null,
-  "scraped": false
+  "nationality": "French",
+  "wiki_url": "https://en.wikipedia.org/wiki/Julien_Falchero",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:14:55.460365"
 }

@@ -35,7 +35,7 @@ class DriverProfileScraper:
             'formula', 'racing driver', 'motorsport', 'grand prix',
             'championship', 'circuit', 'f1', 'f2', 'f3', 'indycar',
             'nascar', 'lemans', 'endurance racing', 'karting',
-            'single-seater', 'open-wheel', 'touring car'
+            'single-seater', 'open-wheel', 'touring car', 'gp2', 'gp3'
         ]
 
         # Check if any racing keywords appear in the first few paragraphs
@@ -45,54 +45,68 @@ class DriverProfileScraper:
         return any(keyword in first_paragraphs for keyword in racing_keywords)
 
     def search_wikipedia_page(self, driver_name):
-        """Search driver's Wikipedia page, prioritizing racing driver disambiguation."""
-        search_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
+        """Search driver's Wikipedia page using Wikipedia search API."""
 
-        # Try different name variations, prioritizing racing driver
-        # disambiguation
+        # First try the OpenSearch API for fuzzy matching
+        search_api_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
+        opensearch_url = "https://en.wikipedia.org/w/api.php"
+
+        # Try OpenSearch API first
+        try:
+            params = {
+                'action': 'opensearch',
+                'search': driver_name,
+                'limit': 5,
+                'format': 'json',
+                'redirects': 'resolve'
+            }
+
+            response = requests.get(opensearch_url, params=params)
+            if response.status_code == 200:
+                data = response.json()
+                if len(data) >= 4 and data[3]:  # URLs are in the 4th element
+                    urls = data[3]
+
+                    # Check each result to find racing driver pages
+                    for i, url in enumerate(urls):
+                        try:
+                            page_response = requests.get(url)
+                            if page_response.status_code == 200:
+                                soup = BeautifulSoup(page_response.text, 'html.parser')
+                                if self.is_racing_driver_page(soup):
+                                    return url
+                        except Exception as e:
+                            print(f"Error checking search result {i}: {e}")
+                            continue
+
+                    # If no racing driver found, return first result as fallback
+                    if urls:
+                        return urls[0]
+
+        except Exception as e:
+            print(f"OpenSearch API error for {driver_name}: {e}")
+
+        # Fallback method
         name_variations = [
             driver_name,
             f"{driver_name}_(racing_driver)",
             driver_name.replace(" ", "_")
         ]
 
-        best_match = None
-        best_url = None
-
         for variation in name_variations:
             try:
-                response = requests.get(f"{search_url}{variation}")
+                response = requests.get(f"{search_api_url}{variation}")
                 if response.status_code == 200:
                     data = response.json()
                     if 'extract' in data and len(data['extract']) > 50:
-                        page_url = data.get(
-                            'content_urls', {}).get(
-                            'desktop', {}).get('page')
-
+                        page_url = data.get('content_urls', {}).get('desktop', {}).get('page')
                         if page_url:
-                            # Get the full page to check if it's about racing
-                            page_response = requests.get(page_url)
-                            if page_response.status_code == 200:
-                                soup = BeautifulSoup(
-                                    page_response.text, 'html.parser')
-
-                                # If this is a racing driver page, return it
-                                # immediately
-                                if self.is_racing_driver_page(soup):
-                                    return page_url
-
-                                # Otherwise, store as backup if we haven't
-                                # found anything better
-                                if best_match is None:
-                                    best_match = data
-                                    best_url = page_url
-
+                            return page_url
             except Exception as e:
                 print(f"Error checking variation {variation}: {e}")
                 continue
 
-        # Return best match found, even if not confirmed as racingdriver
-        return best_url
+        return None
 
     def extract_nationality(self, soup):
         """Extract driver nationality from infobox, otherwise from short description."""
@@ -173,9 +187,9 @@ class DriverProfileScraper:
         )
 
         # Check if already scraped
-        # if os.path.exists(profile_file):
-        #    with open(profile_file, 'r', encoding='utf-8') as f:
-        #        return json.load(f)
+        if os.path.exists(profile_file):
+            with open(profile_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
 
         print(f"Scraping profile for {driver_name}...")
 

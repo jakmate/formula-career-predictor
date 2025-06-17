@@ -1,6 +1,9 @@
 {
   "name": "Kevin Korjus",
-  "dob": null,
+  "dob": "1993-01-09",
   "academy": null,
-  "scraped": false
+  "nationality": "Estonian",
+  "wiki_url": "https://en.wikipedia.org/wiki/Kevin_Korjus",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:19:27.893622"
 }

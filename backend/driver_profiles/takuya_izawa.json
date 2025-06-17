@@ -1,6 +1,9 @@
 {
   "name": "Takuya Izawa",
-  "dob": null,
+  "dob": "1984-06-01",
   "academy": null,
-  "scraped": false
+  "nationality": "Japanese",
+  "wiki_url": "https://en.wikipedia.org/wiki/Takuya_Izawa",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:13:06.211635"
 }

@@ -1,6 +1,9 @@
 {
   "name": "Lewis Williamson",
-  "dob": null,
+  "dob": "1989-11-11",
   "academy": null,
-  "scraped": false
+  "nationality": "British",
+  "wiki_url": "https://en.wikipedia.org/wiki/Lewis_Williamson",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:15:25.180341"
 }

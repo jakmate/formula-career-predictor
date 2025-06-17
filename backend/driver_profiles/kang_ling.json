@@ -1,6 +1,9 @@
 {
   "name": "Kang Ling",
-  "dob": null,
+  "dob": "1997-03-14",
   "academy": null,
-  "scraped": false
+  "nationality": "Chinese",
+  "wiki_url": "https://en.wikipedia.org/wiki/Ling_Kang",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:18:32.461191"
 }

@@ -1,6 +1,9 @@
 {
   "name": "Sebastian Balthasar",
-  "dob": null,
+  "dob": "1996-08-30",
   "academy": null,
-  "scraped": false
+  "nationality": "German",
+  "wiki_url": "https://en.wikipedia.org/wiki/Sebastian_Balthasar",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:11:08.925719"
 }

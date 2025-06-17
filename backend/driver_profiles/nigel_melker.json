@@ -1,6 +1,9 @@
 {
   "name": "Nigel Melker",
-  "dob": null,
+  "dob": "1991-01-25",
   "academy": null,
-  "scraped": false
+  "nationality": "Dutch",
+  "wiki_url": "https://en.wikipedia.org/wiki/Nigel_Melker",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:14:15.942413"
 }

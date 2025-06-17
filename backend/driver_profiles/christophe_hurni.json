@@ -1,6 +1,9 @@
 {
   "name": "Christophe Hurni",
-  "dob": null,
+  "dob": "1962-12-01",
   "academy": null,
-  "scraped": false
+  "nationality": "Swiss",
+  "wiki_url": "https://en.wikipedia.org/wiki/Christophe_Hurni",
+  "scraped": true,
+  "scraped_date": "2025-06-17T14:19:07.224119"
 }
