@@ -5,6 +5,7 @@ import { ErrorDisplay } from './ErrorDisplay';
 import type { SystemStatus } from '../types/SystemStatus';
 import { Header } from './Header';
 import type { Driver } from '../types/Driver';
+import { getFlagComponent } from '../utils/flags';
 
 interface ModelResults {
   model_name: string;
@@ -32,7 +33,7 @@ const PredictionsTable = () => {
         setSelectedModel(allModels[0]);
       }
     } catch (err) {
-      setError('Failed to fetch models');
+      setError(`Failed to fetch models: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }, [API_BASE, selectedModel]);
 
@@ -74,7 +75,7 @@ const PredictionsTable = () => {
         fetchStatus();
       }, 5000);
     } catch (err) {
-      setError('Failed to trigger update');
+      setError(`Failed to trigger update ${err instanceof Error ? err.message : 'Unknown error'}`);
       setLoading(false);
     }
   };
@@ -123,6 +124,7 @@ const PredictionsTable = () => {
                 <thead className="bg-white/5">
                   <tr className="text-left text-white/90">
                     <th className="p-4 font-semibold">Driver</th>
+                    <th className="p-4 font-semibold">Nat.</th>
                     <th className="p-4 font-semibold">Position</th>
                     <th className="p-4 font-semibold">Points</th>
                     <th className="p-4 font-semibold">Win %</th>
@@ -142,6 +144,7 @@ const PredictionsTable = () => {
                       }`}
                     >
                       <td className="p-4 text-white font-medium">{driver.driver}</td>
+                      <td className="p-4">{getFlagComponent(driver.nationality)}</td>
                       <td className="p-4 text-white">{driver.position}</td>
                       <td className="p-4 text-white">{driver.points.toFixed(1)}</td>
                       <td className="p-4 text-white">{(driver.win_rate * 100).toFixed(1)}%</td>

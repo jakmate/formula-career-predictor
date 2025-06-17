@@ -8,4 +8,5 @@ export interface Driver {
   experience: number;
   empirical_percentage: number;
   prediction: number;
+  nationality: string;
 }

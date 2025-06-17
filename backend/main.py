@@ -15,7 +15,6 @@ from predictor import (
     load_and_combine_data,
     create_target_variable,
     calculate_teammate_performance,
-    calculate_years_in_f3_combined,
     engineer_features,
     train_models,
 )
@@ -38,6 +37,7 @@ app.add_middleware(
 # Pydantic models
 class PredictionResponse(BaseModel):
     driver: str
+    nationality: Optional[str] = None
     position: int
     points: float
     win_rate: float
@@ -108,9 +108,8 @@ async def train_models_task():
             logger.warning("No data available for training")
             return
 
-        # Process data using the correct function names
+        # Process data
         f3_df = calculate_teammate_performance(f3_df)
-        f3_df = calculate_years_in_f3_combined(f3_df)
         f3_df = create_target_variable(f3_df, f2_df)
 
         features_df = engineer_features(f3_df)
@@ -219,7 +218,6 @@ async def get_predictions(model_name: str) -> ModelResults:
 
         # Process data
         f3_df = calculate_teammate_performance(f3_df)
-        f3_df = calculate_years_in_f3_combined(f3_df)
         f3_df = create_target_variable(f3_df, f2_df)
 
         features_df = engineer_features(f3_df)
@@ -257,7 +255,7 @@ async def get_predictions(model_name: str) -> ModelResults:
                         X_torch = X_torch.cuda()
                     logits = model(X_torch)
                     raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
-            else:  # Keras model
+            else:
                 raw_probas = model.predict(X_current_scaled, verbose=0).flatten()
 
             predictions_binary = (raw_probas > 0.5).astype(int)
@@ -275,6 +273,7 @@ async def get_predictions(model_name: str) -> ModelResults:
         for idx, (_, row) in enumerate(f3_current_drivers.iterrows()):
             predictions.append(PredictionResponse(
                 driver=row['driver'],
+                nationality=row['nationality'] if pd.notna(row['nationality']) else None,
                 position=int(row['final_position']),
                 points=float(row['points']),
                 win_rate=float(row['win_rate']),

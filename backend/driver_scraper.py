@@ -91,9 +91,79 @@ class DriverProfileScraper:
                 print(f"Error checking variation {variation}: {e}")
                 continue
 
-        # Return the best match we found, even if not confirmed as racing
-        # driver
+        # Return best match found, even if not confirmed as racingdriver
         return best_url
+
+    def extract_nationality(self, soup):
+        """Extract driver nationality from infobox, otherwise from short description."""
+        # Infobox extraction
+        infobox = soup.find('table', class_='infobox')
+        if infobox:
+            for tr in infobox.find_all('tr'):
+                th = tr.find('th')
+                if th and 'nationality' in th.get_text(strip=True).lower():
+                    td = tr.find('td')
+                    if td:
+                        # Use plain text in that cell
+                        text = td.get_text(" ", strip=True)
+                        # remove reference marks
+                        text = re.sub(r'\[\d+\]', '', text)
+                        # strip off any italic parentheticals
+                        text = re.sub(r'\s*via .+$', '', text, flags=re.IGNORECASE)
+                        # Normalize separators and casing
+                        return self.normalize_nationality_text(text)
+
+        # Short description extraction
+        shortdesc = soup.find(
+            'div',
+            class_='shortdescription nomobile noexcerpt noprint searchaux'
+        )
+        if shortdesc:
+            text = shortdesc.get_text(" ", strip=True)
+            # Capture everything up to " racing"
+            m = re.match(r'^(.+?)\s+racing\b', text, re.IGNORECASE)
+            if m:
+                nat_string = m.group(1).strip()
+                return self.normalize_nationality_text(nat_string)
+            # Fallback to first word
+            m2 = re.match(r'^([A-Z][a-z]+)', text)
+            if m2:
+                return m2.group(1).capitalize()
+
+        return None
+
+    def normalize_nationality_text(self, text):
+        """Normalize nationality text to consistent format"""
+        # Clean and normalize text
+        text = re.sub(r'\s+', ' ', text)  # Collapse multiple spaces
+        text = re.sub(r'\s*[,\/;|]\s*', ', ', text)  # Normalize separators to commas
+        text = re.sub(r'\s*[–—\-]\s*', '-', text)  # Normalize hyphens
+
+        # Split and process individual nationality terms
+        parts = []
+        for part in re.split(r'[,\s]', text):
+            part = part.strip()
+            if not part:
+                continue
+
+            # Handle hyphenated nationalities
+            if '-' in part:
+                hyphenated = [p.strip().capitalize() for p in part.split('-') if p.strip()]
+                if hyphenated:
+                    parts.extend(hyphenated)
+                continue
+
+            parts.append(part.capitalize())
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_parts = []
+        for part in parts:
+            if part not in seen:
+                seen.add(part)
+                unique_parts.append(part)
+
+        return ', '.join(unique_parts)
 
     def scrape_driver_profile(self, driver_name):
         """Scrape individual driver profile from Wikipedia."""
@@ -103,9 +173,9 @@ class DriverProfileScraper:
         )
 
         # Check if already scraped
-        if os.path.exists(profile_file):
-            with open(profile_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+        # if os.path.exists(profile_file):
+        #    with open(profile_file, 'r', encoding='utf-8') as f:
+        #        return json.load(f)
 
         print(f"Scraping profile for {driver_name}...")
 
@@ -132,16 +202,16 @@ class DriverProfileScraper:
                 print(
                     f"Warning: {driver_name} page may not be about racing driver")
 
-            # Extract date of birth
+            # Extract data
             dob = self.extract_dob(soup)
-
-            # Extract academy information
             academy = self.extract_academy_info(soup)
+            nationality = self.extract_nationality(soup)
 
             profile = {
                 "name": driver_name,
                 "dob": dob,
                 "academy": academy,
+                "nationality": nationality,
                 "wiki_url": wiki_url,
                 "scraped": True,
                 "scraped_date": datetime.now().isoformat()
@@ -390,8 +460,7 @@ def main():
     print("Starting driver profile scraping...")
     profiles = scraper.batch_scrape_drivers(all_drivers)
 
-    scraped_count = sum(
-        1 for p in profiles.values() if p.get(
+    scraped_count = sum(1 for p in profiles.values() if p.get(
             'scraped', False))
     with_dob = sum(1 for p in profiles.values() if p.get('dob'))
     with_academy = sum(1 for p in profiles.values() if p.get('academy'))

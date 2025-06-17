@@ -1,6 +1,9 @@
 {
   "name": "Alessio Lorandi",
-  "dob": null,
+  "dob": "1998-09-08",
   "academy": null,
-  "scraped": false
+  "nationality": "Italian",
+  "wiki_url": "https://en.wikipedia.org/wiki/Alessio_Lorandi",
+  "scraped": true,
+  "scraped_date": "2025-06-17T12:38:55.779952"
 }

@@ -32,7 +32,7 @@ def get_race_columns(df):
     for col in df.columns:
         if df[col].notna().any():  # Column has at least one non-null value
             columns_with_data.append(col)
-    
+
     track_codes = set()
     for col in columns_with_data:
         parts = col.split()
@@ -370,6 +370,9 @@ def engineer_features(df):
     if df.empty:
         return pd.DataFrame()
 
+    df = df.sort_values(by=['Driver', 'year'])
+    df['years_in_f3'] = df.groupby('Driver').cumcount()
+
     features_df = pd.DataFrame()
     features_df['year'] = df['year']
     features_df['driver'] = df['Driver']
@@ -388,7 +391,7 @@ def engineer_features(df):
     for _, row in df.iterrows():
         # Create cache key for this year/series combination
         cache_key = (row['year'], row.get('series_type', 'F3_Main'))
-        
+
         if cache_key not in race_cols_cache:
             # Get all rows for this year/series to determine race columns
             year_series_data = df[
@@ -464,7 +467,6 @@ def engineer_features(df):
     features_df['completion_rate'] = completion_rates
     features_df['field_size'] = field_sizes
 
-    # Teammate performance metrics
     features_df['teammate_h2h_rate'] = df.get('teammate_h2h_rate', 0.5)
     features_df['avg_pos_vs_teammates'] = df.get('avg_pos_vs_teammates', 0)
     features_df['teammate_battles'] = df.get('teammate_battles', 0)
@@ -485,34 +487,8 @@ def engineer_features(df):
     return features_df
 
 
-def calculate_years_in_f3_combined(df):
-    """Calculate years in F3"""
-    df = df.sort_values(by=['Driver', 'year'])
-
-    # Group consecutive years for each driver
-    df['years_in_f3'] = 0
-
-    for driver in df['Driver'].unique():
-        driver_data = df[df['Driver'] == driver].copy()
-
-        # Calculate cumulative years, treating F3 and F3 European as continuous
-        years_count = 0
-        prev_year = None
-
-        for idx, row in driver_data.iterrows():
-            current_year = row['year']
-
-            if prev_year is None or current_year == prev_year + 1:
-                years_count += 1
-
-            df.loc[idx, 'years_in_f3'] = years_count
-            prev_year = current_year
-
-    return df
-
-
 def add_driver_features(features_df, f3_df):
-    """Add age and academy features from cached JSON profiles."""
+    """Add features from cached JSON profiles."""
     profiles_dir = "driver_profiles"
 
     def get_driver_filename(driver_name):
@@ -543,13 +519,14 @@ def add_driver_features(features_df, f3_df):
                     with open(profile_file, 'r', encoding='utf-8') as f:
                         profiles[driver] = json.load(f)
                 except BaseException:
-                    profiles[driver] = {'dob': None, 'academy': None}
+                    profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
             else:
-                profiles[driver] = {'dob': None, 'academy': None}
+                profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
 
     # Add features
     ages = []
     has_academy = []
+    nationalities = []
 
     for _, row in features_df.iterrows():
         driver = row['driver']
@@ -563,18 +540,19 @@ def add_driver_features(features_df, f3_df):
         academy = profile.get('academy')
         has_academy.append(1 if academy else 0)
 
+        nationality = profile.get('nationality', 'Unknown')
+        nationalities.append(nationality)
+
     features_df['age'] = ages
     features_df['has_academy'] = has_academy
+    features_df['nationality'] = nationalities
 
     return features_df
 
 
 def create_deep_nn_model(
         input_dim,
-        hidden_layers=[
-            128,
-            64,
-            32],
+        hidden_layers=[128, 64, 32],
         dropout_rate=0.3):
     """Create a deep neural network for F2 progression prediction."""
     model = Sequential()
@@ -638,7 +616,7 @@ def train_models(df):
         'dnf_rate', 'points_per_race', 'top_10_rate',
         'years_in_f3', 'age', 'has_academy',
         'teammate_h2h_rate', 'avg_pos_vs_teammates',
-        'completion_rate'
+        'teammate_battles', 'completion_rate'
     ]
 
     X = df_clean[feature_cols].fillna(0)
@@ -902,22 +880,24 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                 # Create results DataFrame
                 results = pd.DataFrame({
                     'Driver': current_df['driver'],
-                    'Position': current_df['final_position'],
+                    'Nationality': current_df['nationality'],
+                    'Pos': current_df['final_position'],
                     'Points': current_df['points'],
                     'Win %': current_df['win_rate'],
                     'Podium %': current_df['podium_rate'],
                     'Top 10 %': current_df['top_10_rate'],
                     'DNF %': current_df['dnf_rate'],
-                    'Points / Races': current_df['points_per_race'],
-                    'Experience': current_df['years_in_f3'],
+                    'Points/Races': current_df['points_per_race'],
+                    'Exp': current_df['years_in_f3'],
                     'Age': current_df['age'],
                     'Academy': current_df['has_academy'],
                     'H2H_Rate': current_df['teammate_h2h_rate'],
                     'Avg_Pos_Diff': current_df['avg_pos_vs_teammates'],
+                    'Teammate_Battles': current_df['teammate_battles'],
                     'Completion %': current_df['completion_rate'],
-                    'Raw_Probability': raw_probas,
+                    'Raw_Prob': raw_probas,
                     'Empirical_%': empirical_pct,
-                    'Prediction': (raw_probas > 0.5).astype(int)
+                    'Pred': (raw_probas > 0.5).astype(int)
                 }).sort_values('Empirical_%', ascending=False)
 
                 print(f"\n{name} Predictions:")
@@ -945,10 +925,6 @@ if f3_df.empty or f2_df.empty:
 
 print("Calculating teammate performance metrics...")
 f3_df = calculate_teammate_performance(f3_df)
-
-print("Calculating years in F3 for each driver...")
-f3_df = f3_df.sort_values(by=['Driver', 'year'])
-f3_df['years_in_f3'] = f3_df.groupby('Driver').cumcount()
 
 print("Creating target variable based on F2 participation...")
 f3_df = create_target_variable(f3_df, f2_df)
