@@ -12,10 +12,11 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 from scraper import scrape
 from predictor import (
+    enhance_with_team_data,
     load_and_combine_data,
     create_target_variable,
-    calculate_teammate_performance,
     engineer_features,
+    load_team_standings,
     train_models,
 )
 
@@ -44,12 +45,15 @@ class PredictionResponse(BaseModel):
     podium_rate: float
     top_10_rate: float
     dnf_rate: float
-    points_per_race: float
     experience: int
     age: Optional[float]
     has_academy: int
-    h2h_rate: float
     avg_pos_diff: float
+    teammate_battles: float
+    team_pos: int
+    team_points: float
+    points_vs_team_strength: float
+    pos_vs_team_strength: float
     raw_probability: float
     empirical_percentage: float
     prediction: int
@@ -108,8 +112,10 @@ async def train_models_task():
             logger.warning("No data available for training")
             return
 
+        f3_team_df = load_team_standings('F3')
+        f3_df = enhance_with_team_data(f3_df, f3_team_df)
+
         # Process data
-        f3_df = calculate_teammate_performance(f3_df)
         f3_df = create_target_variable(f3_df, f2_df)
 
         features_df = engineer_features(f3_df)
@@ -216,8 +222,10 @@ async def get_predictions(model_name: str) -> ModelResults:
         if f3_df.empty:
             raise HTTPException(status_code=404, detail="No F3 data available")
 
+        f3_team_df = load_team_standings('F3')
+        f3_df = enhance_with_team_data(f3_df, f3_team_df)
+
         # Process data
-        f3_df = calculate_teammate_performance(f3_df)
         f3_df = create_target_variable(f3_df, f2_df)
 
         features_df = engineer_features(f3_df)
@@ -274,18 +282,21 @@ async def get_predictions(model_name: str) -> ModelResults:
             predictions.append(PredictionResponse(
                 driver=row['driver'],
                 nationality=row['nationality'] if pd.notna(row['nationality']) else None,
-                position=int(row['final_position']),
+                position=int(row['final_pos']),
                 points=float(row['points']),
                 win_rate=float(row['win_rate']),
                 podium_rate=float(row['podium_rate']),
                 top_10_rate=float(row['top_10_rate']),
                 dnf_rate=float(row['dnf_rate']),
-                points_per_race=float(row['points_per_race']),
                 experience=int(row['years_in_f3']),
                 age=float(row['age']) if pd.notna(row['age']) else None,
                 has_academy=int(row['has_academy']),
-                h2h_rate=float(row['teammate_h2h_rate']),
                 avg_pos_diff=float(row['avg_pos_vs_teammates']),
+                teammate_battles=float(row['teammate_battles']),
+                team_pos=int(row['team_pos']),
+                team_points=float(row['team_points']),
+                points_vs_team_strength=float(row['points_vs_team_strength']),
+                pos_vs_team_strength=float(row['pos_vs_team_strength']),
                 raw_probability=float(raw_probas[idx]),
                 empirical_percentage=float(empirical_pct[idx]),
                 prediction=int(predictions_binary[idx])

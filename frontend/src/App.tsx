@@ -1,5 +1,5 @@
 
-import PredictionsTable from './components/PredictionsTable'
+import PredictionsTable from './components/table/PredictionsTable'
 import './App.css'
 
 function App() {
