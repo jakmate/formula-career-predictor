@@ -1,37 +1,37 @@
 Team,Chassis[N 1],Engine,No.,Driver,Status,Rounds
-Prema Powerteam[7],F314/003,Mercedes[8],1
-Prema Powerteam[7],F312/015,2,Esteban Ocon[10]
-Prema Powerteam[7],F312/030,25,Antonio Fuoco[11][N 3]
-Prema Powerteam[7],F312/005,26,Dennis van de Laar[12][N 4]
-Mücke Motorsport[7],F312/019,Mercedes[13],3
-Mücke Motorsport[7],F312/023,4,Roy Nissany[13][N 4]
-Mücke Motorsport[7],F312/020,27,Felix Rosenqvist[15]
-Carlin[7],F312/004,Volkswagen,5
-Carlin[7],F312/016,6,Ed Jones[17][N 5]
-Carlin[7],F312/001,28,Jake Dennis[18][N 6]
-EuroInternational[19],F312/053,Mercedes[19],7
-EuroInternational[19],F312/003,8,Michele Beretta[21]
-EuroInternational[19],F312/053,29,Santino Ferrucci[22]
-EuroInternational[19],Sérgio Sette Câmara[23][N 7],,10
-EuroInternational[19],Stefano Coletti[24][N 7],,11
-Fortec Motorsports[7],F312/011,Mercedes,9
-Fortec Motorsports[7],Alfonso Celis[25],,8
-Fortec Motorsports[7],Martin Cao[26],,10
-Fortec Motorsports[7],F312/007,10,John Bryant-Meisner[15]
-Fortec Motorsports[7],Santino Ferrucci[27],R,10–11
-ThreeBond Racingwith T-Sport[7],F312/049,NBE[28],11
-ThreeBond Racingwith T-Sport[7],F312/008,12,Alexander Toril[30]
-ThreeBond Racingwith T-Sport[7],F314/019,32,Nick Cassidy[31][N 7]
-,Double R Racing[32],F313/001,Mercedes[32]
-Van Amersfoort Racing[7],F312/051,Volkswagen[34],15
-Van Amersfoort Racing[7],F312/052,16,Gustavo Menezes[34][N 3]
-Van Amersfoort Racing[7],F314/009,30,Max Verstappen[35]
-Jo Zeller Racing[7],F312/039,Mercedes,17
-Jo Zeller Racing[7],F312/044,18,Tatiana Calderón[36]
-Jagonya Ayam with Carlin[37],F314/020,Volkswagen,19
-Jagonya Ayam with Carlin[37],F312/002,20,Sean Gelael[16][N 4]
-Jagonya Ayam with Carlin[37],F312/010,31,Tom Blomqvist[16]
-Team West-Tec F3[39],F314/007,Mercedes[39],21
-Team West-Tec F3[39],F312/011,22,Hector Hurst[41]
-Team West-Tec F3[39],Wing Chung Chang[42],,9–11
-,Signature[43],F314/005,Volkswagen[43]
+Prema Powerteam,F314/003,Mercedes,1,Nicholas Latifi[N 2],,1–10
+Prema Powerteam,F312/015,Mercedes,2,Esteban Ocon,R,All
+Prema Powerteam,F312/030,Mercedes,25,Antonio Fuoco[N 3],R,All
+Prema Powerteam,F312/005,Mercedes,26,Dennis van de Laar[N 4],,All
+Mücke Motorsport,F312/019,Mercedes,3,Lucas Auer,,All
+Mücke Motorsport,F312/023,Mercedes,4,Roy Nissany[N 4],,All
+Mücke Motorsport,F312/020,Mercedes,27,Felix Rosenqvist,,All
+Carlin,F312/004,Volkswagen,5,Jordan King,,All
+Carlin,F312/016,Volkswagen,6,Ed Jones[N 5],,"1–3, 8–11"
+Carlin,F312/001,Volkswagen,28,Jake Dennis[N 6],R,All
+EuroInternational,F312/053,Mercedes,7,Riccardo Agostini,,1–3
+EuroInternational,F312/003,Mercedes,8,Michele Beretta,R,All
+EuroInternational,F312/053,Mercedes,29,Santino Ferrucci,R,5–9
+EuroInternational,F312/053,Mercedes,29,Sérgio Sette Câmara[N 7],,10
+EuroInternational,F312/053,Mercedes,29,Stefano Coletti[N 7],,11
+Fortec Motorsports,F312/011,Mercedes,9,Mitch Gilbert,,1–6
+Fortec Motorsports,F312/011,Mercedes,9,Alfonso Celis,,8
+Fortec Motorsports,F312/011,Mercedes,9,Martin Cao,,10
+Fortec Motorsports,F312/007,Mercedes,10,John Bryant-Meisner,,"1–6, 8"
+Fortec Motorsports,F312/007,Mercedes,10,Santino Ferrucci,R,10–11
+ThreeBond Racingwith T-Sport,F312/049,NBE,11,Richard Goddard,,"1–6, 8–11"
+ThreeBond Racingwith T-Sport,F312/008,NBE,12,Alexander Toril,,"1–6, 8–11"
+ThreeBond Racingwith T-Sport,F314/019,NBE,32,Nick Cassidy[N 7],,10–11
+Double R Racing,F313/001,Mercedes,14,Felipe Guimarães,,1–6
+Van Amersfoort Racing,F312/051,Volkswagen,15,Jules Szymkowiak[N 8],R,All
+Van Amersfoort Racing,F312/052,Volkswagen,16,Gustavo Menezes[N 3],,All
+Van Amersfoort Racing,F314/009,Volkswagen,30,Max Verstappen,R,All
+Jo Zeller Racing,F312/039,Mercedes,17,Sandro Zeller,,"2, 4–6, 8–11"
+Jo Zeller Racing,F312/044,Mercedes,18,Tatiana Calderón,,All
+Jagonya Ayam with Carlin,F314/020,Volkswagen,19,Antonio Giovinazzi,,All
+Jagonya Ayam with Carlin,F312/002,Volkswagen,20,Sean Gelael[N 4],,All
+Jagonya Ayam with Carlin,F312/010,Volkswagen,31,Tom Blomqvist,,All
+Team West-Tec F3,F314/007,Mercedes,21,Félix Serrallés,,All
+Team West-Tec F3,F312/011,Mercedes,22,Hector Hurst,,1–8
+Team West-Tec F3,F312/011,Mercedes,22,Wing Chung Chang,,9–11
+Signature,F314/005,Volkswagen,23,William Buller[N 7],,10

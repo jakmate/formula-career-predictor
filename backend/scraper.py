@@ -1,7 +1,8 @@
+import csv
 import os
+import re
 import requests
 from bs4 import BeautifulSoup
-import csv
 
 BASE_URL = "https://en.wikipedia.org/wiki/"
 
@@ -246,6 +247,11 @@ def process_championship(
             writer.writerow(row_data)
 
 
+def remove_citations(text):
+    """Remove Wikipedia-style citations (e.g., [1], [a], [Note]) from text."""
+    return re.sub(r'\[\w+\]', '', text)
+
+
 def process_entries(soup, year, formula, series_type="main"):
     # Determine heading based on series type and year
     if series_type == "f3_euro":
@@ -263,17 +269,17 @@ def process_entries(soup, year, formula, series_type="main"):
         heading = soup.find("h2", {"id": "Entries"})
 
     if not heading:
-        print(f"No entries heading found for {formula} {year} {series_type}")
+        print(f"No entries heading found for F{formula} {year} {series_type}")
         return
 
     table = heading.find_next("table", {"class": "wikitable"})
     if not table:
-        print(f"No table found for {formula} {year} {series_type}")
+        print(f"No table found for F{formula} {year} {series_type}")
         return
 
     all_rows = table.find_all("tr")
     if len(all_rows) < 3:
-        print(f"Not enough rows in table for {formula} {year} {series_type}")
+        print(f"Not enough rows in table for F{formula} {year} {series_type}")
         return
 
     # Create directories
@@ -295,6 +301,7 @@ def process_entries(soup, year, formula, series_type="main"):
         headers = [header.get_text(strip=True)
                    for header in header_row.find_all("th")]
         writer.writerow(headers)
+        num_columns = len(headers)
 
         # Data processing - skip header row
         data_rows = all_rows[1:]
@@ -302,38 +309,63 @@ def process_entries(soup, year, formula, series_type="main"):
         # Remove footer row (if detected)
         if len(data_rows) > 0:
             last_row = data_rows[-1]
-            if len(last_row.find_all(["td", "th"])) < 3:
+            if len(last_row.find_all(["td", "th"])) < num_columns:
                 data_rows = data_rows[:-1]
 
-        # Track rowspan for Entrant
-        current_entrant = ""
-        entrant_rowspan = 0
+        # Determine rowspan columns based on series and year
+        if series_type == "f3_euro" and 2012 <= year <= 2018:
+            rowspan_columns = 4  # Team, Chassis, Engine, No.
+        else:
+            rowspan_columns = 2  # Entrant/Team, No.
+
+        # Initialize rowspan trackers
+        trackers = [
+            {'value': '', 'remaining': 0}
+            for _ in range(rowspan_columns)
+        ]
 
         for row in data_rows:
             cells = row.find_all(["td", "th"])
             row_data = []
+            cell_index = 0
 
-            # Check for new entrant
-            if entrant_rowspan <= 0:
-                current_entrant = ""
-                if cells:
-                    first_cell = cells[0]
-                    rowspan = int(first_cell.get("rowspan", 1))
-                    if rowspan > 1:
-                        current_entrant = first_cell.get_text(strip=True)
-                        entrant_rowspan = rowspan
-                        cells = cells[1:]  # Remove entrant cell
+            # Process rowspan columns
+            for col_idx in range(rowspan_columns):
+                if trackers[col_idx]['remaining'] > 0:
+                    # Reuse value from tracker
+                    row_data.append(trackers[col_idx]['value'])
+                    trackers[col_idx]['remaining'] -= 1
+                else:
+                    # Get new value from cell
+                    if cell_index < len(cells):
+                        cell = cells[cell_index]
+                        cell_index += 1
+                        value = remove_citations(cell.get_text(strip=True))
+                        # Get rowspan value (default 1 if missing/invalid)
+                        rowspan_attr = cell.get('rowspan', '1')
+                        try:
+                            rowspan_val = int(rowspan_attr)
+                        except ValueError:
+                            rowspan_val = 1
+                        # Update tracker
+                        trackers[col_idx] = {
+                            'value': value,
+                            'remaining': rowspan_val - 1
+                        }
+                        row_data.append(value)
+                    else:
+                        row_data.append('')
 
-            # Extract data from cells
-            no = cells[0].get_text(strip=True) if len(cells) > 0 else ""
-            driver = cells[1].get_text(strip=True) if len(cells) > 1 else ""
-            rounds = cells[2].get_text(strip=True) if len(cells) > 2 else ""
+            # Process remaining columns (no rowspan)
+            while len(row_data) < num_columns:
+                if cell_index < len(cells):
+                    cell = cells[cell_index]
+                    cell_index += 1
+                    row_data.append(remove_citations(cell.get_text(strip=True)))
+                else:
+                    row_data.append('')
 
-            row_data = [current_entrant, no, driver, rounds]
             writer.writerow(row_data)
-
-            # Update rowspan counter (decrement after processing the row)
-            entrant_rowspan = max(entrant_rowspan - 1, 0)
 
 
 def extract_race_report_links(soup):
@@ -597,10 +629,8 @@ def scrape():
             soup = BeautifulSoup(response.text, "html.parser")
 
             process_entries(soup, year, 3, "f3_euro")
-            process_championship(soup, "Teams'", year,
-                                 "teams_standings", 3, "f3_euro")
-            process_championship(soup, "Drivers'", year,
-                                 "drivers_standings", 3, "f3_euro")
+            process_championship(soup, "Teams'", year, "teams_standings", 3, "f3_euro")
+            process_championship(soup, "Drivers'", year, "drivers_standings", 3, "f3_euro")
 
         except Exception as e:
             print(f"Error processing F3 European {year}: {str(e)}")

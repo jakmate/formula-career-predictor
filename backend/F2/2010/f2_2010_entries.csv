@@ -1,34 +1,34 @@
 Team,No.,Driver name,Rounds
-ART Grand Prix,1,Jules Bianchi[4],All
-ART Grand Prix,2,Sam Bird[5],All
-Barwa Addax Team,3,Giedo van der Garde[6],All
-Barwa Addax Team,4,Sergio Pérez[7],All
-Super Nova Racing,5,Josef Král[8],"1–4, 10"
-Super Nova Racing,Luca Filippi[9],5–9,
-Super Nova Racing,6,Marcus Ericsson[8],All
-Racing Engineering,7,Dani Clos[10],All
-Racing Engineering,8,Christian Vietoris[10],1–9
-Racing Engineering,Ho-Pin Tung[11],10,
-iSport International,9,Oliver Turvey[12],All
-iSport International,10,Davide Valsecchi[13],All
-DAMS,11,Jérôme d'Ambrosio[14],"1–5, 7–10"
-DAMS,Romain Grosjean[15],6,
-DAMS,12,Ho-Pin Tung[14],1–7
-DAMS,Romain Grosjean[16],8–10,
-Rapax[17],14,Luiz Razia[18],All
-Rapax[17],15,Pastor Maldonado[18],All
-Arden International,16,Charles Pic[19],All
-Arden International,17,Rodolfo González[20],All
-Ocean Racing Technology,18,Max Chilton[21],All
-Ocean Racing Technology,19,Fabio Leimer[21],All
-Scuderia Coloni,20,Alberto Valerio[22],1–7
-Scuderia Coloni,Álvaro Parente[16],8–9,
-Scuderia Coloni,James Jakes[23],10,
-Scuderia Coloni,21,Vladimir Arabadzhiev[24],1–8
-Scuderia Coloni,Brendon Hartley[25],9–10,
-Trident Racing,24,Johnny Cecotto Jr.[26],1–8
-Trident Racing,Edoardo Piscopo[27],9,
-Trident Racing,Federico Leo[28],10,
-Trident Racing,25,Adrian Zaugg[29],All
-DPR,26,Michael Herck[20],All
-DPR,27,Giacomo Ricci[20],1–7
+ART Grand Prix,1,Jules Bianchi,All
+ART Grand Prix,2,Sam Bird,All
+Barwa Addax Team,3,Giedo van der Garde,All
+Barwa Addax Team,4,Sergio Pérez,All
+Super Nova Racing,5,Josef Král,"1–4, 10"
+Super Nova Racing,5,Luca Filippi,5–9
+Super Nova Racing,6,Marcus Ericsson,All
+Racing Engineering,7,Dani Clos,All
+Racing Engineering,8,Christian Vietoris,1–9
+Racing Engineering,8,Ho-Pin Tung,10
+iSport International,9,Oliver Turvey,All
+iSport International,10,Davide Valsecchi,All
+DAMS,11,Jérôme d'Ambrosio,"1–5, 7–10"
+DAMS,11,Romain Grosjean,6
+DAMS,12,Ho-Pin Tung,1–7
+DAMS,12,Romain Grosjean,8–10
+Rapax,14,Luiz Razia,All
+Rapax,15,Pastor Maldonado,All
+Arden International,16,Charles Pic,All
+Arden International,17,Rodolfo González,All
+Ocean Racing Technology,18,Max Chilton,All
+Ocean Racing Technology,19,Fabio Leimer,All
+Scuderia Coloni,20,Alberto Valerio,1–7
+Scuderia Coloni,20,Álvaro Parente,8–9
+Scuderia Coloni,20,James Jakes,10
+Scuderia Coloni,21,Vladimir Arabadzhiev,1–8
+Scuderia Coloni,21,Brendon Hartley,9–10
+Trident Racing,24,Johnny Cecotto Jr.,1–8
+Trident Racing,24,Edoardo Piscopo,9
+Trident Racing,24,Federico Leo,10
+Trident Racing,25,Adrian Zaugg,All
+DPR,26,Michael Herck,All
+DPR,27,Giacomo Ricci,1–7

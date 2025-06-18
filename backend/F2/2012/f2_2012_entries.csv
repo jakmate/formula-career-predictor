@@ -1,37 +1,36 @@
 Team,No.,Driver name,Rounds
-Barwa Addax Team[3],1,Johnny Cecotto Jr.[4][N 1],All
-Barwa Addax Team[3],2,Josef Král[5],"1, 4–10"
-Barwa Addax Team[3],Dani Clos[6],2–3,
-Barwa Addax Team[3],Jake Rosenzweig[7],11–12,
-DAMS[3],3,Davide Valsecchi[8],All
-DAMS[3],4,Felipe Nasr[9],All
-Racing Engineering[3],5,Fabio Leimer[10],All
-Racing Engineering[3],6,Nathanaël Berthon[11],All
-iSport International[3],7,Marcus Ericsson[12],All
-iSport International[3],8,Jolyon Palmer[13],All
-Lotus GP[14][a],9,James Calado[15],All
-Lotus GP[14][a],10,Esteban Gutiérrez[16],All
-Caterham Racing[17],11,Rodolfo González[18][N 1],All
-Caterham Racing[17],12,Giedo van der Garde[19],All
-Scuderia Coloni[3],14,Stefano Coletti[20],1–10
-Scuderia Coloni[3],Luca Filippi[21],11–12,
-Scuderia Coloni[3],15,Fabio Onidi[20],All
-Trident Racing[3],16,Stéphane Richelmi[22],All
-Trident Racing[3],17,Julián Leal[23],All
-Venezuela GP Lazarus[24][b],18,Fabrizio Crestani[25],1–7
-Venezuela GP Lazarus[24][b],Sergio Canamasas[26],8–12,
-Venezuela GP Lazarus[24][b],19,Giancarlo Serenelli[27][N 1],1–9
-Venezuela GP Lazarus[24][b],René Binder[28],10–12,
-Rapax[3],20,Ricardo Teixeira[29],"1–5, 7–12"
-Rapax[3],Tom Dillmann[29],6,
-Rapax[3],21,Tom Dillmann[29],"1–5, 8"
-Rapax[3],Daniël de Jong[30],"6–7, 9–10",
-Rapax[3],Stefano Coletti[31],11–12,
-Arden International[3],22,Simon Trummer[32],All
-Arden International[3],23,Luiz Razia[33],All
-Ocean Racing Technology[3],24,Jon Lancaster[34],1
-Ocean Racing Technology[3],Brendon Hartley[35],2–3,
-Ocean Racing Technology[3],Victor Guerin[36],4–12,
-Ocean Racing Technology[3],25,Nigel Melker[37],All
-Carlin[38],26,Max Chilton[38],All
-Carlin[38],27,Rio Haryanto[38],All
+Barwa Addax Team,1,Johnny Cecotto Jr.[N 1],All
+Barwa Addax Team,2,Josef Král,"1, 4–10"
+Barwa Addax Team,2,Dani Clos,2–3
+Barwa Addax Team,2,Jake Rosenzweig,11–12
+DAMS,3,Davide Valsecchi,All
+DAMS,4,Felipe Nasr,All
+Racing Engineering,5,Fabio Leimer,All
+Racing Engineering,6,Nathanaël Berthon,All
+iSport International,7,Marcus Ericsson,All
+iSport International,8,Jolyon Palmer,All
+Lotus GP,9,James Calado,All
+Lotus GP,10,Esteban Gutiérrez,All
+Caterham Racing,11,Rodolfo González[N 1],All
+Caterham Racing,12,Giedo van der Garde,All
+Scuderia Coloni,14,Stefano Coletti,1–10
+Scuderia Coloni,14,Luca Filippi,11–12
+Scuderia Coloni,15,Fabio Onidi,All
+Trident Racing,16,Stéphane Richelmi,All
+Trident Racing,17,Julián Leal,All
+Venezuela GP Lazarus,18,Fabrizio Crestani,1–7
+Venezuela GP Lazarus,18,Sergio Canamasas,8–12
+Venezuela GP Lazarus,19,Giancarlo Serenelli[N 1],1–9
+Venezuela GP Lazarus,19,René Binder,10–12
+Rapax,20,Ricardo Teixeira,"1–5, 7–12"
+Rapax,20,Tom Dillmann,6
+Rapax,21,Tom Dillmann,"1–5, 8"
+Rapax,21,Daniël de Jong,"6–7, 9–10"
+Rapax,21,Stefano Coletti,11–12
+Arden International,22,Simon Trummer,All
+Arden International,23,Luiz Razia,All
+Ocean Racing Technology,24,Jon Lancaster,1
+Ocean Racing Technology,24,Brendon Hartley,2–3
+Ocean Racing Technology,24,Victor Guerin,4–12
+Ocean Racing Technology,25,Nigel Melker,All
+Carlin,26,Max Chilton,All

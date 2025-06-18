@@ -1,33 +1,32 @@
 Team,No.,Driver name,Rounds
-ART Grand Prix[6][10],1,Conor Daly[11],All
-ART Grand Prix[6][10],2,Facu Regalia[12],All
-ART Grand Prix[6][10],3,Jack Harvey[13],All
-MWArden[6][a],4,Carlos Sainz Jr.[14],All
-MWArden[6][a],5,Robert Vișoiu[14],All
-MWArden[6][a],6,Daniil Kvyat[14],All
-Carlin[6],7,Luís Sá Silva[15][b],All
-Carlin[6],8,Nick Yelloly[16],All
-Carlin[6],9,Eric Lichtenstein[17],1–5
-Carlin[6],Alexander Sims[18],6–8,
-Jenzer Motorsport[6],10,Samin Gómez[19][20],All
-Jenzer Motorsport[6],11,Patric Niederhauser[21][22],All
-Jenzer Motorsport[6],12,Alex Fontana[23],All
-MarussiaManor Racing[6],14,Tio Ellinas[24],All
-MarussiaManor Racing[6],15,Ryan Cullen[25][c],All
-MarussiaManor Racing[6],16,Dino Zamparelli[26],All
-Status Grand Prix[27][d],17,Jimmy Eriksson[28],All
-Status Grand Prix[27][d],18,Adderly Fong[29],"1–3, 5–8"
-Status Grand Prix[27][d],Alexander Sims[30],4,
-Status Grand Prix[27][d],19,Josh Webster[31],All
-Bamboo Engineering[32],20,Lewis Williamson[33],1–7
-Bamboo Engineering[32],21,Melville McKee[34],1–7
-Bamboo Engineering[32],Alice Powell[35],8,
-Bamboo Engineering[32],22,Carmen Jordá[36],All
-Trident[6],23,Giovanni Venturini[37],All
-Trident[6],24,David Fumanelli[38],1–7
-Trident[6],Robert Cregan[39],8,
-Trident[6],25,Emanuele Zonzini[40],All
-Koiranen GP[6][41],26,Patrick Kujala[42],All
-Koiranen GP[6][41],27,Aaro Vainio[42],1–7
-Koiranen GP[6][41],Dean Stoneman[43],8,
-Koiranen GP[6][41],28,Kevin Korjus[44],All
+ART Grand Prix,1,Conor Daly,All
+ART Grand Prix,2,Facu Regalia,All
+ART Grand Prix,3,Jack Harvey,All
+MWArden,4,Carlos Sainz Jr.,All
+MWArden,5,Robert Vișoiu,All
+MWArden,6,Daniil Kvyat,All
+Carlin,7,Luís Sá Silva,All
+Carlin,8,Nick Yelloly,All
+Carlin,9,Eric Lichtenstein,1–5
+Carlin,9,Alexander Sims,6–8
+Jenzer Motorsport,10,Samin Gómez,All
+Jenzer Motorsport,11,Patric Niederhauser,All
+Jenzer Motorsport,12,Alex Fontana,All
+MarussiaManor Racing,14,Tio Ellinas,All
+MarussiaManor Racing,15,Ryan Cullen,All
+MarussiaManor Racing,16,Dino Zamparelli,All
+Status Grand Prix,17,Jimmy Eriksson,All
+Status Grand Prix,18,Adderly Fong,"1–3, 5–8"
+Status Grand Prix,18,Alexander Sims,4
+Status Grand Prix,19,Josh Webster,All
+Bamboo Engineering,20,Lewis Williamson,1–7
+Bamboo Engineering,21,Melville McKee,1–7
+Bamboo Engineering,21,Alice Powell,8
+Bamboo Engineering,22,Carmen Jordá,All
+Trident,23,Giovanni Venturini,All
+Trident,24,David Fumanelli,1–7
+Trident,24,Robert Cregan,8
+Trident,25,Emanuele Zonzini,All
+Koiranen GP,26,Patrick Kujala,All
+Koiranen GP,27,Aaro Vainio,1–7
+Koiranen GP,27,Dean Stoneman,8

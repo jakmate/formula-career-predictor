@@ -1,33 +1,32 @@
 Team,No.,Driver name,Rounds
-Lotus GP[4],1,Daniel Abt[5],All
-Lotus GP[4],2,Conor Daly[6],All
-Lotus GP[4],3,Aaro Vainio[7],All
-MWArden[8][a],4,Mitch Evans[9],All
-MWArden[8][a],5,David Fumanelli[10],All
-MWArden[8][a],6,Matias Laine[11],All
-MarussiaManor Racing[8],7,Dmitry Suranovich[12],All
-MarussiaManor Racing[8],8,Fabiano Machado[13],All
-MarussiaManor Racing[8],9,Tio Ellinas[14],All
-Status Grand Prix[8][b],14,Marlon Stöckinger[15],All
-Status Grand Prix[8][b],15,Kotaro Sakurai[16][c],"1–2, 4"
-Status Grand Prix[8][b],Lewis Williamson[17],5–8,
-Status Grand Prix[8][b],16,Alice Powell[18],All
-Ocean Racing Technology[19],17,Carmen Jordá[20],All
-Ocean Racing Technology[19],18,Kevin Ceccon[21],All
-Ocean Racing Technology[19],19,Robert Cregan[20],All
-Jenzer Motorsport[8],20,Robert Visoiu[22],All
-Jenzer Motorsport[8],21,Patric Niederhauser[23],All
-Jenzer Motorsport[8],22,Jakub Klášterka[24],1–2
-Jenzer Motorsport[8],Facu Regalia[25],4,
-Jenzer Motorsport[8],Alex Fontana[26],6–7,
-Trident Racing[27],23,Vicky Piria[28],All
-Trident Racing[27],24,Antonio Spavone[29],1–4
-Trident Racing[27],25,Giovanni Venturini[30],4–8
-Carlin[8],26,Alex Brundle[31],All
-Carlin[8],27,António Félix da Costa[32],All
-Carlin[8],28,William Buller[33],All
-AtechCRS GP[8],29,Tamás Pál Kiss[34],All
-AtechCRS GP[8],30,John Wartique[35],"1–3, 7–8"
-AtechCRS GP[8],Fabio Gamberini[36],4,
-AtechCRS GP[8],Facu Regalia[37],6,
-AtechCRS GP[8],31,Ethan Ringel[38],All
+Lotus GP,1,Daniel Abt,All
+Lotus GP,2,Conor Daly,All
+Lotus GP,3,Aaro Vainio,All
+MWArden,4,Mitch Evans,All
+MWArden,5,David Fumanelli,All
+MWArden,6,Matias Laine,All
+MarussiaManor Racing,7,Dmitry Suranovich,All
+MarussiaManor Racing,8,Fabiano Machado,All
+MarussiaManor Racing,9,Tio Ellinas,All
+Status Grand Prix,14,Marlon Stöckinger,All
+Status Grand Prix,15,Kotaro Sakurai,"1–2, 4"
+Status Grand Prix,15,Lewis Williamson,5–8
+Status Grand Prix,16,Alice Powell,All
+Ocean Racing Technology,17,Carmen Jordá,All
+Ocean Racing Technology,18,Kevin Ceccon,All
+Ocean Racing Technology,19,Robert Cregan,All
+Jenzer Motorsport,20,Robert Visoiu,All
+Jenzer Motorsport,21,Patric Niederhauser,All
+Jenzer Motorsport,22,Jakub Klášterka,1–2
+Jenzer Motorsport,22,Facu Regalia,4
+Jenzer Motorsport,22,Alex Fontana,6–7
+Trident Racing,23,Vicky Piria,All
+Trident Racing,24,Antonio Spavone,1–4
+Trident Racing,25,Giovanni Venturini,4–8
+Carlin,26,Alex Brundle,All
+Carlin,27,António Félix da Costa,All
+Carlin,28,William Buller,All
+AtechCRS GP,29,Tamás Pál Kiss,All
+AtechCRS GP,30,John Wartique,"1–3, 7–8"
+AtechCRS GP,30,Fabio Gamberini,4
+AtechCRS GP,30,Facu Regalia,6

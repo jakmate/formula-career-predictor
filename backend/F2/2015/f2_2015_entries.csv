@@ -1,45 +1,45 @@
 Team,No.,Drivers,Rounds
-DAMS[3],1,Pierre Gasly[4],All
-DAMS[3],2,Alex Lynn[4],All
-Carlin[3],3,Julián Leal[5],1–8
-Carlin[3],Dean Stoneman[6],9–11,
-Carlin[3],4,Marco Sørensen[7],1–4
-Carlin[3],Johnny Cecotto Jr.[8][a],5,
-Carlin[3],Sean Gelael[9],"6–7, 9–11",
-Carlin[3],Jann Mardenborough[10],8,
-ART Grand Prix[3],5,Stoffel Vandoorne[11],All
-ART Grand Prix[3],6,Nobuharu Matsushita[12],All
-Racing Engineering[3],7,Jordan King[13],All
-Racing Engineering[3],8,Alexander Rossi[14],All
-Russian Time[3],9,Mitch Evans[15],All
-Russian Time[3],10,Artem Markelov[15],All
-Trident[3],11,Raffaele Marciello[16],All
-Trident[3],12,René Binder[17],1–6
-Trident[3],Gustav Malja[18],7,
-Trident[3],Johnny Cecotto Jr.[19][a],8–9,
-Trident[3],Daniël de Jong[20],10–11,
-Campos Racing[3],14,Arthur Pic[21],All
-Campos Racing[3],15,Rio Haryanto[22],All
-MP Motorsport[3],16,Sergio Canamasas[23],1–3
-MP Motorsport[3],Oliver Rowland[24],"5, 7",
-MP Motorsport[3],Nicholas Latifi[25],"6, 9–11",
-MP Motorsport[3],Meindert van Buuren[19],8,
-MP Motorsport[3],17,Daniël de Jong[26],1–7
-MP Motorsport[3],René Binder[19],8–11,
-Rapax[3],18,Sergey Sirotkin[27],All
-Rapax[3],19,Robert Vișoiu[28],1–9
-Rapax[3],Gustav Malja[29],10–11,
-Arden International[3],20,André Negrão[30],All
-Arden International[3],21,Norman Nato[31],All
-Status Grand Prix[32][b],22,Marlon Stöckinger[33],All
-Status Grand Prix[32][b],23,Richie Stanaway[34],1–9
-Status Grand Prix[32][b],Oliver Rowland[35],10–11,
-Hilmer Motorsport[3],24,Nick Yelloly[36],2–7
-Hilmer Motorsport[3],Simon Trummer[19][37],8,
-Hilmer Motorsport[3],25,Johnny Cecotto Jr.[36][a],2–3
-Hilmer Motorsport[3],Simon Trummer[19][37],4,
-Hilmer Motorsport[3],Jon Lancaster[24],5,
-Hilmer Motorsport[3],Sergio Canamasas[38],6,
-Lazarus(1–3)Daiko Team Lazarus[c](4–11)[39],26,Nathanaël Berthon[40],"1–7, 9–11"
-Lazarus(1–3)Daiko Team Lazarus[c](4–11)[39],Patric Niederhauser[41],8,
-Lazarus(1–3)Daiko Team Lazarus[c](4–11)[39],27,Zoël Amberg[42],"1–4, 6"
+DAMS,1,Pierre Gasly,All
+DAMS,2,Alex Lynn,All
+Carlin,3,Julián Leal,1–8
+Carlin,3,Dean Stoneman,9–11
+Carlin,4,Marco Sørensen,1–4
+Carlin,4,Johnny Cecotto Jr.,5
+Carlin,4,Sean Gelael,"6–7, 9–11"
+Carlin,4,Jann Mardenborough,8
+ART Grand Prix,5,Stoffel Vandoorne,All
+ART Grand Prix,6,Nobuharu Matsushita,All
+Racing Engineering,7,Jordan King,All
+Racing Engineering,8,Alexander Rossi,All
+Russian Time,9,Mitch Evans,All
+Russian Time,10,Artem Markelov,All
+Trident,11,Raffaele Marciello,All
+Trident,12,René Binder,1–6
+Trident,12,Gustav Malja,7
+Trident,12,Johnny Cecotto Jr.,8–9
+Trident,12,Daniël de Jong,10–11
+Campos Racing,14,Arthur Pic,All
+Campos Racing,15,Rio Haryanto,All
+MP Motorsport,16,Sergio Canamasas,1–3
+MP Motorsport,16,Oliver Rowland,"5, 7"
+MP Motorsport,16,Nicholas Latifi,"6, 9–11"
+MP Motorsport,16,Meindert van Buuren,8
+MP Motorsport,17,Daniël de Jong,1–7
+MP Motorsport,17,René Binder,8–11
+Rapax,18,Sergey Sirotkin,All
+Rapax,19,Robert Vișoiu,1–9
+Rapax,19,Gustav Malja,10–11
+Arden International,20,André Negrão,All
+Arden International,21,Norman Nato,All
+Status Grand Prix,22,Marlon Stöckinger,All
+Status Grand Prix,23,Richie Stanaway,1–9
+Status Grand Prix,23,Oliver Rowland,10–11
+Hilmer Motorsport,24,Nick Yelloly,2–7
+Hilmer Motorsport,24,Simon Trummer,8
+Hilmer Motorsport,25,Johnny Cecotto Jr.,2–3
+Hilmer Motorsport,25,Simon Trummer,4
+Hilmer Motorsport,25,Jon Lancaster,5
+Hilmer Motorsport,25,Sergio Canamasas,6
+Lazarus(1–3)Daiko Team Lazarus(4–11),26,Nathanaël Berthon,"1–7, 9–11"
+Lazarus(1–3)Daiko Team Lazarus(4–11),26,Patric Niederhauser,8
+Lazarus(1–3)Daiko Team Lazarus(4–11),27,Zoël Amberg,"1–4, 6"

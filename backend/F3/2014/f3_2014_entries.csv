@@ -1,43 +1,42 @@
 Team,No.,Driver name,Rounds
-ART Grand Prix[4],1,Alex Fontana[5],All
-ART Grand Prix[4],2,Marvin Kirchhöfer[6],All
-ART Grand Prix[4],3,Dino Zamparelli[7],All
-Arden International[4][8],4,Robert Vișoiu[9],All
-Arden International[4][8],5,Patric Niederhauser[10],All
-Arden International[4][8],6,Jann Mardenborough[11],All
-Koiranen GP[4],7,Carmen Jordá[12],1–7
-Koiranen GP[4],Dean Stoneman[13][14],8–9,
-Koiranen GP[4],8,Jimmy Eriksson[15],All
-Koiranen GP[4],9,Santiago Urrutia[16],All
-Carlin[4],10,Alex Lynn[17],All
-Carlin[4],11,Emil Bernstorff[18],All
-Carlin[4],12,Luís Sá Silva[19][a],All
-Marussia Manor Racing[4],14,Patrick Kujala[20],1–7
-Marussia Manor Racing[4],15,Ryan Cullen[20][b],1–7
-Marussia Manor Racing[4],16,Dean Stoneman[20],1–7
-Hilmer Motorsport[21],17,Ivan Taranov[22][23],1
-Hilmer Motorsport[21],Nikolay Martsenko[24],"2, 8",
-Hilmer Motorsport[21],Sebastian Balthasar[25],3–7,
-Hilmer Motorsport[21],18,Nelson Mason[26],All
-Hilmer Motorsport[21],19,Beitske Visser[26],1
-Hilmer Motorsport[21],Riccardo Agostini[27],2–9,
-Jenzer Motorsport[4],20,Pål Varhaug[28],All
-Jenzer Motorsport[4],21,Mathéo Tuscher[28],All
-Jenzer Motorsport[4],22,Adderly Fong[28],1–4
-Jenzer Motorsport[4],Christopher Höher[29],5,
-Jenzer Motorsport[4],Kevin Ceccon[30],6–9,
-Trident[4],23,Victor Carbone[31],1–4
-Trident[4],Konstantin Tereshchenko[32],6,
-Trident[4],Luca Ghiotto[32],7,
-Trident[4],Kang Ling[33],9,
-Trident[4],24,Roman de Beer[34],1–5
-Trident[4],John Bryant-Meisner[32],6–7,
-Trident[4],Patrick Kujala[13][35],8,
-Trident[4],Ryan Cullen[33][b],9,
-Trident[4],25,Denis Nagulin[36],1
-Trident[4],Mitchell Gilbert[25],"3–5, 7–8",
-Trident[4],Luca Ghiotto[32],6,
-Trident[4],Patrick Kujala[13][35],9,
-Status Grand Prix[4],26,Nick Yelloly[37],All
-Status Grand Prix[4],27,Richie Stanaway[38],All
-Status Grand Prix[4],28,Alfonso Celis Jr.[39],All
+ART Grand Prix,1,Alex Fontana,All
+ART Grand Prix,2,Marvin Kirchhöfer,All
+ART Grand Prix,3,Dino Zamparelli,All
+Arden International,4,Robert Vișoiu,All
+Arden International,5,Patric Niederhauser,All
+Arden International,6,Jann Mardenborough,All
+Koiranen GP,7,Carmen Jordá,1–7
+Koiranen GP,7,Dean Stoneman,8–9
+Koiranen GP,8,Jimmy Eriksson,All
+Koiranen GP,9,Santiago Urrutia,All
+Carlin,10,Alex Lynn,All
+Carlin,11,Emil Bernstorff,All
+Carlin,12,Luís Sá Silva,All
+Marussia Manor Racing,14,Patrick Kujala,1–7
+Marussia Manor Racing,15,Ryan Cullen,1–7
+Marussia Manor Racing,16,Dean Stoneman,1–7
+Hilmer Motorsport,17,Ivan Taranov,1
+Hilmer Motorsport,17,Nikolay Martsenko,"2, 8"
+Hilmer Motorsport,17,Sebastian Balthasar,3–7
+Hilmer Motorsport,18,Nelson Mason,All
+Hilmer Motorsport,19,Beitske Visser,1
+Hilmer Motorsport,19,Riccardo Agostini,2–9
+Jenzer Motorsport,20,Pål Varhaug,All
+Jenzer Motorsport,21,Mathéo Tuscher,All
+Jenzer Motorsport,22,Adderly Fong,1–4
+Jenzer Motorsport,22,Christopher Höher,5
+Jenzer Motorsport,22,Kevin Ceccon,6–9
+Trident,23,Victor Carbone,1–4
+Trident,23,Konstantin Tereshchenko,6
+Trident,23,Luca Ghiotto,7
+Trident,23,Kang Ling,9
+Trident,24,Roman de Beer,1–5
+Trident,24,John Bryant-Meisner,6–7
+Trident,24,Patrick Kujala,8
+Trident,24,Ryan Cullen,9
+Trident,25,Denis Nagulin,1
+Trident,25,Mitchell Gilbert,"3–5, 7–8"
+Trident,25,Luca Ghiotto,6
+Trident,25,Patrick Kujala,9
+Status Grand Prix,26,Nick Yelloly,All
+Status Grand Prix,27,Richie Stanaway,All

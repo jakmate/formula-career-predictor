@@ -1,28 +1,28 @@
 Team,No.,Driver name,Rounds
-ART Grand Prix,1,Callum Ilott[4],All
-ART Grand Prix,2,Anthoine Hubert[5],All
-ART Grand Prix,3,Nikita Mazepin[6],All
-ART Grand Prix,4,Jake Hughes[7],All
-Trident,5,Pedro Piquet[8],All
-Trident,6,Giuliano Alesi[9],All
-Trident,7,Ryan Tveter[10],All
-Trident,8,Alessio Lorandi[11],1–4
-Trident,David Beckmann[12],5–9,
-Jenzer Motorsport,9,Tatiana Calderón[13],All
-Jenzer Motorsport,10,Juan Manuel Correa[14],All
-Jenzer Motorsport,11,David Beckmann[15],1–4
-Jenzer Motorsport,Jannes Fittje[16],5–9,
-Arden International,14,Gabriel Aubry[17],All
-Arden International,15,Julien Falchero[18],1–7
-Arden International,Sacha Fenestraz[19],8–9,
-Arden International,16,Joey Mawson[20],All
-Campos Racing,18,Leonardo Pulcini[21],All
-Campos Racing,19,Simo Laaksonen[22],All
-Campos Racing,20,Diego Menchaca[23],All
-MP Motorsport,22,Dorian Boccolacci[24],1–5
-MP Motorsport,Richard Verschoor[25],6–9,
-MP Motorsport,23,Will Palmer[26],1
-MP Motorsport,Christian Lundgaard[27],2,
-MP Motorsport,Devlin DeFrancesco[28],3–9,
-MP Motorsport,24,Niko Kari[29],1–7
-MP Motorsport,Jehan Daruvala[30],9,
+ART Grand Prix,1,Callum Ilott,All
+ART Grand Prix,2,Anthoine Hubert,All
+ART Grand Prix,3,Nikita Mazepin,All
+ART Grand Prix,4,Jake Hughes,All
+Trident,5,Pedro Piquet,All
+Trident,6,Giuliano Alesi,All
+Trident,7,Ryan Tveter,All
+Trident,8,Alessio Lorandi,1–4
+Trident,8,David Beckmann,5–9
+Jenzer Motorsport,9,Tatiana Calderón,All
+Jenzer Motorsport,10,Juan Manuel Correa,All
+Jenzer Motorsport,11,David Beckmann,1–4
+Jenzer Motorsport,11,Jannes Fittje,5–9
+Arden International,14,Gabriel Aubry,All
+Arden International,15,Julien Falchero,1–7
+Arden International,15,Sacha Fenestraz,8–9
+Arden International,16,Joey Mawson,All
+Campos Racing,18,Leonardo Pulcini,All
+Campos Racing,19,Simo Laaksonen,All
+Campos Racing,20,Diego Menchaca,All
+MP Motorsport,22,Dorian Boccolacci,1–5
+MP Motorsport,22,Richard Verschoor,6–9
+MP Motorsport,23,Will Palmer,1
+MP Motorsport,23,Christian Lundgaard,2
+MP Motorsport,23,Devlin DeFrancesco,3–9
+MP Motorsport,24,Niko Kari,1–7
+MP Motorsport,24,Jehan Daruvala,9

@@ -1,12 +1,12 @@
 import glob
-import os
 import json
-import requests
-from bs4 import BeautifulSoup
+import os
 import pandas as pd
-from datetime import datetime
-import time
 import re
+import requests
+import time
+from bs4 import BeautifulSoup
+from datetime import datetime
 
 
 class DriverProfileScraper:

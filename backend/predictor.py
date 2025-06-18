@@ -112,6 +112,14 @@ def merge_entries_data(df, entries_file):
 
     entries_df = pd.read_csv(entries_file)
 
+    # Define columns to drop from F3 European entries
+    columns_to_drop = ['Chassis', 'Engine', 'Status']
+
+    # Remove special columns if they exist
+    for col in columns_to_drop:
+        if col in entries_df.columns:
+            entries_df = entries_df.drop(columns=col)
+
     # Apply column mapping
     for old_name, new_name in COLUMN_MAPPING.items():
         if old_name in entries_df.columns:
@@ -206,6 +214,61 @@ def load_team_standings(series='F3'):
 
     if all_team_data:
         return pd.concat(all_team_data, ignore_index=True)
+    return pd.DataFrame()
+
+
+def load_qualifying_data(series='F3'):
+    """Load qualifying data for a racing series across years."""
+    all_qualifying_data = []
+    config = SERIES_CONFIG[series]
+
+    for series_pattern in config['patterns']:
+        # Skip F3_European as it doesn't have qualifying data
+        if series_pattern == 'F3_European':
+            continue
+
+        series_dirs = glob.glob(f"{series_pattern}/*")
+
+        for year_dir in series_dirs:
+            year = os.path.basename(year_dir)
+            try:
+                year_int = int(year)
+                # Skip 2011 as it doesn't have qualifying data
+                if year_int == 2011:
+                    continue
+
+                qualifying_dir = os.path.join(year_dir, 'qualifying')
+                if not os.path.exists(qualifying_dir):
+                    continue
+
+                # Load all qualifying round files
+                qualifying_files = glob.glob(os.path.join(
+                    qualifying_dir,
+                    f"{series.lower()}_{year}_qualifying_round_*.csv")
+                )
+
+                year_qualifying_data = []
+                for quali_file in qualifying_files:
+                    try:
+                        df = pd.read_csv(quali_file)
+                        df['year'] = year_int
+                        df['series'] = series
+                        df['round'] = os.path.basename(
+                            quali_file).split('_')[-1].replace('.csv', '')
+                        year_qualifying_data.append(df)
+                    except Exception as e:
+                        print(f"Error loading quali file {quali_file}: {e}")
+                        continue
+
+                if year_qualifying_data:
+                    all_qualifying_data.extend(year_qualifying_data)
+
+            except Exception as e:
+                print(f"Error processing quali data for {year_dir}: {e}")
+                continue
+
+    if all_qualifying_data:
+        return pd.concat(all_qualifying_data, ignore_index=True)
     return pd.DataFrame()
 
 
@@ -559,6 +622,96 @@ def add_driver_features(features_df, f3_df):
     return features_df
 
 
+def calculate_qualifying_features(df, qualifying_df):
+    """Calculate qualifying-based features for drivers."""
+    if qualifying_df.empty:
+        df['avg_quali_pos'] = np.nan
+        df['std_quali_pos'] = np.nan
+        return df
+
+    # Apply column mapping to qualifying data
+    for old_name, new_name in COLUMN_MAPPING.items():
+        if old_name in qualifying_df.columns:
+            qualifying_df = qualifying_df.rename(columns={old_name: new_name})
+
+    # Clean driver names
+    if 'Driver' in qualifying_df.columns:
+        qualifying_df['Driver'] = qualifying_df['Driver'].astype(str).str.strip()
+
+    # Calculate qualifying statistics for each driver-year combination
+    qualifying_stats = []
+
+    for (driver, year), driver_year_data in qualifying_df.groupby(['Driver', 'year']):
+        qualifying_positions = []
+
+        # Extract qualifying positions from all rounds
+        for idx, row in driver_year_data.iterrows():
+            # Define priority order for qualifying position columns
+            position_columns = [
+                'Grid',     # Highest priority
+                'GridFR',  # Secondary priority
+                'R2',       # Tertiary priority
+                'Pos',      # Fallback options
+                'Position'
+            ]
+            position_value = None
+
+            # Check columns in priority order
+            for col in position_columns:
+                if col in row and pd.notna(row[col]):
+                    raw_value = row[col]
+
+                    # Handle numeric values directly
+                    if isinstance(raw_value, (int, float)):
+                        position_value = int(raw_value)
+                        break
+
+                    # Convert to string and clean
+                    str_value = str(raw_value).strip()
+
+                    # Skip non-participation codes
+                    if str_value in NOT_PARTICIPATED_CODES:
+                        position_value = None
+                        break
+
+                    # Extract numeric position using regex (max 2 digits)
+                    match = re.search(r'\b\d{1,2}\b', str_value)
+                    if match:
+                        position_value = int(match.group())
+                        break
+
+            if position_value is not None:
+                qualifying_positions.append(position_value)
+
+        # Calculate statistics only if we have valid positions
+        if qualifying_positions:
+            avg_quali = np.mean(qualifying_positions)
+            std_quali = np.std(qualifying_positions) if len(qualifying_positions) > 1 else 0
+        else:
+            avg_quali = np.nan
+            std_quali = np.nan
+
+        qualifying_stats.append({
+            'Driver': driver,
+            'year': year,
+            'avg_quali_pos': avg_quali,
+            'std_quali_pos': std_quali
+        })
+
+    # Convert to DataFrame and merge with main data
+    quali_stats_df = pd.DataFrame(qualifying_stats)
+
+    if not quali_stats_df.empty:
+        df = df.merge(quali_stats_df[['Driver', 'year', 'avg_quali_pos', 'std_quali_pos']],
+                      on=['Driver', 'year'],
+                      how='left')
+    else:
+        df['avg_quali_pos'] = np.nan
+        df['std_quali_pos'] = np.nan
+
+    return df
+
+
 def engineer_features(df):
     """Create features for ML models"""
     if df.empty:
@@ -584,6 +737,8 @@ def engineer_features(df):
     race_cols_cache = {}
     wins, podiums, points_finishes, dnfs, races_completed = [], [], [], [], []
     participation_rates, field_sizes = [], []
+    avg_finish_positions = []
+    std_finish_positions = []
 
     for _, row in df.iterrows():
         # Create cache key for this year/series combination
@@ -614,6 +769,8 @@ def engineer_features(df):
         field_size = len(year_series_data)
         field_sizes.append(field_size)
 
+        finish_positions = []
+
         for col in race_cols:
             if col not in row or pd.isna(row[col]):
                 continue
@@ -634,6 +791,7 @@ def engineer_features(df):
                 pos = int(
                     result.split()[0].replace('†', '').replace(
                         'F', '').replace('P', ''))
+                finish_positions.append(pos)
 
                 if pos == 1:
                     driver_wins += 1
@@ -646,6 +804,16 @@ def engineer_features(df):
                     driver_points += 1
             except BaseException:
                 continue
+
+        if finish_positions:
+            avg_position = np.mean(finish_positions)
+            std_position = np.std(finish_positions)
+        else:
+            avg_position = np.nan
+            std_position = np.nan
+
+        avg_finish_positions.append(avg_position)
+        std_finish_positions.append(std_position)
 
         if total_scheduled_races > 0:
             participation_rate = driver_races / total_scheduled_races
@@ -666,9 +834,14 @@ def engineer_features(df):
     features_df['races_completed'] = races_completed
     features_df['participation_rate'] = participation_rates
     features_df['field_size'] = field_sizes
+    features_df['avg_finish_pos'] = avg_finish_positions
+    features_df['std_finish_pos'] = std_finish_positions
 
     features_df['avg_pos_vs_teammates'] = df.get('avg_pos_vs_teammates', 0)
     features_df['teammate_battles'] = df.get('teammate_battles', 0)
+
+    features_df['avg_quali_pos'] = df.get('avg_quali_pos', np.nan)
+    features_df['std_quali_pos'] = df.get('std_quali_pos', np.nan)
 
     features_df = add_driver_features(features_df, f3_df)
 
@@ -749,6 +922,7 @@ def train_models(df):
         'years_in_f3', 'age', 'has_academy', 'avg_pos_vs_teammates', 'teammate_battles',
         'participation_rate', 'is_f3_european', 'team_pos', 'team_points',
         'points_vs_team_strength', 'pos_vs_team_strength',
+        'avg_finish_pos', 'std_finish_pos', 'avg_quali_pos', 'std_quali_pos'
     ]
 
     X = df_clean[feature_cols].fillna(0)
@@ -1009,6 +1183,10 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                     'Driver': current_df['driver'],
                     'Nat.': current_df['nationality'],
                     'Pos': current_df['final_pos'],
+                    'Avg Pos': current_df['avg_finish_pos'],
+                    'Std Pos': current_df['std_finish_pos'],
+                    'Avg Quali': current_df['avg_quali_pos'],
+                    'Std Quali': current_df['std_quali_pos'],
                     'Points': current_df['points'],
                     'Win %': current_df['win_rate'],
                     'Podium %': current_df['podium_rate'],
@@ -1050,12 +1228,18 @@ f2_df = load_and_combine_data('F2')
 print("Loading F3 team championship data...")
 f3_team_df = load_team_standings('F3')
 
+print("Loading F3 qualifying data...")
+f3_qualifying_df = load_qualifying_data('F3')
+
 if f3_df.empty or f2_df.empty:
     print("No F2/F3 data found. Check file paths.")
     exit()
 
 print("Enhancing F3 data with team championship metrics...")
 f3_df = enhance_with_team_data(f3_df, f3_team_df)
+
+print("Adding qualifying features...")
+f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
 
 print("Creating target variable based on F2 participation...")
 f3_df = create_target_variable(f3_df, f2_df)

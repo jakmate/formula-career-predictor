@@ -1,29 +1,28 @@
 Team,No.,Driver name,Rounds
-ART Grand Prix[5],1,Charles Leclerc[6],All
-ART Grand Prix[5],2,Nirei Fukuzumi[7],All
-ART Grand Prix[5],3,Alexander Albon[8],All
-ART Grand Prix[5],4,Nyck de Vries[9],All
-Trident[5],5,Antonio Fuoco[10],All
-Trident[5],6,Artur Janosz[10],All
-Trident[5],7,Giuliano Alesi[10],All
-Trident[5],8,Sandy Stuvik[10],All
-Arden International[5],9,Jake Dennis[11],All
-Arden International[5],10,Tatiana Calderón[12],All
-Arden International[5],11,Jack Aitken[13],All
-Koiranen GP[5],14,Matt Parry[14],All
-Koiranen GP[5],15,Mahaveer Raghunathan[15],1
-Koiranen GP[5],16,Matevos Isaakyan[16],All
-Koiranen GP[5],17,Ralph Boschung[17],"1–5, 7"
-Koiranen GP[5],Niko Kari[18],6,
-Jenzer Motorsport[5],18,Akash Nandy[19],All
-Jenzer Motorsport[5],19,Richard Gonda[20],"1–2, 4"
-Jenzer Motorsport[5],Óscar Tunjo[21],6,
-Jenzer Motorsport[5],Alessio Lorandi[22],8–9,
-Jenzer Motorsport[5],20,Óscar Tunjo[21],1–2
-Jenzer Motorsport[5],Arjun Maini[23],3–9,
-Campos Racing[5],22,Álex Palou[24],All
-Campos Racing[5],23,Steijn Schothorst[25],All
-Campos Racing[5],24,Konstantin Tereshchenko[25],All
-DAMS[5],26,Santino Ferrucci[26],All
-DAMS[5],27,Jake Hughes[26],All
-DAMS[5],28,Kevin Jörg[26],All
+ART Grand Prix,1,Charles Leclerc,All
+ART Grand Prix,2,Nirei Fukuzumi,All
+ART Grand Prix,3,Alexander Albon,All
+ART Grand Prix,4,Nyck de Vries,All
+Trident,5,Antonio Fuoco,All
+Trident,6,Artur Janosz,All
+Trident,7,Giuliano Alesi,All
+Trident,8,Sandy Stuvik,All
+Arden International,9,Jake Dennis,All
+Arden International,10,Tatiana Calderón,All
+Arden International,11,Jack Aitken,All
+Koiranen GP,14,Matt Parry,All
+Koiranen GP,15,Mahaveer Raghunathan,1
+Koiranen GP,16,Matevos Isaakyan,All
+Koiranen GP,17,Ralph Boschung,"1–5, 7"
+Koiranen GP,17,Niko Kari,6
+Jenzer Motorsport,18,Akash Nandy,All
+Jenzer Motorsport,19,Richard Gonda,"1–2, 4"
+Jenzer Motorsport,19,Óscar Tunjo,6
+Jenzer Motorsport,19,Alessio Lorandi,8–9
+Jenzer Motorsport,20,Óscar Tunjo,1–2
+Jenzer Motorsport,20,Arjun Maini,3–9
+Campos Racing,22,Álex Palou,All
+Campos Racing,23,Steijn Schothorst,All
+Campos Racing,24,Konstantin Tereshchenko,All
+DAMS,26,Santino Ferrucci,All
+DAMS,27,Jake Hughes,All

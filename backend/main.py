@@ -13,11 +13,13 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 from scraper import scrape
 from predictor import (
-    enhance_with_team_data,
     load_and_combine_data,
+    load_team_standings,
+    load_qualifying_data,
+    enhance_with_team_data,
+    calculate_qualifying_features,
     create_target_variable,
     engineer_features,
-    load_team_standings,
     train_models,
 )
 
@@ -30,6 +32,10 @@ class PredictionResponse(BaseModel):
     driver: str
     nationality: Optional[str] = None
     position: int
+    avg_finish_pos: float
+    std_finish_pos: float
+    avg_quali_pos: Optional[float] = None
+    std_quali_pos: Optional[float] = None
     points: float
     win_rate: float
     podium_rate: float
@@ -107,8 +113,8 @@ async def train_models_task():
 
         f3_team_df = load_team_standings('F3')
         f3_df = enhance_with_team_data(f3_df, f3_team_df)
-
-        # Process data
+        f3_qualifying_df = load_qualifying_data('F3')
+        f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
         f3_df = create_target_variable(f3_df, f2_df)
         features_df = engineer_features(f3_df)
         features_df['moved_to_f2'] = f3_df['moved_to_f2']
@@ -182,6 +188,10 @@ def _create_prediction_responses(current_df, raw_probas):
             nationality=row['nationality'] if pd.notna(row['nationality']) else None,
             position=int(row['final_pos']),
             points=float(row['points']),
+            avg_finish_pos=float(row['avg_finish_pos']),
+            std_finish_pos=float(row['std_finish_pos']),
+            avg_quali_pos=float(row['avg_quali_pos']) if pd.notna(row['avg_quali_pos']) else None,
+            std_quali_pos=float(row['std_quali_pos']) if pd.notna(row['std_quali_pos']) else None,
             win_rate=float(row['win_rate']),
             podium_rate=float(row['podium_rate']),
             top_10_rate=float(row['top_10_rate']),
@@ -215,6 +225,8 @@ def _load_current_data():
 
     f3_team_df = load_team_standings('F3')
     f3_df = enhance_with_team_data(f3_df, f3_team_df)
+    f3_qualifying_df = load_qualifying_data('F3')
+    f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
     f3_df = create_target_variable(f3_df, f2_df)
 
     features_df = engineer_features(f3_df)

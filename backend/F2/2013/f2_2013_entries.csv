@@ -1,38 +1,37 @@
 Team,No.,Drivers,Rounds
-DAMS[7],1,Marcus Ericsson[8],All
-DAMS[7],2,Stéphane Richelmi[8],All
-ART Grand Prix[7][9],3,James Calado[10],All
-ART Grand Prix[7][9],4,Daniel Abt[11],All
-Arden International[7],5,Johnny Cecotto Jr.[12][a],All
-Arden International[7],6,Mitch Evans[13],All
-Racing Engineering[7],7,Julián Leal[14],All
-Racing Engineering[7],8,Fabio Leimer[15],All
-Carlin[7],9,Felipe Nasr[16],All
-Carlin[7],10,Jolyon Palmer[17],All
-Russian Time[1],11,Sam Bird[18],All
-Russian Time[1],12,Tom Dillmann[19],All
-Caterham Racing(1–3)EQ8 Caterham Racing(4–11)[20],14,Sergio Canamasas[21],All
-Caterham Racing(1–3)EQ8 Caterham Racing(4–11)[20],15,Ma Qinghua[22],1
-Caterham Racing(1–3)EQ8 Caterham Racing(4–11)[20],Alexander Rossi[23],2–11,
-Barwa Addax Team[7],16,Jake Rosenzweig[24],All
-Barwa Addax Team[7],17,Rio Haryanto[25],All
-Rapax[7],18,Stefano Coletti[26],All
-Rapax[7],19,Simon Trummer[27],All
-Trident Racing[7],20,Nathanaël Berthon[28],All
-Trident Racing[7],21,Kevin Ceccon[28],1–6
-Trident Racing[7],Ricardo Teixeira[29],7–8,
-Trident Racing[7],Sergio Campana[30],9,
-Trident Racing[7],Gianmarco Raimondo[31],10–11,
-Hilmer Motorsport[2],22,Conor Daly[32],1
-Hilmer Motorsport[2],Robin Frijns[33],2–6,
-Hilmer Motorsport[2],Adrian Quaife-Hobbs[34],7–11,
-Hilmer Motorsport[2],23,Pål Varhaug[35],1–2
-Hilmer Motorsport[2],Jon Lancaster[36],"3–7, 9–11",
-Hilmer Motorsport[2],Robin Frijns[33],8,
-Venezuela GP Lazarus[7][b],24,René Binder[37],All
-Venezuela GP Lazarus[7][b],25,Kevin Giovesi[38],1–4
-Venezuela GP Lazarus[7][b],Fabrizio Crestani[39],5–6,
-Venezuela GP Lazarus[7][b],Vittorio Ghirelli[40],7–11,
-MP Motorsport[3],26,Adrian Quaife-Hobbs[41],1–6
-MP Motorsport[3],Dani Clos[42],7–11,
-MP Motorsport[3],27,Daniël de Jong[3],All
+DAMS,1,Marcus Ericsson,All
+DAMS,2,Stéphane Richelmi,All
+ART Grand Prix,3,James Calado,All
+ART Grand Prix,4,Daniel Abt,All
+Arden International,5,Johnny Cecotto Jr.,All
+Arden International,6,Mitch Evans,All
+Racing Engineering,7,Julián Leal,All
+Racing Engineering,8,Fabio Leimer,All
+Carlin,9,Felipe Nasr,All
+Carlin,10,Jolyon Palmer,All
+Russian Time,11,Sam Bird,All
+Russian Time,12,Tom Dillmann,All
+Caterham Racing(1–3)EQ8 Caterham Racing(4–11),14,Sergio Canamasas,All
+Caterham Racing(1–3)EQ8 Caterham Racing(4–11),15,Ma Qinghua,1
+Caterham Racing(1–3)EQ8 Caterham Racing(4–11),15,Alexander Rossi,2–11
+Barwa Addax Team,16,Jake Rosenzweig,All
+Barwa Addax Team,17,Rio Haryanto,All
+Rapax,18,Stefano Coletti,All
+Rapax,19,Simon Trummer,All
+Trident Racing,20,Nathanaël Berthon,All
+Trident Racing,21,Kevin Ceccon,1–6
+Trident Racing,21,Ricardo Teixeira,7–8
+Trident Racing,21,Sergio Campana,9
+Trident Racing,21,Gianmarco Raimondo,10–11
+Hilmer Motorsport,22,Conor Daly,1
+Hilmer Motorsport,22,Robin Frijns,2–6
+Hilmer Motorsport,22,Adrian Quaife-Hobbs,7–11
+Hilmer Motorsport,23,Pål Varhaug,1–2
+Hilmer Motorsport,23,Jon Lancaster,"3–7, 9–11"
+Hilmer Motorsport,23,Robin Frijns,8
+Venezuela GP Lazarus,24,René Binder,All
+Venezuela GP Lazarus,25,Kevin Giovesi,1–4
+Venezuela GP Lazarus,25,Fabrizio Crestani,5–6
+Venezuela GP Lazarus,25,Vittorio Ghirelli,7–11
+MP Motorsport,26,Adrian Quaife-Hobbs,1–6
+MP Motorsport,26,Dani Clos,7–11

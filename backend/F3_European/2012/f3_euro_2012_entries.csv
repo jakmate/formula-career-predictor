@@ -1,37 +1,36 @@
 Team,Chassis[N 1],Engine,No.,Driver,Rounds
-Prema Powerteam[3],F312/005,Mercedes-Benz,1
-Prema Powerteam[3],F312/014,2,Sven Müller[5]
-Prema Powerteam[3],F312/015,14,Michael Lewis[6]
-Prema Powerteam[3],F312/030,15,Raffaele Marciello[7]
-Mücke Motorsport[3],F312/020,Mercedes-Benz,5
-Mücke Motorsport[3],F312/023,6,Pascal Wehrlein[8]
-,Jo Zeller Racing[3],F312/044,Mercedes-Benz
-,URD Rennsport[3],F312/011,Mercedes-Benz
-,GU-Racing[3],F312/019,Mercedes-Benz
-Carlin[12],F312/040,Volkswagen,11
-Carlin[12],F312/004,12,Carlos Sainz Jr.[12]
-ma-con Motorsport[13],F312/045,Volkswagen,16
-ma-con Motorsport[13],F312/046,17,Emil Bernstorff[13]
-,Angola Racing Team,F312/039,Mercedes-Benz
-,Entries ineligible for championship points,,
-,Jo Zeller Racing[3],F308/044,Mercedes-Benz
-Carlin,F312/010,Volkswagen,30
-Carlin,F312/002,34,Jazeman Jaafar[14]
-Carlin,F312/001,39,Jack Harvey[14]
-Carlin,F312/016,40,Pietro Fantin[14]
-Carlin,F312/016,44,Felipe Nasr
-Carlin,F312/040,71,Richard Bradley
-Fortec Motorsports[16],F312/002,Mercedes-Benz,31
-Fortec Motorsports[16],F312/007,32,Félix Serrallés[16]
-Fortec Motorsports[16],F312/036,33,Alex Lynn[16]
-Fortec Motorsports[16],F312/0003,38,Pipo Derani[14]
-Double R Racing,F312/043,Mercedes-Benz,35
-Double R Racing,F312/009,36,Fahmi Ilyas[14]
-Double R Racing,F308/054,Mugen-Honda,37
-ThreeBondwithT-Sport,F312/008,ThreeBond Nissan,41
-ThreeBondwithT-Sport,F308/025,Mugen-Honda,42
-ThreeBondwithT-Sport,F312/008,ThreeBond Nissan,43
-ThreeBondwithT-Sport,F311,Mugen-Honda,44
-,CF Racing,F311,Mugen-Honda
-Van Amersfoort Racing,F312/051,Volkswagen,50
-Van Amersfoort Racing,F312/052,51,Dennis van de Laar
+Prema Powerteam,F312/005,Mercedes-Benz,1,Daniel Juncadella,All
+Prema Powerteam,F312/014,Mercedes-Benz,2,Sven Müller,All
+Prema Powerteam,F312/015,Mercedes-Benz,14,Michael Lewis,All
+Prema Powerteam,F312/030,Mercedes-Benz,15,Raffaele Marciello,All
+Mücke Motorsport,F312/020,Mercedes-Benz,5,Felix Rosenqvist,All
+Mücke Motorsport,F312/023,Mercedes-Benz,6,Pascal Wehrlein,All
+Jo Zeller Racing,F312/044,Mercedes-Benz,8,Andrea Roda,All
+URD Rennsport,F312/011,Mercedes-Benz,9,Lucas Wolf,"1, 3–10"
+GU-Racing,F312/019,Mercedes-Benz,10,Philip Ellis,"1, 4–5"
+Carlin,F312/040,Volkswagen,11,William Buller,"1, 3–5, 7–10"
+Carlin,F312/004,Volkswagen,12,Carlos Sainz Jr.,All
+ma-con Motorsport,F312/045,Volkswagen,16,Tom Blomqvist,All
+ma-con Motorsport,F312/046,Volkswagen,17,Emil Bernstorff,All
+Angola Racing Team,F312/039,Mercedes-Benz,23,Luís Sá Silva,"1, 3–10"
+Entries ineligible for championship points,,,,,
+Jo Zeller Racing,F308/044,Mercedes-Benz,7,Sandro Zeller,All
+Carlin,F312/010,Volkswagen,30,Harry Tincknell,"2–3, 5–6"
+Carlin,F312/002,Volkswagen,34,Jazeman Jaafar,2–7
+Carlin,F312/001,Volkswagen,39,Jack Harvey,"2, 5–6"
+Carlin,F312/016,Volkswagen,40,Pietro Fantin,"2, 5–6"
+Carlin,F312/016,Volkswagen,44,Felipe Nasr,10
+Carlin,F312/040,Volkswagen,71,Richard Bradley,6
+Fortec Motorsports,F312/002,Mercedes-Benz,31,Hannes van Asseldonk,"1–2, 5–6"
+Fortec Motorsports,F312/007,Mercedes-Benz,32,Félix Serrallés,"1–2, 5–6, 10"
+Fortec Motorsports,F312/036,Mercedes-Benz,33,Alex Lynn,"1–2, 5–6, 10"
+Fortec Motorsports,F312/0003,Mercedes-Benz,38,Pipo Derani,"2, 5–6, 10"
+Double R Racing,F312/043,Mercedes-Benz,35,Geoff Uhrhane,"2–3, 5–6"
+Double R Racing,F312/009,Mercedes-Benz,36,Fahmi Ilyas,"2–3, 5–6"
+Double R Racing,F308/054,Mugen-Honda,37,Duvashen Padayachee,"2, 5–6"
+ThreeBondwithT-Sport,F312/008,ThreeBond Nissan,41,Nick McBride,"2, 5–6"
+ThreeBondwithT-Sport,F308/025,Mugen-Honda,42,Spike Goddard,"2, 5–7"
+ThreeBondwithT-Sport,F312/008,ThreeBond Nissan,43,Alexander Sims,7
+ThreeBondwithT-Sport,F311,Mugen-Honda,44,Pedro Pablo Calbimonte,6
+CF Racing,F311,Mugen-Honda,43,Adderly Fong,6
+Van Amersfoort Racing,F312/051,Volkswagen,50,Lucas Auer,10

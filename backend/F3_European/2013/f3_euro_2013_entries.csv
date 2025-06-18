@@ -1,43 +1,42 @@
 Team,Chassis[N 1],Engine,No.,Driver,Rounds
-Prema Powerteam[6],F312/030,Mercedes,1
-Prema Powerteam[6],F312/014,2,Alex Lynn[6][N 2]
-Prema Powerteam[6],F312/005,24,Lucas Auer[7][N 3]
-Prema Powerteam[6],F312/015,25,Eddie Cheever III[8][N 4]
-Carlin[9],F312/010,Volkswagen,3
-Carlin[9],F312/004,4,Jordan King[10][N 5]
-Carlin[9],F312/001,26,Nicholas Latifi[10][N 6]
-Carlin[9],F312/040,27,Jann Mardenborough[10][N 7]
-Carlin[9],F312/016,51,Daniil Kvyat[11][N 8]
-Carlin[9],Nick Cassidy[12][N 8],10,
-kfzteile24Mücke Motorsport[9],F312/023,Mercedes,5
-kfzteile24Mücke Motorsport[9],Michael Lewis[14][N 9],2–10,
-kfzteile24Mücke Motorsport[9],F312/004,6,Felix Rosenqvist[15]
-kfzteile24Mücke Motorsport[9],F312/019,28,Mitchell Gilbert[16][N 10]
-kfzteile24Mücke Motorsport[9],F312/039,29,Roy Nissany[17][N 7]
-ma-con[9],F312/045,Volkswagen,7
-ma-con[9],Stefano Coletti[19],10,
-ma-con[9],F312/046,8,André Rudersdorf[20]
-,URD Rennsport[9],F312/011,Mercedes
-,Jo Zeller Racing[9],F312/048,Mercedes
-Fortec Motorsports[23],F312/007,Mercedes,11
-Fortec Motorsports[23],F312/003,12,Luis Felipe Derani[23][N 12]
-Fortec Motorsports[23],F312/036,30,Josh Hill[24][N 7]
-Fortec Motorsports[23],F312/035,John Bryant-Meisner[25][N 7],9–10
-Fortec Motorsports[23],31,Dmitry Suranovich[24][N 7],1
-Fortec Motorsports[23],Edward Jones[26][N 8],3,
-Fortec Motorsports[23],William Buller[27],5,
-Fortec Motorsports[23],Alfonso Celis Jr.[28][N 7],8,
-ThreeBondwithT-Sport,F312/008,ThreeBond Nissan,14
-ThreeBondwithT-Sport,Alexander Sims[30],6–9,
-ThreeBondwithT-Sport,Kevin Korjus[31],10,
-ThreeBondwithT-Sport,F312/049,15,Richard Goddard[32]
-Double R Racing[33],F312/043,Mercedes,16
-Double R Racing[33],F312/009,17,Antonio Giovinazzi[33]
-Double R Racing[33],F312/004,32,Sean Gelael[33]
-Van Amersfoort Racing[34],F312/052,Volkswagen,18
-Van Amersfoort Racing[34],F312/051,19,Måns Grenhagen[36]
-Van Amersfoort Racing[34],Sven Müller[37],8–10,
-EuroInternational[9],F312/053,Mercedes[38],20
-EuroInternational[9],F312/003,52,Nick Cassidy[39][N 8]
-Romeo Ferraris[40],F312/003,Mercedes[40],22
-Romeo Ferraris[40],F312/001,23,Michela Cerruti[40]
+Prema Powerteam,F312/030,Mercedes,1,Raffaele Marciello,All
+Prema Powerteam,F312/014,Mercedes,2,Alex Lynn[N 2],All
+Prema Powerteam,F312/005,Mercedes,24,Lucas Auer[N 3],All
+Prema Powerteam,F312/015,Mercedes,25,Eddie Cheever III[N 4],All
+Carlin,F312/010,Volkswagen,3,Harry Tincknell,All
+Carlin,F312/004,Volkswagen,4,Jordan King[N 5],All
+Carlin,F312/001,Volkswagen,26,Nicholas Latifi[N 6],All
+Carlin,F312/040,Volkswagen,27,Jann Mardenborough[N 7],All
+Carlin,F312/016,Volkswagen,51,Daniil Kvyat[N 8],3–9
+Carlin,F312/016,Volkswagen,51,Nick Cassidy[N 8],10
+kfzteile24Mücke Motorsport,F312/023,Mercedes,5,Pascal Wehrlein,1
+kfzteile24Mücke Motorsport,F312/023,Mercedes,5,Michael Lewis[N 9],2–10
+kfzteile24Mücke Motorsport,F312/004,Mercedes,6,Felix Rosenqvist,All
+kfzteile24Mücke Motorsport,F312/019,Mercedes,28,Mitchell Gilbert[N 10],All
+kfzteile24Mücke Motorsport,F312/039,Mercedes,29,Roy Nissany[N 7],All
+ma-con,F312/045,Volkswagen,7,Sven Müller,1–7
+ma-con,F312/045,Volkswagen,7,Stefano Coletti,10
+ma-con,F312/046,Volkswagen,8,André Rudersdorf,All
+URD Rennsport,F312/011,Mercedes,9,Lucas Wolf,All
+Jo Zeller Racing,F312/048,Mercedes,10,Sandro Zeller,All
+Fortec Motorsports,F312/007,Mercedes,11,Félix Serrallés[N 11],All
+Fortec Motorsports,F312/003,Mercedes,12,Luis Felipe Derani[N 12],All
+Fortec Motorsports,F312/036,Mercedes,30,Josh Hill[N 7],1–5
+Fortec Motorsports,F312/035,Mercedes,30,John Bryant-Meisner[N 7],9–10
+Fortec Motorsports,F312/035,Mercedes,31,Dmitry Suranovich[N 7],1
+Fortec Motorsports,F312/035,Mercedes,31,Edward Jones[N 8],3
+Fortec Motorsports,F312/035,Mercedes,31,William Buller,5
+Fortec Motorsports,F312/035,Mercedes,31,Alfonso Celis Jr.[N 7],8
+ThreeBondwithT-Sport,F312/008,ThreeBond Nissan,14,William Buller,1–4
+ThreeBondwithT-Sport,F312/008,ThreeBond Nissan,14,Alexander Sims,6–9
+ThreeBondwithT-Sport,F312/008,ThreeBond Nissan,14,Kevin Korjus,10
+ThreeBondwithT-Sport,F312/049,ThreeBond Nissan,15,Richard Goddard,All
+Double R Racing,F312/043,Mercedes,16,Tatiana Calderón[N 7],All
+Double R Racing,F312/009,Mercedes,17,Antonio Giovinazzi,All
+Double R Racing,F312/004,Mercedes,32,Sean Gelael,All
+Van Amersfoort Racing,F312/052,Volkswagen,18,Dennis van de Laar,All
+Van Amersfoort Racing,F312/051,Volkswagen,19,Måns Grenhagen,1–5
+Van Amersfoort Racing,F312/051,Volkswagen,19,Sven Müller,8–10
+EuroInternational,F312/053,Mercedes,20,Tom Blomqvist,All
+EuroInternational,F312/003,Mercedes,52,Nick Cassidy[N 8],6
+Romeo Ferraris,F312/003,Mercedes,22,Gary Thompson[N 13],1–2

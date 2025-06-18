@@ -1,29 +1,29 @@
 Team,Chassis[N 1],Engine,No.,Driver,Status,Rounds
-Prema Theodore Racing,F315/004,Mercedes-Benz,1
-Prema Theodore Racing,F318/002,4,Mick Schumacher[8]
-Prema Theodore Racing,F317/004,7,Ralf Aron[9]
-Prema Theodore Racing,F317/003,8,Marcus Armstrong[10][N 2]
-Prema Theodore Racing,F314/015,10,Robert Shwartzman[12]
-Motopark,F318/006[N 3],Volkswagen,3
-Motopark,F316/012,13,Fabio Scherer[14]
-Motopark,F315/007,23,Jonathan Aberdein[15]
-Motopark,F318/007,27,Dan Ticktum[16]
-Motopark,F314/018,33,Marino Sato[17][N 5]
-Motopark,F315/003,44,Jüri Vips[18]
-,Fortec Motorsports,F318/007[N 6],Mercedes-Benz
-Carlin,F312/010[N 7],Volkswagen,9
-Carlin,F317/001,11,Sacha Fenestraz[21]
-Carlin,F315/016,16,Nikita Troitskiy[22]
-Carlin,F312/004,17,Devlin DeFrancesco[23]
-Carlin,Julian Hanses[24],R,9–10
-Carlin,F312/002[N 8],24,Ameya Vaidyanathan[25][N 9]
-Carlin,F317/020,62,Ferdinand Habsburg[29]
-Van Amersfoort Racing,F316/017,Mercedes-Benz,12
-Van Amersfoort Racing,F317/018,15,Keyvan Andres[31][N 10]
-Van Amersfoort Racing,F316/001,25,Sophia Flörsch[32]
-Van Amersfoort Racing,F316/010,30,Frederik Vesti[33]
-,ma-con,F312/019[N 11],Volkswagen
-Hitech Bullfrog GP,F316/018[N 12],Mercedes-Benz,39
-Hitech Bullfrog GP,F315/009[N 13],65,Enaam Ahmed[36]
-Hitech Bullfrog GP,F317/011,66,Charles Leong[37]
-Hitech Bullfrog GP,F315/011[N 14],77,Ben Hingeley[38]
+Prema Theodore Racing,F315/004,Mercedes-Benz,1,Guanyu Zhou,,All
+Prema Theodore Racing,F318/002,Mercedes-Benz,4,Mick Schumacher,,All
+Prema Theodore Racing,F317/004,Mercedes-Benz,7,Ralf Aron,,All
+Prema Theodore Racing,F317/003,Mercedes-Benz,8,Marcus Armstrong[N 2],R,All
+Prema Theodore Racing,F314/015,Mercedes-Benz,10,Robert Shwartzman,R,All
+Motopark,F318/006[N 3],Volkswagen,3,Sebastián Fernández[N 4],R,All
+Motopark,F316/012,Volkswagen,13,Fabio Scherer,R,All
+Motopark,F315/007,Volkswagen,23,Jonathan Aberdein,R,All
+Motopark,F318/007,Volkswagen,27,Dan Ticktum,,All
+Motopark,F314/018,Volkswagen,33,Marino Sato[N 5],,All
+Motopark,F315/003,Volkswagen,44,Jüri Vips,R,All
+Fortec Motorsports,F318/007[N 6],Mercedes-Benz,5,Petru Florescu,R,2–7
+Carlin,F312/010[N 7],Volkswagen,9,Jehan Daruvala,,All
+Carlin,F317/001,Volkswagen,11,Sacha Fenestraz,R,All
+Carlin,F315/016,Volkswagen,16,Nikita Troitskiy,R,All
+Carlin,F312/004,Volkswagen,17,Devlin DeFrancesco,,1–4
+Carlin,F312/004,Volkswagen,17,Julian Hanses,R,9–10
+Carlin,F312/002[N 8],Volkswagen,24,Ameya Vaidyanathan[N 9],R,All
+Carlin,F317/020,Volkswagen,62,Ferdinand Habsburg,,All
+Van Amersfoort Racing,F316/017,Mercedes-Benz,12,Artem Petrov,R,All
+Van Amersfoort Racing,F317/018,Mercedes-Benz,15,Keyvan Andres[N 10],,All
+Van Amersfoort Racing,F316/001,Mercedes-Benz,25,Sophia Flörsch,R,4–10
+Van Amersfoort Racing,F316/010,Mercedes-Benz,30,Frederik Vesti,R,10
+ma-con,F312/019[N 11],Volkswagen,18,Julian Hanses,R,1–6
+Hitech Bullfrog GP,F316/018[N 12],Mercedes-Benz,39,Álex Palou,,All
+Hitech Bullfrog GP,F315/009[N 13],Mercedes-Benz,65,Enaam Ahmed,R,All
+Hitech Bullfrog GP,F317/011,Mercedes-Benz,66,Charles Leong,R,6
+Hitech Bullfrog GP,F315/011[N 14],Mercedes-Benz,77,Ben Hingeley,R,All

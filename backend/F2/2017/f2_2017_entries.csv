@@ -1,34 +1,33 @@
 Team,No.,Drivers,Rounds
-Prema Racing,1,Charles Leclerc[6],All
-Prema Racing,2,Antonio Fuoco[6],All
-Racing Engineering,3,Louis Delétraz[7],1–7
-Racing Engineering,Nyck de Vries[8],8–11,
-Racing Engineering,4,Gustav Malja[9],All
-Russian Time,5,Luca Ghiotto[10],All
-Russian Time,6,Artem Markelov[10],All
-ART Grand Prix,7,Nobuharu Matsushita[11],All
-ART Grand Prix,8,Alexander Albon[12],"1–3, 5–11"
-ART Grand Prix,Sergey Sirotkin[13],4,
-DAMS,9,Oliver Rowland[14],All
-DAMS,10,Nicholas Latifi[14],All
-Campos Racing,11,Ralph Boschung[15],1–10
-Campos Racing,Lando Norris[16],11,
-Campos Racing,12,Stefano Coletti[17],1
-Campos Racing,Roberto Merhi[18],2,
-Campos Racing,Robert Vișoiu[19],3–9,
-Campos Racing,Álex Palou[20][a],10–11,
-MP Motorsport,14,Sérgio Sette Câmara[21],All
-MP Motorsport,15,Jordan King[22],All
-Trident,16,Nabil Jeffri[23],All
-Trident,17,Sergio Canamasas[17],1–4
-Trident,Raffaele Marciello[24],5,
-Trident,Callum Ilott[25],6,
-Trident,Santino Ferrucci[26],7–11,
-Rapax,18,Nyck de Vries[27],1–7
-Rapax,Louis Delétraz[8],8–11,
-Rapax,19,Johnny Cecotto Jr.[27][b],1–4
-Rapax,Sergio Canamasas[24],5–7,
-Rapax,Roberto Merhi[8][28],"8–9, 11",
-Rapax,René Binder[29],10,
-Pertamina Arden[30],20,Norman Nato[31],All
-Pertamina Arden[30],21,Sean Gelael[31],All
+Prema Racing,1,Charles Leclerc,All
+Prema Racing,2,Antonio Fuoco,All
+Racing Engineering,3,Louis Delétraz,1–7
+Racing Engineering,3,Nyck de Vries,8–11
+Racing Engineering,4,Gustav Malja,All
+Russian Time,5,Luca Ghiotto,All
+Russian Time,6,Artem Markelov,All
+ART Grand Prix,7,Nobuharu Matsushita,All
+ART Grand Prix,8,Alexander Albon,"1–3, 5–11"
+ART Grand Prix,8,Sergey Sirotkin,4
+DAMS,9,Oliver Rowland,All
+DAMS,10,Nicholas Latifi,All
+Campos Racing,11,Ralph Boschung,1–10
+Campos Racing,11,Lando Norris,11
+Campos Racing,12,Stefano Coletti,1
+Campos Racing,12,Roberto Merhi,2
+Campos Racing,12,Robert Vișoiu,3–9
+Campos Racing,12,Álex Palou,10–11
+MP Motorsport,14,Sérgio Sette Câmara,All
+MP Motorsport,15,Jordan King,All
+Trident,16,Nabil Jeffri,All
+Trident,17,Sergio Canamasas,1–4
+Trident,17,Raffaele Marciello,5
+Trident,17,Callum Ilott,6
+Trident,17,Santino Ferrucci,7–11
+Rapax,18,Nyck de Vries,1–7
+Rapax,18,Louis Delétraz,8–11
+Rapax,19,Johnny Cecotto Jr.,1–4
+Rapax,19,Sergio Canamasas,5–7
+Rapax,19,Roberto Merhi,"8–9, 11"
+Rapax,19,René Binder,10
+Pertamina Arden,20,Norman Nato,All
