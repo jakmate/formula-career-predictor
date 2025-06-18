@@ -1,32 +1,32 @@
 Team,Chassis[N 1],Engine,No.,Driver,Status,Rounds
 Prema Powerteam,F315/006,Mercedes,1,Felix Rosenqvist,,All
-Prema Powerteam,F315/005,Mercedes,2,Jake Dennis[N 2],,All
-Prema Powerteam,F312/015,Mercedes,24,Brandon Maïsano[N 3],,1–8
-Prema Powerteam,F312/015,Mercedes,24,Nick Cassidy[N 3],,9–10
-Prema Powerteam,F312/015,Mercedes,24,Maximilian Günther[N 3],R,11
-Prema Powerteam,F315/004,Mercedes,25,Lance Stroll[N 4],R,All
+Prema Powerteam,F315/005,Mercedes,2,Jake Dennis,,All
+Prema Powerteam,F312/015,Mercedes,24,Brandon Maïsano,,1–8
+Prema Powerteam,F312/015,Mercedes,24,Nick Cassidy,,9–10
+Prema Powerteam,F312/015,Mercedes,24,Maximilian Günther,R,11
+Prema Powerteam,F315/004,Mercedes,25,Lance Stroll,R,All
 Jagonya Ayam with Carlin,F315/001,Volkswagen,3,Antonio Giovinazzi,,All
 Jagonya Ayam with Carlin,F312/040,Volkswagen,4,Gustavo Menezes,,All
-Jagonya Ayam with Carlin,F312/002,Volkswagen,26,Ryan Tveter[N 3],R,All
-kfzteile24 Mücke Motorsport,F312/039,Mercedes,5,Santino Ferrucci[N 5],,All
-kfzteile24 Mücke Motorsport,F312/019,Mercedes,6,Michele Beretta[N 5],,All
-kfzteile24 Mücke Motorsport,F312/023,Mercedes,27,Mikkel Jensen[N 6],R,All
-kfzteile24 Mücke Motorsport,F312/020,Mercedes,28,Maximilian Günther[N 6],R,1–9
-kfzteile24 Mücke Motorsport,F312/044,Mercedes,35,Kang Ling[N 3],,1–8
-kfzteile24 Mücke Motorsport,F312/044,Mercedes,35,Félix Serrallés[N 3],,10
+Jagonya Ayam with Carlin,F312/002,Volkswagen,26,Ryan Tveter,R,All
+kfzteile24 Mücke Motorsport,F312/039,Mercedes,5,Santino Ferrucci,,All
+kfzteile24 Mücke Motorsport,F312/019,Mercedes,6,Michele Beretta,,All
+kfzteile24 Mücke Motorsport,F312/023,Mercedes,27,Mikkel Jensen,R,All
+kfzteile24 Mücke Motorsport,F312/020,Mercedes,28,Maximilian Günther,R,1–9
+kfzteile24 Mücke Motorsport,F312/044,Mercedes,35,Kang Ling,,1–8
+kfzteile24 Mücke Motorsport,F312/044,Mercedes,35,Félix Serrallés,,10
 Van Amersfoort Racing,F316/001,Volkswagen,7,Charles Leclerc,R,All
-Van Amersfoort Racing,F312/052,Volkswagen,8,Alessio Lorandi[N 7],R,All
-Van Amersfoort Racing,F312/051,Volkswagen,29,Arjun Maini[N 8],R,All
-Carlin,F314/020,Volkswagen,9,Tatiana Calderón[N 9],,All
+Van Amersfoort Racing,F312/052,Volkswagen,8,Alessio Lorandi,R,All
+Van Amersfoort Racing,F312/051,Volkswagen,29,Arjun Maini,R,All
+Carlin,F314/020,Volkswagen,9,Tatiana Calderón,,All
 Carlin,F312/010,Volkswagen,10,George Russell,R,All
-Carlin,F312/004,Volkswagen,30,Callum Ilott[N 10],R,All
+Carlin,F312/004,Volkswagen,30,Callum Ilott,R,All
 Team West-Tec F3,F312/011,Mercedes,11,Fabian Schiller,R,1–8
 Team West-Tec F3,F314/007,Mercedes,38,Raoul Hyman,R,All
 Fortec Motorsports,F315/012,Mercedes,12,Pietro Fittipaldi,R,All
-Fortec Motorsports,F312/007,Mercedes,14,Matthew Rao[N 11],,All
-Fortec Motorsports,F312/035,Mercedes,31,Martin Cao[N 12],,1–5
-Fortec Motorsports,F312/035,Mercedes,31,Andy Chang[N 13],,7–11
-Fortec Motorsports,F312/003,Mercedes,32,Peter Li[N 3],,"1–2, 7–11"
+Fortec Motorsports,F312/007,Mercedes,14,Matthew Rao,,All
+Fortec Motorsports,F312/035,Mercedes,31,Martin Cao,,1–5
+Fortec Motorsports,F312/035,Mercedes,31,Andy Chang,,7–11
+Fortec Motorsports,F312/003,Mercedes,32,Peter Li,,"1–2, 7–11"
 EuroInternational,F312/053,Mercedes,15,Nicolas Beer,R,1–2
 EuroInternational,F312/053,Mercedes,15,Artur Janosz,,4
 EuroInternational,F313/003,Mercedes,16,Gustav Malja,R,3
@@ -37,11 +37,11 @@ Double R Racing,F312/043,Mercedes,18,Matheus Leist,R,8
 Double R Racing,F313/004,Mercedes,19,Matt Solomon,R,All
 Signature,F315/015,Volkswagen,20,Dorian Boccolacci,R,All
 Signature,F315/002,Volkswagen,21,Alexander Albon,R,All
-Motopark,F314/021,Volkswagen,22,Nabil Jeffri[N 3],,All
-Motopark,F314/018,Volkswagen,23,Sérgio Sette Câmara[N 14],,All
-Motopark,F314/016,Volkswagen,33,Mahaveer Raghunathan[N 3],R,1–10
+Motopark,F314/021,Volkswagen,22,Nabil Jeffri,,All
+Motopark,F314/018,Volkswagen,23,Sérgio Sette Câmara,,All
+Motopark,F314/016,Volkswagen,33,Mahaveer Raghunathan,R,1–10
 Motopark,F314/016,Volkswagen,33,Tanart Sathienthirakul,,11
 Motopark,F315/007,Volkswagen,34,Markus Pommer,,All
-Motopark,F315/003,Volkswagen,36,Sam MacLeod[N 15],,1–10
+Motopark,F315/003,Volkswagen,36,Sam MacLeod,,1–10
 HitechGP,F315/010,Mercedes,39,Alexander Sims,G,"9, 11"
 Artline Engineering,ArtTech P315,NBE,40,Harald Schlegelmilch,G,10–11

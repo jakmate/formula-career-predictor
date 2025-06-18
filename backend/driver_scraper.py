@@ -22,6 +22,25 @@ class DriverProfileScraper:
             "sauber junior", "renault sport academy"
         ]
 
+        # Known driver aliases and redirects
+        self.driver_aliases = {
+            "Peter Li": "Li Zhicong",
+            "Hongwei Cao": "Martin Cao",
+            "Michael Lewis": "Michael James Lewis",
+            "Richard Goddard": "Spike Goddard",
+            "Edward Jones": "Ed Jones",
+            "Nick Ncbride": None,
+            "Bang Hongwei": None,
+            "Sam MacLeod": None,
+            "Matthew Rao": None,
+            "Pedro Pablo Calbimonte": None,
+            "Nicolas Pohler": None,
+            "Fahmi Ilyas": None,
+            "Andrea Roda": None,
+            "Alexander Toril": None,
+            "Geoff Uhrhane": None,
+        }
+
     def get_driver_filename(self, driver_name):
         """Create safe filename from driver name."""
         safe_name = re.sub(r'[^\w\s-]', '', driver_name)
@@ -46,6 +65,12 @@ class DriverProfileScraper:
 
     def search_wikipedia_page(self, driver_name):
         """Search driver's Wikipedia page using Wikipedia search API."""
+        # Check for known aliases first
+        if driver_name in self.driver_aliases:
+            alias = self.driver_aliases[driver_name]
+            if alias is None:  # Explicitly marked as invalid
+                return None
+            driver_name = alias
 
         # First try the OpenSearch API for fuzzy matching
         search_api_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
@@ -101,7 +126,10 @@ class DriverProfileScraper:
                     if 'extract' in data and len(data['extract']) > 50:
                         page_url = data.get('content_urls', {}).get('desktop', {}).get('page')
                         if page_url:
-                            return page_url
+                            page_response = requests.get(page_url)
+                            soup = BeautifulSoup(page_response.text, 'html.parser')
+                            if self.is_racing_driver_page(soup):
+                                return page_url
             except Exception as e:
                 print(f"Error checking variation {variation}: {e}")
                 continue
@@ -192,6 +220,18 @@ class DriverProfileScraper:
                 return json.load(f)
 
         print(f"Scraping profile for {driver_name}...")
+
+        # Check for known invalid drivers
+        if driver_name in self.driver_aliases and self.driver_aliases[driver_name] is None:
+            print(f"Skipping known invalid driver: {driver_name}")
+            profile = {
+                "name": driver_name,
+                "dob": None,
+                "academy": None,
+                "scraped": False,
+            }
+            self.save_profile(profile_file, profile)
+            return profile
 
         # Find Wikipedia page
         wiki_url = self.search_wikipedia_page(driver_name)
@@ -416,8 +456,22 @@ def clean_driver_name(name):
 def get_all_drivers_from_data():
     """Extract all driver names from F2 and F3 data files."""
     all_drivers = set()
+    series_map = {
+        'F2': {
+            'standings_pattern': 'f2_{year}_drivers_standings.csv',
+            'entries_pattern': 'f2_{year}_entries.csv'
+        },
+        'F3': {
+            'standings_pattern': 'f3_{year}_drivers_standings.csv',
+            'entries_pattern': 'f3_{year}_entries.csv'
+        },
+        'F3_European': {
+            'standings_pattern': 'f3_euro_{year}_drivers_standings.csv',
+            'entries_pattern': 'f3_euro_{year}_entries.csv'
+        }
+    }
 
-    for series in ['F2', 'F3']:
+    for series, patterns in series_map.items():
         series_dirs = glob.glob(f"{series}/*")
 
         for year_dir in series_dirs:
@@ -425,9 +479,12 @@ def get_all_drivers_from_data():
             if not year.isdigit():
                 continue
 
-            # Check driver standings files
-            standings_file = os.path.join(
-                year_dir, f"{series.lower()}_{year}_drivers_standings.csv")
+            # Get file patterns for this series
+            standings_pattern = patterns['standings_pattern'].format(year=year)
+            entries_pattern = patterns['entries_pattern'].format(year=year)
+
+            # Check driver standings file
+            standings_file = os.path.join(year_dir, standings_pattern)
             if os.path.exists(standings_file):
                 try:
                     df = pd.read_csv(standings_file)
@@ -438,9 +495,8 @@ def get_all_drivers_from_data():
                 except Exception as e:
                     print(f"Error reading {standings_file}: {e}")
 
-            # Check entries files
-            entries_file = os.path.join(
-                year_dir, f"{series.lower()}_{year}_entries.csv")
+            # Check entries file
+            entries_file = os.path.join(year_dir, entries_pattern)
             if os.path.exists(entries_file):
                 try:
                     df = pd.read_csv(entries_file)
@@ -474,8 +530,7 @@ def main():
     print("Starting driver profile scraping...")
     profiles = scraper.batch_scrape_drivers(all_drivers)
 
-    scraped_count = sum(1 for p in profiles.values() if p.get(
-            'scraped', False))
+    scraped_count = sum(1 for p in profiles.values() if p.get('scraped', False))
     with_dob = sum(1 for p in profiles.values() if p.get('dob'))
     with_academy = sum(1 for p in profiles.values() if p.get('academy'))
 

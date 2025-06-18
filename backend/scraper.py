@@ -162,9 +162,19 @@ def process_championship(
                             (year > 2012 and formula == 3) or
                             (year > 2016 and formula == 2)) else all_rows[1:]
 
-        # Remove footer rows (usually last 2-3 rows contain sources/notes)
-        if len(data_rows) > 3:
-            data_rows = data_rows[:-3]
+        # Remove footer rows (sources/notes)
+        if series_type == "f3_euro" and championship_type == "Drivers'":
+            # For F3 European drivers standings, remove only 2 footer rows
+            if len(data_rows) > 2:
+                data_rows = data_rows[:-2]
+        elif series_type == "main" and championship_type == "Drivers'" and year == 2020:
+            # For F3 2020, remove 4 rows
+            if len(data_rows) > 4:
+                data_rows = data_rows[:-4]
+        else:
+            # Default: remove 3 footer rows for other standings
+            if len(data_rows) > 3:
+                data_rows = data_rows[:-3]
 
         # Calculate the number of race columns expected
         num_race_columns = len(combined_headers) - 3  # Pos, Team, Points
@@ -249,7 +259,7 @@ def process_championship(
 
 def remove_citations(text):
     """Remove Wikipedia-style citations (e.g., [1], [a], [Note]) from text."""
-    return re.sub(r'\[\w+\]', '', text)
+    return re.sub(r'\[(?:N\s*\d+|\w+)\]', '', text)
 
 
 def process_entries(soup, year, formula, series_type="main"):

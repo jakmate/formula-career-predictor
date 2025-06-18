@@ -163,6 +163,18 @@ def load_and_combine_data(series='F3'):
 
                 if os.path.exists(driver_file):
                     df = pd.read_csv(driver_file)
+
+                    # Filter out guest drivers (0 or no points and no position)
+                    if 'Points' in df.columns and 'Pos' in df.columns:
+                        mask = (
+                            df['Pos'].isna() |
+                            (df['Pos'] == '') |
+                            (df['Points'] == 0) |
+                            df['Points'].isna()
+                        )
+                        # Keep only non-guest drivers (invert the mask)
+                        df = df[~mask]
+
                     df['year'] = year_int
                     df['series'] = series
                     df['series_type'] = series_type
@@ -589,7 +601,15 @@ def add_driver_features(features_df, f3_df):
             if os.path.exists(profile_file):
                 try:
                     with open(profile_file, 'r', encoding='utf-8') as f:
-                        profiles[driver] = json.load(f)
+                        profile_data = json.load(f)
+
+                        # Check if driver was successfully scraped
+                        if profile_data.get('scraped', True):
+                            profiles[driver] = profile_data
+                        else:
+                            # Driver exists but wasn't scraped - treat as no data
+                            profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
+
                 except BaseException:
                     profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
             else:
@@ -618,6 +638,9 @@ def add_driver_features(features_df, f3_df):
     features_df['age'] = ages
     features_df['has_academy'] = has_academy
     features_df['nationality'] = nationalities
+
+    median_age = features_df['age'].median()
+    features_df['age'] = features_df['age'].fillna(median_age)
 
     return features_df
 

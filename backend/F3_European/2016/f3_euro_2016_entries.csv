@@ -1,31 +1,31 @@
 Team,Chassis[N 1],Engine,No.,Driver,Status,Rounds
 Prema Powerteam,F316/002,Mercedes,1,Lance Stroll,,All
-Prema Powerteam,F314/015,Mercedes,2,Nick Cassidy[N 2],,All
-Prema Powerteam,F315/005,Mercedes,16,Ralf Aron[N 3],R,All
-Prema Powerteam,F315/006,Mercedes,17,Maximilian Günther[N 4],,All
-Carlin,F316/014,Volkswagen,3,Ryan Tveter[N 5],,1–7
-Carlin,F312/004,Volkswagen,3,Dan Ticktum[N 3],RG,10
+Prema Powerteam,F314/015,Mercedes,2,Nick Cassidy,,All
+Prema Powerteam,F315/005,Mercedes,16,Ralf Aron,R,All
+Prema Powerteam,F315/006,Mercedes,17,Maximilian Günther,,All
+Carlin,F316/014,Volkswagen,3,Ryan Tveter,,1–7
+Carlin,F312/004,Volkswagen,3,Dan Ticktum,RG,10
 Carlin,F315/016,Volkswagen,4,Alessio Lorandi,,1–7
-Carlin,F312/010,Volkswagen,4,Lando Norris[N 3],RG,10
-Carlin,F314/020,Volkswagen,18,Peter Li[N 3],,1–4
+Carlin,F312/010,Volkswagen,4,Lando Norris,RG,10
+Carlin,F314/020,Volkswagen,18,Peter Li,,1–4
 Carlin,F314/020,Volkswagen,18,William Buller,,5
 Carlin,F312/040,Volkswagen,18,Jake Hughes,,10
-Carlin,F315/001,Volkswagen,19,Raoul Hyman[N 3],,1
-Carlin,F315/001,Volkswagen,19,Weiron Tan[N 3],,"4, 6–7"
-Van Amersfoort Racing,F316/010,Mercedes,5,Pedro Piquet[N 6],,All
-Van Amersfoort Racing,F316/017,Mercedes,6,Callum Ilott[N 7],,All
-Van Amersfoort Racing,F316/001,Mercedes,20,Harrison Newey[N 3],R,All
-Van Amersfoort Racing,F312/052,Mercedes,21,Anthoine Hubert[N 8],R,All
+Carlin,F315/001,Volkswagen,19,Raoul Hyman,,1
+Carlin,F315/001,Volkswagen,19,Weiron Tan,,"4, 6–7"
+Van Amersfoort Racing,F316/010,Mercedes,5,Pedro Piquet,,All
+Van Amersfoort Racing,F316/017,Mercedes,6,Callum Ilott,,All
+Van Amersfoort Racing,F316/001,Mercedes,20,Harrison Newey,R,All
+Van Amersfoort Racing,F312/052,Mercedes,21,Anthoine Hubert,R,All
 kfzteile24 Mücke Motorsport,F316/007,Mercedes,7,Mikkel Jensen,,All
 kfzteile24 Mücke Motorsport,F316/012,Mercedes,8,David Beckmann,R,3–10
-Motopark,F316/020,Volkswagen,9,Sérgio Sette Câmara[N 9],,All
-Motopark,F315/003,Volkswagen,10,Niko Kari[N 10],R,All
-Motopark,F315/007,Volkswagen,22,Joel Eriksson[N 11],R,All
-Motopark,F314/016,Volkswagen,23,Guanyu Zhou[N 12],R,All
-HitechGP,F316/018,Mercedes,11,Nikita Mazepin[N 3],R,All
+Motopark,F316/020,Volkswagen,9,Sérgio Sette Câmara,,All
+Motopark,F315/003,Volkswagen,10,Niko Kari,R,All
+Motopark,F315/007,Volkswagen,22,Joel Eriksson,R,All
+Motopark,F314/016,Volkswagen,23,Guanyu Zhou,R,All
+HitechGP,F316/018,Mercedes,11,Nikita Mazepin,R,All
 HitechGP,F315/010,Mercedes,12,George Russell,,All
 HitechGP,F316/022,Mercedes,24,Ben Barnicoat,R,All
-HitechGP,F315/009,Mercedes,25,Alexander Sims[N 3],G,10
+HitechGP,F315/009,Mercedes,25,Alexander Sims,G,10
 Threebondwith T-Sport,F314/019,NBE,14,Arjun Maini,,2–4
 Threebondwith T-Sport,F316/008,NBE,14,Wing Chung Chang,,9–10
 Threebondwith T-Sport,F316/008,Threebond,15,Arjun Maini,,1
