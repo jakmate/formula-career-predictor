@@ -13,8 +13,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 from scraper import scrape
 from predictor import (
-    load_and_combine_data,
-    load_team_standings,
+    load_standings_data,
     load_qualifying_data,
     enhance_with_team_data,
     calculate_qualifying_features,
@@ -104,14 +103,14 @@ async def train_models_task():
         logger.info("Starting model training task...")
 
         # Load and process data
-        f3_df = load_and_combine_data('F3')
-        f2_df = load_and_combine_data('F2')
+        f3_df = load_standings_data('F3', 'drivers')
+        f2_df = load_standings_data('F2', 'drivers')
 
         if f3_df.empty or f2_df.empty:
             logger.warning("No data available for training")
             return
 
-        f3_team_df = load_team_standings('F3')
+        f3_team_df = load_standings_data('F3', 'teams')
         f3_df = enhance_with_team_data(f3_df, f3_team_df)
         f3_qualifying_df = load_qualifying_data('F3')
         f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
@@ -217,13 +216,13 @@ def _create_prediction_responses(current_df, raw_probas):
 
 def _load_current_data():
     """Load and process current racing data"""
-    f3_df = load_and_combine_data('F3')
-    f2_df = load_and_combine_data('F2')
+    f3_df = load_standings_data('F3', 'drivers')
+    f2_df = load_standings_data('F2', 'drivers')
 
     if f3_df.empty:
         raise HTTPException(status_code=404, detail="No F3 data available")
 
-    f3_team_df = load_team_standings('F3')
+    f3_team_df = load_standings_data('F3', 'teams')
     f3_df = enhance_with_team_data(f3_df, f3_team_df)
     f3_qualifying_df = load_qualifying_data('F3')
     f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)

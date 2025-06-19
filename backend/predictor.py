@@ -41,7 +41,8 @@ if torch.cuda.is_available():
 
 SERIES_CONFIG = {
     'F3': {'patterns': ['F3', 'F3_European'], 'main_type': 'F3_Main'},
-    'F2': {'patterns': ['F2'], 'main_type': 'F2_Main'}
+    'F2': {'patterns': ['F2'], 'main_type': 'F2_Main'},
+    'F1': {'patterns': ['F1'], 'main_type': 'F1_Main'}
 }
 
 FILE_PATTERNS = {
@@ -53,7 +54,8 @@ FILE_PATTERNS = {
     'default': {
         'drivers': '{series}_{year}_drivers_standings.csv',
         'entries': '{series}_{year}_entries.csv',
-        'teams': '{series}_{year}_teams_standings.csv'
+        'teams': '{series}_{year}_teams_standings.csv',
+        'qualifying': '{series}_{year}_qualifying_round_{round}.csv'
     }
 }
 
@@ -65,6 +67,19 @@ COLUMN_MAPPING = {
 
 NOT_PARTICIPATED_CODES = ['', 'DNS', 'WD', 'DNQ', 'DNA', 'C', 'EX']
 RETIREMENT_CODES = ['Ret', 'NC', 'DSQ']
+
+
+def clean_string_columns(df, columns):
+    """Clean string columns by stripping whitespace."""
+    for col in columns:
+        if col in df.columns:
+            df[col] = df[col].astype(str).str.strip()
+    return df
+
+
+def apply_column_mapping(df):
+    """Apply standard column name mappings."""
+    return df.rename(columns=COLUMN_MAPPING)
 
 
 def get_race_columns(df):
@@ -79,9 +94,8 @@ def get_race_columns(df):
     for col in columns_with_data:
         parts = col.split()
         if parts:
-            first_part = parts[0]
-            if len(first_part) >= 3:
-                code_candidate = first_part[:3]
+            if len(parts[0]) >= 3:
+                code_candidate = parts[0][:3]
                 if code_candidate.isalpha() and code_candidate.isupper():
                     track_codes.add(code_candidate)
 
@@ -89,20 +103,43 @@ def get_race_columns(df):
     for col in columns_with_data:
         parts = col.split()
         if parts:
-            first_part = parts[0]
-            if len(first_part) >= 3:
-                code_candidate = first_part[:3]
+            if len(parts[0]) >= 3:
+                code_candidate = parts[0][:3]
                 if code_candidate in track_codes:
                     race_columns.append(col)
 
     return race_columns
 
 
-def get_file_pattern(series_type, file_type, series, year):
+def get_file_pattern(series_type, file_type, series, year, round_num = None):
     """Get file pattern based on series type."""
     if series_type == 'F3_European':
-        return FILE_PATTERNS['F3_European'][file_type].format(year=year)
-    return FILE_PATTERNS['default'][file_type].format(series=series.lower(), year=year)
+        FILE_PATTERNS['F3_European'][file_type].format(year=year)
+
+    pattern = FILE_PATTERNS['default'][file_type]
+    if round_num:
+        return pattern.format(series=series.lower(), year=year, round=round_num)
+    return pattern.format(series=series.lower(), year=year)
+
+
+def get_series_directories(series):
+    """Get all directories for a series and their patterns."""
+    config = SERIES_CONFIG[series]
+    directories = []
+
+    for series_pattern in config['patterns']:
+        series_dirs = glob.glob(f"{series_pattern}/*")
+        for year_dir in series_dirs:
+            directories.append((year_dir, series_pattern))
+
+    return directories
+
+
+def determine_series_type(series_pattern, series):
+    """Determine the series type based on pattern."""
+    if series_pattern == 'F3_European':
+        return 'F3_European'
+    return SERIES_CONFIG[series]['main_type']
 
 
 def merge_entries_data(df, entries_file):
@@ -112,162 +149,175 @@ def merge_entries_data(df, entries_file):
 
     entries_df = pd.read_csv(entries_file)
 
-    # Define columns to drop from F3 European entries
+    # Remove columns from F3 European entries
     columns_to_drop = ['Chassis', 'Engine', 'Status']
-
-    # Remove special columns if they exist
     for col in columns_to_drop:
         if col in entries_df.columns:
             entries_df = entries_df.drop(columns=col)
 
-    # Apply column mapping
-    for old_name, new_name in COLUMN_MAPPING.items():
-        if old_name in entries_df.columns:
-            entries_df = entries_df.rename(columns={old_name: new_name})
-
-    # Clean driver names
-    for col in ['Driver']:
-        if col in entries_df.columns:
-            entries_df[col] = entries_df[col].astype(str).str.strip()
-        if col in df.columns:
-            df[col] = df[col].astype(str).str.strip()
+    # Apply column mapping and clean data
+    entries_df = apply_column_mapping(entries_df)
+    entries_df = clean_string_columns(entries_df, ['Driver'])
+    df = clean_string_columns(df, ['Driver'])
 
     # Merge team data if both Driver and Team columns exist
+    # Handle multi-team drivers
     if all(col in entries_df.columns for col in ['Driver', 'Team']):
-        team_data = entries_df[['Driver', 'Team']].drop_duplicates(subset=['Driver', 'Team'])
-        df = df.merge(team_data, on='Driver', how='left')
+        # Create weighted team assignment for multi-team drivers
+        multi_team_data = []
+        
+        for driver in entries_df['Driver'].unique():
+            driver_entries = entries_df[entries_df['Driver'] == driver]
+            
+            if len(driver_entries) == 1:
+                # Single team driver
+                multi_team_data.append({
+                    'Driver': driver,
+                    'Team': driver_entries.iloc[0]['Team'],
+                    'primary_team': driver_entries.iloc[0]['Team'],
+                    'team_count': 1
+                })
+            else:
+                # Multi-team driver - parse rounds to determine primary team
+                team_rounds = []
+                
+                for _, entry in driver_entries.iterrows():
+                    team = entry['Team']
+                    rounds_str = entry.get('Rounds', 'All')
+                    
+                    if rounds_str == 'All':
+                        # Assign high weight for full season
+                        team_rounds.append((team, 999))
+                    else:
+                        # Count individual rounds
+                        round_count = 0
+                        if '–' in rounds_str or '-' in rounds_str:
+                            # Range like "1-5" or "7-8"
+                            parts = rounds_str.replace('–', '-').split(',')
+                            for part in parts:
+                                part = part.strip()
+                                if '-' in part:
+                                    start, end = map(int, part.split('-'))
+                                    round_count += (end - start + 1)
+                                else:
+                                    round_count += 1
+                        else:
+                            # Single round or comma-separated
+                            round_count = len(rounds_str.split(','))
+                        
+                        team_rounds.append((team, round_count))
+                
+                # Primary team is the one with most rounds
+                primary_team = max(team_rounds, key=lambda x: x[1])[0]
+                
+                multi_team_data.append({
+                    'Driver': driver,
+                    'Team': primary_team,  # Use primary team for main Team column
+                    'primary_team': primary_team,
+                    'team_count': len(driver_entries)
+                })
+        
+        team_data = pd.DataFrame(multi_team_data)
+        df = df.merge(team_data[['Driver', 'Team', 'team_count']], on='Driver', how='left')
+        df['team_count'] = df['team_count'].fillna(1)
 
     return df
 
 
-def load_and_combine_data(series='F3'):
-    """Load and combine data for a racing series across years."""
+def load_year_data(year_dir, series_pattern, series, data_type):
+    """Load data for a specific year and series."""
+    year = os.path.basename(year_dir)
+
+    try:
+        year_int = int(year)
+        series_type = determine_series_type(series_pattern, series)
+
+        # Get file paths
+        data_file = os.path.join(
+            year_dir, 
+            get_file_pattern(series_type, data_type, series, year)
+        )
+
+        if not os.path.exists(data_file):
+            return None
+
+        df = pd.read_csv(data_file)
+
+        # Add metadata
+        df['year'] = year_int
+        df['series'] = series
+        df['series_type'] = series_type
+
+        # Special processing for driver data
+        if data_type == 'drivers':         
+            # Merge entries data if available
+            entries_file = os.path.join(
+                year_dir,
+                get_file_pattern(series_type, 'entries', series, year)
+            )
+            df = merge_entries_data(df, entries_file)
+
+        return df
+
+    except Exception as e:
+        print(f"Error processing {year_dir}: {e}")
+        return None
+
+def load_standings_data(series, data_type):
+    """Load standings data (drivers or teams) for a racing series."""
     all_data = []
-    config = SERIES_CONFIG[series]
+    directories = get_series_directories(series)
 
-    for series_pattern in config['patterns']:
-        series_dirs = glob.glob(f"{series_pattern}/*")
+    for year_dir, series_pattern in directories:
+        df = load_year_data(year_dir, series_pattern, series, data_type)
+        if df is not None:
+            all_data.append(df)
 
-        for year_dir in series_dirs:
-            year = os.path.basename(year_dir)
-            try:
-                year_int = int(year)
-                if series_pattern == 'F3_European':
-                    series_type = 'F3_European'
-                else:
-                    series_type = config['main_type']
-
-                driver_file = os.path.join(year_dir,
-                                           get_file_pattern(series_type, 'drivers', series, year))
-                entries_file = os.path.join(year_dir,
-                                            get_file_pattern(series_type, 'entries', series, year))
-
-                if os.path.exists(driver_file):
-                    df = pd.read_csv(driver_file)
-
-                    df['year'] = year_int
-                    df['series'] = series
-                    df['series_type'] = series_type
-
-                    # Merge entries data if available
-                    df = merge_entries_data(df, entries_file)
-                    all_data.append(df)
-
-            except Exception as e:
-                print(f"Error processing {year_dir}: {e}")
-                continue
-
-    if all_data:
-        combined_df = pd.concat(all_data, ignore_index=True)
-        return combined_df
-    return pd.DataFrame()
-
-
-def load_team_standings(series='F3'):
-    """Load team championship standings data."""
-    all_team_data = []
-    config = SERIES_CONFIG[series]
-
-    for series_pattern in config['patterns']:
-        series_dirs = glob.glob(f"{series_pattern}/*")
-
-        for year_dir in series_dirs:
-            year = os.path.basename(year_dir)
-            try:
-                year_int = int(year)
-                if series_pattern == 'F3_European':
-                    series_type = 'F3_European'
-                else:
-                    series_type = config['main_type']
-
-                team_file = os.path.join(year_dir,
-                                         get_file_pattern(series_type, 'teams', series, year))
-
-                if os.path.exists(team_file):
-                    df = pd.read_csv(team_file)
-                    df['year'] = year_int
-                    df['series'] = series
-                    df['series_type'] = series_type
-                    all_team_data.append(df)
-
-            except Exception as e:
-                print(f"Error processing team data {year_dir}: {e}")
-                continue
-
-    if all_team_data:
-        return pd.concat(all_team_data, ignore_index=True)
-    return pd.DataFrame()
+    return pd.concat(all_data, ignore_index=True) if all_data else pd.DataFrame()
 
 
 def load_qualifying_data(series='F3'):
     """Load qualifying data for a racing series across years."""
     all_qualifying_data = []
-    config = SERIES_CONFIG[series]
+    directories = get_series_directories(series)
 
-    for series_pattern in config['patterns']:
+    for year_dir, series_pattern in directories:
         # Skip F3_European as it doesn't have qualifying data
         if series_pattern == 'F3_European':
             continue
 
-        series_dirs = glob.glob(f"{series_pattern}/*")
-
-        for year_dir in series_dirs:
-            year = os.path.basename(year_dir)
-            try:
-                year_int = int(year)
-                # Skip 2011 as it doesn't have qualifying data
-                if year_int == 2011:
-                    continue
-
-                qualifying_dir = os.path.join(year_dir, 'qualifying')
-                if not os.path.exists(qualifying_dir):
-                    continue
-
-                # Load all qualifying round files
-                qualifying_files = glob.glob(os.path.join(
-                    qualifying_dir,
-                    f"{series.lower()}_{year}_qualifying_round_*.csv")
-                )
-
-                year_qualifying_data = []
-                for quali_file in qualifying_files:
-                    try:
-                        df = pd.read_csv(quali_file)
-                        df['year'] = year_int
-                        df['series'] = series
-                        df['round'] = os.path.basename(
-                            quali_file).split('_')[-1].replace('.csv', '')
-                        year_qualifying_data.append(df)
-                    except Exception as e:
-                        print(f"Error loading quali file {quali_file}: {e}")
-                        continue
-
-                if year_qualifying_data:
-                    all_qualifying_data.extend(year_qualifying_data)
-
-            except Exception as e:
-                print(f"Error processing quali data for {year_dir}: {e}")
+        year = os.path.basename(year_dir)
+        try:
+            year_int = int(year)
+            # Skip 2011 as it doesn't have qualifying data
+            if year_int == 2011:
                 continue
+
+            qualifying_dir = os.path.join(year_dir, 'qualifying')
+            if not os.path.exists(qualifying_dir):
+                continue
+
+            # Load all qualifying round files
+            qualifying_files = glob.glob(os.path.join(
+                qualifying_dir,
+                f"{series.lower()}_{year}_qualifying_round_*.csv")
+            )
+
+            year_qualifying_data = []
+            for quali_file in qualifying_files:
+                try:
+                    df = pd.read_csv(quali_file)
+                    df['year'] = year_int
+                    df['series'] = series
+                    df['round'] = os.path.basename(
+                        quali_file).split('_')[-1].replace('.csv', '')
+                    year_qualifying_data.append(df)
+                except Exception as e:
+                    print(f"Error loading quali file {quali_file}: {e}")
+
+        except Exception as e:
+            print(f"Error processing quali data for {year_dir}: {e}")
+            continue
 
     if all_qualifying_data:
         return pd.concat(all_qualifying_data, ignore_index=True)
@@ -406,13 +456,13 @@ def enhance_with_team_data(driver_df, team_df):
         driver_df['team_points'] = 0
         return driver_df
 
-    # Merge with driver data
-    merge_cols = ['Team', 'year', 'series_type']
-    team_feature_cols = ['team_pos', 'team_pos_per', 'Points']
-
     # Handle missing series_type in driver data
     if 'series_type' not in driver_df.columns:
         driver_df['series_type'] = 'F3_Main'
+
+    # Merge with driver data
+    merge_cols = ['Team', 'year', 'series_type']
+    team_feature_cols = ['team_pos', 'team_pos_per', 'Points']
 
     enhanced_df = driver_df.merge(
         team_metrics[merge_cols + team_feature_cols],
@@ -423,6 +473,13 @@ def enhance_with_team_data(driver_df, team_df):
 
     # Rename team points column to avoid confusion
     enhanced_df = enhanced_df.rename(columns={'Points_team': 'team_points'})
+
+    # For multi-team drivers, adjust team strength impact
+    if 'team_count' in enhanced_df.columns:
+        multi_team_mask = enhanced_df['team_count'] > 1
+        # Moderate the team performance impact for multi-team drivers
+        enhanced_df.loc[multi_team_mask, 'team_pos_per'] = \
+            enhanced_df.loc[multi_team_mask, 'team_pos_per'] * 0.8 + 0.2 * 0.5
 
     # Fill missing values
     enhanced_df['team_pos'] = enhanced_df['team_pos'].fillna(enhanced_df['team_pos'].median())
@@ -450,6 +507,7 @@ def calculate_teammate_performance(df):
 
         for _, driver_row in team_df.iterrows():
             driver = driver_row['Driver']
+            is_multi_team = driver_row.get('team_count', 1) > 1
 
             # Get teammates (excluding current driver)
             teammates_df = team_df[team_df['Driver'] != driver]
@@ -461,7 +519,6 @@ def calculate_teammate_performance(df):
             h2h_wins = 0
             h2h_total = 0
             better_finishes = 0
-            total_comparable = 0
 
             for race_col in race_cols:
                 driver_result = str(driver_row[race_col]).strip()
@@ -532,12 +589,18 @@ def calculate_teammate_performance(df):
             avg_pos_difference = np.mean(
                 pos_differences) if pos_differences else 0
 
+            # Adjust teammate metrics for multi-team drivers (reduce weight)
+            if is_multi_team and h2h_total > 0:
+                avg_pos_difference *= 0.7  # Reduce impact for partial teammate comparisons
+                h2h_total = int(h2h_total * 0.7)
+
             team_performance.append({
                 'Driver': driver,
                 'year': year,
                 'Team': team,
                 'avg_pos_vs_teammates': avg_pos_difference,
-                'teammate_battles': h2h_total
+                'teammate_battles': h2h_total,
+                'is_multi_team': is_multi_team
             })
 
     # Convert to DataFrame and merge with original
@@ -546,7 +609,8 @@ def calculate_teammate_performance(df):
         df = df.merge(team_perf_df[['Driver',
                                     'year',
                                     'avg_pos_vs_teammates',
-                                    'teammate_battles']],
+                                    'teammate_battles',
+                                    'is_multi_team']],
                       on=['Driver',
                           'year'],
                       how='left')
@@ -554,9 +618,11 @@ def calculate_teammate_performance(df):
         # Fill NaN values for drivers without teammates
         df['avg_pos_vs_teammates'] = df['avg_pos_vs_teammates'].fillna(0)
         df['teammate_battles'] = df['teammate_battles'].fillna(0)
+        df['is_multi_team'] = df['is_multi_team'].infer_objects(copy=False)
     else:
         df['avg_pos_vs_teammates'] = 0
         df['teammate_battles'] = 0
+        df['is_multi_team'] = False
 
     return df
 
@@ -606,9 +672,7 @@ def add_driver_features(features_df, f3_df):
                 profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
 
     # Add features
-    ages = []
-    has_academy = []
-    nationalities = []
+    ages, has_academy, nationalities = [], [], []
 
     for _, row in features_df.iterrows():
         driver = row['driver']
@@ -648,8 +712,7 @@ def calculate_qualifying_features(df, qualifying_df):
             qualifying_df = qualifying_df.rename(columns={old_name: new_name})
 
     # Clean driver names
-    if 'Driver' in qualifying_df.columns:
-        qualifying_df['Driver'] = qualifying_df['Driver'].astype(str).str.strip()
+    qualifying_df = clean_string_columns(qualifying_df, ['Driver'])
 
     # Calculate qualifying statistics for each driver-year combination
     qualifying_stats = []
@@ -1222,8 +1285,7 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
 
                 print(f"\n{name} Predictions:")
                 print("-" * 50)
-                print(results.head(10).to_string(
-                        index=False, float_format='%.3f'))
+                print(results.head(10).to_string(index=False, float_format='%.3f'))
 
             except Exception as e:
                 print(f"Error with {name} model: {e}")
@@ -1233,13 +1295,13 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
 
 
 print("Loading F3 data...")
-f3_df = load_and_combine_data('F3')
+f3_df = load_standings_data('F3', 'drivers')
 
 print("Loading F2 data...")
-f2_df = load_and_combine_data('F2')
+f2_df = load_standings_data('F2', 'drivers')
 
 print("Loading F3 team championship data...")
-f3_team_df = load_team_standings('F3')
+f3_team_df = load_standings_data('F3', 'teams')
 
 print("Loading F3 qualifying data...")
 f3_qualifying_df = load_qualifying_data('F3')
