@@ -233,7 +233,7 @@ def _load_current_data():
     features_df['moved_to_f2'] = f3_df['moved_to_f2']
 
     # Get current year data
-    current_year = 2025
+    current_year = datetime.now().year
     current_df = features_df[features_df['year'] == current_year].copy()
     if current_df.empty:
         current_year = features_df['year'].max()

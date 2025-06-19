@@ -7,13 +7,8 @@ from bs4 import BeautifulSoup
 BASE_URL = "https://en.wikipedia.org/wiki/"
 
 
-def process_championship(
-        soup,
-        championship_type,
-        year,
-        file_suffix,
-        formula,
-        series_type="main"):
+def process_championship(soup, championship_type, year,
+                         file_suffix, formula, series_type="main"):
     # Determine heading ID based on year and championship type
     if series_type == "f3_euro":
         if year == 2012:
@@ -121,6 +116,7 @@ def process_championship(
         # Process all race headers
         for i, th in enumerate(race_headers[col_index:], col_index):
             race_name = th.get_text(strip=True)
+            race_name = remove_citations(race_name)
             # Stop when we hit the Points column
             if not race_name or race_name.lower() in ['points', 'pts']:
                 break
@@ -163,11 +159,11 @@ def process_championship(
                             (year > 2016 and formula == 2)) else all_rows[1:]
 
         # Remove footer rows (sources/notes)
-        if series_type == "f3_euro" and championship_type == "Drivers'":
+        if (series_type == "f3_euro" and championship_type == "Drivers'") or year == 2025:
             # For F3 European drivers standings, remove only 2 footer rows
             if len(data_rows) > 2:
                 data_rows = data_rows[:-2]
-        elif series_type == "main" and championship_type == "Drivers'" and year == 2020:
+        elif championship_type == "Drivers'" and year == 2020 and formula == 3:
             # For F3 2020, remove 4 rows
             if len(data_rows) > 4:
                 data_rows = data_rows[:-4]

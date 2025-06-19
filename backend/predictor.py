@@ -134,7 +134,8 @@ def merge_entries_data(df, entries_file):
 
     # Merge team data if both Driver and Team columns exist
     if all(col in entries_df.columns for col in ['Driver', 'Team']):
-        df = df.merge(entries_df[['Driver', 'Team']], on='Driver', how='left')
+        team_data = entries_df[['Driver', 'Team']].drop_duplicates(subset=['Driver', 'Team'])
+        df = df.merge(team_data, on='Driver', how='left')
 
     return df
 
@@ -163,17 +164,6 @@ def load_and_combine_data(series='F3'):
 
                 if os.path.exists(driver_file):
                     df = pd.read_csv(driver_file)
-
-                    # Filter out guest drivers (0 or no points and no position)
-                    if 'Points' in df.columns and 'Pos' in df.columns:
-                        mask = (
-                            df['Pos'].isna() |
-                            (df['Pos'] == '') |
-                            (df['Points'] == 0) |
-                            df['Points'].isna()
-                        )
-                        # Keep only non-guest drivers (invert the mask)
-                        df = df[~mask]
 
                     df['year'] = year_int
                     df['series'] = series
