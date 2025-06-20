@@ -111,7 +111,7 @@ def get_race_columns(df):
     return race_columns
 
 
-def get_file_pattern(series_type, file_type, series, year, round_num = None):
+def get_file_pattern(series_type, file_type, series, year, round_num=None):
     """Get file pattern based on series type."""
     if series_type == 'F3_European':
         FILE_PATTERNS['F3_European'][file_type].format(year=year)
@@ -161,14 +161,13 @@ def merge_entries_data(df, entries_file):
     df = clean_string_columns(df, ['Driver'])
 
     # Merge team data if both Driver and Team columns exist
-    # Handle multi-team drivers
     if all(col in entries_df.columns for col in ['Driver', 'Team']):
         # Create weighted team assignment for multi-team drivers
         multi_team_data = []
-        
+
         for driver in entries_df['Driver'].unique():
             driver_entries = entries_df[entries_df['Driver'] == driver]
-            
+
             if len(driver_entries) == 1:
                 # Single team driver
                 multi_team_data.append({
@@ -180,11 +179,11 @@ def merge_entries_data(df, entries_file):
             else:
                 # Multi-team driver - parse rounds to determine primary team
                 team_rounds = []
-                
+
                 for _, entry in driver_entries.iterrows():
                     team = entry['Team']
                     rounds_str = entry.get('Rounds', 'All')
-                    
+
                     if rounds_str == 'All':
                         # Assign high weight for full season
                         team_rounds.append((team, 999))
@@ -204,19 +203,19 @@ def merge_entries_data(df, entries_file):
                         else:
                             # Single round or comma-separated
                             round_count = len(rounds_str.split(','))
-                        
+
                         team_rounds.append((team, round_count))
-                
+
                 # Primary team is the one with most rounds
                 primary_team = max(team_rounds, key=lambda x: x[1])[0]
-                
+
                 multi_team_data.append({
                     'Driver': driver,
                     'Team': primary_team,  # Use primary team for main Team column
                     'primary_team': primary_team,
                     'team_count': len(driver_entries)
                 })
-        
+
         team_data = pd.DataFrame(multi_team_data)
         df = df.merge(team_data[['Driver', 'Team', 'team_count']], on='Driver', how='left')
         df['team_count'] = df['team_count'].fillna(1)
@@ -234,7 +233,7 @@ def load_year_data(year_dir, series_pattern, series, data_type):
 
         # Get file paths
         data_file = os.path.join(
-            year_dir, 
+            year_dir,
             get_file_pattern(series_type, data_type, series, year)
         )
 
@@ -249,7 +248,7 @@ def load_year_data(year_dir, series_pattern, series, data_type):
         df['series_type'] = series_type
 
         # Special processing for driver data
-        if data_type == 'drivers':         
+        if data_type == 'drivers':
             # Merge entries data if available
             entries_file = os.path.join(
                 year_dir,
@@ -262,6 +261,7 @@ def load_year_data(year_dir, series_pattern, series, data_type):
     except Exception as e:
         print(f"Error processing {year_dir}: {e}")
         return None
+
 
 def load_standings_data(series, data_type):
     """Load standings data (drivers or teams) for a racing series."""
@@ -315,6 +315,8 @@ def load_qualifying_data(series='F3'):
                 except Exception as e:
                     print(f"Error loading quali file {quali_file}: {e}")
 
+            if year_qualifying_data:
+                all_qualifying_data.extend(year_qualifying_data)
         except Exception as e:
             print(f"Error processing quali data for {year_dir}: {e}")
             continue
@@ -544,7 +546,6 @@ def calculate_teammate_performance(df):
                                 '†', '').replace('Ret', '999'))
 
                         h2h_total += 1
-                        total_comparable += 1
 
                         if driver_pos < teammate_pos:  # Lower pos number = better finish
                             h2h_wins += 1
@@ -672,13 +673,16 @@ def add_driver_features(features_df, f3_df):
                 profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
 
     # Add features
-    ages, has_academy, nationalities = [], [], []
+    dobs, ages, has_academy, nationalities = [], [], [], []
 
     for _, row in features_df.iterrows():
         driver = row['driver']
         year = row['year']
 
         profile = profiles.get(driver, {})
+
+        dob = profile.get('dob')
+        dobs.append(dob)
 
         age = calculate_age(profile.get('dob'), year)
         ages.append(age)
@@ -689,6 +693,7 @@ def add_driver_features(features_df, f3_df):
         nationality = profile.get('nationality', 'Unknown')
         nationalities.append(nationality)
 
+    features_df['dob'] = dobs
     features_df['age'] = ages
     features_df['has_academy'] = has_academy
     features_df['nationality'] = nationalities
@@ -806,6 +811,7 @@ def engineer_features(df):
     features_df['series_type'] = df.get('series_type', 'Unknown')
     features_df['is_f3_european'] = (features_df['series_type'] == 'F3_European').astype(int)
 
+    features_df['team'] = df.get('Team')
     features_df['team_pos'] = df.get('team_pos', np.nan)
     features_df['team_pos_per'] = df.get('team_pos_per', 0.5)
     features_df['team_points'] = df.get('team_points', 0)
@@ -936,7 +942,7 @@ def engineer_features(df):
     return features_df
 
 
-def create_deep_nn_model(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0.3):
+def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0.3):
     # Input layer
     model = Sequential([
         Input(shape=(input_dim,)),
@@ -1099,7 +1105,7 @@ def train_models(df):
 
     # Keras DNN
     print("\nTraining Keras Deep Neural Network...")
-    dnn_model = create_deep_nn_model(X_train_scaled.shape[1])
+    dnn_model = create_tensorflow_dnn(X_train_scaled.shape[1])
 
     callbacks = [
         EarlyStopping(patience=10, restore_best_weights=True),
@@ -1264,16 +1270,20 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                     'Avg Quali': current_df['avg_quali_pos'],
                     'Std Quali': current_df['std_quali_pos'],
                     'Points': current_df['points'],
+                    'Wins': current_df['wins'],
+                    'Podiums': current_df['podiums'],
                     'Win %': current_df['win_rate'],
                     'Podium %': current_df['podium_rate'],
                     'Top 10 %': current_df['top_10_rate'],
                     'DNF %': current_df['dnf_rate'],
                     'Exp': current_df['years_in_f3'],
+                    'DoB': current_df['dob'],
                     'Age': current_df['age'],
                     'Academy': current_df['has_academy'],
                     'Avg_Pos_Diff': current_df['avg_pos_vs_teammates'],
                     'Teammate_Battles': current_df['teammate_battles'],
                     'Participation %': current_df['participation_rate'],
+                    'team': current_df['team'],
                     'team_pos': current_df['team_pos'],
                     'team_points': current_df['team_points'],
                     'points_vs_team_strength': current_df['points_vs_team_strength'],

@@ -1,6 +1,7 @@
 import type { Driver } from '../../types/Driver';
 import { getFlagComponent } from '../../utils/flags';
 import { ProbabilityBar } from '../ProbabilityBar';
+import { DriverHoverCard } from './DriverHoverCard';
 
 interface TableRowProps {
   driver: Driver;
@@ -12,7 +13,13 @@ export const TableRow = ({ driver }: TableRowProps) => (
       driver.prediction === 1 ? 'bg-green-500/10' : ''
     }`}
   >
-    <td className="p-4 text-white font-medium">{driver.driver}</td>
+    <td className="p-4 text-white font-medium">
+      <DriverHoverCard driver={driver}>
+        <span className="cursor-pointer hover:text-blue-300 transition-colors">
+          {driver.driver}
+        </span>
+      </DriverHoverCard>
+    </td>
     <td className="p-4">{getFlagComponent(driver.nationality)}</td>
     <td className="p-4 text-white">{driver.position}</td>
     <td className="p-4 text-white">{driver.points.toFixed(1)}</td>

@@ -529,6 +529,13 @@ def extract_table_data(table):
         header_row = all_rows[0]
         headers = [th.get_text(strip=True) for th in header_row.find_all("th")]
 
+        # Identify Driver column index
+        driver_col_index = None
+        for idx, header in enumerate(headers):
+            if header.lower() in ["driver", "name"]:
+                driver_col_index = idx
+                break
+
         # Get data rows
         data_rows = []
         for row in all_rows[1:]:
@@ -542,8 +549,11 @@ def extract_table_data(table):
                 text = cell.get_text(strip=True)
                 row_data.append(text)
 
-            if row_data:  # Only add non-empty rows
-                # Process grid column (last column) to max 2 digits
+            if row_data:
+                if driver_col_index is not None and len(row_data) > driver_col_index:
+                    row_data[driver_col_index] = remove_citations(row_data[driver_col_index])
+
+                # Process grid column (last column) truncation
                 grid_value = row_data[-1]
                 if grid_value.isdigit() and len(grid_value) > 2:
                     row_data[-1] = grid_value[:2]  # Truncate to first two digits

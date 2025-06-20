@@ -6,7 +6,7 @@ import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import date, datetime
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -36,15 +36,19 @@ class PredictionResponse(BaseModel):
     avg_quali_pos: Optional[float] = None
     std_quali_pos: Optional[float] = None
     points: float
+    wins: int
+    podiums: int
     win_rate: float
     podium_rate: float
     top_10_rate: float
     dnf_rate: float
     experience: int
     age: Optional[float]
+    dob: Optional[date] = None
     has_academy: int
     avg_pos_diff: float
     teammate_battles: float
+    team: str
     team_pos: int
     team_points: float
     points_vs_team_strength: float
@@ -191,15 +195,19 @@ def _create_prediction_responses(current_df, raw_probas):
             std_finish_pos=float(row['std_finish_pos']),
             avg_quali_pos=float(row['avg_quali_pos']) if pd.notna(row['avg_quali_pos']) else None,
             std_quali_pos=float(row['std_quali_pos']) if pd.notna(row['std_quali_pos']) else None,
+            wins=int(row['wins']),
             win_rate=float(row['win_rate']),
+            podiums=int(row['podiums']),
             podium_rate=float(row['podium_rate']),
             top_10_rate=float(row['top_10_rate']),
             dnf_rate=float(row['dnf_rate']),
             experience=int(row['years_in_f3']),
+            dob=row['dob'],
             age=float(row['age']) if pd.notna(row['age']) else None,
             has_academy=int(row['has_academy']),
             avg_pos_diff=float(row['avg_pos_vs_teammates']),
             teammate_battles=float(row['teammate_battles']),
+            team=str(row['team']),
             team_pos=int(row['team_pos']),
             team_points=float(row['team_points']),
             points_vs_team_strength=float(row['points_vs_team_strength']),
