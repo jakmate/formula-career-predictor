@@ -353,26 +353,6 @@ class DriverProfileScraper:
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(profile, f, indent=2, ensure_ascii=False)
 
-    def calculate_age(self, dob_str, competition_year):
-        """Calculate driver age during competition year."""
-        if not dob_str:
-            return None
-
-        try:
-            # Parse DOB
-            if len(dob_str) == 10:  # YYYY-MM-DD
-                dob = datetime.strptime(dob_str, '%Y-%m-%d')
-            else:
-                return None
-
-            # Calculate age at start of season
-            season_start = datetime(competition_year, 1, 1)
-            age = (season_start - dob).days / 365.25
-            return round(age, 1)
-
-        except BaseException:
-            return None
-
     def batch_scrape_drivers(self, driver_list):
         """Scrape profiles for list of drivers."""
         profiles = {}

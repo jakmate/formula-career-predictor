@@ -97,11 +97,11 @@ async def scrape_and_train_task():
         await asyncio.get_event_loop().run_in_executor(None, scrape_current_year)
         app_state.system_status["last_scrape"] = datetime.now()
         logger.info("Data scraping completed successfully")
-        
+
         # Automatically train models after successful scraping
         logger.info("Starting model training after scraping...")
         await train_models_task()
-        
+
     except Exception as e:
         logger.error(f"Error during scrape and train task: {e}")
 
@@ -264,7 +264,6 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("Starting F3/F2 Predictions API...")
 
-        # Schedule combined scrape and train task (only one job needed)
         app_state.scheduler.add_job(
             scrape_and_train_task,
             CronTrigger(day_of_week='fri', hour=9, minute=0),

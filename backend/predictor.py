@@ -18,11 +18,11 @@ from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.layers import Dense, Dropout, BatchNormalization, Input
 from keras.models import Sequential
 from keras.optimizers import Adam
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.model_selection import cross_val_score, train_test_split, StratifiedKFold
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
@@ -329,6 +329,478 @@ def load_qualifying_data(series='F3'):
     return pd.DataFrame()
 
 
+def extract_position(result_str):
+    """Extract numeric position from result string."""
+    if not result_str or result_str in NOT_PARTICIPATED_CODES:
+        return None
+
+    try:
+        return int(result_str.split()[0].replace('†', '').replace('F', '').replace('P', ''))
+    except (ValueError, IndexError):
+        return None
+
+
+def calculate_participation_stats(df, race_cols):
+    """Calculate participation statistics for a dataframe."""
+    stats = []
+
+    for _, row in df.iterrows():
+        participated_races = 0
+        positions = []
+        dnfs = 0
+
+        for col in race_cols:
+            result = str(row[col]).strip()
+            if not result or result in NOT_PARTICIPATED_CODES:
+                continue
+
+            participated_races += 1
+
+            if any(x in result for x in RETIREMENT_CODES):
+                if result != 'NC':
+                    dnfs += 1
+            else:
+                pos = extract_position(result)
+                if pos:
+                    positions.append(pos)
+
+        stats.append({
+            'Driver': row['Driver'],
+            'year': row['year'],
+            'participated_races': participated_races,
+            'positions': positions,
+            'dnfs': dnfs
+        })
+
+    return stats
+
+
+def calculate_team_performance_metrics(team_df):
+    """Calculate team performance metrics from standings."""
+    if team_df.empty:
+        return pd.DataFrame()
+
+    team_metrics = []
+    for (year, series_type), year_data in team_df.groupby(['year', 'series_type']):
+        # Get unique teams and their positions
+        team_positions = year_data.groupby('Team').agg({
+            'Pos': 'first',
+            'Points': 'first'
+        }).reset_index()
+
+        # Convert position to numeric, handling ties
+        team_positions['team_pos'] = team_positions['Pos'].astype(
+            str).str.extract(r'(\d+)').astype(float)
+
+        # Calculate relative performance metrics
+        total_teams = len(team_positions)
+        team_positions['team_pos_per'] = \
+            (total_teams - team_positions['team_pos'] + 1) / total_teams
+
+        # Add year and series info
+        team_positions['year'] = year
+        team_positions['series_type'] = series_type
+
+        team_metrics.append(team_positions)
+
+    return pd.concat(team_metrics, ignore_index=True) if team_metrics else pd.DataFrame()
+
+
+def enhance_with_team_data(driver_df, team_df):
+    """Add team championship metrics to driver data."""
+    default_cols = {'team_pos': np.nan, 'team_pos_per': 0.5, 'team_points': 0}
+
+    if team_df.empty:
+        for col, default in default_cols.items():
+            driver_df[col] = default
+        return driver_df
+
+    # Calculate team metrics
+    team_metrics = calculate_team_performance_metrics(team_df)
+    if team_metrics.empty:
+        for col, default in default_cols.items():
+            driver_df[col] = default
+        return driver_df
+
+    # Handle missing series_type in driver data
+    if 'series_type' not in driver_df.columns:
+        driver_df['series_type'] = 'F3_Main'
+
+    # Merge with driver data
+    enhanced_df = driver_df.merge(
+        team_metrics[['Team', 'year', 'series_type', 'team_pos', 'team_pos_per', 'Points']],
+        on=['Team', 'year', 'series_type'],
+        how='left',
+        suffixes=('', '_team')
+    ).rename(columns={'Points_team': 'team_points'})
+
+    # For multi-team drivers, adjust team strength impact
+    if 'team_count' in enhanced_df.columns:
+        multi_team_mask = enhanced_df['team_count'] > 1
+        # Moderate the team performance impact for multi-team drivers
+        enhanced_df.loc[multi_team_mask, 'team_pos_per'] = \
+            enhanced_df.loc[multi_team_mask, 'team_pos_per'] * 0.8 + 0.1
+
+    # Fill missing values
+    for col, default in default_cols.items():
+        enhanced_df[col] = enhanced_df[col].fillna(
+            enhanced_df[col].median() if col == 'team_pos' else default
+        )
+
+    return enhanced_df
+
+
+def calculate_teammate_performance(df):
+    """Calculate performance metrics relative to teammates."""
+    if 'Team' not in df.columns:
+        return df
+
+    team_performance = []
+
+    # Group by year and team to find teammates
+    for (year, team), team_df in df.groupby(['year', 'Team']):
+        if len(team_df) < 2:  # Skip teams with only one driver
+            continue
+
+        race_cols = get_race_columns(team_df)
+        if not race_cols:
+            continue
+
+        for _, driver_row in team_df.iterrows():
+            driver = driver_row['Driver']
+
+            # Get teammates (excluding current driver)
+            teammates_df = team_df[team_df['Driver'] != driver]
+
+            if teammates_df.empty:
+                continue
+
+            # Calculate head-to-head record
+            h2h_wins = 0
+            h2h_total = 0
+            pos_differences = []
+
+            for race_col in race_cols:
+                driver_pos = extract_position(str(driver_row[race_col]).strip())
+                if not driver_pos:
+                    continue
+
+                # Compare with each teammate
+                teammate_positions = []
+                for _, teammate_row in teammates_df.iterrows():
+                    teammate_pos = extract_position(str(teammate_row[race_col]).strip())
+
+                    if teammate_pos:
+                        teammate_positions.append(teammate_pos)
+                        h2h_total += 1
+                        if driver_pos < teammate_pos:
+                            h2h_wins += 1
+
+                if teammate_positions:
+                    avg_teammate_pos = np.mean(teammate_positions)
+                    pos_differences.append(avg_teammate_pos - driver_pos)
+
+            avg_pos_difference = np.mean(pos_differences) if pos_differences else 0
+            is_multi_team = driver_row.get('team_count', 1) > 1
+
+            if is_multi_team and h2h_total > 0:
+                avg_pos_difference *= 0.7
+                h2h_total = int(h2h_total * 0.7)
+
+            team_performance.append({
+                'Driver': driver,
+                'year': year,
+                'Team': team,
+                'avg_pos_vs_teammates': avg_pos_difference,
+                'teammate_battles': h2h_total,
+                'is_multi_team': is_multi_team
+            })
+
+    # Convert to DataFrame and merge with original
+    if team_performance:
+        team_perf_df = pd.DataFrame(team_performance)
+        df = df.merge(
+            team_perf_df[['Driver', 'year', 'avg_pos_vs_teammates',
+                          'teammate_battles', 'is_multi_team']],
+            on=['Driver', 'year'], how='left'
+        )
+
+    # Fill defaults
+    defaults = {'avg_pos_vs_teammates': 0, 'teammate_battles': 0, 'is_multi_team': False}
+    for col, default in defaults.items():
+        df[col] = df[col].fillna(default) if col in df.columns else default
+
+    return df
+
+
+def get_driver_filename(driver_name):
+    safe_name = re.sub(r'[^\w\s-]', '', driver_name)
+    safe_name = re.sub(r'[-\s]+', '_', safe_name)
+    return f"{safe_name.lower()}.json"
+
+
+def calculate_age(dob_str, competition_year):
+    if not dob_str:
+        return None
+    try:
+        if len(dob_str) == 10:
+            dob = datetime.strptime(dob_str, '%Y-%m-%d')
+            season_start = datetime(competition_year, 1, 1)
+            age = (season_start - dob).days / 365.25
+            return round(age, 1)
+    except BaseException:
+        return None
+
+
+def add_driver_features(features_df, f3_df):
+    """Add features from cached JSON profiles."""
+    profiles_dir = "data/driver_profiles"
+
+    # Load cached profiles
+    profiles = {}
+    if os.path.exists(profiles_dir):
+        for driver in f3_df['Driver'].unique():
+            profile_file = os.path.join(
+                profiles_dir, get_driver_filename(driver))
+            try:
+                if os.path.exists(profile_file):
+                    with open(profile_file, 'r', encoding='utf-8') as f:
+                        profile_data = json.load(f)
+
+                        # Check if driver was successfully scraped
+                        if profile_data.get('scraped', True):
+                            profiles[driver] = profile_data
+                        else:
+                            # Driver exists but wasn't scraped - treat as no data
+                            profiles[driver] = {'dob': None, 'nationality': None}
+                else:
+                    profiles[driver] = {'dob': None, 'nationality': None}
+            except BaseException:
+                profiles[driver] = {'dob': None, 'nationality': None}
+
+    # Add features
+    feature_data = []
+    for _, row in features_df.iterrows():
+        profile = profiles.get(row['driver'], {})
+        feature_data.append({
+            'dob': profile.get('dob'),
+            'age': calculate_age(profile.get('dob'), row['year']),
+            'nationality': profile.get('nationality', 'Unknown')
+        })
+
+    for key in ['dob', 'age', 'nationality']:
+        features_df[key] = [item[key] for item in feature_data]
+
+    features_df['age'] = features_df['age'].fillna(features_df['age'].median())
+    return features_df
+
+
+def calculate_qualifying_features(df, qualifying_df):
+    """Calculate qualifying-based features for drivers."""
+    if qualifying_df.empty:
+        df['avg_quali_pos'] = np.nan
+        df['std_quali_pos'] = np.nan
+        return df
+
+    qualifying_df = apply_column_mapping(qualifying_df)
+    qualifying_df = clean_string_columns(qualifying_df, ['Driver'])
+
+    # Calculate qualifying statistics for each driver-year combination
+    qualifying_stats = []
+
+    for (driver, year), driver_data in qualifying_df.groupby(['Driver', 'year']):
+        positions = []
+        # Define priority order for qualifying position columns
+        position_columns = [
+            'Grid',     # Highest priority
+            'GridFR',  # Secondary priority
+            'R2',       # Tertiary priority
+            'Pos',      # Fallback options
+            'Pos.'
+        ]
+
+        # Extract qualifying positions from all rounds
+        for _, row in driver_data.iterrows():
+            # Check columns in priority order
+            for col in position_columns:
+                if col in row and pd.notna(row[col]):
+                    # Handle numeric values directly
+                    if isinstance(row[col], (int, float)):
+                        positions.append(int(row[col]))
+                        break
+
+                    # Convert to string and clean
+                    str_value = str(row[col]).strip()
+
+                    # Skip non-participation codes
+                    # Extract numeric position using regex (max 2 digits)
+                    if str_value not in NOT_PARTICIPATED_CODES:
+                        match = re.search(r'\b\d{1,2}\b', str_value)
+                        if match:
+                            positions.append(int(match.group()))
+                            break
+
+        qualifying_stats.append({
+            'Driver': driver,
+            'year': year,
+            'avg_quali_pos': np.mean(positions) if positions else np.nan,
+            'std_quali_pos': np.std(positions) if len(positions) > 1 else 0
+        })
+
+    # Convert to DataFrame and merge with main data
+    quali_stats_df = pd.DataFrame(qualifying_stats)
+
+    if not quali_stats_df.empty:
+        df = df.merge(quali_stats_df, on=['Driver', 'year'], how='left')
+    else:
+        df['avg_quali_pos'] = np.nan
+        df['std_quali_pos'] = np.nan
+
+    return df
+
+
+def engineer_features(df):
+    """Create features for ML models"""
+    if df.empty:
+        return pd.DataFrame()
+
+    df = calculate_teammate_performance(df)
+    df = df.sort_values(by=['Driver', 'year'])
+    df['years_in_f3'] = df.groupby('Driver').cumcount()
+
+    features_df = pd.DataFrame({
+        'year': df['year'],
+        'driver': df['Driver'],
+        'final_pos': pd.to_numeric(df['Pos'].astype(str).str.extract(r'(\d+)')[0], errors='coerce'),
+        'points': pd.to_numeric(df['Points'], errors='coerce').fillna(0),
+        'years_in_f3': df['years_in_f3'],
+        'series_type': df.get('series_type', 'Unknown'),
+        'team': df.get('Team'),
+        'team_pos': df.get('team_pos', np.nan),
+        'team_pos_per': df.get('team_pos_per', 0.5),
+        'team_points': df.get('team_points', 0),
+        'avg_pos_vs_teammates': df.get('avg_pos_vs_teammates', 0),
+        'teammate_battles': df.get('teammate_battles', 0),
+        'avg_quali_pos': df.get('avg_quali_pos', np.nan),
+        'std_quali_pos': df.get('std_quali_pos', np.nan)
+    })
+
+    features_df['is_f3_european'] = (features_df['series_type'] == 'F3_European').astype(int)
+
+    race_cols_cache = {}
+    field_size_cache = {}
+    wins, podiums, points_finishes, dnfs, races_completed = [], [], [], [], []
+    participation_rates, field_sizes = [], []
+    avg_finish_positions = []
+    std_finish_positions = []
+
+    for _, row in df.iterrows():
+        # Create cache key for this year/series combination
+        cache_key = (row['year'], row.get('series_type', 'F3_Main'))
+
+        if cache_key not in race_cols_cache:
+            # Get all rows for this year/series to determine race columns
+            year_series_data = df[
+                (df['year'] == row['year']) &
+                (df.get('series_type', 'F3_Main') == row.get('series_type', 'F3_Main'))
+            ]
+            race_cols_cache[cache_key] = get_race_columns(year_series_data)
+            field_size_cache[cache_key] = len(year_series_data)
+
+        race_cols = race_cols_cache[cache_key]
+        field_size = field_size_cache[cache_key]
+
+        driver_wins = 0
+        driver_podiums = 0
+        driver_points = 0
+        driver_dnfs = 0
+        driver_races = 0
+        total_scheduled_races = len(race_cols)
+
+        finish_positions = []
+
+        for col in race_cols:
+            if col not in row or pd.isna(row[col]):
+                continue
+
+            result = str(row[col]).strip()
+            if not result:
+                continue
+
+            if result not in NOT_PARTICIPATED_CODES:
+                driver_races += 1
+
+            if any(x in result for x in RETIREMENT_CODES):
+                if result != 'NC':
+                    driver_dnfs += 1
+                continue
+
+            try:
+                pos = int(extract_position(result))
+                finish_positions.append(pos)
+
+                if pos == 1:
+                    driver_wins += 1
+                    driver_podiums += 1
+                    driver_points += 1
+                elif pos <= 3:
+                    driver_podiums += 1
+                    driver_points += 1
+                elif pos <= 10:
+                    driver_points += 1
+            except BaseException:
+                continue
+
+        if finish_positions:
+            avg_position = np.mean(finish_positions)
+            std_position = np.std(finish_positions)
+        else:
+            avg_position = np.nan
+            std_position = np.nan
+
+        avg_finish_positions.append(avg_position)
+        std_finish_positions.append(std_position)
+
+        if total_scheduled_races > 0:
+            participation_rate = driver_races / total_scheduled_races
+        else:
+            participation_rate = 0
+
+        wins.append(driver_wins)
+        podiums.append(driver_podiums)
+        points_finishes.append(driver_points)
+        dnfs.append(driver_dnfs)
+        races_completed.append(driver_races if driver_races > 0 else 1)
+        participation_rates.append(participation_rate)
+        field_sizes.append(field_size)
+
+    features_df['wins'] = wins
+    features_df['podiums'] = podiums
+    features_df['points_finishes'] = points_finishes
+    features_df['dnfs'] = dnfs
+    features_df['races_completed'] = races_completed
+    features_df['participation_rate'] = participation_rates
+    features_df['field_size'] = field_sizes
+    features_df['avg_finish_pos'] = avg_finish_positions
+    features_df['std_finish_pos'] = std_finish_positions
+
+    features_df = add_driver_features(features_df, f3_df)
+
+    features_df['win_rate'] = features_df['wins'] / \
+        features_df['races_completed']
+    features_df['podium_rate'] = features_df['podiums'] / \
+        features_df['races_completed']
+    features_df['dnf_rate'] = features_df['dnfs'] / \
+        features_df['races_completed']
+    features_df['top_10_rate'] = features_df['points_finishes'] / \
+        features_df['races_completed']
+    features_df['points_vs_team_strength'] = features_df['points'] / \
+        (features_df['team_points'] + 1)
+    features_df['pos_vs_team_strength'] = features_df['final_pos'] * features_df['team_pos_per']
+
+    return features_df
+
+
 def create_target_variable(f3_df, f2_df):
     """Create target variable for F2 participation after last F3 season."""
     if f3_df.empty or f2_df.empty:
@@ -346,27 +818,17 @@ def create_target_variable(f3_df, f2_df):
     f2_participation = []
     for year, year_df in f2_df.groupby('year'):
         race_cols = get_race_columns(year_df)
-        total_races = len(race_cols)
-        if total_races == 0:
+        if not race_cols:
             continue
 
-        for _, row in year_df.iterrows():
-            driver = row['Driver']
-            participation = 0
-            for col in race_cols:
-                result = str(row[col]).strip()
-                if not result or result in NOT_PARTICIPATED_CODES:
-                    continue
-                participation += 1
+        participation_stats = calculate_participation_stats(year_df, race_cols)
+        threshold = 0 if year == 2025 else len(race_cols) * 0.5
 
-            # For 2025, count any participation (>0 races)
-            # For other years, use 50% threshold
-            threshold = 0 if year == 2025 else total_races * 0.5
-
+        for stat in participation_stats:
             f2_participation.append({
-                'driver': driver,
+                'driver': stat['Driver'],
                 'year': year,
-                'participated': participation > threshold
+                'participated': stat['participated_races'] > threshold
             })
 
     f2_participation_df = pd.DataFrame(f2_participation)
@@ -410,538 +872,8 @@ def create_target_variable(f3_df, f2_df):
     return f3_df
 
 
-def calculate_team_performance_metrics(team_df):
-    """Calculate team performance metrics from standings."""
-    if team_df.empty:
-        return pd.DataFrame()
-
-    team_metrics = []
-
-    for (year, series_type), year_data in team_df.groupby(['year', 'series_type']):
-        # Get unique teams and their positions
-        team_positions = year_data.groupby('Team')['Pos'].first().reset_index()
-
-        # Convert position to numeric, handling ties
-        team_positions['team_pos'] = team_positions['Pos'].astype(
-            str).str.extract(r'(\d+)').astype(float)
-
-        # Calculate team points
-        team_points = year_data.groupby('Team')['Points'].first().reset_index()
-        team_positions = team_positions.merge(team_points, on='Team', how='left')
-
-        # Calculate relative performance metrics
-        total_teams = len(team_positions)
-        team_positions['team_pos_per'] = \
-            (total_teams - team_positions['team_pos'] + 1) / total_teams
-
-        # Add year and series info
-        team_positions['year'] = year
-        team_positions['series_type'] = series_type
-
-        team_metrics.append(team_positions)
-
-    return pd.concat(team_metrics, ignore_index=True) if team_metrics else pd.DataFrame()
-
-
-def enhance_with_team_data(driver_df, team_df):
-    """Add team championship metrics to driver data."""
-    if team_df.empty:
-        # Add default values if no team data
-        driver_df['team_pos'] = np.nan
-        driver_df['team_pos_per'] = 0.5
-        driver_df['team_points'] = 0
-        return driver_df
-
-    # Calculate team metrics
-    team_metrics = calculate_team_performance_metrics(team_df)
-
-    if team_metrics.empty:
-        driver_df['team_pos'] = np.nan
-        driver_df['team_pos_per'] = 0.5
-        driver_df['team_points'] = 0
-        return driver_df
-
-    # Handle missing series_type in driver data
-    if 'series_type' not in driver_df.columns:
-        driver_df['series_type'] = 'F3_Main'
-
-    # Merge with driver data
-    merge_cols = ['Team', 'year', 'series_type']
-    team_feature_cols = ['team_pos', 'team_pos_per', 'Points']
-
-    enhanced_df = driver_df.merge(
-        team_metrics[merge_cols + team_feature_cols],
-        on=merge_cols,
-        how='left',
-        suffixes=('', '_team')
-    )
-
-    # Rename team points column to avoid confusion
-    enhanced_df = enhanced_df.rename(columns={'Points_team': 'team_points'})
-
-    # For multi-team drivers, adjust team strength impact
-    if 'team_count' in enhanced_df.columns:
-        multi_team_mask = enhanced_df['team_count'] > 1
-        # Moderate the team performance impact for multi-team drivers
-        enhanced_df.loc[multi_team_mask, 'team_pos_per'] = \
-            enhanced_df.loc[multi_team_mask, 'team_pos_per'] * 0.8 + 0.2 * 0.5
-
-    # Fill missing values
-    enhanced_df['team_pos'] = enhanced_df['team_pos'].fillna(enhanced_df['team_pos'].median())
-    enhanced_df['team_pos_per'] = enhanced_df['team_pos_per'].fillna(0.5)
-    enhanced_df['team_points'] = enhanced_df['team_points'].fillna(0)
-
-    return enhanced_df
-
-
-def calculate_teammate_performance(df):
-    """Calculate performance metrics relative to teammates."""
-    if 'Team' not in df.columns:
-        return df
-
-    team_performance = []
-
-    # Group by year and team to find teammates
-    for (year, team), team_df in df.groupby(['year', 'Team']):
-        if len(team_df) < 2:  # Skip teams with only one driver
-            continue
-
-        race_cols = get_race_columns(team_df)
-        if not race_cols:
-            continue
-
-        for _, driver_row in team_df.iterrows():
-            driver = driver_row['Driver']
-            is_multi_team = driver_row.get('team_count', 1) > 1
-
-            # Get teammates (excluding current driver)
-            teammates_df = team_df[team_df['Driver'] != driver]
-
-            if teammates_df.empty:
-                continue
-
-            # Calculate head-to-head record
-            h2h_wins = 0
-            h2h_total = 0
-            better_finishes = 0
-
-            for race_col in race_cols:
-                driver_result = str(driver_row[race_col]).strip()
-                if not driver_result or driver_result in NOT_PARTICIPATED_CODES:
-                    continue
-
-                try:
-                    driver_pos = int(
-                        driver_result.split()[0].replace(
-                            '†', '').replace('Ret', '999'))
-                except BaseException:
-                    continue
-
-                # Compare with each teammate
-                for _, teammate_row in teammates_df.iterrows():
-                    teammate_result = str(teammate_row[race_col]).strip()
-                    if not teammate_result or teammate_result in NOT_PARTICIPATED_CODES:
-                        continue
-
-                    try:
-                        teammate_pos = int(
-                            teammate_result.split()[0].replace(
-                                '†', '').replace('Ret', '999'))
-
-                        h2h_total += 1
-
-                        if driver_pos < teammate_pos:  # Lower pos number = better finish
-                            h2h_wins += 1
-                            better_finishes += 1
-
-                    except BaseException:
-                        continue
-
-            # Calculate average position difference
-            pos_differences = []
-            for race_col in race_cols:
-                driver_result = str(driver_row[race_col]).strip()
-                if not driver_result or driver_result in NOT_PARTICIPATED_CODES:
-                    continue
-
-                try:
-                    driver_pos = int(
-                        driver_result.split()[0].replace(
-                            '†', '').replace('Ret', '25'))
-                except BaseException:
-                    continue
-
-                teammate_positions = []
-                for _, teammate_row in teammates_df.iterrows():
-                    teammate_result = str(teammate_row[race_col]).strip()
-                    if not teammate_result or teammate_result in NOT_PARTICIPATED_CODES:
-                        continue
-
-                    try:
-                        teammate_pos = int(
-                            teammate_result.split()[0].replace(
-                                '†', '').replace('Ret', '25'))
-                        teammate_positions.append(teammate_pos)
-                    except BaseException:
-                        continue
-
-                if teammate_positions:
-                    avg_teammate_pos = np.mean(teammate_positions)
-                    pos_differences.append(
-                        avg_teammate_pos - driver_pos)  # Positive = driver better
-
-            avg_pos_difference = np.mean(
-                pos_differences) if pos_differences else 0
-
-            # Adjust teammate metrics for multi-team drivers (reduce weight)
-            if is_multi_team and h2h_total > 0:
-                avg_pos_difference *= 0.7  # Reduce impact for partial teammate comparisons
-                h2h_total = int(h2h_total * 0.7)
-
-            team_performance.append({
-                'Driver': driver,
-                'year': year,
-                'Team': team,
-                'avg_pos_vs_teammates': avg_pos_difference,
-                'teammate_battles': h2h_total,
-                'is_multi_team': is_multi_team
-            })
-
-    # Convert to DataFrame and merge with original
-    team_perf_df = pd.DataFrame(team_performance)
-    if not team_perf_df.empty:
-        df = df.merge(team_perf_df[['Driver',
-                                    'year',
-                                    'avg_pos_vs_teammates',
-                                    'teammate_battles',
-                                    'is_multi_team']],
-                      on=['Driver',
-                          'year'],
-                      how='left')
-
-        # Fill NaN values for drivers without teammates
-        df['avg_pos_vs_teammates'] = df['avg_pos_vs_teammates'].fillna(0)
-        df['teammate_battles'] = df['teammate_battles'].fillna(0)
-        df['is_multi_team'] = df['is_multi_team'].infer_objects(copy=False)
-    else:
-        df['avg_pos_vs_teammates'] = 0
-        df['teammate_battles'] = 0
-        df['is_multi_team'] = False
-
-    return df
-
-
-def add_driver_features(features_df, f3_df):
-    """Add features from cached JSON profiles."""
-    profiles_dir = "data/driver_profiles"
-
-    def get_driver_filename(driver_name):
-        safe_name = re.sub(r'[^\w\s-]', '', driver_name)
-        safe_name = re.sub(r'[-\s]+', '_', safe_name)
-        return f"{safe_name.lower()}.json"
-
-    def calculate_age(dob_str, competition_year):
-        if not dob_str:
-            return None
-        try:
-            if len(dob_str) == 10:
-                dob = datetime.strptime(dob_str, '%Y-%m-%d')
-                season_start = datetime(competition_year, 1, 1)
-                age = (season_start - dob).days / 365.25
-                return round(age, 1)
-        except BaseException:
-            return None
-
-    # Load cached profiles
-    profiles = {}
-    if os.path.exists(profiles_dir):
-        for driver in f3_df['Driver'].unique():
-            profile_file = os.path.join(
-                profiles_dir, get_driver_filename(driver))
-            if os.path.exists(profile_file):
-                try:
-                    with open(profile_file, 'r', encoding='utf-8') as f:
-                        profile_data = json.load(f)
-
-                        # Check if driver was successfully scraped
-                        if profile_data.get('scraped', True):
-                            profiles[driver] = profile_data
-                        else:
-                            # Driver exists but wasn't scraped - treat as no data
-                            profiles[driver] = {'dob': None, 'nationality': None}
-
-                except BaseException:
-                    profiles[driver] = {'dob': None, 'nationality': None}
-            else:
-                profiles[driver] = {'dob': None, 'nationality': None}
-
-    # Add features
-    dobs, ages, nationalities = [], [], []
-
-    for _, row in features_df.iterrows():
-        driver = row['driver']
-        year = row['year']
-
-        profile = profiles.get(driver, {})
-
-        dob = profile.get('dob')
-        dobs.append(dob)
-
-        age = calculate_age(profile.get('dob'), year)
-        ages.append(age)
-
-        nationality = profile.get('nationality', 'Unknown')
-        nationalities.append(nationality)
-
-    features_df['dob'] = dobs
-    features_df['age'] = ages
-    features_df['nationality'] = nationalities
-
-    median_age = features_df['age'].median()
-    features_df['age'] = features_df['age'].fillna(median_age)
-
-    return features_df
-
-
-def calculate_qualifying_features(df, qualifying_df):
-    """Calculate qualifying-based features for drivers."""
-    if qualifying_df.empty:
-        df['avg_quali_pos'] = np.nan
-        df['std_quali_pos'] = np.nan
-        return df
-
-    # Apply column mapping to qualifying data
-    for old_name, new_name in COLUMN_MAPPING.items():
-        if old_name in qualifying_df.columns:
-            qualifying_df = qualifying_df.rename(columns={old_name: new_name})
-
-    # Clean driver names
-    qualifying_df = clean_string_columns(qualifying_df, ['Driver'])
-
-    # Calculate qualifying statistics for each driver-year combination
-    qualifying_stats = []
-
-    for (driver, year), driver_year_data in qualifying_df.groupby(['Driver', 'year']):
-        qualifying_positions = []
-
-        # Extract qualifying positions from all rounds
-        for idx, row in driver_year_data.iterrows():
-            # Define priority order for qualifying position columns
-            position_columns = [
-                'Grid',     # Highest priority
-                'GridFR',  # Secondary priority
-                'R2',       # Tertiary priority
-                'Pos',      # Fallback options
-                'Position'
-            ]
-            position_value = None
-
-            # Check columns in priority order
-            for col in position_columns:
-                if col in row and pd.notna(row[col]):
-                    raw_value = row[col]
-
-                    # Handle numeric values directly
-                    if isinstance(raw_value, (int, float)):
-                        position_value = int(raw_value)
-                        break
-
-                    # Convert to string and clean
-                    str_value = str(raw_value).strip()
-
-                    # Skip non-participation codes
-                    if str_value in NOT_PARTICIPATED_CODES:
-                        position_value = None
-                        break
-
-                    # Extract numeric position using regex (max 2 digits)
-                    match = re.search(r'\b\d{1,2}\b', str_value)
-                    if match:
-                        position_value = int(match.group())
-                        break
-
-            if position_value is not None:
-                qualifying_positions.append(position_value)
-
-        # Calculate statistics only if we have valid positions
-        if qualifying_positions:
-            avg_quali = np.mean(qualifying_positions)
-            std_quali = np.std(qualifying_positions) if len(qualifying_positions) > 1 else 0
-        else:
-            avg_quali = np.nan
-            std_quali = np.nan
-
-        qualifying_stats.append({
-            'Driver': driver,
-            'year': year,
-            'avg_quali_pos': avg_quali,
-            'std_quali_pos': std_quali
-        })
-
-    # Convert to DataFrame and merge with main data
-    quali_stats_df = pd.DataFrame(qualifying_stats)
-
-    if not quali_stats_df.empty:
-        df = df.merge(quali_stats_df[['Driver', 'year', 'avg_quali_pos', 'std_quali_pos']],
-                      on=['Driver', 'year'],
-                      how='left')
-    else:
-        df['avg_quali_pos'] = np.nan
-        df['std_quali_pos'] = np.nan
-
-    return df
-
-
-def engineer_features(df):
-    """Create features for ML models"""
-    if df.empty:
-        return pd.DataFrame()
-
-    df = calculate_teammate_performance(df)
-    df = df.sort_values(by=['Driver', 'year'])
-    df['years_in_f3'] = df.groupby('Driver').cumcount()
-
-    features_df = pd.DataFrame()
-    features_df['year'] = df['year']
-    features_df['driver'] = df['Driver']
-    features_df['final_pos'] = df['Pos'].astype(str).str.extract(r'(\d+)').astype(float)
-    features_df['points'] = pd.to_numeric(df['Points'], errors='coerce').fillna(0)
-    features_df['years_in_f3'] = df['years_in_f3']
-    features_df['series_type'] = df.get('series_type', 'Unknown')
-    features_df['is_f3_european'] = (features_df['series_type'] == 'F3_European').astype(int)
-
-    features_df['team'] = df.get('Team')
-    features_df['team_pos'] = df.get('team_pos', np.nan)
-    features_df['team_pos_per'] = df.get('team_pos_per', 0.5)
-    features_df['team_points'] = df.get('team_points', 0)
-
-    race_cols_cache = {}
-    wins, podiums, points_finishes, dnfs, races_completed = [], [], [], [], []
-    participation_rates, field_sizes = [], []
-    avg_finish_positions = []
-    std_finish_positions = []
-
-    for _, row in df.iterrows():
-        # Create cache key for this year/series combination
-        cache_key = (row['year'], row.get('series_type', 'F3_Main'))
-
-        if cache_key not in race_cols_cache:
-            # Get all rows for this year/series to determine race columns
-            year_series_data = df[
-                (df['year'] == row['year']) &
-                (df.get('series_type', 'F3_Main') == row.get('series_type', 'F3_Main'))
-            ]
-            race_cols_cache[cache_key] = get_race_columns(year_series_data)
-
-        race_cols = race_cols_cache[cache_key]
-
-        driver_wins = 0
-        driver_podiums = 0
-        driver_points = 0
-        driver_dnfs = 0
-        driver_races = 0
-        total_scheduled_races = len(race_cols)
-
-        # Calculate field size for this year/series
-        year_series_data = df[
-            (df['year'] == row['year']) &
-            (df.get('series_type', 'F3_Main') == row.get('series_type', 'F3_Main'))
-        ]
-        field_size = len(year_series_data)
-        field_sizes.append(field_size)
-
-        finish_positions = []
-
-        for col in race_cols:
-            if col not in row or pd.isna(row[col]):
-                continue
-
-            result = str(row[col]).strip()
-            if not result:
-                continue
-
-            if result not in NOT_PARTICIPATED_CODES:
-                driver_races += 1
-
-            if any(x in result for x in RETIREMENT_CODES):
-                if result != 'NC':
-                    driver_dnfs += 1
-                continue
-
-            try:
-                pos = int(
-                    result.split()[0].replace('†', '').replace(
-                        'F', '').replace('P', ''))
-                finish_positions.append(pos)
-
-                if pos == 1:
-                    driver_wins += 1
-                    driver_podiums += 1
-                    driver_points += 1
-                elif pos <= 3:
-                    driver_podiums += 1
-                    driver_points += 1
-                elif pos <= 10:
-                    driver_points += 1
-            except BaseException:
-                continue
-
-        if finish_positions:
-            avg_position = np.mean(finish_positions)
-            std_position = np.std(finish_positions)
-        else:
-            avg_position = np.nan
-            std_position = np.nan
-
-        avg_finish_positions.append(avg_position)
-        std_finish_positions.append(std_position)
-
-        if total_scheduled_races > 0:
-            participation_rate = driver_races / total_scheduled_races
-        else:
-            participation_rate = 0
-
-        wins.append(driver_wins)
-        podiums.append(driver_podiums)
-        points_finishes.append(driver_points)
-        dnfs.append(driver_dnfs)
-        races_completed.append(driver_races if driver_races > 0 else 1)
-        participation_rates.append(participation_rate)
-
-    features_df['wins'] = wins
-    features_df['podiums'] = podiums
-    features_df['points_finishes'] = points_finishes
-    features_df['dnfs'] = dnfs
-    features_df['races_completed'] = races_completed
-    features_df['participation_rate'] = participation_rates
-    features_df['field_size'] = field_sizes
-    features_df['avg_finish_pos'] = avg_finish_positions
-    features_df['std_finish_pos'] = std_finish_positions
-
-    features_df['avg_pos_vs_teammates'] = df.get('avg_pos_vs_teammates', 0)
-    features_df['teammate_battles'] = df.get('teammate_battles', 0)
-
-    features_df['avg_quali_pos'] = df.get('avg_quali_pos', np.nan)
-    features_df['std_quali_pos'] = df.get('std_quali_pos', np.nan)
-
-    features_df = add_driver_features(features_df, f3_df)
-
-    features_df['win_rate'] = features_df['wins'] / \
-        features_df['races_completed']
-    features_df['podium_rate'] = features_df['podiums'] / \
-        features_df['races_completed']
-    features_df['dnf_rate'] = features_df['dnfs'] / \
-        features_df['races_completed']
-    features_df['top_10_rate'] = features_df['points_finishes'] / \
-        features_df['races_completed']
-    features_df['points_vs_team_strength'] = features_df['points'] / \
-        (features_df['team_points'] + 1)
-    features_df['pos_vs_team_strength'] = features_df['final_pos'] * features_df['team_pos_per']
-
-    return features_df
-
-
-def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0.3, learning_rate=0.001):
+def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32],
+                          dropout_rate=0.3, learning_rate=0.001):
     model = Sequential([
         Input(shape=(input_dim,)),
         Dense(hidden_layers[0], activation='relu'),
@@ -962,6 +894,7 @@ def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0
         metrics=['accuracy', 'precision', 'recall']
     )
     return model
+
 
 class RacingPredictor(nn.Module):
     def __init__(self, input_dim, hidden_dims=[128, 64, 32], dropout_rate=0.3):
@@ -984,30 +917,33 @@ class RacingPredictor(nn.Module):
     def forward(self, x):
         return self.network(x)
 
-def train_pytorch_model(X_train_scaled, y_train, X_val_scaled, y_val, input_dim, hidden_dims, dropout_rate, learning_rate, batch_size, epochs=100):
+
+def train_pytorch_model(X_train_scaled, y_train, X_val_scaled, y_val, input_dim,
+                        hidden_dims, dropout_rate, learning_rate, batch_size, epochs=100):
     """Train PyTorch model with proper training loop"""
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    
+
     # Convert to tensors
     X_train_tensor = torch.FloatTensor(X_train_scaled).to(device)
     y_train_tensor = torch.FloatTensor(y_train.values).to(device)
     X_val_tensor = torch.FloatTensor(X_val_scaled).to(device)
     y_val_tensor = torch.FloatTensor(y_val.values).to(device)
-    
+
     # Create data loaders
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    
+
     # Initialize model
     model = RacingPredictor(input_dim, hidden_dims, dropout_rate).to(device)
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=0.5, min_lr=1e-6)
-    
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10,
+                                                     factor=0.5, min_lr=1e-6)
+
     best_val_loss = float('inf')
     patience_counter = 0
     patience = 15
-    
+
     for epoch in range(epochs):
         # Training
         model.train()
@@ -1019,28 +955,29 @@ def train_pytorch_model(X_train_scaled, y_train, X_val_scaled, y_val, input_dim,
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-        
+
         # Validation
         model.eval()
         with torch.no_grad():
             val_outputs = model(X_val_tensor).squeeze()
             val_loss = criterion(val_outputs, y_val_tensor).item()
-        
+
         scheduler.step(val_loss)
-        
+
         # Early stopping
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             patience_counter = 0
-            torch.save(model.state_dict(), 'best_model.pth')
+            best_state_dict = model.state_dict()
         else:
             patience_counter += 1
             if patience_counter >= patience:
                 break
-    
+
     # Load best model
-    model.load_state_dict(torch.load('best_model.pth'))
+    model.load_state_dict(best_state_dict)
     return model
+
 
 def optimize_traditional_hyperparams(X_train, y_train, model_type='xgboost', n_trials=50):
     """Optimize hyperparameters using Optuna"""
@@ -1054,7 +991,7 @@ def optimize_traditional_hyperparams(X_train, y_train, model_type='xgboost', n_t
                 'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
             }
             model = xgb.XGBClassifier(random_state=SEED, **params)
-            
+
         elif model_type == 'random_forest':
             params = {
                 'n_estimators': trial.suggest_int('n_estimators', 50, 300),
@@ -1063,7 +1000,7 @@ def optimize_traditional_hyperparams(X_train, y_train, model_type='xgboost', n_t
                 'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 5),
             }
             model = RandomForestClassifier(random_state=SEED, class_weight='balanced', **params)
-            
+
         elif model_type == 'logistic':
             params = {
                 'C': trial.suggest_float('C', 0.01, 100, log=True),
@@ -1073,7 +1010,7 @@ def optimize_traditional_hyperparams(X_train, y_train, model_type='xgboost', n_t
                 random_state=SEED, penalty='elasticnet', solver='saga',
                 class_weight='balanced', max_iter=10000, **params
             )
-        
+
         elif model_type == 'mlp':
             # MLP hyperparameters
             n_layers = trial.suggest_int('n_layers', 1, 4)
@@ -1081,31 +1018,32 @@ def optimize_traditional_hyperparams(X_train, y_train, model_type='xgboost', n_t
             for i in range(n_layers):
                 size = trial.suggest_int(f'layer_{i}_size', 32, 256)
                 hidden_layer_sizes.append(size)
-            
+
             params = {
                 'hidden_layer_sizes': tuple(hidden_layer_sizes),
                 'alpha': trial.suggest_float('alpha', 1e-5, 1e-1, log=True),
-                'learning_rate_init': trial.suggest_float('learning_rate_init', 1e-4, 1e-2, log=True),
-                'max_iter': 500,
+                'learning_rate_init': trial.suggest_float('learning_rate_init',
+                                                          1e-4, 1e-2, log=True),
+                'max_iter': 10000,
                 'early_stopping': True,
                 'validation_fraction': 0.2,
                 'n_iter_no_change': 20
             }
             model = MLPClassifier(random_state=SEED, **params)
 
-        # Use SMOTE + model pipeline
         pipeline = ImbPipeline([
             ('smote', SMOTE(random_state=SEED)),
             ('scaler', StandardScaler()),
             ('classifier', model)
         ])
-        
+
         scores = cross_val_score(pipeline, X_train, y_train, cv=3, scoring='roc_auc')
         return scores.mean()
 
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
     return study.best_params
+
 
 def optimize_deep_learning_hyperparams(X_train_scaled, y_train, model_type='keras', n_trials=30):
     """Optimize deep learning hyperparameters"""
@@ -1117,25 +1055,25 @@ def optimize_deep_learning_hyperparams(X_train_scaled, y_train, model_type='kera
             for i in range(n_layers):
                 dim = trial.suggest_int(f'hidden_dim_{i}', 32, 256)
                 hidden_dims.append(dim)
-            
+
             dropout_rate = trial.suggest_float('dropout_rate', 0.1, 0.5)
             learning_rate = trial.suggest_float('learning_rate', 1e-4, 1e-2, log=True)
             batch_size = trial.suggest_categorical('batch_size', [16, 32, 64])
-            
+
             model = create_tensorflow_dnn(
                 X_train_scaled.shape[1], hidden_dims, dropout_rate, learning_rate
             )
-            
+
             # Quick training for evaluation
             early_stop = EarlyStopping(patience=5, restore_best_weights=True)
             model.fit(
                 X_train_scaled, y_train, validation_split=0.2, epochs=20,
                 batch_size=batch_size, callbacks=[early_stop], verbose=0
             )
-            
+
             val_loss = min(model.history.history['val_loss'])
             return -val_loss  # Minimize loss = maximize negative loss
-            
+
         elif model_type == 'pytorch':
             # PyTorch hyperparameters
             n_layers = trial.suggest_int('n_layers', 2, 4)
@@ -1143,22 +1081,22 @@ def optimize_deep_learning_hyperparams(X_train_scaled, y_train, model_type='kera
             for i in range(n_layers):
                 dim = trial.suggest_int(f'hidden_dim_{i}', 32, 256)
                 hidden_dims.append(dim)
-            
+
             dropout_rate = trial.suggest_float('dropout_rate', 0.1, 0.5)
             learning_rate = trial.suggest_float('learning_rate', 1e-4, 1e-2, log=True)
             batch_size = trial.suggest_categorical('batch_size', [16, 32, 64])
-            
+
             # Split for validation
             X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
                 X_train_scaled, y_train, test_size=0.2, random_state=SEED, stratify=y_train
             )
-            
+
             model = train_pytorch_model(
                 X_train_fold, y_train_fold, X_val_fold, y_val_fold,
-                X_train_scaled.shape[1], hidden_dims, dropout_rate, 
+                X_train_scaled.shape[1], hidden_dims, dropout_rate,
                 learning_rate, batch_size, epochs=30
             )
-            
+
             # Evaluate on validation set
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             model.eval()
@@ -1167,29 +1105,13 @@ def optimize_deep_learning_hyperparams(X_train_scaled, y_train, model_type='kera
                 y_val_tensor = torch.FloatTensor(y_val_fold.values).to(device)
                 outputs = model(X_val_tensor).squeeze()
                 val_loss = nn.BCEWithLogitsLoss()(outputs, y_val_tensor).item()
-            
+
             return -val_loss
-            
+
     study = optuna.create_study(direction='maximize')
     study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
     return study.best_params
 
-def create_ensemble_model(traditional_models, X_train, y_train):
-    """Create voting ensemble from best traditional models"""
-    # Select top 3 models based on cross-validation performance
-    model_scores = {}
-    cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=SEED)
-    
-    for name, pipeline in traditional_models.items():
-        scores = cross_val_score(pipeline, X_train, y_train, cv=cv, scoring='roc_auc')
-        model_scores[name] = scores.mean()
-    
-    # Get top 3 models
-    top_models = sorted(model_scores.items(), key=lambda x: x[1], reverse=True)[:3]
-    ensemble_models = [(name, traditional_models[name]) for name, _ in top_models]
-    
-    ensemble = VotingClassifier(estimators=ensemble_models, voting='soft')
-    return ensemble
 
 def train_models(df):
     """Enhanced training with PyTorch and MLP"""
@@ -1248,8 +1170,8 @@ def train_models(df):
                 class_weight='balanced', max_iter=10000, **best_params
             )
         elif model_type == 'mlp':
-            mlp_params = {k: v for k, v in best_params.items() 
-                         if k not in ['n_layers'] and not k.startswith('layer_')}
+            mlp_params = {k: v for k, v in best_params.items()
+                          if k not in ['n_layers'] and not k.startswith('layer_')}
             model = MLPClassifier(random_state=SEED, **mlp_params)
 
         pipeline = ImbPipeline([
@@ -1259,27 +1181,14 @@ def train_models(df):
         ])
 
         pipeline.fit(X_train, y_train)
-        
+
         # Add calibration
         y_pred_proba = pipeline.predict_proba(X_test)[:, 1]
         iso_reg = IsotonicRegression(out_of_bounds='clip')
         iso_reg.fit(y_pred_proba, y_test)
         pipeline.calibrator = iso_reg
-        
-        traditional_results[f'Optimized_{model_type}'] = pipeline
 
-    # Create ensemble
-    print("\nCreating ensemble model...")
-    ensemble = create_ensemble_model(traditional_results, X_train, y_train)
-    ensemble.fit(X_train, y_train)
-    
-    # Add calibration to ensemble
-    y_pred_proba_ensemble = ensemble.predict_proba(X_test)[:, 1]
-    iso_reg_ensemble = IsotonicRegression(out_of_bounds='clip')
-    iso_reg_ensemble.fit(y_pred_proba_ensemble, y_test)
-    ensemble.calibrator = iso_reg_ensemble
-    
-    traditional_results['Ensemble'] = ensemble
+        traditional_results[f'Optimized_{model_type}'] = pipeline
 
     # Optimize deep learning
     print("\n" + "=" * 50)
@@ -1298,8 +1207,8 @@ def train_models(df):
             hidden_dims.append(best_keras_params[f'hidden_dim_{i}'])
 
     dnn_model = create_tensorflow_dnn(
-        X_train_scaled.shape[1], 
-        hidden_dims, 
+        X_train_scaled.shape[1],
+        hidden_dims,
         best_keras_params['dropout_rate'],
         best_keras_params['learning_rate']
     )
@@ -1353,7 +1262,7 @@ def train_models(df):
     with torch.no_grad():
         X_test_tensor = torch.FloatTensor(X_test_scaled).to(device)
         pytorch_probas = torch.sigmoid(pytorch_model(X_test_tensor)).cpu().numpy().flatten()
-    
+
     iso_reg_pytorch = IsotonicRegression(out_of_bounds='clip')
     iso_reg_pytorch.fit(pytorch_probas, y_test)
     pytorch_model.calibrator = iso_reg_pytorch
@@ -1373,11 +1282,11 @@ def train_models(df):
     # Evaluate deep learning models
     probas_dnn = dnn_model.predict(X_test_scaled, verbose=0).flatten()
     pred_dnn = (probas_dnn > 0.5).astype(int)
-    print(f"\nOptimized Keras DNN:")
+    print("\nOptimized Keras DNN:")
     print(classification_report(y_test, pred_dnn))
 
     pred_pytorch = (pytorch_probas > 0.5).astype(int)
-    print(f"\nOptimized PyTorch DNN:")
+    print("\nOptimized PyTorch DNN:")
     print(classification_report(y_test, pred_pytorch))
 
     return traditional_results, deep_results, X_test, y_test, feature_cols, scaler
@@ -1428,7 +1337,7 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                     calibrated_probas = model.calibrator.transform(raw_probas)
                 else:
                     calibrated_probas = raw_probas
-                    
+
                 empirical_pct = calibrated_probas * 100.0
 
                 # Create results DataFrame

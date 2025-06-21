@@ -59,9 +59,12 @@ def process_entries(soup, year, formula, series_type="main"):
 
         # Remove footer row (if detected)
         if len(data_rows) > 0:
-            last_row = data_rows[-1]
-            if len(last_row.find_all(["td", "th"])) < num_columns:
-                data_rows = data_rows[:-1]
+            if not (formula == 2 and year < 2018) and not (
+                formula == 3 and year < 2017) and not (
+                    formula == 3 and year == 2017 and series_type == 'f3_euro'):
+                last_row = data_rows[-1]
+                if len(last_row.find_all(["td", "th"])) < num_columns:
+                    data_rows = data_rows[:-1]
 
         # Determine rowspan columns based on series and year
         if series_type == "f3_euro" and 2012 <= year <= 2018:
