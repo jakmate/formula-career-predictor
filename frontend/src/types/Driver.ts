@@ -14,4 +14,16 @@ export interface Driver {
   dob?: string;
   age?: number;
   team: string;
+  avg_finish_pos: number;
+  std_finish_pos: number;
+  avg_quali_pos?: number;
+  std_quali_pos?: number;
+  dnf_rate: number;
+  participation_rate: number;
+  avg_pos_diff: number;
+  teammate_battles: number;
+  team_pos: number;
+  team_points: number;
+  points_vs_team_strength: number;
+  pos_vs_team_strength: number;
 }

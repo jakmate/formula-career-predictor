@@ -18,7 +18,6 @@ export const TableContent = ({ predictions }: TableContentProps) => {
             <TableHeader field="driver" sortConfig={sortConfig} onSort={handleSort}>
               Driver
             </TableHeader>
-            <th className="p-4 font-semibold">Nat.</th>
             <TableHeader field="position" sortConfig={sortConfig} onSort={handleSort}>
               Position
             </TableHeader>
@@ -34,14 +33,17 @@ export const TableContent = ({ predictions }: TableContentProps) => {
             <TableHeader field="top_10_rate" sortConfig={sortConfig} onSort={handleSort}>
               Top 10 %
             </TableHeader>
+            <TableHeader field="dnf_rate" sortConfig={sortConfig} onSort={handleSort}>
+              DNF %
+            </TableHeader>
+            <TableHeader field="participation_rate" sortConfig={sortConfig} onSort={handleSort}>
+              Participation %
+            </TableHeader>
             <TableHeader field="experience" sortConfig={sortConfig} onSort={handleSort}>
               Experience
             </TableHeader>
             <TableHeader field="empirical_percentage" sortConfig={sortConfig} onSort={handleSort}>
               F2 Probability
-            </TableHeader>
-            <TableHeader field="prediction" sortConfig={sortConfig} onSort={handleSort}>
-              Prediction
             </TableHeader>
           </tr>
         </thead>

@@ -3,6 +3,7 @@ import json
 import os
 import random
 import numpy as np
+import optuna
 import pandas as pd
 import re
 import tensorflow as tf
@@ -17,14 +18,14 @@ from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.layers import Dense, Dropout, BatchNormalization, Input
 from keras.models import Sequential
 from keras.optimizers import Adam
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_validate
+from sklearn.model_selection import cross_val_score, train_test_split, StratifiedKFold
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.utils import class_weight
+from torch.utils.data import DataLoader, TensorDataset
 
 SEED = 69
 os.environ['PYTHONHASHSEED'] = str(SEED)
@@ -33,6 +34,7 @@ np.random.seed(SEED)
 os.environ['TF_DETERMINISTIC_OPS'] = '1'
 os.environ['TF_CUDNN_DETERMINISTIC'] = '1'
 tf.keras.utils.set_random_seed(SEED)
+tf.config.experimental.enable_op_determinism()
 torch.manual_seed(SEED)
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(SEED)
@@ -128,7 +130,8 @@ def get_series_directories(series):
     directories = []
 
     for series_pattern in config['patterns']:
-        series_dirs = glob.glob(f"{series_pattern}/*")
+        pattern = os.path.join("data", series_pattern, "*")
+        series_dirs = glob.glob(pattern)
         for year_dir in series_dirs:
             directories.append((year_dir, series_pattern))
 
@@ -630,7 +633,7 @@ def calculate_teammate_performance(df):
 
 def add_driver_features(features_df, f3_df):
     """Add features from cached JSON profiles."""
-    profiles_dir = "driver_profiles"
+    profiles_dir = "data/driver_profiles"
 
     def get_driver_filename(driver_name):
         safe_name = re.sub(r'[^\w\s-]', '', driver_name)
@@ -665,15 +668,15 @@ def add_driver_features(features_df, f3_df):
                             profiles[driver] = profile_data
                         else:
                             # Driver exists but wasn't scraped - treat as no data
-                            profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
+                            profiles[driver] = {'dob': None, 'nationality': None}
 
                 except BaseException:
-                    profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
+                    profiles[driver] = {'dob': None, 'nationality': None}
             else:
-                profiles[driver] = {'dob': None, 'nationality': None, 'academy': None}
+                profiles[driver] = {'dob': None, 'nationality': None}
 
     # Add features
-    dobs, ages, has_academy, nationalities = [], [], [], []
+    dobs, ages, nationalities = [], [], []
 
     for _, row in features_df.iterrows():
         driver = row['driver']
@@ -687,15 +690,11 @@ def add_driver_features(features_df, f3_df):
         age = calculate_age(profile.get('dob'), year)
         ages.append(age)
 
-        academy = profile.get('academy')
-        has_academy.append(1 if academy else 0)
-
         nationality = profile.get('nationality', 'Unknown')
         nationalities.append(nationality)
 
     features_df['dob'] = dobs
     features_df['age'] = ages
-    features_df['has_academy'] = has_academy
     features_df['nationality'] = nationalities
 
     median_age = features_df['age'].median()
@@ -942,8 +941,7 @@ def engineer_features(df):
     return features_df
 
 
-def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0.3):
-    # Input layer
+def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0.3, learning_rate=0.001):
     model = Sequential([
         Input(shape=(input_dim,)),
         Dense(hidden_layers[0], activation='relu'),
@@ -951,28 +949,23 @@ def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0
         Dropout(dropout_rate)
     ])
 
-    # Hidden layers
     for units in hidden_layers[1:]:
         model.add(Dense(units, activation='relu'))
         model.add(BatchNormalization())
         model.add(Dropout(dropout_rate))
 
-    # Output layer
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(
-        optimizer=Adam(learning_rate=0.001),
+        optimizer=Adam(learning_rate=learning_rate),
         loss='binary_crossentropy',
         metrics=['accuracy', 'precision', 'recall']
     )
-
     return model
-
 
 class RacingPredictor(nn.Module):
     def __init__(self, input_dim, hidden_dims=[128, 64, 32], dropout_rate=0.3):
         super(RacingPredictor, self).__init__()
-
         layers = []
         prev_dim = input_dim
 
@@ -991,9 +984,215 @@ class RacingPredictor(nn.Module):
     def forward(self, x):
         return self.network(x)
 
+def train_pytorch_model(X_train_scaled, y_train, X_val_scaled, y_val, input_dim, hidden_dims, dropout_rate, learning_rate, batch_size, epochs=100):
+    """Train PyTorch model with proper training loop"""
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    # Convert to tensors
+    X_train_tensor = torch.FloatTensor(X_train_scaled).to(device)
+    y_train_tensor = torch.FloatTensor(y_train.values).to(device)
+    X_val_tensor = torch.FloatTensor(X_val_scaled).to(device)
+    y_val_tensor = torch.FloatTensor(y_val.values).to(device)
+    
+    # Create data loaders
+    train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    
+    # Initialize model
+    model = RacingPredictor(input_dim, hidden_dims, dropout_rate).to(device)
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=0.5, min_lr=1e-6)
+    
+    best_val_loss = float('inf')
+    patience_counter = 0
+    patience = 15
+    
+    for epoch in range(epochs):
+        # Training
+        model.train()
+        train_loss = 0
+        for batch_X, batch_y in train_loader:
+            optimizer.zero_grad()
+            outputs = model(batch_X).squeeze()
+            loss = criterion(outputs, batch_y)
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item()
+        
+        # Validation
+        model.eval()
+        with torch.no_grad():
+            val_outputs = model(X_val_tensor).squeeze()
+            val_loss = criterion(val_outputs, y_val_tensor).item()
+        
+        scheduler.step(val_loss)
+        
+        # Early stopping
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            patience_counter = 0
+            torch.save(model.state_dict(), 'best_model.pth')
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                break
+    
+    # Load best model
+    model.load_state_dict(torch.load('best_model.pth'))
+    return model
+
+def optimize_traditional_hyperparams(X_train, y_train, model_type='xgboost', n_trials=50):
+    """Optimize hyperparameters using Optuna"""
+    def objective(trial):
+        if model_type == 'xgboost':
+            params = {
+                'n_estimators': trial.suggest_int('n_estimators', 50, 300),
+                'max_depth': trial.suggest_int('max_depth', 3, 10),
+                'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
+                'subsample': trial.suggest_float('subsample', 0.6, 1.0),
+                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
+            }
+            model = xgb.XGBClassifier(random_state=SEED, **params)
+            
+        elif model_type == 'random_forest':
+            params = {
+                'n_estimators': trial.suggest_int('n_estimators', 50, 300),
+                'max_depth': trial.suggest_int('max_depth', 5, 20),
+                'min_samples_split': trial.suggest_int('min_samples_split', 2, 10),
+                'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 5),
+            }
+            model = RandomForestClassifier(random_state=SEED, class_weight='balanced', **params)
+            
+        elif model_type == 'logistic':
+            params = {
+                'C': trial.suggest_float('C', 0.01, 100, log=True),
+                'l1_ratio': trial.suggest_float('l1_ratio', 0, 1),
+            }
+            model = LogisticRegression(
+                random_state=SEED, penalty='elasticnet', solver='saga',
+                class_weight='balanced', max_iter=10000, **params
+            )
+        
+        elif model_type == 'mlp':
+            # MLP hyperparameters
+            n_layers = trial.suggest_int('n_layers', 1, 4)
+            hidden_layer_sizes = []
+            for i in range(n_layers):
+                size = trial.suggest_int(f'layer_{i}_size', 32, 256)
+                hidden_layer_sizes.append(size)
+            
+            params = {
+                'hidden_layer_sizes': tuple(hidden_layer_sizes),
+                'alpha': trial.suggest_float('alpha', 1e-5, 1e-1, log=True),
+                'learning_rate_init': trial.suggest_float('learning_rate_init', 1e-4, 1e-2, log=True),
+                'max_iter': 500,
+                'early_stopping': True,
+                'validation_fraction': 0.2,
+                'n_iter_no_change': 20
+            }
+            model = MLPClassifier(random_state=SEED, **params)
+
+        # Use SMOTE + model pipeline
+        pipeline = ImbPipeline([
+            ('smote', SMOTE(random_state=SEED)),
+            ('scaler', StandardScaler()),
+            ('classifier', model)
+        ])
+        
+        scores = cross_val_score(pipeline, X_train, y_train, cv=3, scoring='roc_auc')
+        return scores.mean()
+
+    study = optuna.create_study(direction='maximize')
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+    return study.best_params
+
+def optimize_deep_learning_hyperparams(X_train_scaled, y_train, model_type='keras', n_trials=30):
+    """Optimize deep learning hyperparameters"""
+    def objective(trial):
+        if model_type == 'keras':
+            # Suggest architecture
+            n_layers = trial.suggest_int('n_layers', 2, 4)
+            hidden_dims = []
+            for i in range(n_layers):
+                dim = trial.suggest_int(f'hidden_dim_{i}', 32, 256)
+                hidden_dims.append(dim)
+            
+            dropout_rate = trial.suggest_float('dropout_rate', 0.1, 0.5)
+            learning_rate = trial.suggest_float('learning_rate', 1e-4, 1e-2, log=True)
+            batch_size = trial.suggest_categorical('batch_size', [16, 32, 64])
+            
+            model = create_tensorflow_dnn(
+                X_train_scaled.shape[1], hidden_dims, dropout_rate, learning_rate
+            )
+            
+            # Quick training for evaluation
+            early_stop = EarlyStopping(patience=5, restore_best_weights=True)
+            model.fit(
+                X_train_scaled, y_train, validation_split=0.2, epochs=20,
+                batch_size=batch_size, callbacks=[early_stop], verbose=0
+            )
+            
+            val_loss = min(model.history.history['val_loss'])
+            return -val_loss  # Minimize loss = maximize negative loss
+            
+        elif model_type == 'pytorch':
+            # PyTorch hyperparameters
+            n_layers = trial.suggest_int('n_layers', 2, 4)
+            hidden_dims = []
+            for i in range(n_layers):
+                dim = trial.suggest_int(f'hidden_dim_{i}', 32, 256)
+                hidden_dims.append(dim)
+            
+            dropout_rate = trial.suggest_float('dropout_rate', 0.1, 0.5)
+            learning_rate = trial.suggest_float('learning_rate', 1e-4, 1e-2, log=True)
+            batch_size = trial.suggest_categorical('batch_size', [16, 32, 64])
+            
+            # Split for validation
+            X_train_fold, X_val_fold, y_train_fold, y_val_fold = train_test_split(
+                X_train_scaled, y_train, test_size=0.2, random_state=SEED, stratify=y_train
+            )
+            
+            model = train_pytorch_model(
+                X_train_fold, y_train_fold, X_val_fold, y_val_fold,
+                X_train_scaled.shape[1], hidden_dims, dropout_rate, 
+                learning_rate, batch_size, epochs=30
+            )
+            
+            # Evaluate on validation set
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            model.eval()
+            with torch.no_grad():
+                X_val_tensor = torch.FloatTensor(X_val_fold).to(device)
+                y_val_tensor = torch.FloatTensor(y_val_fold.values).to(device)
+                outputs = model(X_val_tensor).squeeze()
+                val_loss = nn.BCEWithLogitsLoss()(outputs, y_val_tensor).item()
+            
+            return -val_loss
+            
+    study = optuna.create_study(direction='maximize')
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+    return study.best_params
+
+def create_ensemble_model(traditional_models, X_train, y_train):
+    """Create voting ensemble from best traditional models"""
+    # Select top 3 models based on cross-validation performance
+    model_scores = {}
+    cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=SEED)
+    
+    for name, pipeline in traditional_models.items():
+        scores = cross_val_score(pipeline, X_train, y_train, cv=cv, scoring='roc_auc')
+        model_scores[name] = scores.mean()
+    
+    # Get top 3 models
+    top_models = sorted(model_scores.items(), key=lambda x: x[1], reverse=True)[:3]
+    ensemble_models = [(name, traditional_models[name]) for name, _ in top_models]
+    
+    ensemble = VotingClassifier(estimators=ensemble_models, voting='soft')
+    return ensemble
 
 def train_models(df):
-    """Combined training function for all model types with proper cross-validation."""
+    """Enhanced training with PyTorch and MLP"""
     if df.empty:
         print("No data available for training")
         return {}, {}, None, None, None
@@ -1001,7 +1200,7 @@ def train_models(df):
     df_clean = df.dropna(subset=['moved_to_f2', 'final_pos', 'points'])
     feature_cols = [
         'final_pos', 'win_rate', 'podium_rate', 'dnf_rate', 'top_10_rate',
-        'years_in_f3', 'age', 'has_academy', 'avg_pos_vs_teammates', 'teammate_battles',
+        'years_in_f3', 'age', 'avg_pos_vs_teammates', 'teammate_battles',
         'participation_rate', 'is_f3_european', 'team_pos', 'team_points',
         'points_vs_team_strength', 'pos_vs_team_strength',
         'avg_finish_pos', 'std_finish_pos', 'avg_quali_pos', 'std_quali_pos'
@@ -1013,205 +1212,173 @@ def train_models(df):
     print(f"Dataset size: {len(X)} drivers")
     print(f"F2 progressions: {y.sum()} ({y.mean():.2%})")
 
-    # Scale features
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    # Split data for final evaluation
+    # Split data
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=SEED, stratify=y
     )
-    X_train_scaled, X_test_scaled, _, _ = train_test_split(
-        X_scaled, y, test_size=0.2, random_state=SEED, stratify=y
-    )
 
-    # Traditional ML pipelines
-    traditional_pipelines = {
-        'Random Forest': ImbPipeline([
-            ('smote', SMOTE(random_state=SEED)),
-            ('classifier', RandomForestClassifier(
-                random_state=SEED, class_weight='balanced'))
-        ]),
-        'Logistic Regression': ImbPipeline([
-            ('smote', SMOTE(random_state=SEED)),
-            ('scaler', StandardScaler()),
-            ('classifier', LogisticRegression(
-                random_state=SEED, class_weight='balanced', max_iter=10000))
-        ]),
-        'XGBoost': ImbPipeline([
-            ('smote', SMOTE(random_state=SEED)),
-            ('classifier', xgb.XGBClassifier(
-                random_state=SEED, eval_metric='logloss',
-                scale_pos_weight=len(y_train[y_train == 0]) / len(y_train[y_train == 1])
-            ))
-        ]),
-        'MLP': ImbPipeline([
-            ('smote', SMOTE(random_state=SEED)),
-            ('classifier', MLPClassifier(random_state=SEED, max_iter=10000))
-        ])
-    }
-
-    # Cross-validation setup
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
-    scoring = ['roc_auc', 'precision', 'recall', 'f1']
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
     traditional_results = {}
     deep_results = {}
 
-    # Train traditional models
+    # Optimize traditional models (including MLP)
     print("\n" + "=" * 50)
-    print("TRAINING TRADITIONAL MODELS")
+    print("OPTIMIZING TRADITIONAL MODELS")
     print("=" * 50)
 
-    for name, pipeline in traditional_pipelines.items():
-        print(f"\n{name} Cross-Validation Results:")
-        print("-" * 40)
+    model_types = ['xgboost', 'random_forest', 'logistic', 'mlp']
+    for model_type in model_types:
+        print(f"\nOptimizing {model_type}...")
+        best_params = optimize_traditional_hyperparams(X_train, y_train, model_type)
+        print(f"Best params: {best_params}")
 
-        # Cross-validation
-        cv_scores = cross_validate(
-            pipeline, X_train, y_train,
-            cv=cv, scoring=scoring, n_jobs=-1
-        )
+        # Create optimized model
+        if model_type == 'xgboost':
+            model = xgb.XGBClassifier(random_state=SEED, **best_params)
+        elif model_type == 'random_forest':
+            model = RandomForestClassifier(
+                random_state=SEED, class_weight='balanced', **best_params
+            )
+        elif model_type == 'logistic':
+            model = LogisticRegression(
+                random_state=SEED, penalty='elasticnet', solver='saga',
+                class_weight='balanced', max_iter=10000, **best_params
+            )
+        elif model_type == 'mlp':
+            mlp_params = {k: v for k, v in best_params.items() 
+                         if k not in ['n_layers'] and not k.startswith('layer_')}
+            model = MLPClassifier(random_state=SEED, **mlp_params)
 
-        for metric in scoring:
-            scores = cv_scores[f'test_{metric}']
-            print(f"{metric.upper()}: {scores.mean():.4f} (+/- {scores.std() * 2:.4f})")
+        pipeline = ImbPipeline([
+            ('smote', SMOTE(random_state=SEED)),
+            ('scaler', StandardScaler()),
+            ('classifier', model)
+        ])
 
-        # Fit and evaluate on test set
         pipeline.fit(X_train, y_train)
-        y_pred = pipeline.predict(X_test)
-        probas_test = pipeline.predict_proba(X_test)[:, 1]
-
-        # Calibration
+        
+        # Add calibration
+        y_pred_proba = pipeline.predict_proba(X_test)[:, 1]
         iso_reg = IsotonicRegression(out_of_bounds='clip')
-        iso_reg.fit(probas_test, y_test)
+        iso_reg.fit(y_pred_proba, y_test)
         pipeline.calibrator = iso_reg
+        
+        traditional_results[f'Optimized_{model_type}'] = pipeline
 
-        print("\nTest Set Results:")
-        print(classification_report(y_test, y_pred))
+    # Create ensemble
+    print("\nCreating ensemble model...")
+    ensemble = create_ensemble_model(traditional_results, X_train, y_train)
+    ensemble.fit(X_train, y_train)
+    
+    # Add calibration to ensemble
+    y_pred_proba_ensemble = ensemble.predict_proba(X_test)[:, 1]
+    iso_reg_ensemble = IsotonicRegression(out_of_bounds='clip')
+    iso_reg_ensemble.fit(y_pred_proba_ensemble, y_test)
+    ensemble.calibrator = iso_reg_ensemble
+    
+    traditional_results['Ensemble'] = ensemble
 
-        traditional_results[name] = pipeline
-
-    # Train deep learning models
+    # Optimize deep learning
     print("\n" + "=" * 50)
-    print("TRAINING DEEP LEARNING MODELS")
+    print("OPTIMIZING DEEP LEARNING MODELS")
     print("=" * 50)
 
-    # Calculate class weights for neural networks
-    class_weights = class_weight.compute_class_weight(
-        'balanced', classes=np.unique(y_train), y=y_train
-    )
-    class_weight_dict = {0: class_weights[0], 1: class_weights[1]}
+    # Optimize Keras
+    print("Optimizing Keras DNN...")
+    best_keras_params = optimize_deep_learning_hyperparams(X_train_scaled, y_train, 'keras')
+    print(f"Best Keras params: {best_keras_params}")
 
-    # Keras DNN
-    print("\nTraining Keras Deep Neural Network...")
-    dnn_model = create_tensorflow_dnn(X_train_scaled.shape[1])
+    # Train optimized Keras model
+    hidden_dims = []
+    for i in range(best_keras_params['n_layers']):
+        if f'hidden_dim_{i}' in best_keras_params:
+            hidden_dims.append(best_keras_params[f'hidden_dim_{i}'])
+
+    dnn_model = create_tensorflow_dnn(
+        X_train_scaled.shape[1], 
+        hidden_dims, 
+        best_keras_params['dropout_rate'],
+        best_keras_params['learning_rate']
+    )
 
     callbacks = [
-        EarlyStopping(patience=10, restore_best_weights=True),
-        ReduceLROnPlateau(patience=5, factor=0.5)
+        EarlyStopping(patience=15, restore_best_weights=True),
+        ReduceLROnPlateau(patience=7, factor=0.5, min_lr=1e-6)
     ]
 
     dnn_model.fit(
-        X_train_scaled, y_train, validation_split=0.2, epochs=100, batch_size=32,
-        class_weight=class_weight_dict, callbacks=callbacks, verbose=0
+        X_train_scaled, y_train, validation_split=0.2, epochs=150,
+        batch_size=best_keras_params['batch_size'], callbacks=callbacks, verbose=0
     )
 
-    # Evaluate and calibrate
-    raw_probas_dnn = dnn_model.predict(X_test_scaled, verbose=0).flatten()
+    # Add calibration to Keras model
+    probas_dnn = dnn_model.predict(X_test_scaled, verbose=0).flatten()
     iso_reg_dnn = IsotonicRegression(out_of_bounds='clip')
-    iso_reg_dnn.fit(raw_probas_dnn, y_test)
+    iso_reg_dnn.fit(probas_dnn, y_test)
     dnn_model.calibrator = iso_reg_dnn
 
-    dnn_pred = (raw_probas_dnn > 0.5).astype(int)
-    print("Keras DNN Classification Report:")
-    print(classification_report(y_test, dnn_pred))
-    deep_results['Keras_DNN'] = dnn_model
+    deep_results['Optimized_Keras_DNN'] = dnn_model
 
-    # PyTorch Model
-    print("\nTraining PyTorch Model...")
+    # Optimize PyTorch
+    print("Optimizing PyTorch DNN...")
+    best_pytorch_params = optimize_deep_learning_hyperparams(X_train_scaled, y_train, 'pytorch')
+    print(f"Best PyTorch params: {best_pytorch_params}")
+
+    # Train optimized PyTorch model
+    pytorch_hidden_dims = []
+    for i in range(best_pytorch_params['n_layers']):
+        if f'hidden_dim_{i}' in best_pytorch_params:
+            pytorch_hidden_dims.append(best_pytorch_params[f'hidden_dim_{i}'])
+
+    # Split for validation
+    X_train_pt, X_val_pt, y_train_pt, y_val_pt = train_test_split(
+        X_train_scaled, y_train, test_size=0.2, random_state=SEED, stratify=y_train
+    )
+
+    pytorch_model = train_pytorch_model(
+        X_train_pt, y_train_pt, X_val_pt, y_val_pt,
+        X_train_scaled.shape[1], pytorch_hidden_dims,
+        best_pytorch_params['dropout_rate'],
+        best_pytorch_params['learning_rate'],
+        best_pytorch_params['batch_size'],
+        epochs=150
+    )
+
+    # Add calibration to PyTorch model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    # Convert to PyTorch tensors
-    X_train_torch = torch.FloatTensor(X_train_scaled).to(device)
-    y_train_torch = torch.FloatTensor(y_train.values).to(device)
-    X_test_torch = torch.FloatTensor(X_test_scaled).to(device)
-
-    pytorch_model = RacingPredictor(X_train_scaled.shape[1]).to(device)
-
-    # Calculate class weights for PyTorch
-    n_neg = (y_train == 0).sum()
-    n_pos = (y_train == 1).sum()
-    pos_weight = torch.tensor([n_neg / n_pos]).to(device)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    optimizer = optim.Adam(pytorch_model.parameters(), lr=0.001)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=0.5, patience=5)
-
-    # Validation split
-    val_size = int(0.2 * len(X_train_torch))
-    indices = torch.randperm(len(X_train_torch))
-    train_idx, val_idx = indices[val_size:], indices[:val_size]
-
-    X_train_sub = X_train_torch[train_idx]
-    y_train_sub = y_train_torch[train_idx]
-    X_val = X_train_torch[val_idx]
-    y_val = y_train_torch[val_idx]
-
-    # Training loop
-    best_val_loss = float('inf')
-    patience_counter = 0
-
-    for epoch in range(100):
-        pytorch_model.train()
-        optimizer.zero_grad()
-
-        outputs = pytorch_model(X_train_sub).squeeze()
-        loss = criterion(outputs, y_train_sub)
-        loss.backward()
-        optimizer.step()
-
-        # Validation
-        pytorch_model.eval()
-        with torch.no_grad():
-            val_outputs = pytorch_model(X_val).squeeze()
-            val_loss = criterion(val_outputs, y_val)
-
-        scheduler.step(val_loss)
-
-        # Early stopping
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            patience_counter = 0
-            best_state_dict = pytorch_model.state_dict().copy()
-        else:
-            patience_counter += 1
-            if patience_counter >= 10:
-                break
-
-    # Load best model and evaluate
-    pytorch_model.load_state_dict(best_state_dict)
     pytorch_model.eval()
-
     with torch.no_grad():
-        logits = pytorch_model(X_test_torch)
-        raw_probas_torch = torch.sigmoid(logits).cpu().numpy().flatten()
+        X_test_tensor = torch.FloatTensor(X_test_scaled).to(device)
+        pytorch_probas = torch.sigmoid(pytorch_model(X_test_tensor)).cpu().numpy().flatten()
+    
+    iso_reg_pytorch = IsotonicRegression(out_of_bounds='clip')
+    iso_reg_pytorch.fit(pytorch_probas, y_test)
+    pytorch_model.calibrator = iso_reg_pytorch
 
-    # Calibrate PyTorch model
-    iso_reg_torch = IsotonicRegression(out_of_bounds='clip')
-    iso_reg_torch.fit(raw_probas_torch, y_test)
-    pytorch_model.calibrator = iso_reg_torch
+    deep_results['Optimized_PyTorch_DNN'] = pytorch_model
 
-    pytorch_pred = (raw_probas_torch > 0.5).astype(int)
-    print("PyTorch Classification Report:")
-    print(classification_report(y_test, pytorch_pred))
-    deep_results['PyTorch'] = pytorch_model
+    # Evaluate all models
+    print("\n" + "=" * 50)
+    print("EVALUATION RESULTS")
+    print("=" * 50)
 
-    print("\n" + "=" * 70)
-    print("TRAINING COMPLETE")
-    print("=" * 70)
-    print(f"Traditional Models: {list(traditional_results.keys())}")
-    print(f"Deep Learning Models: {list(deep_results.keys())}")
+    for name, model in traditional_results.items():
+        y_pred = model.predict(X_test)
+        print(f"\n{name}:")
+        print(classification_report(y_test, y_pred))
+
+    # Evaluate deep learning models
+    probas_dnn = dnn_model.predict(X_test_scaled, verbose=0).flatten()
+    pred_dnn = (probas_dnn > 0.5).astype(int)
+    print(f"\nOptimized Keras DNN:")
+    print(classification_report(y_test, pred_dnn))
+
+    pred_pytorch = (pytorch_probas > 0.5).astype(int)
+    print(f"\nOptimized PyTorch DNN:")
+    print(classification_report(y_test, pred_pytorch))
 
     return traditional_results, deep_results, X_test, y_test, feature_cols, scaler
 
@@ -1225,9 +1392,10 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
         current_df = df[df['year'] == current_year].copy()
     if current_df.empty:
         print("No current data found for predictions")
-        return
+        return pd.DataFrame()
 
     X_current = current_df[feature_cols].fillna(0)
+    results = None
 
     for model_type, models in all_models.items():
         print(f"\n{model_type} Predictions:")
@@ -1243,21 +1411,24 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
             try:
                 # Get raw probabilities based on model type
                 if model_type == 'Deep Learning':
-                    if name == 'Keras_DNN':  # Keras model
+                    if 'Keras' in name:  # Keras model
                         raw_probas = model.predict(X_processed, verbose=0).flatten()
-                    else:  # PyTorch model
+                    elif 'PyTorch' in name:  # PyTorch model
+                        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
                         model.eval()
                         with torch.no_grad():
-                            X_torch = torch.FloatTensor(X_processed)
-                            if torch.cuda.is_available():
-                                X_torch = X_torch.cuda()
+                            X_torch = torch.FloatTensor(X_processed).to(device)
                             logits = model(X_torch)
                             raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
                 else:  # Traditional models
                     raw_probas = model.predict_proba(X_processed)[:, 1]
 
-                # Apply calibration
-                calibrated_probas = model.calibrator.transform(raw_probas)
+                # Apply calibration if available
+                if hasattr(model, 'calibrator') and model.calibrator is not None:
+                    calibrated_probas = model.calibrator.transform(raw_probas)
+                else:
+                    calibrated_probas = raw_probas
+                    
                 empirical_pct = calibrated_probas * 100.0
 
                 # Create results DataFrame
@@ -1279,7 +1450,6 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                     'Exp': current_df['years_in_f3'],
                     'DoB': current_df['dob'],
                     'Age': current_df['age'],
-                    'Academy': current_df['has_academy'],
                     'Avg_Pos_Diff': current_df['avg_pos_vs_teammates'],
                     'Teammate_Battles': current_df['teammate_battles'],
                     'Participation %': current_df['participation_rate'],
@@ -1301,7 +1471,9 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                 print(f"Error with {name} model: {e}")
                 continue
 
-    return results
+    if results is not None:
+        return results
+    return pd.DataFrame()
 
 
 print("Loading F3 data...")

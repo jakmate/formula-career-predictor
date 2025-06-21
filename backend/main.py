@@ -11,7 +11,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
-from scraper import scrape
+from scraping.scrape import scrape_current_year
 from predictor import (
     load_standings_data,
     load_qualifying_data,
@@ -45,9 +45,9 @@ class PredictionResponse(BaseModel):
     experience: int
     age: Optional[float]
     dob: Optional[date] = None
-    has_academy: int
     avg_pos_diff: float
     teammate_battles: float
+    participation_rate: float
     team: str
     team_pos: int
     team_points: float
@@ -90,15 +90,20 @@ class AppState:
 app_state = AppState()
 
 
-async def scrape_data_task():
-    """Background task to scrape racing data"""
+async def scrape_and_train_task():
+    """Combined task to scrape data and then train models"""
     try:
         logger.info("Starting data scraping task...")
-        await asyncio.get_event_loop().run_in_executor(None, scrape)
+        await asyncio.get_event_loop().run_in_executor(None, scrape_current_year)
         app_state.system_status["last_scrape"] = datetime.now()
         logger.info("Data scraping completed successfully")
+        
+        # Automatically train models after successful scraping
+        logger.info("Starting model training after scraping...")
+        await train_models_task()
+        
     except Exception as e:
-        logger.error(f"Error during data scraping: {e}")
+        logger.error(f"Error during scrape and train task: {e}")
 
 
 async def train_models_task():
@@ -204,7 +209,7 @@ def _create_prediction_responses(current_df, raw_probas):
             experience=int(row['years_in_f3']),
             dob=row['dob'],
             age=float(row['age']) if pd.notna(row['age']) else None,
-            has_academy=int(row['has_academy']),
+            participation_rate=float(row['participation_rate']),
             avg_pos_diff=float(row['avg_pos_vs_teammates']),
             teammate_battles=float(row['teammate_battles']),
             team=str(row['team']),
@@ -259,50 +264,44 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("Starting F3/F2 Predictions API...")
 
-        # Schedule tasks
+        # Schedule combined scrape and train task (only one job needed)
         app_state.scheduler.add_job(
-            scrape_data_task,
+            scrape_and_train_task,
             CronTrigger(day_of_week='fri', hour=9, minute=0),
-            id='scrape_data',
-            replace_existing=True
-        )
-
-        app_state.scheduler.add_job(
-            train_models_task,
-            CronTrigger(day_of_week='fri', hour=10, minute=0),
-            id='train_models',
+            id='scrape_and_train',
             replace_existing=True
         )
 
         if not app_state.scheduler.running:
             app_state.scheduler.start()
 
-        # Load existing models in background
+        # Load existing models in background on startup
         startup_task = asyncio.create_task(train_models_task())
 
     except Exception as e:
         logger.error(f"Startup failed: {e}")
         raise
 
-    yield
-
     try:
-        logger.info("Starting application shutdown...")
+        yield
+    finally:
+        try:
+            logger.info("Starting application shutdown...")
 
-        # Cancel startup task if still running
-        if startup_task and not startup_task.done():
-            startup_task.cancel()
-            try:
-                await startup_task
-            except asyncio.CancelledError:
-                pass
+            # Cancel startup task if still running
+            if startup_task and not startup_task.done():
+                startup_task.cancel()
+                try:
+                    await startup_task
+                except asyncio.CancelledError:
+                    pass
 
-        if app_state.scheduler.running:
-            app_state.scheduler.shutdown(wait=False)
+            if app_state.scheduler.running:
+                app_state.scheduler.shutdown(wait=False)
 
-        logger.info("Application shutdown complete")
-    except Exception as e:
-        logger.error(f"Shutdown error: {e}")
+            logger.info("Application shutdown complete")
+        except Exception as e:
+            logger.error(f"Shutdown error: {e}")
 
 
 app = FastAPI(
@@ -336,14 +335,14 @@ async def get_system_status():
 
 @app.post("/scrape", tags=["Data"])
 async def trigger_scrape(background_tasks: BackgroundTasks):
-    """Manually trigger data scraping"""
-    background_tasks.add_task(scrape_data_task)
-    return {"message": "Data scraping started in background"}
+    """Manually trigger data scraping and model training"""
+    background_tasks.add_task(scrape_and_train_task)
+    return {"message": "Data scraping and model training started in background"}
 
 
 @app.post("/train", tags=["Models"])
 async def trigger_training(background_tasks: BackgroundTasks):
-    """Manually trigger model training"""
+    """Manually trigger model training only"""
     background_tasks.add_task(train_models_task)
     return {"message": "Model training started in background"}
 
