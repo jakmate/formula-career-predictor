@@ -1,6 +1,6 @@
 import csv
 import os
-from scraping.scraping_utils import remove_citations
+from .scraping_utils import remove_citations
 
 
 def process_entries(soup, year, formula, series_type="main"):

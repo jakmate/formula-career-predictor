@@ -1,5 +1,4 @@
 import glob
-import json
 import os
 import pandas as pd
 import re
@@ -7,14 +6,12 @@ import requests
 import time
 from bs4 import BeautifulSoup
 from datetime import datetime
-from scraping.scraping_utils import remove_citations
+from .scraping_utils import remove_citations
+from .db_config import get_db_connection
 
 
 class DriverProfileScraper:
-    def __init__(self, profiles_dir="driver_profiles"):
-        self.profiles_dir = profiles_dir
-        os.makedirs(profiles_dir, exist_ok=True)
-
+    def __init__(self):
         # Known driver aliases and redirects
         self.driver_aliases = {
             "Peter Li": "Li Zhicong",
@@ -202,15 +199,18 @@ class DriverProfileScraper:
 
     def scrape_driver_profile(self, driver_name):
         """Scrape individual driver profile from Wikipedia."""
-        profile_file = os.path.join(
-            self.profiles_dir,
-            self.get_driver_filename(driver_name)
-        )
-
-        # Check if already scraped
-        if os.path.exists(profile_file):
-            with open(profile_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM driver_profiles WHERE name = %s', (driver_name,))
+            existing = cursor.fetchone()
+            if existing:
+                return {
+                    'name': existing[1],
+                    'dob': existing[2].isoformat() if existing[2] else None,
+                    'nationality': existing[3],
+                    'scraped': existing[5]
+                }
 
         print(f"Scraping profile for {driver_name}...")
 
@@ -222,7 +222,7 @@ class DriverProfileScraper:
                 "dob": None,
                 "scraped": False,
             }
-            self.save_profile(profile_file, profile)
+            self.save_profile(profile)
             return profile
 
         # Find Wikipedia page
@@ -234,7 +234,7 @@ class DriverProfileScraper:
                 "dob": None,
                 "scraped": False
             }
-            self.save_profile(profile_file, profile)
+            self.save_profile(profile)
             return profile
 
         try:
@@ -259,7 +259,7 @@ class DriverProfileScraper:
                 "scraped_date": datetime.now().isoformat()
             }
 
-            self.save_profile(profile_file, profile)
+            self.save_profile(profile)
             time.sleep(1)
             return profile
 
@@ -271,7 +271,7 @@ class DriverProfileScraper:
                 "scraped": False,
                 "error": str(e)
             }
-            self.save_profile(profile_file, profile)
+            self.save_profile(profile)
             return profile
 
     def extract_dob(self, soup):
@@ -348,11 +348,6 @@ class DriverProfileScraper:
 
         return None
 
-    def save_profile(self, filename, profile):
-        """Save profile to JSON file."""
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(profile, f, indent=2, ensure_ascii=False)
-
     def batch_scrape_drivers(self, driver_list):
         """Scrape profiles for list of drivers."""
         profiles = {}
@@ -365,6 +360,50 @@ class DriverProfileScraper:
             profiles[driver] = self.scrape_driver_profile(driver)
 
         return profiles
+    
+    def save_driver_profile_to_db(self, profile):
+        """Save driver profile to database"""
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            name = profile.get('name')
+            dob = profile.get('dob')
+            nationality = profile.get('nationality')
+            wiki_url = profile.get('wiki_url')
+            scraped = profile.get('scraped', False)
+            scraped_date = datetime.fromisoformat(profile['scraped_date']) if profile.get('scraped_date') else None
+            error_message = profile.get('error')
+            
+            # Convert DOB string to date
+            date_of_birth = None
+            if dob:
+                try:
+                    date_of_birth = datetime.strptime(dob, '%Y-%m-%d').date()
+                except ValueError:
+                    # Try other formats
+                    try:
+                        date_of_birth = datetime.strptime(dob[:10], '%Y-%m-%d').date()
+                    except ValueError:
+                        pass
+            
+            cursor.execute('''
+                INSERT INTO driver_profiles 
+                (name, date_of_birth, nationality, wiki_url, scraped, scraped_date, error_message)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (name) DO UPDATE SET
+                    date_of_birth = EXCLUDED.date_of_birth,
+                    nationality = EXCLUDED.nationality,
+                    wiki_url = EXCLUDED.wiki_url,
+                    scraped = EXCLUDED.scraped,
+                    scraped_date = EXCLUDED.scraped_date,
+                    error_message = EXCLUDED.error_message
+            ''', (name, date_of_birth, nationality, wiki_url, scraped, scraped_date, error_message))
+            
+            conn.commit()
+
+    def save_profile(self, profile):
+        """Save profile to database."""
+        self.save_driver_profile_to_db(profile)
 
 
 def get_all_drivers_from_data():
@@ -445,12 +484,10 @@ def main():
     profiles = scraper.batch_scrape_drivers(all_drivers)
 
     scraped_count = sum(1 for p in profiles.values() if p.get('scraped', False))
-    with_dob = sum(1 for p in profiles.values() if p.get('dob'))
 
     print("Scraping complete!")
     print(f"Successfully scraped: {scraped_count}/{len(all_drivers)}")
-    print(f"Drivers with DOB: {with_dob}")
-    print(f"Profiles saved to: {scraper.profiles_dir}/")
+    print(f"Profiles saved to database")
 
 
 if __name__ == "__main__":

@@ -1,14 +1,16 @@
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
-from scraping.championship_scraper import process_championship
-from scraping.entries_scraper import process_entries
-from scraping.qualifying_scraper import scrape_quali
+from .db_config import create_tables
+from .championship_scraper import process_championship
+from .entries_scraper import process_entries
+from .qualifying_scraper import scrape_quali
 
 BASE_URL = "https://en.wikipedia.org/wiki/"
 
 
 def scrape():
+    create_tables()
     # F2 and F3/GP3 processing
     for num in [2, 3]:
         for year in range(2010, 2026):
@@ -54,6 +56,7 @@ def scrape():
 
 
 def scrape_current_year():
+    create_tables()
     current_year = datetime.now().year
 
     for num in [2, 3]:

@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: formula_motorsport
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+    environment:
+      DB_HOST: db
+      DB_NAME: formula_motorsport
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    command: [ "npm", "install" ]
+    # separate step to ensure dependencies are installed before dev server
+    # use a tiny init script:
+    entrypoint: >
+      sh -c "npm install &&
+             npm run dev -- --host 0.0.0.0"
+
+volumes:
+  db_data:
