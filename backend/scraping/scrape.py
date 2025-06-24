@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from scraping.championship_scraper import process_championship
 from scraping.entries_scraper import process_entries
 from scraping.qualifying_scraper import scrape_quali
+from scraping.driver_scraper import scrape_drivers
 
 BASE_URL = "https://en.wikipedia.org/wiki/"
 
@@ -52,6 +53,8 @@ def scrape():
         except Exception as e:
             print(f"Error processing F3 European {year}: {str(e)}")
 
+    scrape_drivers()
+
 
 def scrape_current_year():
     current_year = datetime.now().year
@@ -74,6 +77,8 @@ def scrape_current_year():
 
         except Exception as e:
             print(f"Error processing current year F{num}: {str(e)}")
+
+    scrape_drivers()
 
 
 if __name__ == "__main__":

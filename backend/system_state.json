@@ -1,0 +1,1 @@
+{"last_scrape": "2025-06-24T20:33:24.132351", "last_training": "2025-06-24T20:17:40.198280", "last_trained_season": "2024", "models_available": ["Logistic Regression", "MLP", "Random Forest", "XGBoost", "Keras_DNN", "PyTorch"]}

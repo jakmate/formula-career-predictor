@@ -11,7 +11,7 @@ from scraping.scraping_utils import remove_citations
 
 
 class DriverProfileScraper:
-    def __init__(self, profiles_dir="driver_profiles"):
+    def __init__(self, profiles_dir="data/driver_profiles"):
         self.profiles_dir = profiles_dir
         os.makedirs(profiles_dir, exist_ok=True)
 
@@ -361,7 +361,7 @@ class DriverProfileScraper:
         print(f"Scraping profiles for {len(unique_drivers)} unique drivers...")
 
         for i, driver in enumerate(unique_drivers, 1):
-            print(f"Progress: {i}/{len(unique_drivers)}")
+            # print(f"Progress: {i}/{len(unique_drivers)}")
             profiles[driver] = self.scrape_driver_profile(driver)
 
         return profiles
@@ -429,7 +429,7 @@ def get_all_drivers_from_data():
     return sorted(list(all_drivers))
 
 
-def main():
+def scrape_drivers():
     print("Scanning F2/F3 data files for driver names...")
     all_drivers = get_all_drivers_from_data()
 
@@ -454,4 +454,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    scrape_drivers()

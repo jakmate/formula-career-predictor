@@ -30,23 +30,23 @@ export const Header = ({
         
         <div className="flex flex-col sm:flex-row gap-3">
             <select 
-            value={selectedModel} 
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white backdrop-blur-sm focus:outline-none focus:border-blue-400"
+                value={selectedModel} 
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white backdrop-blur-sm focus:outline-none focus:border-blue-400"
             >
-            <option value="">Select Model</option>
-            {models.map(model => (
-                <option key={model} value={model} className="text-gray-800">{model}</option>
-            ))}
+                <option value="">Select Model</option>
+                {models.map(model => (
+                    <option key={model} value={model} className="text-gray-800">{model}</option>
+                ))}
             </select>
             
             <button 
-            onClick={onRefresh}
-            disabled={loading}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                onClick={onRefresh}
+                disabled={loading}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Updating...' : 'Refresh Data'}
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Updating...' : 'Refresh Data'}
             </button>
         </div>
         </div>
