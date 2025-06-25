@@ -18,10 +18,12 @@ from keras.layers import Dense, Dropout, BatchNormalization, Input
 from keras.models import Sequential
 from keras.optimizers import Adam
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import RFE
+from sklearn.inspection import permutation_importance
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
-from sklearn.model_selection import StratifiedKFold, cross_validate, train_test_split
+from sklearn.metrics import classification_report, roc_auc_score
+from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import class_weight
@@ -345,7 +347,6 @@ def calculate_participation_stats(df, race_cols):
     for _, row in df.iterrows():
         participated_races = 0
         positions = []
-        dnfs = 0
 
         for col in race_cols:
             result = str(row[col]).strip()
@@ -355,8 +356,7 @@ def calculate_participation_stats(df, race_cols):
             participated_races += 1
 
             if any(x in result for x in RETIREMENT_CODES):
-                if result != 'NC':
-                    dnfs += 1
+                continue
             else:
                 pos = extract_position(result)
                 if pos:
@@ -367,7 +367,6 @@ def calculate_participation_stats(df, race_cols):
             'year': row['year'],
             'participated_races': participated_races,
             'positions': positions,
-            'dnfs': dnfs
         })
 
     return stats
@@ -667,14 +666,14 @@ def engineer_features(df):
 
     df = calculate_teammate_performance(df)
     df = df.sort_values(by=['Driver', 'year'])
-    df['years_in_f3'] = df.groupby('Driver').cumcount()
+    df['experience'] = df.groupby('Driver').cumcount()
 
     features_df = pd.DataFrame({
         'year': df['year'],
         'driver': df['Driver'],
         'final_pos': pd.to_numeric(df['Pos'].astype(str).str.extract(r'(\d+)')[0], errors='coerce'),
         'points': pd.to_numeric(df['Points'], errors='coerce').fillna(0),
-        'years_in_f3': df['years_in_f3'],
+        'experience': df['experience'],
         'series_type': df.get('series_type', 'Unknown'),
         'team': df.get('Team'),
         'team_pos': df.get('team_pos', np.nan),
@@ -806,11 +805,11 @@ def engineer_features(df):
 def create_target_variable(f3_df, f2_df):
     """Create target variable for F2 participation after last F3 season."""
     if f3_df.empty or f2_df.empty:
-        f3_df['moved_to_f2'] = np.nan
+        f3_df['promoted'] = np.nan
         return f3_df
 
     # Initialize target column
-    f3_df['moved_to_f2'] = 0
+    f3_df['promoted'] = 0
     max_f2_year = f2_df['year'].max()
 
     # Get last F3 season for each driver
@@ -869,7 +868,7 @@ def create_target_variable(f3_df, f2_df):
         driver = row['Driver']
         year = row['year']
         if (driver, year) in moved_drivers:
-            f3_df.at[idx, 'moved_to_f2'] = moved_drivers[(driver, year)]
+            f3_df.at[idx, 'promoted'] = moved_drivers[(driver, year)]
 
     return f3_df
 
@@ -930,17 +929,13 @@ def train_models(df):
         print("No data available for training")
         return {}, {}, None, None, None
 
-    df_clean = df.dropna(subset=['moved_to_f2', 'final_pos', 'points'])
+    df_clean = df.dropna(subset=['promoted', 'final_pos', 'points'])
     feature_cols = [
-        'final_pos', 'win_rate', 'podium_rate', 'dnf_rate', 'top_10_rate',
-        'years_in_f3', 'age', 'avg_pos_vs_teammates', 'teammate_battles',
-        'participation_rate', 'is_f3_european', 'team_pos', 'team_points',
-        'points_vs_team_strength', 'pos_vs_team_strength',
-        'avg_finish_pos', 'std_finish_pos', 'avg_quali_pos', 'std_quali_pos'
+        'win_rate', 'dnf_rate', 'pos_vs_team_strength',
     ]
 
     X = df_clean[feature_cols].fillna(0)
-    y = df_clean['moved_to_f2']
+    y = df_clean['promoted']
 
     print(f"Dataset size: {len(X)} drivers")
     print(f"F2 progressions: {y.sum()} ({y.mean():.2%})")
@@ -983,10 +978,6 @@ def train_models(df):
         ])
     }
 
-    # Cross-validation setup
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
-    scoring = ['roc_auc', 'precision', 'recall', 'f1']
-
     traditional_results = {}
     deep_results = {}
 
@@ -996,18 +987,8 @@ def train_models(df):
     print("=" * 50)
 
     for name, pipeline in traditional_pipelines.items():
-        print(f"\n{name} Cross-Validation Results:")
+        print(f"\nTraining {name}:")
         print("-" * 40)
-
-        # Cross-validation
-        cv_scores = cross_validate(
-            pipeline, X_train, y_train,
-            cv=cv, scoring=scoring, n_jobs=-1
-        )
-
-        for metric in scoring:
-            scores = cv_scores[f'test_{metric}']
-            print(f"{metric.upper()}: {scores.mean():.4f} (+/- {scores.std() * 2:.4f})")
 
         # Fit and evaluate on test set
         pipeline.fit(X_train, y_train)
@@ -1145,7 +1126,7 @@ def train_models(df):
     print(f"Traditional Models: {list(traditional_results.keys())}")
     print(f"Deep Learning Models: {list(deep_results.keys())}")
 
-    return traditional_results, deep_results, X_test, y_test, feature_cols, scaler
+    return traditional_results, deep_results, X_test, y_test, feature_cols, scaler, X_train, y_train
 
 
 def predict_drivers(all_models, df, feature_cols, scaler=None):
@@ -1212,7 +1193,7 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
                     'Podium %': current_df['podium_rate'],
                     'Top 10 %': current_df['top_10_rate'],
                     'DNF %': current_df['dnf_rate'],
-                    'Exp': current_df['years_in_f3'],
+                    'Exp': current_df['experience'],
                     'DoB': current_df['dob'],
                     'Age': current_df['age'],
                     'Avg_Pos_Diff': current_df['avg_pos_vs_teammates'],
@@ -1268,10 +1249,10 @@ f3_df = create_target_variable(f3_df, f2_df)
 
 print("Engineering features...")
 features_df = engineer_features(f3_df)
-features_df['moved_to_f2'] = f3_df['moved_to_f2']
+features_df['promoted'] = f3_df['promoted']
 
 print("Training all models...")
-models, deep_models, X_test, y_test, feature_cols, scaler = train_models(
+models, deep_models, X_test, y_test, feature_cols, scaler, X_train, y_train = train_models(
     features_df)
 
 print("Making predictions for F3 2025 drivers...")
@@ -1280,3 +1261,350 @@ all_models = {
     'Deep Learning': deep_models
 }
 predict_drivers(all_models, features_df, feature_cols, scaler)
+
+
+def analyze_feature_importance(models, X_test, y_test, feature_cols):
+    """Analyze feature importance across all models"""
+    print("\n" + "="*70)
+    print("FEATURE IMPORTANCE ANALYSIS")
+    print("="*70)
+
+    importance_results = {}
+
+    for name, model in models.items():
+        print(f"\n{name} Feature Analysis:")
+        print("-" * 50)
+
+        # Get feature importance based on model type
+        if hasattr(model.named_steps['classifier'], 'feature_importances_'):
+            # Tree-based models (RF, XGBoost)
+            importances = model.named_steps['classifier'].feature_importances_
+        elif hasattr(model.named_steps['classifier'], 'coef_'):
+            # Linear models (LogReg)
+            importances = np.abs(model.named_steps['classifier'].coef_[0])
+        else:
+            # MLP - use permutation importance
+            perm_importance = permutation_importance(
+                model, X_test, y_test, n_repeats=10, random_state=42
+            )
+            importances = perm_importance.importances_mean
+
+        importance_df = pd.DataFrame({
+            'Feature': feature_cols,
+            'Importance': importances
+        }).sort_values('Importance', ascending=False)
+
+        print(importance_df.head(10))
+        importance_results[name] = importance_df
+
+    return importance_results
+
+
+def analyze_negative_features(models, X_train, y_train, X_test, y_test, feature_cols):
+    """Identify features that negatively impact performance"""
+    print("\n" + "="*70)
+    print("NEGATIVE FEATURE IMPACT ANALYSIS")
+    print("="*70)
+
+    negative_impact = {}
+
+    for name, model in models.items():
+        print(f"\n{name} - Features with Negative Impact:")
+        print("-" * 50)
+
+        # Get baseline performance
+        baseline_score = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+
+        feature_impacts = []
+
+        # Test removing each feature
+        for feature in feature_cols:
+            remaining_features = [f for f in feature_cols if f != feature]
+            X_train_reduced = X_train[remaining_features]
+            X_test_reduced = X_test[remaining_features]
+
+            try:
+                # Clone and retrain model without this feature
+                from sklearn.base import clone
+                temp_model = clone(model)
+                temp_model.fit(X_train_reduced, y_train)
+                score_without = roc_auc_score(y_test,
+                                              temp_model.predict_proba(X_test_reduced)[:, 1])
+                impact = score_without - baseline_score
+                feature_impacts.append({
+                    'Feature': feature,
+                    'Impact': impact,
+                    'Baseline_AUC': baseline_score,
+                    'Without_Feature_AUC': score_without
+                })
+            except Exception as e:
+                print(f"  Error testing {feature}: {e}")
+                continue
+
+        # Sort by impact (positive impact means feature was hurting performance)
+        impact_df = pd.DataFrame(feature_impacts).sort_values('Impact', ascending=False)
+
+        # Show features that improve performance when removed (negative impact features)
+        negative_features = impact_df[impact_df['Impact'] > 0]
+        if not negative_features.empty:
+            print("Features that hurt performance (removing them improves AUC):")
+            print(negative_features.head())
+        else:
+            print("No clearly negative features found")
+
+        negative_impact[name] = impact_df
+
+    return negative_impact
+
+
+def recursive_feature_elimination(models, X_train, y_train, X_test, y_test, feature_cols):
+    """Use RFE to find optimal feature subset"""
+    print("\n" + "="*70)
+    print("RECURSIVE FEATURE ELIMINATION")
+    print("="*70)
+
+    rfe_results = {}
+
+    for name, model in models.items():
+        print(f"\n{name} - Recursive Feature Elimination:")
+        print("-" * 50)
+
+        # Try different numbers of features
+        best_score = 0
+        best_n_features = len(feature_cols)
+        scores_by_n_features = {}
+
+        for n_features in range(5, len(feature_cols) + 1, 2):
+            try:
+                # Create RFE selector
+                rfe = RFE(model.named_steps['classifier'], n_features_to_select=n_features)
+
+                # Fit on training data
+                rfe.fit(X_train, y_train)
+
+                # Get selected features
+                selected_features = [feature_cols[i] for i, selected in enumerate(rfe.support_) if selected]  # noqa: 501
+
+                # Test performance
+                X_test_selected = X_test[selected_features]
+                X_train_selected = X_train[selected_features]
+
+                # Clone and retrain model with selected features
+                from sklearn.base import clone
+                temp_model = clone(model)
+                temp_model.fit(X_train_selected, y_train)
+                score = roc_auc_score(y_test, temp_model.predict_proba(X_test_selected)[:, 1])
+
+                scores_by_n_features[n_features] = {
+                    'score': score,
+                    'features': selected_features
+                }
+
+                if score > best_score:
+                    best_score = score
+                    best_n_features = n_features
+
+                print(f"  {n_features} features: AUC = {score:.4f}")
+
+            except Exception as e:
+                print(f"  Error with {n_features} features: {e}")
+                continue
+
+        print(f"  Best: {best_n_features} features with AUC = {best_score:.4f}")
+
+        # Show which features were eliminated in the best configuration
+        if best_n_features in scores_by_n_features:
+            selected = scores_by_n_features[best_n_features]['features']
+            eliminated = [f for f in feature_cols if f not in selected]
+            print(f"  Eliminated features: {eliminated}")
+
+        rfe_results[name] = scores_by_n_features
+
+    return rfe_results
+
+
+def correlation_analysis(X, feature_cols):
+    """Analyze feature correlations to identify redundant features"""
+    print("\n" + "="*70)
+    print("FEATURE CORRELATION ANALYSIS")
+    print("="*70)
+
+    # Calculate correlation matrix
+    corr_matrix = X[feature_cols].corr()
+
+    # Find highly correlated pairs
+    high_corr_pairs = []
+    for i in range(len(corr_matrix.columns)):
+        for j in range(i+1, len(corr_matrix.columns)):
+            corr_val = corr_matrix.iloc[i, j]
+            if abs(corr_val) > 0.8:  # High correlation threshold
+                high_corr_pairs.append({
+                    'Feature_1': corr_matrix.columns[i],
+                    'Feature_2': corr_matrix.columns[j],
+                    'Correlation': corr_val
+                })
+
+    if high_corr_pairs:
+        print("Highly correlated feature pairs (|correlation| > 0.8):")
+        corr_df = pd.DataFrame(high_corr_pairs).sort_values('Correlation', key=abs, ascending=False)
+        print(corr_df)
+
+        print("\nConsider removing one feature from each highly correlated pair")
+        return corr_df
+    else:
+        print("No highly correlated features found")
+        return pd.DataFrame()
+
+
+def feature_ablation_study(models, X_train, y_train, X_test, y_test, feature_cols):
+    """Systematic feature ablation study - FIXED VERSION"""
+    print("\n" + "="*70)
+    print("FEATURE ABLATION STUDY")
+    print("="*70)
+
+    ablation_results = {}
+
+    # Create dynamic feature groups based on actual features in dataset
+    actual_features = set(feature_cols)
+
+    # Define feature groups with only features that actually exist
+    feature_groups = {}
+
+    # Position features
+    position_features = [f for f in ['final_pos', 'avg_finish_pos', 'std_finish_pos'] if f in actual_features]  # noqa: 501
+    if position_features:
+        feature_groups['position_features'] = position_features
+
+    # Rate features
+    rate_features = [f for f in ['win_rate', 'podium_rate', 'dnf_rate', 'top_10_rate'] if f in actual_features]  # noqa: 501
+    if rate_features:
+        feature_groups['rate_features'] = rate_features
+
+    # Experience features
+    experience_features = [f for f in ['experience', 'age'] if f in actual_features]
+    if experience_features:
+        feature_groups['experience_features'] = experience_features
+
+    # Teammate features
+    teammate_features = [f for f in ['avg_pos_vs_teammates', 'teammate_battles'] if f in actual_features]  # noqa: 501
+    if teammate_features:
+        feature_groups['teammate_features'] = teammate_features
+
+    # Team features
+    team_features = [f for f in ['team_pos', 'points_vs_team_strength', 'pos_vs_team_strength'] if f in actual_features]  # noqa: 501
+    if team_features:
+        feature_groups['team_features'] = team_features
+
+    # Qualifying features
+    quali_features = [f for f in ['avg_quali_pos', 'std_quali_pos'] if f in actual_features]
+    if quali_features:
+        feature_groups['qualifying_features'] = quali_features
+
+    # Other features
+    other_features = [f for f in ['participation_rate', 'is_f3_european', 'points'] if f in actual_features]  # noqa: 501
+    if other_features:
+        feature_groups['other_features'] = other_features
+
+    print(f"Feature groups identified: {list(feature_groups.keys())}")
+
+    for name, model in models.items():
+        print(f"\n{name} - Feature Ablation:")
+        print("-" * 50)
+
+        # Get baseline performance with all features
+        try:
+            baseline_score = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+        except Exception as e:
+            print(f"Error getting baseline score for {name}: {e}")
+            continue
+
+        feature_ablations = []
+
+        # Test performance when removing each feature group
+        for group_name, group_features in feature_groups.items():
+            remaining_features = [f for f in feature_cols if f not in group_features]
+
+            try:
+                X_train_reduced = X_train[remaining_features]
+                X_test_reduced = X_test[remaining_features]
+
+                # Create and train new model
+                from sklearn.base import clone
+                temp_model = clone(model)
+                temp_model.fit(X_train_reduced, y_train)
+                score = roc_auc_score(y_test, temp_model.predict_proba(X_test_reduced)[:, 1])
+
+                impact = baseline_score - score
+
+                feature_ablations.append({
+                    'Feature_Group': group_name,
+                    'Features_Removed': group_features,
+                    'Baseline_AUC': baseline_score,
+                    'Reduced_AUC': score,
+                    'Impact': impact
+                })
+
+                print(f"  Removing {group_name}: AUC = {score:.4f} (impact: {impact:+.4f})")
+
+            except Exception as e:
+                print(f"  Error removing {group_name}: {e}")
+                continue
+
+        if feature_ablations:
+            ablation_results[name] = pd.DataFrame(feature_ablations).sort_values('Impact', ascending=False)  # noqa: 501
+        else:
+            print(f"  No successful ablations for {name}")
+            ablation_results[name] = pd.DataFrame()
+
+    return ablation_results
+
+
+def comprehensive_feature_analysis(models, X_train, y_train, X_test, y_test, feature_cols):
+    """Run comprehensive feature analysis - FIXED VERSION"""
+
+    print(f"Starting comprehensive feature analysis with {len(feature_cols)} features:")
+    print(f"Features: {feature_cols}")
+
+    importance_results = analyze_feature_importance(models, X_test, y_test, feature_cols)
+    negative_impact = analyze_negative_features(models, X_train, y_train, X_test, y_test, feature_cols)  # noqa: 501
+    correlation_results = correlation_analysis(pd.concat([X_train, X_test]), feature_cols)
+    rfe_results = recursive_feature_elimination(models, X_train, y_train, X_test, y_test, feature_cols)  # noqa: 501
+    ablation_results = feature_ablation_study(models, X_train, y_train, X_test, y_test, feature_cols)  # noqa: 501
+
+    print("\n" + "="*70)
+    print("SUMMARY: POTENTIALLY PROBLEMATIC FEATURES")
+    print("="*70)
+
+    # Collect features that consistently show up as problematic
+    problematic_features = set()
+
+    # From correlation analysis
+    if not correlation_results.empty:
+        for _, row in correlation_results.iterrows():
+            # Remove the second feature in correlated pairs
+            problematic_features.add(row['Feature_2'])
+
+    # From ablation study - features whose removal improves performance
+    for model_name, ablation_df in ablation_results.items():
+        if not ablation_df.empty:
+            # Negative impact means removal improved performance
+            negative_impact_groups = ablation_df[ablation_df['Impact'] < 0]
+            for _, row in negative_impact_groups.iterrows():
+                problematic_features.update(row['Features_Removed'])
+
+    if problematic_features:
+        print(f"Features that may be hindering performance: {list(problematic_features)}")
+    else:
+        print("No clearly problematic features identified")
+
+    return {
+        'importance': importance_results,
+        'negative_impact': negative_impact,
+        'correlation': correlation_results,
+        'rfe': rfe_results,
+        'ablation': ablation_results,
+        'problematic_features': list(problematic_features)
+    }
+
+
+comprehensive_feature_analysis(models, X_train, y_train, X_test, y_test, feature_cols)

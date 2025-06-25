@@ -1,0 +1,156 @@
+[
+  {
+    "round": 1,
+    "name": "Melbourne",
+    "location": "Melbourne",
+    "sessions": {
+      "race": "2025-03-16T00:00:00",
+      "practice": "2025-03-16T00:00:00",
+      "qualifying": "2025-03-16T00:00:00",
+      "sprint": "2025-03-16T00:00:00"
+    }
+  },
+  {
+    "round": 2,
+    "name": "Sakhir",
+    "location": "Sakhir",
+    "sessions": {
+      "race": "2025-04-13T00:00:00",
+      "practice": "2025-04-13T00:00:00",
+      "qualifying": "2025-04-13T00:00:00",
+      "sprint": "2025-04-13T00:00:00"
+    }
+  },
+  {
+    "round": 3,
+    "name": "Jeddah",
+    "location": "Jeddah",
+    "sessions": {
+      "race": "2025-04-20T00:00:00",
+      "practice": "2025-04-20T00:00:00",
+      "qualifying": "2025-04-20T00:00:00",
+      "sprint": "2025-04-20T00:00:00"
+    }
+  },
+  {
+    "round": 4,
+    "name": "Imola",
+    "location": "Imola",
+    "sessions": {
+      "race": "2025-05-18T00:00:00",
+      "practice": "2025-05-18T00:00:00",
+      "qualifying": "2025-05-18T00:00:00",
+      "sprint": "2025-05-18T00:00:00"
+    }
+  },
+  {
+    "round": 5,
+    "name": "Monaco",
+    "location": "Monaco",
+    "sessions": {
+      "race": "2025-05-25T00:00:00",
+      "practice": "2025-05-25T00:00:00",
+      "qualifying": "2025-05-25T00:00:00",
+      "sprint": "2025-05-25T00:00:00"
+    }
+  },
+  {
+    "round": 6,
+    "name": "Barcelona",
+    "location": "Barcelona",
+    "sessions": {
+      "race": "2025-06-01T00:00:00",
+      "practice": "2025-06-01T00:00:00",
+      "qualifying": "2025-06-01T00:00:00",
+      "sprint": "2025-06-01T00:00:00"
+    }
+  },
+  {
+    "round": 7,
+    "name": "Spielberg",
+    "location": "Spielberg",
+    "sessions": {
+      "race": "2025-06-29T10:00:00",
+      "practice": "2025-06-27T11:05:00",
+      "qualifying": "2025-06-27T15:55:00",
+      "sprint": "2025-06-28T14:15:00"
+    }
+  },
+  {
+    "round": 8,
+    "name": "Silverstone",
+    "location": "Silverstone",
+    "sessions": {
+      "race": "2025-07-06T11:05:00",
+      "practice": "2025-07-04T10:00:00",
+      "qualifying": "2025-07-04T14:55:00",
+      "sprint": "2025-07-05T13:15:00"
+    }
+  },
+  {
+    "round": 9,
+    "name": "Spa-Francorchamps",
+    "location": "Spa-Francorchamps",
+    "sessions": {
+      "race": "2025-07-27T00:00:00",
+      "practice": "2025-07-27T00:00:00",
+      "qualifying": "2025-07-27T00:00:00",
+      "sprint": "2025-07-27T00:00:00"
+    }
+  },
+  {
+    "round": 10,
+    "name": "Budapest",
+    "location": "Budapest",
+    "sessions": {
+      "race": "2025-08-03T00:00:00",
+      "practice": "2025-08-03T00:00:00",
+      "qualifying": "2025-08-03T00:00:00",
+      "sprint": "2025-08-03T00:00:00"
+    }
+  },
+  {
+    "round": 11,
+    "name": "Monza",
+    "location": "Monza",
+    "sessions": {
+      "race": "2025-09-07T00:00:00",
+      "practice": "2025-09-07T00:00:00",
+      "qualifying": "2025-09-07T00:00:00",
+      "sprint": "2025-09-07T00:00:00"
+    }
+  },
+  {
+    "round": 12,
+    "name": "Baku",
+    "location": "Baku",
+    "sessions": {
+      "race": "2025-09-21T00:00:00",
+      "practice": "2025-09-21T00:00:00",
+      "qualifying": "2025-09-21T00:00:00",
+      "sprint": "2025-09-21T00:00:00"
+    }
+  },
+  {
+    "round": 13,
+    "name": "Lusail",
+    "location": "Lusail",
+    "sessions": {
+      "race": "2025-11-30T00:00:00",
+      "practice": "2025-11-30T00:00:00",
+      "qualifying": "2025-11-30T00:00:00",
+      "sprint": "2025-11-30T00:00:00"
+    }
+  },
+  {
+    "round": 14,
+    "name": "Yas Island",
+    "location": "Yas Island",
+    "sessions": {
+      "race": "2025-12-07T00:00:00",
+      "practice": "2025-12-07T00:00:00",
+      "qualifying": "2025-12-07T00:00:00",
+      "sprint": "2025-12-07T00:00:00"
+    }
+  }
+]

@@ -19,9 +19,15 @@ export const usePredictions = () => {
 
   // Fetch without state dependencies
   const fetchPredictions = useCallback(async (): Promise<AllPredictionsResponse> => {
-    const response = await fetch(`${API_BASE}/predictions`);
-    if (!response.ok) throw new Error('Failed to fetch predictions');
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE}/predictions`);
+      if (!response.ok) {
+        throw new Error('Server responded with an error');
+      }
+      return response.json();
+    } catch {
+      throw new Error('Network connection issue');
+    }
   }, [API_BASE]);
 
   const fetchAllPredictions = useCallback(async () => {
@@ -35,8 +41,8 @@ export const usePredictions = () => {
       setError(null);
       return data; // Return for immediate use
     } catch (err) {
-      setError(`Failed to fetch predictions: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      throw err;
+      setError('Failed to load predictions data. Please check your connection.');
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -45,10 +51,14 @@ export const usePredictions = () => {
   const handleRefresh = async () => {
     try {
       setLoading(true);
+      setError(null);
       // Capture current status before refresh
       refreshStatusRef.current = allData?.system_status || null;
       
-      await fetch(`${API_BASE}/refresh`, { method: 'POST' });
+      const refreshResponse = await fetch(`${API_BASE}/refresh`, { method: 'POST' });
+      if (!refreshResponse.ok) {
+        throw new Error('Refresh request failed');
+      }
       
       const maxAttempts = 10;
       let attempts = 0;
@@ -88,7 +98,8 @@ export const usePredictions = () => {
       checkForUpdates();
     } catch (err) {
       setLoading(false);
-      setError(`Refresh failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setError('Could not refresh data. Please try again later.');
+      console.error('Refresh error:', err);
     }
   };
 

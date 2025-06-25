@@ -1,0 +1,194 @@
+[
+  {
+    "round": 1,
+    "name": "LOUIS VUITTON AUSTRALIAN",
+    "location": "Australia",
+    "sessions": {
+      "gp": "2025-03-16T00:00:00"
+    }
+  },
+  {
+    "round": 2,
+    "name": "HEINEKEN CHINESE",
+    "location": "China",
+    "sessions": {
+      "gp": "2025-03-23T00:00:00"
+    }
+  },
+  {
+    "round": 3,
+    "name": "LENOVO JAPANESE",
+    "location": "Japan",
+    "sessions": {
+      "gp": "2025-04-06T00:00:00"
+    }
+  },
+  {
+    "round": 4,
+    "name": "GULF AIR BAHRAIN",
+    "location": "Bahrain",
+    "sessions": {
+      "gp": "2025-04-13T00:00:00"
+    }
+  },
+  {
+    "round": 5,
+    "name": "STC SAUDI ARABIAN",
+    "location": "Saudi Arabia",
+    "sessions": {
+      "gp": "2025-04-20T00:00:00"
+    }
+  },
+  {
+    "round": 6,
+    "name": "CRYPTO.COM MIAMI",
+    "location": "Miami",
+    "sessions": {
+      "gp": "2025-05-04T00:00:00"
+    }
+  },
+  {
+    "round": 7,
+    "name": "AWS GRAN PREMIO DEL MADE IN ITALY E DELL'EMILIA-ROMAGNA",
+    "location": "Emilia-Romagna",
+    "sessions": {
+      "gp": "2025-05-18T00:00:00"
+    }
+  },
+  {
+    "round": 8,
+    "name": "TAG HEUER  DE MONACO",
+    "location": "Monaco",
+    "sessions": {
+      "gp": "2025-05-25T00:00:00"
+    }
+  },
+  {
+    "round": 9,
+    "name": "ARAMCO GRAN PREMIO DE ESPA\u00d1A",
+    "location": "Spain",
+    "sessions": {
+      "gp": "2025-06-01T00:00:00"
+    }
+  },
+  {
+    "round": 10,
+    "name": "PIRELLI  DU CANADA",
+    "location": "Canada",
+    "sessions": {
+      "gp": "2025-06-15T00:00:00"
+    }
+  },
+  {
+    "round": 11,
+    "name": "MSC CRUISES AUSTRIAN",
+    "location": "Austria",
+    "sessions": {
+      "gp": "2025-06-29T00:00:00"
+    }
+  },
+  {
+    "round": 12,
+    "name": "QATAR AIRWAYS BRITISH",
+    "location": "Great Britain",
+    "sessions": {
+      "gp": "2025-07-06T00:00:00"
+    }
+  },
+  {
+    "round": 13,
+    "name": "MO\u00cbT & CHANDON BELGIAN",
+    "location": "Belgium",
+    "sessions": {
+      "gp": "2025-07-27T00:00:00"
+    }
+  },
+  {
+    "round": 14,
+    "name": "LENOVO HUNGARIAN",
+    "location": "Hungary",
+    "sessions": {
+      "gp": "2025-08-03T00:00:00"
+    }
+  },
+  {
+    "round": 15,
+    "name": "HEINEKEN DUTCH",
+    "location": "Netherlands",
+    "sessions": {
+      "gp": "2025-08-31T00:00:00"
+    }
+  },
+  {
+    "round": 16,
+    "name": "PIRELLI GRAN PREMIO D\u2019ITALIA",
+    "location": "Italy",
+    "sessions": {
+      "gp": "2025-09-07T00:00:00"
+    }
+  },
+  {
+    "round": 17,
+    "name": "QATAR AIRWAYS AZERBAIJAN",
+    "location": "Azerbaijan",
+    "sessions": {
+      "gp": "2025-09-21T00:00:00"
+    }
+  },
+  {
+    "round": 18,
+    "name": "SINGAPORE AIRLINES SINGAPORE",
+    "location": "Singapore",
+    "sessions": {
+      "gp": "2025-10-05T00:00:00"
+    }
+  },
+  {
+    "round": 19,
+    "name": "MSC CRUISES UNITED STATES",
+    "location": "United States",
+    "sessions": {
+      "gp": "2025-10-19T00:00:00"
+    }
+  },
+  {
+    "round": 20,
+    "name": "GRAN PREMIO DE LA CIUDAD DE M\u00c9XICO",
+    "location": "Mexico",
+    "sessions": {
+      "gp": "2025-10-26T00:00:00"
+    }
+  },
+  {
+    "round": 21,
+    "name": "MSC CRUISES GRANDE PR\u00caMIO DE S\u00c3O PAULO",
+    "location": "Brazil",
+    "sessions": {
+      "gp": "2025-11-09T00:00:00"
+    }
+  },
+  {
+    "round": 22,
+    "name": "HEINEKEN LAS VEGAS",
+    "location": "Las Vegas",
+    "sessions": {
+      "gp": "2025-11-22T00:00:00"
+    }
+  },
+  {
+    "round": 23,
+    "name": "QATAR AIRWAYS QATAR",
+    "location": "Qatar",
+    "sessions": {
+      "gp": "2025-11-30T00:00:00"
+    }
+  },
+  {
+    "round": 24,
+    "name": "ETIHAD AIRWAYS ABU DHABI",
+    "location": "Abu Dhabi",
+    "sessions": {
+      "gp": "2025-12-07T00:00:00"
+    }
+  }
+]

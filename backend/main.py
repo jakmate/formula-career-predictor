@@ -31,6 +31,7 @@ MODELS_DIR = "models"
 STATE_FILE = "system_state.json"
 CURRENT_YEAR = datetime.now().year
 SEASON_END_MONTH = 12
+SCHEDULE_DIR = os.path.join(os.path.dirname(__file__), 'data', 'schedules', str(CURRENT_YEAR))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -168,7 +169,7 @@ def initialize_system():
     f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
     f3_df = create_target_variable(f3_df, f2_df)
     features_df = engineer_features(f3_df)
-    features_df['moved_to_f2'] = f3_df['moved_to_f2']
+    features_df['promoted'] = f3_df['promoted']
 
     # Train models on all available historical data
     trainable_df = features_df[
@@ -182,7 +183,8 @@ def initialize_system():
             app_state.deep_models,
             _, _,
             app_state.feature_cols,
-            app_state.scaler
+            app_state.scaler,
+            _, _
         ) = train_models(trainable_df)
 
         # Update system status
@@ -350,7 +352,7 @@ async def train_models_task():
         f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
         f3_df = create_target_variable(f3_df, f2_df)
         features_df = engineer_features(f3_df)
-        features_df['moved_to_f2'] = f3_df['moved_to_f2']
+        features_df['promoted'] = f3_df['promoted']
 
         # Train only on newly complete seasons
         trainable_df = features_df[
@@ -368,7 +370,8 @@ async def train_models_task():
             app_state.deep_models,
             _, _,
             app_state.feature_cols,
-            app_state.scaler
+            app_state.scaler,
+            _, _
         ) = train_models(trainable_df)
 
         # Update system status
@@ -442,7 +445,7 @@ def _create_prediction_responses(current_df, raw_probas):
             podium_rate=float(row['podium_rate']),
             top_10_rate=float(row['top_10_rate']),
             dnf_rate=float(row['dnf_rate']),
-            experience=int(row['years_in_f3']),
+            experience=int(row['experience']),
             dob=row['dob'],
             age=float(row['age']) if pd.notna(row['age']) else None,
             participation_rate=float(row['participation_rate']),
@@ -478,7 +481,7 @@ def _load_current_data():
     f3_df = create_target_variable(f3_df, f2_df)
 
     features_df = engineer_features(f3_df)
-    features_df['moved_to_f2'] = f3_df['moved_to_f2']
+    features_df['promoted'] = f3_df['promoted']
 
     # Get current year data
     current_year = datetime.now().year
@@ -595,6 +598,70 @@ async def refresh_data(background_tasks: BackgroundTasks):
     background_tasks.add_task(scrape_and_train_task)
     return {"message": "Data refresh and training started in background"}
 
+
+@app.get("/api/races/{series}", tags=["Schedule"])
+async def get_series_schedule(series: str):
+    """Get schedule for a specific racing series"""
+    valid_series = ['f1', 'f2', 'f3']
+    if series not in valid_series:
+        raise HTTPException(status_code=404, detail="Invalid series specified")
+
+    file_path = os.path.join(SCHEDULE_DIR, f"{series}.json")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Schedule data not found")
+
+    try:
+        with open(file_path, 'r') as f:
+            schedule = json.load(f)
+        return schedule
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading schedule: {str(e)}")
+
+
+@app.get("/api/races/{series}/next", tags=["Schedule"])
+async def get_next_race(series: str):
+    """Get the next upcoming race for a series with total rounds and next session"""
+    valid_series = ['f1', 'f2', 'f3']
+    if series not in valid_series:
+        raise HTTPException(status_code=404, detail="Invalid series specified")
+
+    file_path = os.path.join(SCHEDULE_DIR, f"{series}.json")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Schedule data not found")
+
+    try:
+        with open(file_path, 'r') as f:
+            schedule = json.load(f)
+
+        total_rounds = len(schedule)
+        now = datetime.utcnow()
+        next_race = None
+        next_session = None
+
+        for race in schedule:
+            # Check all sessions to find the next upcoming session
+            for session_name, session_time in race['sessions'].items():
+                session_dt = datetime.fromisoformat(session_time)
+                if session_dt > now:
+                    if not next_session or session_dt < datetime.fromisoformat(next_session['date']):  # noqa: 501
+                        next_session = {
+                            'name': session_name,
+                            'date': session_time
+                        }
+                    # Found next race if we haven't found one yet
+                    if not next_race:
+                        next_race = race
+                        next_race['totalRounds'] = total_rounds
+
+        # Add next session to the next race
+        if next_race and next_session:
+            next_race['nextSession'] = next_session
+
+        return next_race
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error finding next race: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info", reload=False)
