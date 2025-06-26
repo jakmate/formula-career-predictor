@@ -1,8 +1,12 @@
 import { Calendar, MapPin } from "lucide-react";
 
+interface SessionDetails {
+  start?: string;
+  time?: string;
+}
+
 interface Session {
-  gp?: string;
-  race?: string;
+  race?: SessionDetails;
 }
 
 interface Race {
@@ -26,7 +30,22 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
   };
 
   const isPastRace = (raceDate: string) => {
-    return new Date(raceDate) < new Date();
+    if (!raceDate) return false;
+    
+    try {
+      const now = new Date();
+      const date = new Date(raceDate);
+      
+      // Handle TBC dates (date-only format)
+      if (raceDate.length === 10) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date < today;
+      }
+      return date < now;
+    } catch {
+      return false;
+    }
   };
 
   let nextUpcomingFound = false;
@@ -43,7 +62,9 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {races.map((race: Race, index: number) => {
-        const raceDate = race.sessions?.gp || race.sessions?.race;
+        const raceSession = race.sessions.race;
+        const raceDate = raceSession?.start;
+        const isTBC = raceSession?.time === 'TBC';
         const past = raceDate ? isPastRace(raceDate) : false;
         const isUpcoming = !past && !nextUpcomingFound;
         
@@ -96,10 +117,12 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
                     {formatDate(raceDate)}
                   </div>
                   <div className="text-white/70 text-sm">
-                    {new Date(raceDate).toLocaleTimeString('en-US', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {isTBC ? 'TBC' : (
+                      new Date(raceDate).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                    )}
                   </div>
                 </div>
               )}

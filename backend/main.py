@@ -642,18 +642,35 @@ async def get_next_race(series: str):
 
         for race in schedule:
             # Check all sessions to find the next upcoming session
-            for session_name, session_time in race['sessions'].items():
-                session_dt = datetime.fromisoformat(session_time)
+            for session_name, session_info in race['sessions'].items():
+                # Skip TBC sessions
+                if session_info.get('time') == 'TBC':
+                    continue
+
+                start_str = session_info.get('start')
+                if not start_str:
+                    continue
+
+                try:
+                    session_dt = datetime.fromisoformat(start_str)
+                except Exception as e:
+                    print(e)
+                    continue
+
                 if session_dt > now:
+                    # Create session object with name and start time
+                    candidate_session = {
+                        'name': session_name,
+                        'date': start_str
+                    }
+
+                    # Check if this is the earliest upcoming session
                     if not next_session or session_dt < datetime.fromisoformat(next_session['date']):  # noqa: 501
-                        next_session = {
-                            'name': session_name,
-                            'date': session_time
-                        }
-                    # Found next race if we haven't found one yet
-                    if not next_race:
-                        next_race = race
-                        next_race['totalRounds'] = total_rounds
+                        next_session = candidate_session
+                        # Only set next_race once
+                        if not next_race:
+                            next_race = race
+                            next_race['totalRounds'] = total_rounds
 
         # Add next session to the next race
         if next_race and next_session:
