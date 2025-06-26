@@ -76,18 +76,21 @@ export const DriverHoverCard = ({ driver, children }: DriverHoverCardProps) => {
       {isVisible && (
         <div
           ref={cardRef}
-          className={`absolute z-50 left-0 w-80 bg-slate-800/95 backdrop-blur-lg border border-white/20 rounded-lg p-4 shadow-2xl animate-in fade-in duration-200 ${
+          className={`absolute z-50 left-0 w-80 bg-gray-800/95 backdrop-blur-lg border border-cyan-500/30 rounded-lg p-4 shadow-2xl animate-in fade-in duration-200 ${
             position === 'top' 
               ? 'bottom-full mb-2' 
               : 'top-full mt-2'
           }`}
         >
           <div className="flex items-start gap-4">
-            <img 
-              src={driverInfo.photo} 
-              alt={driverInfo.fullName}
-              className="w-16 h-16 rounded-lg object-cover bg-slate-700"
-            />
+            <div className="relative">
+              <img 
+                src={driverInfo.photo} 
+                alt={driverInfo.fullName}
+                className="w-16 h-16 rounded-lg object-cover bg-slate-700 border border-cyan-500/30"
+              />
+              <div className="absolute -inset-1 bg-cyan-500/20 rounded-lg blur-sm z-0"></div>
+            </div>
             
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">

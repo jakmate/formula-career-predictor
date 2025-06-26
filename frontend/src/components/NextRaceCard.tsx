@@ -156,21 +156,24 @@ export const NextRaceCard = ({ nextRace }: NextRaceCardProps) => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-700/30 via-purple-700/30 to-indigo-700/30 border border-blue-500/40 rounded-2xl p-8 mb-8 shadow-lg shadow-blue-500/20 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-red-500"></div>
+    <div className="bg-gradient-to-r from-cyan-900/20 via-purple-900/20 to-cyan-900/20 border border-cyan-500/30 rounded-2xl p-6 mb-8 shadow-xl shadow-cyan-500/10 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-purple-500"></div>
       <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400/10 rounded-full blur-xl"></div>
       <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-400/10 rounded-full blur-xl"></div>
       
-      <div className="flex flex-col items-center text-center mb-8">
+      <div className="flex flex-col items-center text-center mb-8 relative z-10">
         <div className="flex items-center mb-3">
-          <Trophy className="w-8 h-8 mr-3 text-yellow-400" />
+          <div className="relative mr-3">
+            <Trophy className="w-8 h-8 text-amber-300 z-10 relative" />
+            <div className="absolute inset-0 bg-amber-400 rounded-full blur-sm opacity-40"></div>
+          </div>
           <h2 className="text-2xl md:text-3xl font-bold text-white">
             NEXT RACE: {nextRace.name} GP
           </h2>
         </div>
         
-        <div className="bg-blue-500/30 px-4 py-1.5 rounded-full flex items-center">
-          <span className="text-blue-200 text-sm font-medium">
+        <div className="bg-cyan-900/40 px-4 py-1.5 rounded-full flex items-center border border-cyan-500/30">
+          <span className="text-cyan-300 text-sm font-medium">
             Round {nextRace.round} of {nextRace.totalRounds || "?"}
           </span>
         </div>

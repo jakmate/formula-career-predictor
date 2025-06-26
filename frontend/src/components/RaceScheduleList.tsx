@@ -60,7 +60,7 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {races.map((race: Race, index: number) => {
         const raceSession = race.sessions.race;
         const raceDate = raceSession?.start;
@@ -74,13 +74,13 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
           <div
             key={race.slug || index}
             className={`
-              backdrop-blur-lg rounded-lg border p-4 transition-opacity
+              backdrop-blur-lg rounded-xl border p-4 transition-all duration-200
               ${past 
-                ? 'bg-red-900/40 border-red-800/50 opacity-60' 
+                ? 'bg-gray-900/60 border-gray-700 opacity-70' 
                 : isUpcoming 
-                  ? 'bg-green-900/30 border-green-700/50' 
-                  : 'bg-white/10 border-white/20'
-              }
+                  ? 'bg-gradient-to-br from-cyan-900/30 to-purple-900/30 border-cyan-500/50 shadow-lg shadow-cyan-500/20' 
+                  : 'bg-gray-800/60 border-cyan-500/30'
+              } hover:shadow-cyan-500/20 hover:border-cyan-400/50
             `}
           >
             <div className="flex flex-col h-full">

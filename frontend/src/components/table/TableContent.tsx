@@ -13,7 +13,7 @@ export const TableContent = ({ predictions }: TableContentProps) => {
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-white/5">
+        <thead className="bg-gray-900/50">
           <tr className="text-left text-white/90">
             <TableHeader field="driver" sortConfig={sortConfig} onSort={handleSort}>
               Driver

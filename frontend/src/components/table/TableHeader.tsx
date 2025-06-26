@@ -18,7 +18,7 @@ export const TableHeader = ({ field, sortConfig, onSort, children }: TableHeader
 
   return (
     <th 
-      className="p-4 font-semibold cursor-pointer hover:bg-white/10 transition-colors select-none"
+      className="p-4 font-semibold cursor-pointer hover:bg-cyan-900/20 transition-colors select-none"
       onClick={() => onSort(field)}
     >
       <div className="flex items-center">

@@ -8,18 +8,18 @@ interface TableRowProps {
 
 export const TableRow = ({ driver }: TableRowProps) => (
   <tr 
-    className={`border-t border-white/10 hover:bg-white/5 transition-colors ${
-      driver.prediction === 1 ? 'bg-green-500/10' : ''
+    className={`border-t border-cyan-500/10 hover:bg-cyan-900/10 transition-colors ${
+      driver.prediction === 1 ? 'bg-gradient-to-r from-green-900/20 to-cyan-900/20' : ''
     }`}
   >
     <td className="p-4 text-white font-medium">
       <DriverHoverCard driver={driver}>
-        <span className="cursor-pointer hover:text-blue-300 transition-colors">
+        <span className="cursor-pointer hover:text-cyan-300 transition-colors">
           {driver.driver}
         </span>
       </DriverHoverCard>
     </td>
-    <td className="p-4 text-white">{driver.position}</td>
+    <td className="p-4 text-white">#{driver.position}</td>
     <td className="p-4 text-white">{driver.points.toFixed(1)}</td>
     <td className="p-4 text-white">{(driver.win_rate * 100).toFixed(1)}%</td>
     <td className="p-4 text-white">{(driver.podium_rate * 100).toFixed(1)}%</td>
