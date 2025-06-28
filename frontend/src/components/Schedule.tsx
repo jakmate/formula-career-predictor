@@ -14,7 +14,7 @@ export const Schedule = () => {
     series,
     loading,
     error,
-    refetch
+    refetch,
   } = useSchedule();
 
   return (
@@ -34,14 +34,16 @@ export const Schedule = () => {
                 </option>
               ))}
             </select>
-            
+
             <button
               onClick={refetch}
               disabled={loading}
               className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 disabled:opacity-50 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Updating...' : 'Refresh'}
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
+              {loading ? "Updating..." : "Refresh"}
             </button>
           </div>
         }
@@ -55,7 +57,7 @@ export const Schedule = () => {
         <h2 className="text-xl font-semibold text-white p-6 border-b border-cyan-500/20">
           Full Season Schedule
         </h2>
-        
+
         {loading ? (
           <div className="p-12 text-center text-white">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-cyan-400" />

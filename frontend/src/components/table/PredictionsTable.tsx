@@ -1,8 +1,14 @@
-import { Calendar, RefreshCw, Target, TrendingUp, UserRound } from 'lucide-react';
-import { ErrorDisplay } from '../ErrorDisplay';
-import { TableContent } from '../table/TableContent';
-import { usePredictions } from '../../hooks/usePredictions';
-import { Header } from '../Header';
+import {
+  Calendar,
+  RefreshCw,
+  Target,
+  TrendingUp,
+  UserRound,
+} from "lucide-react";
+import { ErrorDisplay } from "../ErrorDisplay";
+import { TableContent } from "../table/TableContent";
+import { usePredictions } from "../../hooks/usePredictions";
+import { Header } from "../Header";
 
 export const PredictionsTable = () => {
   const {
@@ -14,34 +20,44 @@ export const PredictionsTable = () => {
     status,
     error,
     handleRefresh,
-    currentPredictions
+    currentPredictions,
   } = usePredictions();
 
   return (
     <div className="w-full">
-      <Header 
+      <Header
         title="F3 to F2 Predictions"
         description="AI-powered analysis of Formula 3 drivers likely to advance to Formula 2"
         rightContent={
           <div className="flex flex-col sm:flex-row gap-3">
-            <select 
-              value={selectedModel} 
+            <select
+              value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               className="px-4 py-2 bg-gray-800/60 border border-cyan-500/30 rounded-lg text-white backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-cyan-500 shadow-sm"
             >
-              <option value="" className="text-gray-800 bg-gray-900">Select Model</option>
-              {models.map(model => (
-                <option key={model} value={model} className="text-white bg-gray-900">{model}</option>
+              <option value="" className="text-gray-800 bg-gray-900">
+                Select Model
+              </option>
+              {models.map((model) => (
+                <option
+                  key={model}
+                  value={model}
+                  className="text-white bg-gray-900"
+                >
+                  {model}
+                </option>
               ))}
             </select>
-            
-            <button 
+
+            <button
               onClick={handleRefresh}
               disabled={loading}
               className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 disabled:opacity-50 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Updating...' : 'Refresh'}
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
+              {loading ? "Updating..." : "Refresh"}
             </button>
           </div>
         }
@@ -57,7 +73,8 @@ export const PredictionsTable = () => {
               {status.last_training && (
                 <div className="flex items-center gap-1">
                   <TrendingUp className="w-4 h-4" />
-                  Last training: {new Date(status.last_training).toLocaleString()}
+                  Last training:{" "}
+                  {new Date(status.last_training).toLocaleString()}
                 </div>
               )}
               <div className="flex items-center gap-1">

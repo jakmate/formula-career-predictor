@@ -17,10 +17,11 @@ os.makedirs(SCHEDULE_DIR, exist_ok=True)
 # Initialize geocoding cache
 location_timezone_cache = {}
 
+
 def get_timezone_for_location(location_str):
     if location_str in location_timezone_cache:
         return location_timezone_cache[location_str]
-    
+
     try:
         geolocator = Nominatim(user_agent="f1_schedule_scraper")
         location = geolocator.geocode(location_str, exactly_one=True, timeout=10)
@@ -32,32 +33,34 @@ def get_timezone_for_location(location_str):
                 return timezone_str
     except Exception as e:
         print(f"Geocoding error for '{location_str}': {str(e)}")
-    
+
     # Fallback to UTC if geocoding fails
     return "UTC"
+
 
 def format_utc_datetime(dt):
     """Format datetime object to ISO string without UTC offset"""
     return dt.replace(tzinfo=None).isoformat() if dt.tzinfo else dt.isoformat()
 
+
 def is_race_in_progress(race):
     """Check if a race is currently in progress (during its race weekend)"""
     now = datetime.utcnow()
-    
+
     # Get all session start times
     session_starts = []
     for session in race['sessions'].values():
         start_str = session.get('start')
         if not start_str:
             continue
-            
+
         # Handle TBC sessions
         if isinstance(start_str, dict) and start_str.get('time') == 'TBC':
             try:
                 date_val = datetime.strptime(start_str['start'], "%Y-%m-%d").date()
                 # Use start of day for comparison
                 session_starts.append(datetime.combine(date_val, datetime.min.time()))
-            except:
+            except Exception as e:
                 continue
         # Handle regular datetime strings
         else:
@@ -69,18 +72,19 @@ def is_race_in_progress(race):
                     date_val = datetime.strptime(start_str, "%Y-%m-%d").date()
                     session_dt = datetime.combine(date_val, datetime.min.time())
                 session_starts.append(session_dt)
-            except:
+            except Exception as e:
                 continue
-    
+
     if not session_starts:
         return False
-    
+
     # Find earliest and latest session times
     earliest_session = min(session_starts)
     latest_session = max(session_starts)
-    
+
     # Check if current time is within the race weekend
     return earliest_session <= now <= latest_session + timedelta(days=1)
+
 
 def parse_time_to_datetime(time_str, base_date, day_name=None, location=None):
     """Parse time string and combine with date to create datetime object in UTC"""
@@ -154,6 +158,7 @@ def parse_time_to_datetime(time_str, base_date, day_name=None, location=None):
     except Exception as e:
         print(f"Error parsing time '{time_str}' with day '{day_name}': {e}")
         return None
+
 
 def scrape_f1_schedule():
     try:
@@ -348,6 +353,7 @@ def scrape_f1_schedule():
         print(f"Error scraping F1 schedule: {e}")
         return []
 
+
 def scrape_fia_formula_schedule(series_name):
     """Generic scraper for F2 and F3 schedules"""
     series_config = {
@@ -420,8 +426,8 @@ def scrape_fia_formula_schedule(series_name):
 
                         for pin in session_pins:
                             session_divs = pin.select('div')
-                            if (len(session_divs) < 2 or 'Summary' in pin.text or 
-                                'Standings' in pin.text or 'hint' in pin.get('class', []) or 
+                            if (len(session_divs) < 2 or 'Summary' in pin.text or
+                                'Standings' in pin.text or 'hint' in pin.get('class', []) or
                                 pin.select_one('.position')):
                                 continue
 

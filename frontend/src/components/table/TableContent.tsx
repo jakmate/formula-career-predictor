@@ -1,7 +1,7 @@
-import type { Driver } from '../../types/Driver';
-import { TableHeader } from './TableHeader';
-import { TableRow } from './TableRow';
-import { useSorting } from '../../hooks/useSorting';
+import type { Driver } from "../../types/Driver";
+import { TableHeader } from "./TableHeader";
+import { TableRow } from "./TableRow";
+import { useSorting } from "../../hooks/useSorting";
 
 interface TableContentProps {
   predictions: Driver[];
@@ -15,34 +15,74 @@ export const TableContent = ({ predictions }: TableContentProps) => {
       <table className="w-full">
         <thead className="bg-gray-900/50">
           <tr className="text-left text-white/90">
-            <TableHeader field="driver" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="driver"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               Driver
             </TableHeader>
-            <TableHeader field="position" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="position"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               Position
             </TableHeader>
-            <TableHeader field="points" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="points"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               Points
             </TableHeader>
-            <TableHeader field="win_rate" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="win_rate"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               Win %
             </TableHeader>
-            <TableHeader field="podium_rate" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="podium_rate"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               Podium %
             </TableHeader>
-            <TableHeader field="top_10_rate" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="top_10_rate"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               Top 10 %
             </TableHeader>
-            <TableHeader field="dnf_rate" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="dnf_rate"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               DNF %
             </TableHeader>
-            <TableHeader field="participation_rate" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="participation_rate"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               Participation %
             </TableHeader>
-            <TableHeader field="experience" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="experience"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               Experience
             </TableHeader>
-            <TableHeader field="empirical_percentage" sortConfig={sortConfig} onSort={handleSort}>
+            <TableHeader
+              field="empirical_percentage"
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            >
               F2 Probability
             </TableHeader>
           </tr>

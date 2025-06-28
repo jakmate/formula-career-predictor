@@ -4,16 +4,18 @@ import logging
 import os
 import joblib
 import pandas as pd
+import pytz
 import torch
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from contextlib import asynccontextmanager
 from datetime import date, datetime
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from keras.models import load_model
 from pydantic import BaseModel
 from typing import List, Dict, Optional
+
 from scraping.scrape import scrape_current_year
 from predictor import (
     RacingPredictor,
@@ -600,8 +602,12 @@ async def refresh_data(background_tasks: BackgroundTasks):
 
 
 @app.get("/api/races/{series}", tags=["Schedule"])
-async def get_series_schedule(series: str):
-    """Get schedule for a specific racing series"""
+async def get_series_schedule(
+    series: str,
+    timezone: Optional[str] = None,
+    x_timezone: Optional[str] = Header(None)
+):
+    """Get schedule for a specific racing series with timezone conversion"""
     valid_series = ['f1', 'f2', 'f3']
     if series not in valid_series:
         raise HTTPException(status_code=404, detail="Invalid series specified")
@@ -614,14 +620,26 @@ async def get_series_schedule(series: str):
     try:
         with open(file_path, 'r') as f:
             schedule = json.load(f)
+
+        # Get timezone from query param, header, or default to UTC
+        user_timezone = timezone or x_timezone or 'UTC'
+
+        # Convert times if timezone is provided and not UTC
+        if user_timezone != 'UTC':
+            schedule = convert_schedule_timezone(schedule, user_timezone)
+
         return schedule
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading schedule: {str(e)}")
 
 
 @app.get("/api/races/{series}/next", tags=["Schedule"])
-async def get_next_race(series: str):
-    """Get the next upcoming race for a series with total rounds and next session"""
+async def get_next_race(
+    series: str,
+    timezone: Optional[str] = None,
+    x_timezone: Optional[str] = Header(None)
+):
+    """Get the next upcoming race for a series with timezone conversion"""
     valid_series = ['f1', 'f2', 'f3']
     if series not in valid_series:
         raise HTTPException(status_code=404, detail="Invalid series specified")
@@ -641,9 +659,7 @@ async def get_next_race(series: str):
         next_session = None
 
         for race in schedule:
-            # Check all sessions to find the next upcoming session
             for session_name, session_info in race['sessions'].items():
-                # Skip TBC sessions
                 if session_info.get('time') == 'TBC':
                     continue
 
@@ -658,27 +674,127 @@ async def get_next_race(series: str):
                     continue
 
                 if session_dt > now:
-                    # Create session object with name and start time
                     candidate_session = {
                         'name': session_name,
                         'date': start_str
                     }
 
-                    # Check if this is the earliest upcoming session
-                    if not next_session or session_dt < datetime.fromisoformat(next_session['date']):  # noqa: 501
+                    if not next_session or session_dt < datetime.fromisoformat(next_session['date']):  #noqa: 501
                         next_session = candidate_session
-                        # Only set next_race once
                         if not next_race:
                             next_race = race
                             next_race['totalRounds'] = total_rounds
 
-        # Add next session to the next race
         if next_race and next_session:
             next_race['nextSession'] = next_session
+
+            # Convert timezone if provided
+            user_timezone = timezone or x_timezone or 'UTC'
+            if user_timezone != 'UTC':
+                next_race = convert_race_timezone(next_race, user_timezone)
 
         return next_race
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error finding next race: {str(e)}")
+
+
+def convert_schedule_timezone(schedule, target_timezone):
+    """Convert all datetime strings in schedule from UTC to target timezone"""
+    try:
+        target_tz = pytz.timezone(target_timezone)
+        utc_tz = pytz.UTC
+
+        for race in schedule:
+            for session_name, session_info in race['sessions'].items():
+                if session_info.get('time') == 'TBC':
+                    continue
+
+                # Convert start time
+                start_str = session_info.get('start')
+                if start_str:
+                    try:
+                        utc_dt = datetime.fromisoformat(start_str)
+                        if utc_dt.tzinfo is None:
+                            utc_dt = utc_tz.localize(utc_dt)
+
+                        local_dt = utc_dt.astimezone(target_tz)
+                        session_info['start'] = local_dt.isoformat()
+                    except Exception as e:
+                        continue
+
+                # Convert end time
+                end_str = session_info.get('end')
+                if end_str:
+                    try:
+                        utc_dt = datetime.fromisoformat(end_str)
+                        if utc_dt.tzinfo is None:
+                            utc_dt = utc_tz.localize(utc_dt)
+
+                        local_dt = utc_dt.astimezone(target_tz)
+                        session_info['end'] = local_dt.isoformat()
+                    except Exception as e:
+                        continue
+
+        return schedule
+    except Exception as e:
+        return schedule
+
+
+def convert_race_timezone(race, target_timezone):
+    """Convert datetime strings in a single race from UTC to target timezone"""
+    try:
+        target_tz = pytz.timezone(target_timezone)
+        utc_tz = pytz.UTC
+
+        # Convert race sessions
+        for session_name, session_info in race['sessions'].items():
+            if session_info.get('time') == 'TBC':
+                continue
+
+            # Convert start time
+            start_str = session_info.get('start')
+            if start_str:
+                try:
+                    utc_dt = datetime.fromisoformat(start_str)
+                    if utc_dt.tzinfo is None:
+                        utc_dt = utc_tz.localize(utc_dt)
+                    
+                    local_dt = utc_dt.astimezone(target_tz)
+                    session_info['start'] = local_dt.isoformat()
+                except Exception as e:
+                    continue
+
+            # Convert end time
+            end_str = session_info.get('end')
+            if end_str:
+                try:
+                    utc_dt = datetime.fromisoformat(end_str)
+                    if utc_dt.tzinfo is None:
+                        utc_dt = utc_tz.localize(utc_dt)
+
+                    local_dt = utc_dt.astimezone(target_tz)
+                    session_info['end'] = local_dt.isoformat()
+                except Exception as e:
+                    continue
+
+        # Convert next session if exists
+        if 'nextSession' in race:
+            start_str = race['nextSession'].get('date')
+            if start_str:
+                try:
+                    utc_dt = datetime.fromisoformat(start_str)
+                    if utc_dt.tzinfo is None:
+                        utc_dt = utc_tz.localize(utc_dt)
+
+                    local_dt = utc_dt.astimezone(target_tz)
+                    race['nextSession']['date'] = local_dt.isoformat()
+                except Exception as e:
+                    pass
+
+        return race
+    except Exception as e:
+        return race
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info", reload=False)
