@@ -1,4 +1,4 @@
-import type { Driver } from "./Driver";
+import type { Driver } from './Driver';
 
 export interface ModelResults {
   model_name: string;

@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
-import type { Driver } from "../../types/Driver";
-import { getFlagComponent } from "../../utils/flags";
+import React, { useState, useRef, useEffect } from 'react';
+import type { Driver } from '../../types/Driver';
+import { getFlagComponent } from '../../utils/flags';
 
 interface DriverHoverCardProps {
   driver: Driver;
@@ -9,7 +9,7 @@ interface DriverHoverCardProps {
 
 export const DriverHoverCard = ({ driver, children }: DriverHoverCardProps) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState<"top" | "bottom">("bottom");
+  const [position, setPosition] = useState<'top' | 'bottom'>('bottom');
   const [cardHeight, setCardHeight] = useState(500);
   const timeoutIdRef = useRef<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -37,7 +37,7 @@ export const DriverHoverCard = ({ driver, children }: DriverHoverCardProps) => {
 
       // Use estimated height for initial calculation
       setPosition(
-        spaceBelow < cardHeight && spaceAbove > spaceBelow ? "top" : "bottom",
+        spaceBelow < cardHeight && spaceAbove > spaceBelow ? 'top' : 'bottom'
       );
     }
 
@@ -58,13 +58,13 @@ export const DriverHoverCard = ({ driver, children }: DriverHoverCardProps) => {
     team: driver.team,
     nationality: driver.nationality,
     dateOfBirth: driver.dob,
-    ...(typeof driver.age === "number" ? { age: Math.floor(driver.age) } : {}),
+    ...(typeof driver.age === 'number' ? { age: Math.floor(driver.age) } : {}),
     seasonWins: driver.wins,
     seasonPodiums: driver.podiums,
     photo: `https://ui-avatars.com/api/?name=${driver.driver
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")}&background=1e40af&color=fff`,
+      .join('')}&background=1e40af&color=fff`,
   };
 
   return (
@@ -80,7 +80,7 @@ export const DriverHoverCard = ({ driver, children }: DriverHoverCardProps) => {
         <div
           ref={cardRef}
           className={`absolute z-50 left-0 w-80 bg-gray-800/95 backdrop-blur-lg border border-cyan-500/30 rounded-lg p-4 shadow-2xl animate-in fade-in duration-200 ${
-            position === "top" ? "bottom-full mb-2" : "top-full mt-2"
+            position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
           }`}
         >
           <div className="flex items-start gap-4">
@@ -121,9 +121,9 @@ export const DriverHoverCard = ({ driver, children }: DriverHoverCardProps) => {
                   <span className="text-white/70">Experience:</span>
                   <span className="text-white">
                     {driver.experience === 0
-                      ? "Rookie"
+                      ? 'Rookie'
                       : driver.experience === 1
-                        ? "1 year"
+                        ? '1 year'
                         : `${driver.experience} years`}
                   </span>
                 </div>

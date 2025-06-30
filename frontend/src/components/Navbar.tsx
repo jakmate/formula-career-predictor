@@ -1,6 +1,6 @@
-import { BarChart3, Calendar, Icon } from "lucide-react";
-import { motorRacingHelmet } from "@lucide/lab";
-import { Link } from "react-router-dom";
+import { BarChart3, Calendar, Icon } from 'lucide-react';
+import { motorRacingHelmet } from '@lucide/lab';
+import { Link } from 'react-router-dom';
 
 interface NavbarProps {
   activeView: string;
@@ -28,9 +28,9 @@ export const Navbar = ({ activeView }: NavbarProps) => {
             <Link
               to="/predictions"
               className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200 ${
-                activeView === "predictions"
-                  ? "bg-gradient-to-r from-cyan-600/60 to-purple-600/60 text-white shadow-lg shadow-cyan-500/20"
-                  : "text-gray-300 hover:text-white hover:bg-gray-800/50"
+                activeView === 'predictions'
+                  ? 'bg-gradient-to-r from-cyan-600/60 to-purple-600/60 text-white shadow-lg shadow-cyan-500/20'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
               }`}
             >
               <BarChart3 className="w-4 h-4" />
@@ -40,9 +40,9 @@ export const Navbar = ({ activeView }: NavbarProps) => {
             <Link
               to="/schedule"
               className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200 ${
-                activeView === "schedule"
-                  ? "bg-gradient-to-r from-cyan-600/60 to-purple-600/60 text-white shadow-lg shadow-cyan-500/20"
-                  : "text-gray-300 hover:text-white hover:bg-gray-800/50"
+                activeView === 'schedule'
+                  ? 'bg-gradient-to-r from-cyan-600/60 to-purple-600/60 text-white shadow-lg shadow-cyan-500/20'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
               }`}
             >
               <Calendar className="w-4 h-4" />

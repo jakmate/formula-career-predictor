@@ -1,9 +1,9 @@
-import { RefreshCw } from "lucide-react";
-import { NextRaceCard } from "./NextRaceCard";
-import { RaceScheduleList } from "./RaceScheduleList";
-import { useSchedule } from "../hooks/useSchedule";
-import { Header } from "./Header";
-import { ErrorDisplay } from "./ErrorDisplay";
+import { RefreshCw } from 'lucide-react';
+import { NextRaceCard } from './NextRaceCard';
+import { RaceScheduleList } from './RaceScheduleList';
+import { useSchedule } from '../hooks/useSchedule';
+import { Header } from './Header';
+import { ErrorDisplay } from './ErrorDisplay';
 
 export const Schedule = () => {
   const {
@@ -41,9 +41,9 @@ export const Schedule = () => {
               className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 disabled:opacity-50 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30"
             >
               <RefreshCw
-                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+                className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
               />
-              {loading ? "Updating..." : "Refresh"}
+              {loading ? 'Updating...' : 'Refresh'}
             </button>
           </div>
         }

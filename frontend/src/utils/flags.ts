@@ -1,6 +1,6 @@
-import React from "react";
-import * as Flags from "country-flag-icons/react/3x2";
-import NATIONALITY_TO_COUNTRY from "../data/countryCodes";
+import React from 'react';
+import * as Flags from 'country-flag-icons/react/3x2';
+import NATIONALITY_TO_COUNTRY from '../data/countryCodes';
 
 interface CountryFlagProps {
   nationality: string | null;
@@ -10,11 +10,11 @@ interface CountryFlagProps {
 // Render fallback state
 const renderFallback = (className: string) => {
   return React.createElement(
-    "div",
+    'div',
     {
       className: `${className} bg-gray-300 rounded-sm flex items-center justify-center text-xs`,
     },
-    "?",
+    '?'
   );
 };
 
@@ -40,37 +40,37 @@ const getValidFlags = (nationalities: string[]) => {
 const MultiFlag: React.FC<{
   flags: React.ComponentType<{ className?: string }>[];
   className?: string;
-}> = ({ flags, className = "w-6 h-4" }) => {
+}> = ({ flags, className = 'w-6 h-4' }) => {
   const flagCount = flags.length;
 
   return React.createElement(
-    "div",
+    'div',
     { className: `relative inline-flex ${className}` },
     flags.map((FlagComponent, index) =>
       React.createElement(
-        "div",
+        'div',
         {
           key: index,
-          className: "absolute top-0 bottom-0",
+          className: 'absolute top-0 bottom-0',
           style: {
             left: `${(index * 100) / flagCount}%`,
             width: `${100 / flagCount}%`,
-            overflow: "hidden",
+            overflow: 'hidden',
           },
         },
         React.createElement(FlagComponent, {
-          className: "w-full h-full object-cover",
-        }),
-      ),
-    ),
+          className: 'w-full h-full object-cover',
+        })
+      )
+    )
   );
 };
 
 export const CountryFlag: React.FC<CountryFlagProps> = ({
   nationality,
-  className = "w-6 h-4",
+  className = 'w-6 h-4',
 }) => {
-  if (!nationality || nationality === "Unknown") {
+  if (!nationality || nationality === 'Unknown') {
     return renderFallback(className);
   }
 
@@ -78,7 +78,7 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
   const nationalities = nationality
     .split(/[,\-\s]+/)
     .map((n) => n.trim())
-    .filter((n) => n && n !== "Unknown")
+    .filter((n) => n && n !== 'Unknown')
     .map((n) => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase());
 
   // Try to get valid flags from the parts

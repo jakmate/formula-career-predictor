@@ -1,7 +1,7 @@
-import type { Driver } from "../../types/Driver";
-import { TableHeader } from "./TableHeader";
-import { TableRow } from "./TableRow";
-import { useSorting } from "../../hooks/useSorting";
+import type { Driver } from '../../types/Driver';
+import { TableHeader } from './TableHeader';
+import { TableRow } from './TableRow';
+import { useSorting } from '../../hooks/useSorting';
 
 interface TableContentProps {
   predictions: Driver[];

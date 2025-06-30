@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import type { SystemStatus } from "../types/SystemStatus";
-import type { ModelResults } from "../types/ModelResults";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import type { SystemStatus } from '../types/SystemStatus';
+import type { ModelResults } from '../types/ModelResults';
 
 interface AllPredictionsResponse {
   models: string[];
@@ -10,12 +10,12 @@ interface AllPredictionsResponse {
 
 export const usePredictions = () => {
   const [allData, setAllData] = useState<AllPredictionsResponse | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string>("");
+  const [selectedModel, setSelectedModel] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const refreshStatusRef = useRef<SystemStatus | null>(null); // Track original status
 
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   // Fetch without state dependencies
   const fetchPredictions =
@@ -23,11 +23,11 @@ export const usePredictions = () => {
       try {
         const response = await fetch(`${API_BASE}/predictions`);
         if (!response.ok) {
-          throw new Error("Server responded with an error");
+          throw new Error('Server responded with an error');
         }
         return response.json();
       } catch {
-        throw new Error("Network connection issue");
+        throw new Error('Network connection issue');
       }
     }, [API_BASE]);
 
@@ -43,9 +43,9 @@ export const usePredictions = () => {
       return data; // Return for immediate use
     } catch (err) {
       setError(
-        "Failed to load predictions data. Please check your connection.",
+        'Failed to load predictions data. Please check your connection.'
       );
-      console.error("Fetch error:", err);
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -59,10 +59,10 @@ export const usePredictions = () => {
       refreshStatusRef.current = allData?.system_status || null;
 
       const refreshResponse = await fetch(`${API_BASE}/refresh`, {
-        method: "POST",
+        method: 'POST',
       });
       if (!refreshResponse.ok) {
-        throw new Error("Refresh request failed");
+        throw new Error('Refresh request failed');
       }
 
       const maxAttempts = 10;
@@ -89,7 +89,7 @@ export const usePredictions = () => {
 
           if (++attempts >= maxAttempts) {
             setLoading(false);
-            setError("Update check timeout");
+            setError('Update check timeout');
             return; // Fail - stop after max attempts
           }
 
@@ -98,7 +98,7 @@ export const usePredictions = () => {
         } catch (err) {
           setLoading(false);
           setError(
-            `Update failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+            `Update failed: ${err instanceof Error ? err.message : 'Unknown error'}`
           );
         }
       };
@@ -106,8 +106,8 @@ export const usePredictions = () => {
       checkForUpdates();
     } catch (err) {
       setLoading(false);
-      setError("Could not refresh data. Please try again later.");
-      console.error("Refresh error:", err);
+      setError('Could not refresh data. Please try again later.');
+      console.error('Refresh error:', err);
     }
   };
 

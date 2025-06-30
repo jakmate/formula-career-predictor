@@ -1,19 +1,19 @@
-import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Navbar } from "./Navbar";
-import { Schedule } from "./Schedule";
-import { PredictionsTable } from "./table/PredictionsTable";
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Navbar } from './Navbar';
+import { Schedule } from './Schedule';
+import { PredictionsTable } from './table/PredictionsTable';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const activeView =
-    location.pathname === "/schedule" ? "schedule" : "predictions";
+    location.pathname === '/schedule' ? 'schedule' : 'predictions';
 
   useEffect(() => {
-    if (location.pathname === "/") {
-      navigate("/predictions", { replace: true });
+    if (location.pathname === '/') {
+      navigate('/predictions', { replace: true });
     }
   }, [location.pathname, navigate]);
 
@@ -24,7 +24,7 @@ const Dashboard = () => {
       <Navbar activeView={activeView} />
 
       <div className="max-w-7xl mx-auto p-4 relative z-10">
-        {activeView === "predictions" ? <PredictionsTable /> : <Schedule />}
+        {activeView === 'predictions' ? <PredictionsTable /> : <Schedule />}
       </div>
     </div>
   );

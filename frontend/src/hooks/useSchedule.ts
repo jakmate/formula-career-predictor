@@ -1,19 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 
 export const useSchedule = () => {
   const [races, setRaces] = useState([]);
   const [nextRace, setNextRace] = useState(null);
-  const [selectedSeries, setSelectedSeries] = useState("f1");
+  const [selectedSeries, setSelectedSeries] = useState('f1');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const series = [
-    { value: "f1", label: "Formula 1" },
-    { value: "f2", label: "Formula 2" },
-    { value: "f3", label: "Formula 3" },
+    { value: 'f1', label: 'Formula 1' },
+    { value: 'f2', label: 'Formula 2' },
+    { value: 'f3', label: 'Formula 3' },
   ];
 
   const fetchSchedule = useCallback(async () => {
@@ -22,8 +22,8 @@ export const useSchedule = () => {
 
     try {
       const headers = {
-        "X-Timezone": userTimezone,
-        "Content-Type": "application/json",
+        'X-Timezone': userTimezone,
+        'Content-Type': 'application/json',
       };
 
       const [racesResponse, nextRaceResponse] = await Promise.all([
@@ -31,19 +31,19 @@ export const useSchedule = () => {
           `${API_BASE}/api/races/${selectedSeries}?timezone=${encodeURIComponent(userTimezone)}`,
           {
             headers,
-          },
+          }
         ),
         fetch(
           `${API_BASE}/api/races/${selectedSeries}/next?timezone=${encodeURIComponent(userTimezone)}`,
           {
             headers,
-          },
+          }
         ),
       ]);
 
       if (!racesResponse.ok) {
         throw new Error(
-          `Failed to fetch ${selectedSeries.toUpperCase()} schedule`,
+          `Failed to fetch ${selectedSeries.toUpperCase()} schedule`
         );
       }
 
@@ -62,7 +62,7 @@ export const useSchedule = () => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("An unknown error occurred");
+        setError('An unknown error occurred');
       }
     } finally {
       setLoading(false);

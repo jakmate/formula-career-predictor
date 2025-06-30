@@ -1,21 +1,21 @@
-import { useState, useMemo } from "react";
-import type { Driver } from "../types/Driver";
-import type { SortField, SortConfig } from "../types/Sorting";
+import { useState, useMemo } from 'react';
+import type { Driver } from '../types/Driver';
+import type { SortField, SortConfig } from '../types/Sorting';
 
 export const useSorting = (
   data: Driver[],
-  defaultField: SortField = "empirical_percentage",
+  defaultField: SortField = 'empirical_percentage'
 ) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     field: defaultField,
-    direction: "desc",
+    direction: 'desc',
   });
 
   const handleSort = (field: SortField) => {
     setSortConfig((prev) => ({
       field,
       direction:
-        prev.field === field && prev.direction === "desc" ? "asc" : "desc",
+        prev.field === field && prev.direction === 'desc' ? 'asc' : 'desc',
     }));
   };
 
@@ -28,13 +28,13 @@ export const useSorting = (
 
       let comparison = 0;
 
-      if (typeof aValue === "string" && typeof bValue === "string") {
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
         comparison = aValue.toLowerCase().localeCompare(bValue.toLowerCase());
-      } else if (typeof aValue === "number" && typeof bValue === "number") {
+      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
         comparison = aValue - bValue;
       }
 
-      return sortConfig.direction === "asc" ? comparison : -comparison;
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
   }, [data, sortConfig]);
 

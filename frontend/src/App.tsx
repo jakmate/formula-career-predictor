@@ -1,11 +1,11 @@
-import "./App.css";
+import './App.css';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-} from "react-router-dom";
-import Dashboard from "./components/Dashboard";
+} from 'react-router-dom';
+import Dashboard from './components/Dashboard';
 
 function App() {
   return (

@@ -8,10 +8,10 @@ export const ProbabilityBar = ({ percentage }: ProbabilityBarProps) => (
       <div
         className={`h-full transition-all duration-500 ${
           percentage > 70
-            ? "bg-gradient-to-r from-green-400 to-cyan-400"
+            ? 'bg-gradient-to-r from-green-400 to-cyan-400'
             : percentage > 40
-              ? "bg-gradient-to-r from-yellow-400 to-amber-400"
-              : "bg-gradient-to-r from-red-400 to-orange-400"
+              ? 'bg-gradient-to-r from-yellow-400 to-amber-400'
+              : 'bg-gradient-to-r from-red-400 to-orange-400'
         } rounded-full`}
         style={{ width: `${Math.min(percentage, 100)}%` }}
       />

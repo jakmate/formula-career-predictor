@@ -1,15 +1,15 @@
-import { Clock, MapPin, Calendar, Trophy } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Clock, MapPin, Calendar, Trophy } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const sessionDisplayNames: Record<string, string> = {
-  practice: "PRACTICE",
-  fp1: "PRACTICE 1",
-  fp2: "PRACTICE 2",
-  fp3: "PRACTICE 3",
-  qualifying: "QUALIFYING",
-  sprint_qualifying: "SPRINT QUALIFYING",
-  sprint: "SPRINT",
-  race: "RACE",
+  practice: 'PRACTICE',
+  fp1: 'PRACTICE 1',
+  fp2: 'PRACTICE 2',
+  fp3: 'PRACTICE 3',
+  qualifying: 'QUALIFYING',
+  sprint_qualifying: 'SPRINT QUALIFYING',
+  sprint: 'SPRINT',
+  race: 'RACE',
 };
 
 interface SessionInfo {
@@ -56,13 +56,13 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
         const diff = sessionTime.getTime() - currentTime.getTime();
 
         if (diff <= 0) {
-          setCountdown("LIVE NOW");
+          setCountdown('LIVE NOW');
           return;
         }
 
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
-          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
         );
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
@@ -85,28 +85,28 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
   // Format date - times are already converted by backend
   const formatDate = (dateString: string) => {
     if (dateString.length === 10) {
-      const [year, month, day] = dateString.split("-");
+      const [year, month, day] = dateString.split('-');
       return new Date(
         parseInt(year),
         parseInt(month) - 1,
-        parseInt(day),
+        parseInt(day)
       ).toLocaleDateString(undefined, {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
       });
     }
 
     try {
       return new Date(dateString).toLocaleDateString(undefined, {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
       });
     } catch {
-      return "Date TBC";
+      return 'Date TBC';
     }
   };
 
@@ -114,57 +114,57 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
   const formatTime = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
       });
     } catch {
-      return "TBC";
+      return 'TBC';
     }
   };
 
   // Format short date
   const formatShortDate = (dateString: string) => {
     if (dateString.length === 10) {
-      const [year, month, day] = dateString.split("-");
+      const [year, month, day] = dateString.split('-');
       return new Date(
         parseInt(year),
         parseInt(month) - 1,
-        parseInt(day),
+        parseInt(day)
       ).toLocaleDateString(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
       });
     }
 
     try {
       return new Date(dateString).toLocaleDateString(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
       });
     } catch {
-      return "TBC";
+      return 'TBC';
     }
   };
 
   // Determine session status
   const getSessionStatus = (sessionInfo: SessionInfo) => {
-    if (sessionInfo.time === "TBC") return "tbc";
+    if (sessionInfo.time === 'TBC') return 'tbc';
 
     try {
       const start = new Date(sessionInfo.start);
       const end = sessionInfo.end ? new Date(sessionInfo.end) : null;
 
-      if (currentTime < start) return "upcoming";
-      if (end && currentTime <= end) return "live";
-      return "completed";
+      if (currentTime < start) return 'upcoming';
+      if (end && currentTime <= end) return 'live';
+      return 'completed';
     } catch {
-      return "tbc";
+      return 'tbc';
     }
   };
 
-  const displayTimezone = userTimezone?.replace("_", " ") || "Local Time";
+  const displayTimezone = userTimezone?.replace('_', ' ') || 'Local Time';
 
   return (
     <div className="bg-gradient-to-r from-cyan-900/20 via-purple-900/20 to-cyan-900/20 border border-cyan-500/30 rounded-2xl p-6 mb-8 shadow-xl shadow-cyan-500/10 relative overflow-hidden">
@@ -185,7 +185,7 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
 
         <div className="bg-cyan-900/40 px-4 py-1.5 rounded-full flex items-center border border-cyan-500/30">
           <span className="text-cyan-300 text-sm font-medium">
-            Round {nextRace.round} of {nextRace.totalRounds || "?"}
+            Round {nextRace.round} of {nextRace.totalRounds || '?'}
           </span>
         </div>
       </div>
@@ -224,9 +224,9 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
               {countdown ? (
                 <span
                   className={`inline-block ml-1 font-bold ${
-                    countdown === "LIVE NOW"
-                      ? "text-red-400 animate-pulse"
-                      : "text-cyan-300"
+                    countdown === 'LIVE NOW'
+                      ? 'text-red-400 animate-pulse'
+                      : 'text-cyan-300'
                   }`}
                 >
                   {countdown}
@@ -257,24 +257,24 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
               ([sessionKey, sessionInfo]) => {
                 const sessionName =
                   sessionDisplayNames[sessionKey] || sessionKey.toUpperCase();
-                const isTBC = sessionInfo.time === "TBC";
+                const isTBC = sessionInfo.time === 'TBC';
                 const status = getSessionStatus(sessionInfo);
 
                 let sessionStyle =
-                  "bg-gradient-to-b from-white/10 to-white/5 border-white/10";
-                let glowStyle = "";
+                  'bg-gradient-to-b from-white/10 to-white/5 border-white/10';
+                let glowStyle = '';
 
-                if (status === "live") {
+                if (status === 'live') {
                   sessionStyle =
-                    "bg-gradient-to-b from-red-900/30 to-red-800/20 border-red-500";
-                  glowStyle = "shadow-lg shadow-red-500/30 animate-pulse";
-                } else if (status === "upcoming") {
+                    'bg-gradient-to-b from-red-900/30 to-red-800/20 border-red-500';
+                  glowStyle = 'shadow-lg shadow-red-500/30 animate-pulse';
+                } else if (status === 'upcoming') {
                   sessionStyle =
-                    "bg-gradient-to-b from-green-900/30 to-green-800/20 border-green-500";
-                  glowStyle = "shadow-lg shadow-green-500/30";
-                } else if (status === "completed") {
+                    'bg-gradient-to-b from-green-900/30 to-green-800/20 border-green-500';
+                  glowStyle = 'shadow-lg shadow-green-500/30';
+                } else if (status === 'completed') {
                   sessionStyle =
-                    "bg-gradient-to-b from-gray-900/30 to-gray-800/20 border-gray-700 opacity-70";
+                    'bg-gradient-to-b from-gray-900/30 to-gray-800/20 border-gray-700 opacity-70';
                 }
 
                 return (
@@ -310,17 +310,17 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
                           <div className="text-white/70 text-sm">
                             {formatShortDate(sessionInfo.start)}
                           </div>
-                          {status === "live" && (
+                          {status === 'live' && (
                             <div className="mt-1 text-xs font-bold text-red-400">
                               LIVE NOW
                             </div>
                           )}
-                          {status === "upcoming" && (
+                          {status === 'upcoming' && (
                             <div className="mt-1 text-xs font-bold text-green-400">
                               UPCOMING
                             </div>
                           )}
-                          {status === "completed" && (
+                          {status === 'completed' && (
                             <div className="mt-1 text-xs font-bold text-gray-400">
                               COMPLETED
                             </div>
@@ -330,7 +330,7 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
                     )}
                   </div>
                 );
-              },
+              }
             )}
           </div>
         </div>

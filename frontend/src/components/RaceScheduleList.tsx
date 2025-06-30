@@ -1,4 +1,4 @@
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, MapPin } from 'lucide-react';
 
 interface SessionDetails {
   start?: string;
@@ -25,18 +25,18 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString('en-US', {
       timeZone: userTimezone,
-      month: "short",
-      day: "numeric",
+      month: 'short',
+      day: 'numeric',
     });
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
+    return new Date(dateString).toLocaleTimeString('en-US', {
       timeZone: userTimezone,
-      hour: "2-digit",
-      minute: "2-digit",
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -72,14 +72,14 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
   return (
     <div className="space-y-2 mb-4">
       <div className="text-center text-white/50 text-sm">
-        Times shown in {userTimezone.replace("_", " ")}
+        Times shown in {userTimezone.replace('_', ' ')}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {races.map((race: Race, index: number) => {
           const raceSession = race.sessions.race;
           const raceDate = raceSession?.start;
-          const isTBC = raceSession?.time === "TBC";
+          const isTBC = raceSession?.time === 'TBC';
           const past = raceDate ? isPastRace(raceDate) : false;
           const isUpcoming = !past && !nextUpcomingFound;
 
@@ -92,10 +92,10 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
                 backdrop-blur-lg rounded-xl border p-4 transition-all duration-200
                 ${
                   past
-                    ? "bg-gray-900/60 border-gray-700 opacity-70"
+                    ? 'bg-gray-900/60 border-gray-700 opacity-70'
                     : isUpcoming
-                      ? "bg-gradient-to-br from-cyan-900/30 to-purple-900/30 border-cyan-500/50 shadow-lg shadow-cyan-500/20"
-                      : "bg-gray-800/60 border-cyan-500/30"
+                      ? 'bg-gradient-to-br from-cyan-900/30 to-purple-900/30 border-cyan-500/50 shadow-lg shadow-cyan-500/20'
+                      : 'bg-gray-800/60 border-cyan-500/30'
                 } hover:shadow-cyan-500/20 hover:border-cyan-400/50
               `}
             >
@@ -133,7 +133,7 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
                       {formatDate(raceDate)}
                     </div>
                     <div className="text-white/70 text-sm">
-                      {isTBC ? "TBC" : formatTime(raceDate)}
+                      {isTBC ? 'TBC' : formatTime(raceDate)}
                     </div>
                   </div>
                 )}

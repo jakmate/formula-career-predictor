@@ -679,7 +679,7 @@ async def get_next_race(
                         'date': start_str
                     }
 
-                    if not next_session or session_dt < datetime.fromisoformat(next_session['date']):  #noqa: 501
+                    if not next_session or session_dt < datetime.fromisoformat(next_session['date']):  # noqa: 501
                         next_session = candidate_session
                         if not next_race:
                             next_race = race
@@ -720,6 +720,7 @@ def convert_schedule_timezone(schedule, target_timezone):
                         local_dt = utc_dt.astimezone(target_tz)
                         session_info['start'] = local_dt.isoformat()
                     except Exception as e:
+                        print(e)
                         continue
 
                 # Convert end time
@@ -733,10 +734,12 @@ def convert_schedule_timezone(schedule, target_timezone):
                         local_dt = utc_dt.astimezone(target_tz)
                         session_info['end'] = local_dt.isoformat()
                     except Exception as e:
+                        print(e)
                         continue
 
         return schedule
     except Exception as e:
+        print(e)
         return schedule
 
 
@@ -758,10 +761,11 @@ def convert_race_timezone(race, target_timezone):
                     utc_dt = datetime.fromisoformat(start_str)
                     if utc_dt.tzinfo is None:
                         utc_dt = utc_tz.localize(utc_dt)
-                    
+
                     local_dt = utc_dt.astimezone(target_tz)
                     session_info['start'] = local_dt.isoformat()
                 except Exception as e:
+                    print(e)
                     continue
 
             # Convert end time
@@ -775,6 +779,7 @@ def convert_race_timezone(race, target_timezone):
                     local_dt = utc_dt.astimezone(target_tz)
                     session_info['end'] = local_dt.isoformat()
                 except Exception as e:
+                    print(e)
                     continue
 
         # Convert next session if exists
@@ -789,10 +794,12 @@ def convert_race_timezone(race, target_timezone):
                     local_dt = utc_dt.astimezone(target_tz)
                     race['nextSession']['date'] = local_dt.isoformat()
                 except Exception as e:
+                    print(e)
                     pass
 
         return race
     except Exception as e:
+        print(e)
         return race
 
 

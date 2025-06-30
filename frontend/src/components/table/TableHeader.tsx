@@ -1,5 +1,5 @@
-import { ChevronUp, ChevronDown } from "lucide-react";
-import type { SortConfig, SortField } from "../../types/Sorting";
+import { ChevronUp, ChevronDown } from 'lucide-react';
+import type { SortConfig, SortField } from '../../types/Sorting';
 
 interface TableHeaderProps {
   field: SortField;
@@ -16,7 +16,7 @@ export const TableHeader = ({
 }: TableHeaderProps) => {
   const isActive = sortConfig.field === field;
   const SortIcon = isActive ? (
-    sortConfig.direction === "asc" ? (
+    sortConfig.direction === 'asc' ? (
       <ChevronUp className="w-4 h-4 inline ml-1" />
     ) : (
       <ChevronDown className="w-4 h-4 inline ml-1" />
