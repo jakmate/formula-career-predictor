@@ -1,10 +1,26 @@
-import { BarChart3, Calendar, Icon } from 'lucide-react';
+import { BarChart3, Calendar, Icon, Coffee } from 'lucide-react';
 import { motorRacingHelmet } from '@lucide/lab';
 import { Link } from 'react-router-dom';
 
 interface NavbarProps {
   activeView: string;
 }
+
+const BuyMeCoffee = () => {
+  const handleCoffeeClick = () => {
+    window.open('https://www.buymeacoffee.com/jakmate', '_blank');
+  };
+
+  return (
+    <button
+      onClick={handleCoffeeClick}
+      className="px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800/50"
+    >
+      <Coffee className="w-4 h-4" />
+      <span className="hidden sm:inline">Coffee</span>
+    </button>
+  );
+};
 
 export const Navbar = ({ activeView }: NavbarProps) => {
   return (
@@ -48,6 +64,8 @@ export const Navbar = ({ activeView }: NavbarProps) => {
               <Calendar className="w-4 h-4" />
               <span className="hidden sm:inline">Schedule</span>
             </Link>
+
+            <BuyMeCoffee />
           </div>
         </div>
       </div>

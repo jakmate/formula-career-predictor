@@ -1,2 +1,5 @@
 .venv
 __pycache__
+/backend/models
+/backend/system_state.json
+/backend/system_state.json.backup

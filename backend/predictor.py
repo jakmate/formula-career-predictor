@@ -17,12 +17,13 @@ from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.layers import Dense, Dropout, BatchNormalization, Input
 from keras.models import Sequential
 from keras.optimizers import Adam
+from sklearn.base import clone
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE
 from sklearn.inspection import permutation_importance
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, roc_auc_score
+from sklearn.metrics import classification_report, average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
@@ -894,7 +895,7 @@ def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0
     model.compile(
         optimizer=Adam(learning_rate=0.001),
         loss='binary_crossentropy',
-        metrics=['accuracy', 'precision', 'recall']
+        metrics=['precision', 'recall']
     )
 
     return model
@@ -924,7 +925,7 @@ class RacingPredictor(nn.Module):
 
 
 def train_models(df):
-    """Combined training function for all model types with proper cross-validation."""
+    """Training function for all model types."""
     if df.empty:
         print("No data available for training")
         return {}, {}, None, None, None
@@ -1003,6 +1004,9 @@ def train_models(df):
         print("\nTest Set Results:")
         print(classification_report(y_test, y_pred))
 
+        pr_auc = average_precision_score(y_test, probas_test)
+        print(f"Precision-Recall AUC: {pr_auc:.4f}")
+
         traditional_results[name] = pipeline
 
     # Train deep learning models
@@ -1039,6 +1043,8 @@ def train_models(df):
     dnn_pred = (raw_probas_dnn > 0.5).astype(int)
     print("Keras DNN Classification Report:")
     print(classification_report(y_test, dnn_pred))
+    pr_auc_dnn = average_precision_score(y_test, raw_probas_dnn)
+    print(f"Keras DNN Precision-Recall AUC: {pr_auc_dnn:.4f}")
     deep_results['Keras_DNN'] = dnn_model
 
     # PyTorch Model
@@ -1118,6 +1124,8 @@ def train_models(df):
     pytorch_pred = (raw_probas_torch > 0.5).astype(int)
     print("PyTorch Classification Report:")
     print(classification_report(y_test, pytorch_pred))
+    pr_auc_torch = average_precision_score(y_test, raw_probas_torch)
+    print(f"PyTorch Precision-Recall AUC: {pr_auc_torch:.4f}")
     deep_results['PyTorch'] = pytorch_model
 
     print("\n" + "=" * 70)
@@ -1313,7 +1321,7 @@ def analyze_negative_features(models, X_train, y_train, X_test, y_test, feature_
         print("-" * 50)
 
         # Get baseline performance
-        baseline_score = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+        baseline_score = average_precision_score(y_test, model.predict_proba(X_test)[:, 1])
 
         feature_impacts = []
 
@@ -1325,17 +1333,18 @@ def analyze_negative_features(models, X_train, y_train, X_test, y_test, feature_
 
             try:
                 # Clone and retrain model without this feature
-                from sklearn.base import clone
                 temp_model = clone(model)
                 temp_model.fit(X_train_reduced, y_train)
-                score_without = roc_auc_score(y_test,
-                                              temp_model.predict_proba(X_test_reduced)[:, 1])
+                score_without = average_precision_score(
+                    y_test,
+                    temp_model.predict_proba(X_test_reduced)[:, 1]
+                )
                 impact = score_without - baseline_score
                 feature_impacts.append({
                     'Feature': feature,
                     'Impact': impact,
-                    'Baseline_AUC': baseline_score,
-                    'Without_Feature_AUC': score_without
+                    'Baseline_PR_AUC': baseline_score,
+                    'Without_Feature_PR_AUC': score_without
                 })
             except Exception as e:
                 print(f"  Error testing {feature}: {e}")
@@ -1347,7 +1356,7 @@ def analyze_negative_features(models, X_train, y_train, X_test, y_test, feature_
         # Show features that improve performance when removed (negative impact features)
         negative_features = impact_df[impact_df['Impact'] > 0]
         if not negative_features.empty:
-            print("Features that hurt performance (removing them improves AUC):")
+            print("Features that hurt performance (removing them improves PR-AUC):")
             print(negative_features.head())
         else:
             print("No clearly negative features found")
@@ -1376,24 +1385,35 @@ def recursive_feature_elimination(models, X_train, y_train, X_test, y_test, feat
 
         for n_features in range(5, len(feature_cols) + 1, 2):
             try:
-                # Create RFE selector
-                rfe = RFE(model.named_steps['classifier'], n_features_to_select=n_features)
+                if 'MLP' in name:
+                    # Get permutation importance
+                    perm_importance = permutation_importance(
+                        model, X_train, y_train, n_repeats=5, random_state=42
+                    )
 
-                # Fit on training data
-                rfe.fit(X_train, y_train)
+                    # Select top n_features based on permutation importance
+                    feature_importance = perm_importance.importances_mean
+                    top_indices = np.argsort(feature_importance)[-n_features:]
+                    selected_features = [feature_cols[i] for i in top_indices]
+                else:
+                    # Create RFE selector
+                    rfe = RFE(model.named_steps['classifier'], n_features_to_select=n_features)
+                    rfe.fit(X_train, y_train)
 
-                # Get selected features
-                selected_features = [feature_cols[i] for i, selected in enumerate(rfe.support_) if selected]  # noqa: 501
+                    # Get selected features
+                    selected_features = [feature_cols[i] for i, selected in enumerate(rfe.support_) if selected]  # noqa: 501
 
                 # Test performance
                 X_test_selected = X_test[selected_features]
                 X_train_selected = X_train[selected_features]
 
                 # Clone and retrain model with selected features
-                from sklearn.base import clone
                 temp_model = clone(model)
                 temp_model.fit(X_train_selected, y_train)
-                score = roc_auc_score(y_test, temp_model.predict_proba(X_test_selected)[:, 1])
+                score = average_precision_score(
+                    y_test,
+                    temp_model.predict_proba(X_test_selected)[:, 1]
+                )
 
                 scores_by_n_features[n_features] = {
                     'score': score,
@@ -1404,13 +1424,13 @@ def recursive_feature_elimination(models, X_train, y_train, X_test, y_test, feat
                     best_score = score
                     best_n_features = n_features
 
-                print(f"  {n_features} features: AUC = {score:.4f}")
+                print(f"  {n_features} features: PR-AUC = {score:.4f}")
 
             except Exception as e:
                 print(f"  Error with {n_features} features: {e}")
                 continue
 
-        print(f"  Best: {best_n_features} features with AUC = {best_score:.4f}")
+        print(f"  Best: {best_n_features} features with PR-AUC = {best_score:.4f}")
 
         # Show which features were eliminated in the best configuration
         if best_n_features in scores_by_n_features:
@@ -1457,7 +1477,7 @@ def correlation_analysis(X, feature_cols):
 
 
 def feature_ablation_study(models, X_train, y_train, X_test, y_test, feature_cols):
-    """Systematic feature ablation study - FIXED VERSION"""
+    """Systematic feature ablation study"""
     print("\n" + "="*70)
     print("FEATURE ABLATION STUDY")
     print("="*70)
@@ -1513,7 +1533,7 @@ def feature_ablation_study(models, X_train, y_train, X_test, y_test, feature_col
 
         # Get baseline performance with all features
         try:
-            baseline_score = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+            baseline_score = average_precision_score(y_test, model.predict_proba(X_test)[:, 1])
         except Exception as e:
             print(f"Error getting baseline score for {name}: {e}")
             continue
@@ -1529,22 +1549,24 @@ def feature_ablation_study(models, X_train, y_train, X_test, y_test, feature_col
                 X_test_reduced = X_test[remaining_features]
 
                 # Create and train new model
-                from sklearn.base import clone
                 temp_model = clone(model)
                 temp_model.fit(X_train_reduced, y_train)
-                score = roc_auc_score(y_test, temp_model.predict_proba(X_test_reduced)[:, 1])
+                score = average_precision_score(
+                    y_test,
+                    temp_model.predict_proba(X_test_reduced)[:, 1]
+                )
 
                 impact = baseline_score - score
 
                 feature_ablations.append({
                     'Feature_Group': group_name,
                     'Features_Removed': group_features,
-                    'Baseline_AUC': baseline_score,
-                    'Reduced_AUC': score,
+                    'Baseline_PR_AUC': baseline_score,
+                    'Reduced_PR_AUC': score,
                     'Impact': impact
                 })
 
-                print(f"  Removing {group_name}: AUC = {score:.4f} (impact: {impact:+.4f})")
+                print(f"  Removing {group_name}: PR AUC = {score:.4f} (impact: {impact:+.4f})")
 
             except Exception as e:
                 print(f"  Error removing {group_name}: {e}")
@@ -1560,16 +1582,19 @@ def feature_ablation_study(models, X_train, y_train, X_test, y_test, feature_col
 
 
 def comprehensive_feature_analysis(models, X_train, y_train, X_test, y_test, feature_cols):
-    """Run comprehensive feature analysis - FIXED VERSION"""
+    """Run comprehensive feature analysis"""
 
     print(f"Starting comprehensive feature analysis with {len(feature_cols)} features:")
     print(f"Features: {feature_cols}")
 
     importance_results = analyze_feature_importance(models, X_test, y_test, feature_cols)
-    negative_impact = analyze_negative_features(models, X_train, y_train, X_test, y_test, feature_cols)  # noqa: 501
+    negative_impact = analyze_negative_features(models, X_train, y_train,
+                                                X_test, y_test, feature_cols)
     correlation_results = correlation_analysis(pd.concat([X_train, X_test]), feature_cols)
-    rfe_results = recursive_feature_elimination(models, X_train, y_train, X_test, y_test, feature_cols)  # noqa: 501
-    ablation_results = feature_ablation_study(models, X_train, y_train, X_test, y_test, feature_cols)  # noqa: 501
+    rfe_results = recursive_feature_elimination(models, X_train, y_train,
+                                                X_test, y_test, feature_cols)
+    ablation_results = feature_ablation_study(models, X_train, y_train,
+                                              X_test, y_test, feature_cols)
 
     print("\n" + "="*70)
     print("SUMMARY: POTENTIALLY PROBLEMATIC FEATURES")
