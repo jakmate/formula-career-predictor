@@ -1,0 +1,12 @@
+[run]
+omit = 
+    .venv/*
+    */site-packages/*
+    */tests/*
+    */__pycache__/*
+    */data/*
+    */models/*
+    system_state.json
+
+[report]
+fail_under = 0

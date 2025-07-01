@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
-import { Schedule } from './Schedule';
+import { Schedule } from './schedule/Schedule';
 import { PredictionsTable } from './table/PredictionsTable';
 
 const Dashboard = () => {

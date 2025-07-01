@@ -1,9 +1,9 @@
 import { RefreshCw } from 'lucide-react';
 import { NextRaceCard } from './NextRaceCard';
 import { RaceScheduleList } from './RaceScheduleList';
-import { useSchedule } from '../hooks/useSchedule';
-import { Header } from './Header';
-import { ErrorDisplay } from './ErrorDisplay';
+import { useSchedule } from '../../hooks/useSchedule';
+import { Header } from '../Header';
+import { ErrorDisplay } from '../ErrorDisplay';
 
 export const Schedule = () => {
   const {
