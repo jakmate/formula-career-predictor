@@ -31,6 +31,7 @@ STATE_FILE = "system_state.json"
 CURRENT_YEAR = datetime.now().year
 SEASON_END_MONTH = 12
 SCHEDULE_DIR = os.path.join(os.path.dirname(__file__), 'data', 'schedules', str(CURRENT_YEAR))
+PORT = int(os.environ.get("PORT", 8000))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -527,7 +528,11 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000"
+        "https://formula-predictions-frontend.onrender.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -791,4 +796,4 @@ def convert_race_timezone(race, target_timezone):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info", reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info", reload=False)

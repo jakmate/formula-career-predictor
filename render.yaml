@@ -1,0 +1,35 @@
+previews:
+  generation: automatic
+
+services:
+  - type: web
+    name: formula-predictions-backend
+    runtime: python
+    plan: free
+    autoDeploy: false
+    region: frankfurt
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PORT
+        generateValue: true
+
+  - type: web
+    name: formula-predictions-frontend
+    runtime: static
+    plan: free
+    region: frankfurt
+    autoDeploy: false
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    buildFilter:
+      paths:
+        - src/**/*.ts
+        - src/**/*.tsx
+      ignoredPaths:
+        - src/**/*.test.ts
+        - src/**/*.test.tsx
+    envVars:
+      - key: VITE_API_URL
+        value: "https://formula-predictions-backend.onrender.com"

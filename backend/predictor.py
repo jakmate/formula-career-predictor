@@ -1498,5 +1498,5 @@ all_models = {
 }
 predict_drivers(all_models, features_df, feature_cols, scaler)
 
-comprehensive_feature_analysis(models, deep_models, X_train, y_train,
-                               X_test, y_test, feature_cols, scaler)
+# comprehensive_feature_analysis(models, deep_models, X_train, y_train,
+#                               X_test, y_test, feature_cols, scaler)
