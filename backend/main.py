@@ -15,13 +15,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from keras.models import load_model
 from pydantic import BaseModel
 from typing import List, Dict, Optional
-
+from loader import load_all_data, load_qualifying_data
 from scraping.scrape import scrape_current_year
 from predictor import (
     RacingPredictor,
-    load_standings_data,
-    load_qualifying_data,
-    enhance_with_team_data,
     calculate_qualifying_features,
     create_target_variable,
     engineer_features,
@@ -161,13 +158,10 @@ def initialize_system():
     logger.info("Initializing system...")
 
     # Load data
-    f3_df = load_standings_data('F3', 'drivers')
-    f2_df = load_standings_data('F2', 'drivers')
-    f3_team_df = load_standings_data('F3', 'teams')
+    f2_df, f3_df = load_all_data()
     f3_qualifying_df = load_qualifying_data('F3')
 
     # Process data
-    f3_df = enhance_with_team_data(f3_df, f3_team_df)
     f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
     f3_df = create_target_variable(f3_df, f2_df)
     features_df = engineer_features(f3_df)
@@ -344,13 +338,10 @@ async def train_models_task():
     """Train models on newly available complete seasons"""
     try:
         # Load newly scraped data
-        f3_df = load_standings_data('F3', 'drivers')
-        f2_df = load_standings_data('F2', 'drivers')
-        f3_team_df = load_standings_data('F3', 'teams')
+        f2_df, f3_df = load_all_data()
         f3_qualifying_df = load_qualifying_data('F3')
 
         # Process data
-        f3_df = enhance_with_team_data(f3_df, f3_team_df)
         f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
         f3_df = create_target_variable(f3_df, f2_df)
         features_df = engineer_features(f3_df)
@@ -470,18 +461,14 @@ def _create_prediction_responses(current_df, raw_probas):
 
 def _load_current_data():
     """Load and process current racing data"""
-    f3_df = load_standings_data('F3', 'drivers')
-    f2_df = load_standings_data('F2', 'drivers')
+    f2_df, f3_df = load_all_data()
 
     if f3_df.empty:
         raise HTTPException(status_code=404, detail="No F3 data available")
 
-    f3_team_df = load_standings_data('F3', 'teams')
-    f3_df = enhance_with_team_data(f3_df, f3_team_df)
     f3_qualifying_df = load_qualifying_data('F3')
     f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
     f3_df = create_target_variable(f3_df, f2_df)
-
     features_df = engineer_features(f3_df)
     features_df['promoted'] = f3_df['promoted']
 

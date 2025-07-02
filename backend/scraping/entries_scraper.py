@@ -49,7 +49,7 @@ def process_entries(soup, year, formula, series_type="main"):
 
         # Extract headers
         header_row = all_rows[0]
-        headers = [header.get_text(strip=True)
+        headers = [remove_citations(header.get_text(strip=True))
                    for header in header_row.find_all("th")]
         writer.writerow(headers)
         num_columns = len(headers)

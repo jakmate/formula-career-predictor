@@ -1,4 +1,3 @@
-import glob
 import json
 import numpy as np
 import os
@@ -29,6 +28,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import class_weight
 
+from loader import load_all_data, load_qualifying_data
+
 SEED = 69
 os.environ['PYTHONHASHSEED'] = str(SEED)
 random.seed(SEED)
@@ -41,35 +42,15 @@ if torch.cuda.is_available():
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-SERIES_CONFIG = {
-    'F3': {'patterns': ['F3', 'F3_European'], 'main_type': 'F3_Main'},
-    'F2': {'patterns': ['F2'], 'main_type': 'F2_Main'},
-    'F1': {'patterns': ['F1'], 'main_type': 'F1_Main'}
-}
-
-FILE_PATTERNS = {
-    'F3_European': {
-        'drivers': 'f3_euro_{year}_drivers_standings.csv',
-        'entries': 'f3_euro_{year}_entries.csv',
-        'teams': 'f3_euro_{year}_teams_standings.csv'
-    },
-    'default': {
-        'drivers': '{series}_{year}_drivers_standings.csv',
-        'entries': '{series}_{year}_entries.csv',
-        'teams': '{series}_{year}_teams_standings.csv',
-        'qualifying': '{series}_{year}_qualifying_round_{round}.csv'
-    }
-}
+NOT_PARTICIPATED_CODES = ['', 'DNS', 'WD', 'DNQ', 'DNA', 'C', 'EX']
+RETIREMENT_CODES = ['Ret', 'NC', 'DSQ', 'DSQP']
+CURRENT_YEAR = datetime.now().year
 
 COLUMN_MAPPING = {
     'Driver name': 'Driver',
     'Drivers': 'Driver',
     'Entrant': 'Team'
 }
-
-NOT_PARTICIPATED_CODES = ['', 'DNS', 'WD', 'DNQ', 'DNA', 'C', 'EX']
-RETIREMENT_CODES = ['Ret', 'NC', 'DSQ', 'DSQP']
-CURRENT_YEAR = datetime.now().year
 
 
 def clean_string_columns(df, columns):
@@ -114,222 +95,6 @@ def get_race_columns(df):
     return race_columns
 
 
-def get_file_pattern(series_type, file_type, series, year, round_num=None):
-    """Get file pattern based on series type."""
-    if series_type == 'F3_European':
-        FILE_PATTERNS['F3_European'][file_type].format(year=year)
-
-    pattern = FILE_PATTERNS['default'][file_type]
-    if round_num:
-        return pattern.format(series=series.lower(), year=year, round=round_num)
-    return pattern.format(series=series.lower(), year=year)
-
-
-def get_series_directories(series):
-    """Get all directories for a series and their patterns."""
-    config = SERIES_CONFIG[series]
-    directories = []
-
-    for series_pattern in config['patterns']:
-        pattern = os.path.join("data", series_pattern, "*")
-        series_dirs = glob.glob(pattern)
-        for year_dir in series_dirs:
-            directories.append((year_dir, series_pattern))
-
-    return directories
-
-
-def determine_series_type(series_pattern, series):
-    """Determine the series type based on pattern."""
-    if series_pattern == 'F3_European':
-        return 'F3_European'
-    return SERIES_CONFIG[series]['main_type']
-
-
-def merge_entries_data(df, entries_file):
-    """Merge entries data with driver standings."""
-    if not os.path.exists(entries_file):
-        return df
-
-    entries_df = pd.read_csv(entries_file)
-
-    # Remove columns from F3 European entries
-    columns_to_drop = ['Chassis', 'Engine', 'Status']
-    for col in columns_to_drop:
-        if col in entries_df.columns:
-            entries_df = entries_df.drop(columns=col)
-
-    # Apply column mapping and clean data
-    entries_df = apply_column_mapping(entries_df)
-    entries_df = clean_string_columns(entries_df, ['Driver'])
-    df = clean_string_columns(df, ['Driver'])
-
-    # Merge team data if both Driver and Team columns exist
-    if all(col in entries_df.columns for col in ['Driver', 'Team']):
-        # Create weighted team assignment for multi-team drivers
-        multi_team_data = []
-
-        for driver in entries_df['Driver'].unique():
-            driver_entries = entries_df[entries_df['Driver'] == driver]
-
-            if len(driver_entries) == 1:
-                # Single team driver
-                multi_team_data.append({
-                    'Driver': driver,
-                    'Team': driver_entries.iloc[0]['Team'],
-                    'primary_team': driver_entries.iloc[0]['Team'],
-                    'team_count': 1
-                })
-            else:
-                # Multi-team driver - parse rounds to determine primary team
-                team_rounds = []
-
-                for _, entry in driver_entries.iterrows():
-                    team = entry['Team']
-                    rounds_str = entry.get('Rounds', 'All')
-
-                    if rounds_str == 'All':
-                        # Assign high weight for full season
-                        team_rounds.append((team, 999))
-                    else:
-                        # Count individual rounds
-                        round_count = 0
-                        if '–' in rounds_str or '-' in rounds_str:
-                            # Range like "1-5" or "7-8"
-                            parts = rounds_str.replace('–', '-').split(',')
-                            for part in parts:
-                                part = part.strip()
-                                if '-' in part:
-                                    start, end = map(int, part.split('-'))
-                                    round_count += (end - start + 1)
-                                else:
-                                    round_count += 1
-                        else:
-                            # Single round or comma-separated
-                            round_count = len(rounds_str.split(','))
-
-                        team_rounds.append((team, round_count))
-
-                # Primary team is the one with most rounds
-                primary_team = max(team_rounds, key=lambda x: x[1])[0]
-
-                multi_team_data.append({
-                    'Driver': driver,
-                    'Team': primary_team,  # Use primary team for main Team column
-                    'primary_team': primary_team,
-                    'team_count': len(driver_entries)
-                })
-
-        team_data = pd.DataFrame(multi_team_data)
-        df = df.merge(team_data[['Driver', 'Team', 'team_count']], on='Driver', how='left')
-        df['team_count'] = df['team_count'].fillna(1)
-
-    return df
-
-
-def load_year_data(year_dir, series_pattern, series, data_type):
-    """Load data for a specific year and series."""
-    year = os.path.basename(year_dir)
-
-    try:
-        year_int = int(year)
-        series_type = determine_series_type(series_pattern, series)
-
-        # Get file paths
-        data_file = os.path.join(
-            year_dir,
-            get_file_pattern(series_type, data_type, series, year)
-        )
-
-        if not os.path.exists(data_file):
-            return None
-
-        df = pd.read_csv(data_file)
-
-        # Add metadata
-        df['year'] = year_int
-        df['series'] = series
-        df['series_type'] = series_type
-
-        # Special processing for driver data
-        if data_type == 'drivers':
-            # Merge entries data if available
-            entries_file = os.path.join(
-                year_dir,
-                get_file_pattern(series_type, 'entries', series, year)
-            )
-            df = merge_entries_data(df, entries_file)
-
-        return df
-
-    except Exception as e:
-        print(f"Error processing {year_dir}: {e}")
-        return None
-
-
-def load_standings_data(series, data_type):
-    """Load standings data (drivers or teams) for a racing series."""
-    all_data = []
-    directories = get_series_directories(series)
-
-    for year_dir, series_pattern in directories:
-        df = load_year_data(year_dir, series_pattern, series, data_type)
-        if df is not None:
-            all_data.append(df)
-
-    return pd.concat(all_data, ignore_index=True) if all_data else pd.DataFrame()
-
-
-def load_qualifying_data(series='F3'):
-    """Load qualifying data for a racing series across years."""
-    all_qualifying_data = []
-    directories = get_series_directories(series)
-
-    for year_dir, series_pattern in directories:
-        # Skip F3_European as it doesn't have qualifying data
-        if series_pattern == 'F3_European':
-            continue
-
-        year = os.path.basename(year_dir)
-        try:
-            year_int = int(year)
-            # Skip 2011 as it doesn't have qualifying data
-            if year_int == 2011:
-                continue
-
-            qualifying_dir = os.path.join(year_dir, 'qualifying')
-            if not os.path.exists(qualifying_dir):
-                continue
-
-            # Load all qualifying round files
-            qualifying_files = glob.glob(os.path.join(
-                qualifying_dir,
-                f"{series.lower()}_{year}_qualifying_round_*.csv")
-            )
-
-            year_qualifying_data = []
-            for quali_file in qualifying_files:
-                try:
-                    df = pd.read_csv(quali_file)
-                    df['year'] = year_int
-                    df['series'] = series
-                    df['round'] = os.path.basename(
-                        quali_file).split('_')[-1].replace('.csv', '')
-                    year_qualifying_data.append(df)
-                except Exception as e:
-                    print(f"Error loading quali file {quali_file}: {e}")
-
-            if year_qualifying_data:
-                all_qualifying_data.extend(year_qualifying_data)
-        except Exception as e:
-            print(f"Error processing quali data for {year_dir}: {e}")
-            continue
-
-    if all_qualifying_data:
-        return pd.concat(all_qualifying_data, ignore_index=True)
-    return pd.DataFrame()
-
-
 def extract_position(result_str):
     """Extract numeric position from result string."""
     if not result_str or result_str in NOT_PARTICIPATED_CODES:
@@ -371,81 +136,6 @@ def calculate_participation_stats(df, race_cols):
         })
 
     return stats
-
-
-def calculate_team_performance_metrics(team_df):
-    """Calculate team performance metrics from standings."""
-    if team_df.empty:
-        return pd.DataFrame()
-
-    team_metrics = []
-    for (year, series_type), year_data in team_df.groupby(['year', 'series_type']):
-        # Get unique teams and their positions
-        team_positions = year_data.groupby('Team').agg({
-            'Pos': 'first',
-            'Points': 'first'
-        }).reset_index()
-
-        # Convert position to numeric, handling ties
-        team_positions['team_pos'] = team_positions['Pos'].astype(
-            str).str.extract(r'(\d+)').astype(float)
-
-        # Calculate relative performance metrics
-        total_teams = len(team_positions)
-        team_positions['team_pos_per'] = \
-            (total_teams - team_positions['team_pos'] + 1) / total_teams
-
-        # Add year and series info
-        team_positions['year'] = year
-        team_positions['series_type'] = series_type
-
-        team_metrics.append(team_positions)
-
-    return pd.concat(team_metrics, ignore_index=True) if team_metrics else pd.DataFrame()
-
-
-def enhance_with_team_data(driver_df, team_df):
-    """Add team championship metrics to driver data."""
-    default_cols = {'team_pos': np.nan, 'team_pos_per': 0.5, 'team_points': 0}
-
-    if team_df.empty:
-        for col, default in default_cols.items():
-            driver_df[col] = default
-        return driver_df
-
-    # Calculate team metrics
-    team_metrics = calculate_team_performance_metrics(team_df)
-    if team_metrics.empty:
-        for col, default in default_cols.items():
-            driver_df[col] = default
-        return driver_df
-
-    # Handle missing series_type in driver data
-    if 'series_type' not in driver_df.columns:
-        driver_df['series_type'] = 'F3_Main'
-
-    # Merge with driver data
-    enhanced_df = driver_df.merge(
-        team_metrics[['Team', 'year', 'series_type', 'team_pos', 'team_pos_per', 'Points']],
-        on=['Team', 'year', 'series_type'],
-        how='left',
-        suffixes=('', '_team')
-    ).rename(columns={'Points_team': 'team_points'})
-
-    # For multi-team drivers, adjust team strength impact
-    if 'team_count' in enhanced_df.columns:
-        multi_team_mask = enhanced_df['team_count'] > 1
-        # Moderate the team performance impact for multi-team drivers
-        enhanced_df.loc[multi_team_mask, 'team_pos_per'] = \
-            enhanced_df.loc[multi_team_mask, 'team_pos_per'] * 0.8 + 0.1
-
-    # Fill missing values
-    for col, default in default_cols.items():
-        enhanced_df[col] = enhanced_df[col].fillna(
-            enhanced_df[col].median() if col == 'team_pos' else default
-        )
-
-    return enhanced_df
 
 
 def calculate_teammate_performance(df):
@@ -709,7 +399,7 @@ def engineer_features(df):
         race_cols, field_size = cache_key_to_data[cache_key]
 
         stats = {
-            'wins': 0, 'podiums': 0, 'points_finishes': 0, 'dnfs': 0, 
+            'wins': 0, 'podiums': 0, 'points_finishes': 0, 'dnfs': 0,
             'races_completed': 0, 'field_size': field_size,
             'finish_positions': []
         }
@@ -742,17 +432,18 @@ def engineer_features(df):
                     stats['points_finishes'] += 1
                 elif pos <= 10:
                     stats['points_finishes'] += 1
-            except:
+            except Exception as e:
+                print(e)
                 continue
 
         stats['participation_rate'] = stats['races_completed'] / len(race_cols) if race_cols else 0
-        stats['avg_finish_pos'] = np.mean(stats['finish_positions']) if stats['finish_positions'] else np.nan
-        stats['std_finish_pos'] = np.std(stats['finish_positions']) if stats['finish_positions'] else np.nan
+        stats['avg_finish_pos'] = np.mean(stats['finish_positions']) if stats['finish_positions'] else np.nan # noqa: 501
+        stats['std_finish_pos'] = np.std(stats['finish_positions']) if stats['finish_positions'] else np.nan # noqa: 501
 
         race_stats.append(stats)
 
     # Add race statistics to features
-    for stat_name in ['wins', 'podiums', 'points_finishes', 'dnfs', 'races_completed', 
+    for stat_name in ['wins', 'podiums', 'points_finishes', 'dnfs', 'races_completed',
                       'participation_rate', 'field_size', 'avg_finish_pos', 'std_finish_pos']:
         features_df[stat_name] = [stats[stat_name] for stats in race_stats]
 
@@ -765,7 +456,7 @@ def engineer_features(df):
     features_df['podium_rate'] = features_df['podiums'] / features_df['races_completed']
     features_df['dnf_rate'] = features_df['dnfs'] / features_df['races_completed']
     features_df['top_10_rate'] = features_df['points_finishes'] / features_df['races_completed']
-    features_df['points_vs_team_strength'] = features_df['points'] / (features_df['team_points'] + 1)
+    features_df['points_vs_team_strength'] = features_df['points'] / (features_df['team_points'] + 1) # noqa: 501
     features_df['pos_vs_team_strength'] = features_df['final_pos'] * features_df['team_pos_per']
 
     return features_df
@@ -1204,47 +895,6 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
     return pd.DataFrame()
 
 
-print("Loading F3 data...")
-f3_df = load_standings_data('F3', 'drivers')
-
-print("Loading F2 data...")
-f2_df = load_standings_data('F2', 'drivers')
-
-print("Loading F3 team championship data...")
-f3_team_df = load_standings_data('F3', 'teams')
-
-print("Loading F3 qualifying data...")
-f3_qualifying_df = load_qualifying_data('F3')
-
-if f3_df.empty or f2_df.empty:
-    print("No F2/F3 data found. Check file paths.")
-    exit()
-
-print("Enhancing F3 data with team championship metrics...")
-f3_df = enhance_with_team_data(f3_df, f3_team_df)
-
-print("Adding qualifying features...")
-f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
-
-print("Creating target variable based on F2 participation...")
-f3_df = create_target_variable(f3_df, f2_df)
-
-print("Engineering features...")
-features_df = engineer_features(f3_df)
-features_df['promoted'] = f3_df['promoted']
-
-print("Training all models...")
-models, deep_models, X_test, y_test, feature_cols, scaler, X_train, y_train = train_models(
-    features_df)
-
-print("Making predictions for F3 2025 drivers...")
-all_models = {
-    'Traditional': models,
-    'Deep Learning': deep_models
-}
-predict_drivers(all_models, features_df, feature_cols, scaler)
-
-
 def analyze_feature_importance(models, deep_models, X_test, y_test, feature_cols, scaler=None):
     """Analyze feature importance across all models"""
     print("\n" + "="*70)
@@ -1282,7 +932,7 @@ def analyze_feature_importance(models, deep_models, X_test, y_test, feature_cols
     # Deep learning models
     if deep_models and scaler is not None:
         X_test_scaled = scaler.transform(X_test)
-        
+
         for name, model in deep_models.items():
             print(f"\n{name} Feature Analysis:")
             print("-" * 50)
@@ -1302,7 +952,7 @@ def analyze_feature_importance(models, deep_models, X_test, y_test, feature_cols
 
                 importances = []
                 baseline_score = average_precision_score(y_test, dl_predict_wrapper(X_test_scaled))
-                
+
                 for i, feature in enumerate(feature_cols):
                     X_permuted = X_test_scaled.copy()
                     np.random.shuffle(X_permuted[:, i])
@@ -1324,7 +974,8 @@ def analyze_feature_importance(models, deep_models, X_test, y_test, feature_cols
     return importance_results
 
 
-def analyze_negative_features(models, deep_models, X_train, y_train, X_test, y_test, feature_cols, scaler=None):
+def analyze_negative_features(models, deep_models, X_train, y_train,
+                              X_test, y_test, feature_cols, scaler=None):
     """Identify features that negatively impact performance"""
     print("\n" + "="*70)
     print("NEGATIVE FEATURE IMPACT ANALYSIS")
@@ -1363,7 +1014,7 @@ def analyze_negative_features(models, deep_models, X_train, y_train, X_test, y_t
                     'Without_Feature_PR_AUC': score_without
                 })
             except Exception as e:
-                print(f"  Error testing {feature}: {e}")
+                print(f"Error testing {feature}: {e}")
                 continue
 
         impact_df = pd.DataFrame(feature_impacts).sort_values('Impact', ascending=False)
@@ -1410,7 +1061,10 @@ def analyze_negative_features(models, deep_models, X_train, y_train, X_test, y_t
                         # Retrain model without this feature
                         if 'Keras' in name:
                             temp_model = create_tensorflow_dnn(X_train_reduced.shape[1])
-                            temp_model.fit(X_train_reduced, y_train, epochs=50, batch_size=32, verbose=0)
+                            temp_model.fit(
+                                X_train_reduced, y_train, epochs=50,
+                                batch_size=32, verbose=0
+                            )
                             probas_without = temp_model.predict(X_test_reduced, verbose=0).flatten()
                         elif 'PyTorch' in name:
                             temp_model = RacingPredictor(X_train_reduced.shape[1]).to(device)
@@ -1446,7 +1100,7 @@ def analyze_negative_features(models, deep_models, X_train, y_train, X_test, y_t
                         })
 
                     except Exception as e:
-                        print(f"  Error testing {feature}: {e}")
+                        print(f"Error testing {feature}: {e}")
                         continue
 
                 impact_df = pd.DataFrame(feature_impacts).sort_values('Impact', ascending=False)
@@ -1523,19 +1177,19 @@ def recursive_feature_elimination(models, X_train, y_train, X_test, y_test, feat
                     best_score = score
                     best_n_features = n_features
 
-                print(f"  {n_features} features: PR-AUC = {score:.4f}")
+                print(f"{n_features} features: PR-AUC = {score:.4f}")
 
             except Exception as e:
-                print(f"  Error with {n_features} features: {e}")
+                print(f"Error with {n_features} features: {e}")
                 continue
 
-        print(f"  Best: {best_n_features} features with PR-AUC = {best_score:.4f}")
+        print(f"Best: {best_n_features} features with PR-AUC = {best_score:.4f}")
 
         # Show which features were eliminated in the best configuration
         if best_n_features in scores_by_n_features:
             selected = scores_by_n_features[best_n_features]['features']
             eliminated = [f for f in feature_cols if f not in selected]
-            print(f"  Eliminated features: {eliminated}")
+            print(f"Eliminated features: {eliminated}")
 
         rfe_results[name] = scores_by_n_features
 
@@ -1575,7 +1229,8 @@ def correlation_analysis(X, feature_cols):
         return pd.DataFrame()
 
 
-def feature_ablation_study(models, deep_models, X_train, y_train, X_test, y_test, feature_cols, scaler=None):
+def feature_ablation_study(models, deep_models, X_train, y_train,
+                           X_test, y_test, feature_cols, scaler=None):
     """Systematic feature ablation study"""
     print("\n" + "="*70)
     print("FEATURE ABLATION STUDY")
@@ -1587,11 +1242,11 @@ def feature_ablation_study(models, deep_models, X_train, y_train, X_test, y_test
     actual_features = set(feature_cols)
     feature_groups = {}
 
-    position_features = [f for f in ['final_pos', 'avg_finish_pos', 'std_finish_pos'] if f in actual_features]
+    position_features = [f for f in ['final_pos', 'avg_finish_pos', 'std_finish_pos'] if f in actual_features] # noqa: 501
     if position_features:
         feature_groups['position_features'] = position_features
 
-    rate_features = [f for f in ['win_rate', 'podium_rate', 'dnf_rate', 'top_10_rate'] if f in actual_features]
+    rate_features = [f for f in ['win_rate', 'podium_rate', 'dnf_rate', 'top_10_rate'] if f in actual_features] # noqa: 501
     if rate_features:
         feature_groups['rate_features'] = rate_features
 
@@ -1599,11 +1254,11 @@ def feature_ablation_study(models, deep_models, X_train, y_train, X_test, y_test
     if experience_features:
         feature_groups['experience_features'] = experience_features
 
-    teammate_features = [f for f in ['avg_pos_vs_teammates', 'teammate_battles'] if f in actual_features]
+    teammate_features = [f for f in ['avg_pos_vs_teammates', 'teammate_battles'] if f in actual_features] # noqa: 501
     if teammate_features:
         feature_groups['teammate_features'] = teammate_features
 
-    team_features = [f for f in ['team_pos', 'points_vs_team_strength', 'pos_vs_team_strength'] if f in actual_features]
+    team_features = [f for f in ['team_pos', 'points_vs_team_strength', 'pos_vs_team_strength'] if f in actual_features] # noqa: 501
     if team_features:
         feature_groups['team_features'] = team_features
 
@@ -1656,14 +1311,17 @@ def feature_ablation_study(models, deep_models, X_train, y_train, X_test, y_test
                     'Impact': impact
                 })
 
-                print(f"  Removing {group_name}: PR AUC = {score:.4f} (impact: {impact:+.4f})")
+                print(f"Removing {group_name}: PR AUC = {score:.4f} (impact: {impact:+.4f})")
 
             except Exception as e:
-                print(f"  Error removing {group_name}: {e}")
+                print(f"Error removing {group_name}: {e}")
                 continue
 
         if feature_ablations:
-            ablation_results[name] = pd.DataFrame(feature_ablations).sort_values('Impact', ascending=False)
+            ablation_results[name] = pd.DataFrame(feature_ablations).sort_values(
+                'Impact',
+                ascending=False
+            )
         else:
             ablation_results[name] = pd.DataFrame()
 
@@ -1704,7 +1362,10 @@ def feature_ablation_study(models, deep_models, X_train, y_train, X_test, y_test
                         # Retrain model with reduced features
                         if 'Keras' in name:
                             temp_model = create_tensorflow_dnn(X_train_reduced.shape[1])
-                            temp_model.fit(X_train_reduced, y_train, epochs=50, batch_size=32, verbose=0)
+                            temp_model.fit(
+                                X_train_reduced, y_train, epochs=50,
+                                batch_size=32, verbose=0
+                            )
                             probas_reduced = temp_model.predict(X_test_reduced, verbose=0).flatten()
                         elif 'PyTorch' in name:
                             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -1741,14 +1402,17 @@ def feature_ablation_study(models, deep_models, X_train, y_train, X_test, y_test
                             'Impact': impact
                         })
 
-                        print(f"  Removing {group_name}: PR AUC = {score:.4f} (impact: {impact:+.4f})")
+                        print(f"Removing {group_name}: PR AUC = {score:.4f} (impact: {impact:+.4f})") # noqa: 501
 
                     except Exception as e:
-                        print(f"  Error removing {group_name}: {e}")
+                        print(f"Error removing {group_name}: {e}")
                         continue
 
                 if feature_ablations:
-                    ablation_results[name] = pd.DataFrame(feature_ablations).sort_values('Impact', ascending=False)
+                    ablation_results[name] = pd.DataFrame(feature_ablations).sort_values(
+                        'Impact',
+                        ascending=False
+                    )
                 else:
                     ablation_results[name] = pd.DataFrame()
 
@@ -1758,7 +1422,8 @@ def feature_ablation_study(models, deep_models, X_train, y_train, X_test, y_test
     return ablation_results
 
 
-def comprehensive_feature_analysis(models, deep_models, X_train, y_train, X_test, y_test, feature_cols, scaler=None):
+def comprehensive_feature_analysis(models, deep_models, X_train, y_train,
+                                   X_test, y_test, feature_cols, scaler=None):
     """Run comprehensive feature analysis"""
 
     print(f"Starting comprehensive feature analysis with {len(feature_cols)} features:")
@@ -1805,6 +1470,33 @@ def comprehensive_feature_analysis(models, deep_models, X_train, y_train, X_test
         'problematic_features': list(problematic_features)
     }
 
+
+print("Loading F3 qualifying data...")
+f3_qualifying_df = load_qualifying_data('F3')
+
+f2_df, f3_df = load_all_data()
+
+print("Adding qualifying features...")
+f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
+
+print("Creating target variable based on F2 participation...")
+f3_df = create_target_variable(f3_df, f2_df)
+
+print("Engineering features...")
+print(f3_df)
+features_df = engineer_features(f3_df)
+features_df['promoted'] = f3_df['promoted']
+
+print("Training all models...")
+models, deep_models, X_test, y_test, feature_cols, scaler, X_train, y_train = train_models(
+    features_df)
+
+print("Making predictions for F3 2025 drivers...")
+all_models = {
+    'Traditional': models,
+    'Deep Learning': deep_models
+}
+predict_drivers(all_models, features_df, feature_cols, scaler)
 
 comprehensive_feature_analysis(models, deep_models, X_train, y_train,
                                X_test, y_test, feature_cols, scaler)

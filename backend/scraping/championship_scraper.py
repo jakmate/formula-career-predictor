@@ -100,7 +100,7 @@ def process_championship(soup, championship_type, year,
         has_no_column = False
         if len(race_headers) > 2:
             second_header = race_headers[2].get_text(strip=True).lower()
-            if "no." in second_header:
+            if "no." in second_header or ("no" == second_header and year == 2010):
                 has_no_column = True
 
         # Start building headers - skip Pos and Driver/Team columns
@@ -155,16 +155,17 @@ def process_championship(soup, championship_type, year,
                             (year > 2016 and formula == 2)) else all_rows[1:]
 
         # Remove footer rows (sources/notes)
-        if (series_type == "f3_euro" and championship_type == "Drivers'") or year == 2025:
-            # For F3 European drivers standings, remove only 2 footer rows
+        if ((series_type == "f3_euro" and championship_type == "Drivers'") or
+                year == 2025 or (series_type == "main" and year < 2013 and formula == 3)):
             if len(data_rows) > 2:
                 data_rows = data_rows[:-2]
+        elif formula == 2 and year < 2017:
+            if len(data_rows) > 1:
+                data_rows = data_rows[:-1]
         elif championship_type == "Drivers'" and year == 2020 and formula == 3:
-            # For F3 2020, remove 4 rows
             if len(data_rows) > 4:
                 data_rows = data_rows[:-4]
         else:
-            # Default: remove 3 footer rows for other standings
             if len(data_rows) > 3:
                 data_rows = data_rows[:-3]
 

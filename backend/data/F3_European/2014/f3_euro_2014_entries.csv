@@ -1,4 +1,4 @@
-Team,Chassis[N 1],Engine,No.,Driver,Status,Rounds
+Team,Chassis,Engine,No.,Driver,Status,Rounds
 Prema Powerteam,F314/003,Mercedes,1,Nicholas Latifi,,1–10
 Prema Powerteam,F312/015,Mercedes,2,Esteban Ocon,R,All
 Prema Powerteam,F312/030,Mercedes,25,Antonio Fuoco,R,All
@@ -15,7 +15,7 @@ EuroInternational,F312/053,Mercedes,29,Santino Ferrucci,R,5–9
 EuroInternational,F312/053,Mercedes,29,Sérgio Sette Câmara,,10
 EuroInternational,F312/053,Mercedes,29,Stefano Coletti,,11
 Fortec Motorsports,F312/011,Mercedes,9,Mitch Gilbert,,1–6
-Fortec Motorsports,F312/011,Mercedes,9,Alfonso Celis,,8
+Fortec Motorsports,F312/011,Mercedes,9,Alfonso Celis Jr.,,8
 Fortec Motorsports,F312/011,Mercedes,9,Martin Cao,,10
 Fortec Motorsports,F312/007,Mercedes,10,John Bryant-Meisner,,"1–6, 8"
 Fortec Motorsports,F312/007,Mercedes,10,Santino Ferrucci,R,10–11
