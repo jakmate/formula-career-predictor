@@ -1,6 +1,3 @@
-previews:
-  generation: automatic
-
 services:
   - type: web
     name: formula-predictions-backend
@@ -10,19 +7,18 @@ services:
     region: frankfurt
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
+    startCommand: sh -c "uvicorn main:app --host 0.0.0.0 --port $PORT"
     envVars:
-      - key: PORT
-        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.11.9"
 
   - type: web
     name: formula-predictions-frontend
     runtime: static
-    plan: free
-    region: frankfurt
     autoDeploy: false
     rootDir: frontend
     buildCommand: npm install && npm run build
+    staticPublishPath: dist
     buildFilter:
       paths:
         - src/**/*.ts
