@@ -83,7 +83,7 @@ export const PredictionsTable = () => {
               </div>
               <div className="flex items-center gap-1">
                 <UserRound className="w-4 h-4" />
-                Drivers: {predictions[selectedModel].predictions.length}
+                Drivers: {predictions[selectedModel]?.predictions?.length || 0}
               </div>
             </div>
           )

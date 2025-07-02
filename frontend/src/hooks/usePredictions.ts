@@ -13,11 +13,10 @@ export const usePredictions = () => {
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const refreshStatusRef = useRef<SystemStatus | null>(null); // Track original status
+  const refreshStatusRef = useRef<SystemStatus | null>(null);
 
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-  // Fetch without state dependencies
   const fetchPredictions =
     useCallback(async (): Promise<AllPredictionsResponse> => {
       try {
@@ -36,11 +35,8 @@ export const usePredictions = () => {
       setLoading(true);
       const data = await fetchPredictions();
       setAllData(data);
-      if (data.models.length > 0 && !selectedModel) {
-        setSelectedModel(data.models[0]);
-      }
       setError(null);
-      return data; // Return for immediate use
+      return data;
     } catch (err) {
       setError(
         'Failed to load predictions data. Please check your connection.'
@@ -49,7 +45,14 @@ export const usePredictions = () => {
     } finally {
       setLoading(false);
     }
-  }, [fetchPredictions, selectedModel]);
+  }, [fetchPredictions]);
+
+  // Set initial model when data loads
+  useEffect(() => {
+    if (allData?.models.length && !selectedModel) {
+      setSelectedModel(allData.models[0]);
+    }
+  }, [allData?.models, selectedModel]);
 
   const handleRefresh = async () => {
     try {
@@ -90,7 +93,7 @@ export const usePredictions = () => {
           if (++attempts >= maxAttempts) {
             setLoading(false);
             setError('Update check timeout');
-            return; // Fail - stop after max attempts
+            return;
           }
 
           // Continue polling
@@ -111,6 +114,7 @@ export const usePredictions = () => {
     }
   };
 
+  // Initial load - only runs once
   useEffect(() => {
     fetchAllPredictions();
   }, [fetchAllPredictions]);

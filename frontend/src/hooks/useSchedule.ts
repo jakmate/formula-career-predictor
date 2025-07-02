@@ -16,62 +16,68 @@ export const useSchedule = () => {
     { value: 'f3', label: 'Formula 3' },
   ];
 
-  const fetchSchedule = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const fetchSchedule = useCallback(
+    async (series: string) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const headers = {
-        'X-Timezone': userTimezone,
-        'Content-Type': 'application/json',
-      };
+      try {
+        const headers = {
+          'X-Timezone': userTimezone,
+          'Content-Type': 'application/json',
+        };
 
-      const [racesResponse, nextRaceResponse] = await Promise.all([
-        fetch(
-          `${API_BASE}/api/races/${selectedSeries}?timezone=${encodeURIComponent(userTimezone)}`,
-          {
-            headers,
-          }
-        ),
-        fetch(
-          `${API_BASE}/api/races/${selectedSeries}/next?timezone=${encodeURIComponent(userTimezone)}`,
-          {
-            headers,
-          }
-        ),
-      ]);
+        const [racesResponse, nextRaceResponse] = await Promise.all([
+          fetch(
+            `${API_BASE}/api/races/${series}?timezone=${encodeURIComponent(userTimezone)}`,
+            {
+              headers,
+            }
+          ),
+          fetch(
+            `${API_BASE}/api/races/${series}/next?timezone=${encodeURIComponent(userTimezone)}`,
+            {
+              headers,
+            }
+          ),
+        ]);
 
-      if (!racesResponse.ok) {
-        throw new Error(
-          `Failed to fetch ${selectedSeries.toUpperCase()} schedule`
-        );
+        if (!racesResponse.ok) {
+          throw new Error(`Failed to fetch ${series.toUpperCase()} schedule`);
+        }
+
+        if (!nextRaceResponse.ok) {
+          console.warn(`No next race found for ${series.toUpperCase()}`);
+        }
+
+        const racesData = await racesResponse.json();
+        const nextRaceData = nextRaceResponse.ok
+          ? await nextRaceResponse.json()
+          : null;
+
+        setRaces(racesData);
+        setNextRace(nextRaceData);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+      } finally {
+        setLoading(false);
       }
+    },
+    [API_BASE, userTimezone]
+  );
 
-      if (!nextRaceResponse.ok) {
-        console.warn(`No next race found for ${selectedSeries.toUpperCase()}`);
-      }
-
-      const racesData = await racesResponse.json();
-      const nextRaceData = nextRaceResponse.ok
-        ? await nextRaceResponse.json()
-        : null;
-
-      setRaces(racesData);
-      setNextRace(nextRaceData);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedSeries, API_BASE, userTimezone]);
-
+  // Fetch when selectedSeries changes
   useEffect(() => {
-    fetchSchedule();
-  }, [fetchSchedule]);
+    fetchSchedule(selectedSeries);
+  }, [selectedSeries, fetchSchedule]);
+
+  const refetch = useCallback(() => {
+    fetchSchedule(selectedSeries);
+  }, [fetchSchedule, selectedSeries]);
 
   return {
     races,
@@ -81,7 +87,7 @@ export const useSchedule = () => {
     series,
     loading,
     error,
-    refetch: fetchSchedule,
+    refetch,
     userTimezone,
   };
 };

@@ -76,10 +76,10 @@ def determine_series_type(series_pattern, series):
     return SERIES_CONFIG[series]['main_type']
 
 
-def merge_entries_data(df, entries_file):
-    """Merge entries data with driver standings."""
+def load_entries_data(entries_file):
+    """Load and preprocess entries data."""
     if not os.path.exists(entries_file):
-        return df
+        return None
 
     entries_df = pd.read_csv(entries_file)
 
@@ -92,68 +92,38 @@ def merge_entries_data(df, entries_file):
     # Apply column mapping and clean data
     entries_df = apply_column_mapping(entries_df)
     entries_df = clean_string_columns(entries_df, ['Driver'])
-    df = clean_string_columns(df, ['Driver'])
-
     entries_df['Driver'] = entries_df['Driver'].replace('Robert Visoiu', 'Robert Vișoiu')
-    # Merge team data if both Driver and Team columns exist
-    if all(col in entries_df.columns for col in ['Driver', 'Team']):
-        # Create weighted team assignment for multi-team drivers
-        multi_team_data = []
 
-        for driver in entries_df['Driver'].unique():
-            driver_entries = entries_df[entries_df['Driver'] == driver]
+    return entries_df
 
-            if len(driver_entries) == 1:
-                # Single team driver
-                multi_team_data.append({
-                    'Driver': driver,
-                    'Team': driver_entries.iloc[0]['Team'],
-                    'primary_team': driver_entries.iloc[0]['Team'],
-                    'team_count': 1
-                })
-            else:
-                # Multi-team driver - parse rounds to determine primary team
-                team_rounds = []
 
-                for _, entry in driver_entries.iterrows():
-                    team = entry['Team']
-                    rounds_str = entry.get('Rounds', 'All')
+def load_all_entries_data(series):
+    """Load all entries data for a series at once."""
+    all_entries = []
+    directories = get_series_directories(series)
 
-                    if rounds_str == 'All':
-                        # Assign high weight for full season
-                        team_rounds.append((team, 999))
-                    else:
-                        # Count individual rounds
-                        round_count = 0
-                        if '–' in rounds_str or '-' in rounds_str:
-                            # Range like "1-5" or "7-8"
-                            parts = rounds_str.replace('–', '-').split(',')
-                            for part in parts:
-                                part = part.strip()
-                                if '-' in part:
-                                    start, end = map(int, part.split('-'))
-                                    round_count += (end - start + 1)
-                                else:
-                                    round_count += 1
-                        else:
-                            # Single round or comma-separated
-                            round_count = len(rounds_str.split(','))
+    for year_dir, series_pattern in directories:
+        year = os.path.basename(year_dir)
+        try:
+            year_int = int(year)
+            series_type = determine_series_type(series_pattern, series)
 
-                        team_rounds.append((team, round_count))
+            entries_file = os.path.join(
+                year_dir,
+                get_file_pattern(series_type, 'entries', series, year)
+            )
 
-                # Primary team is the one with most rounds
-                primary_team = max(team_rounds, key=lambda x: x[1])[0]
+            entries_df = load_entries_data(entries_file)
+            if entries_df is not None:
+                entries_df['year'] = year_int
+                entries_df['series'] = series
+                entries_df['series_type'] = series_type
+                all_entries.append(entries_df)
 
-                multi_team_data.append({
-                    'Driver': driver,
-                    'Team': primary_team,  # Use primary team for main Team column
-                    'team_count': len(driver_entries)
-                })
+        except Exception as e:
+            print(f"Error loading entries for {year_dir}: {e}")
 
-        team_data = pd.DataFrame(multi_team_data)
-        df = df.merge(team_data[['Driver', 'Team', 'team_count']], on='Driver', how='left')
-
-    return df
+    return pd.concat(all_entries, ignore_index=True) if all_entries else pd.DataFrame()
 
 
 def load_year_data(year_dir, series_pattern, series, data_type):
@@ -178,19 +148,9 @@ def load_year_data(year_dir, series_pattern, series, data_type):
         if data_type == 'drivers' and 'Pos' in df.columns:
             df = df.dropna(subset=['Pos'])
 
-        # Add metadata
         df['year'] = year_int
         df['series'] = series
         df['series_type'] = series_type
-
-        # Special processing for driver data
-        if data_type == 'drivers':
-            # Merge entries data if available
-            entries_file = os.path.join(
-                year_dir,
-                get_file_pattern(series_type, 'entries', series, year)
-            )
-            df = merge_entries_data(df, entries_file)
 
         return df
 
@@ -262,6 +222,85 @@ def load_qualifying_data(series='F3'):
     return pd.DataFrame()
 
 
+def merge_entries(driver_df, entries_df):
+    """Merge all entries data with driver standings at once."""
+    if entries_df.empty:
+        return driver_df
+
+    # Process entries data to create team assignments
+    all_team_data = []
+
+    for (year, series, series_type), year_entries in entries_df.groupby(['year', 'series', 'series_type']):  # noqa: 501
+        team_data = process_year_entries(year_entries)
+        if not team_data.empty:
+            team_data['year'] = year
+            team_data['series'] = series
+            team_data['series_type'] = series_type
+            all_team_data.append(team_data)
+
+    if not all_team_data:
+        return driver_df
+
+    all_team_df = pd.concat(all_team_data, ignore_index=True)
+    driver_df = clean_string_columns(driver_df, ['Driver'])
+
+    return driver_df.merge(
+        all_team_df[['Driver', 'Team', 'team_count', 'year', 'series', 'series_type']],
+        on=['Driver', 'year', 'series', 'series_type'],
+        how='left'
+    )
+
+
+def process_year_entries(entries_df):
+    """Process entries for a single year to determine team assignments."""
+    if not all(col in entries_df.columns for col in ['Driver', 'Team']):
+        return pd.DataFrame()
+
+    multi_team_data = []
+
+    for driver in entries_df['Driver'].unique():
+        driver_entries = entries_df[entries_df['Driver'] == driver]
+
+        if len(driver_entries) == 1:
+            multi_team_data.append({
+                'Driver': driver,
+                'Team': driver_entries.iloc[0]['Team'],
+                'team_count': 1
+            })
+        else:
+            # Multi-team logic
+            team_rounds = []
+            for _, entry in driver_entries.iterrows():
+                team = entry['Team']
+                rounds_str = entry.get('Rounds', 'All')
+
+                if rounds_str == 'All':
+                    team_rounds.append((team, 999))
+                else:
+                    round_count = 0
+                    if '–' in rounds_str or '-' in rounds_str:
+                        parts = rounds_str.replace('–', '-').split(',')
+                        for part in parts:
+                            part = part.strip()
+                            if '-' in part:
+                                start, end = map(int, part.split('-'))
+                                round_count += (end - start + 1)
+                            else:
+                                round_count += 1
+                    else:
+                        round_count = len(rounds_str.split(','))
+                    team_rounds.append((team, round_count))
+
+            primary_team = max(team_rounds, key=lambda x: x[1])[0]
+            multi_team_data.append({
+                'Driver': driver,
+                'Team': primary_team,
+                'team_count': len(driver_entries)
+            })
+
+    return pd.DataFrame(multi_team_data)
+
+
 def calculate_position_percentile(team_df):
     """Calculate team position percentile."""
     team_metrics = []
@@ -318,13 +357,21 @@ def load_all_data():
     print("Loading F3 team championship data...")
     f3_team_df = load_standings_data('F3', 'teams')
 
+    print("Loading F3 entries...")
+    f3_entries_df = load_all_entries_data('F3')
+
+    print("Merging entries...")
+    f3_df = merge_entries(f3_df, f3_entries_df)
+
     print("Merge team data")
     f3_df = merge_team_data(f3_df, f3_team_df)
+
+    # f3_qualifying_df = load_qualifying_data()
 
     # print("Rows with NaN values:")
     # print(f3_qualifying_df.isna().sum())
     # f3_qualifying_df.isna().sum().to_csv('nan_counts.csv')
-    # print(f3_df[f3_df['Team'].isna()])
+    # print(f3_qualifying_df[f3_qualifying_df['Team'].isna()])
     # print(f3_df[f3_df['year'] == 2012])
 
     return f2_df, f3_df

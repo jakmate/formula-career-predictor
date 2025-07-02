@@ -101,7 +101,8 @@ def extract_position(result_str):
         return None
 
     try:
-        return int(result_str.split()[0].replace('†', '').replace('F', '').replace('P', ''))
+        clean_str = result_str.split()[0].replace('†', '').replace('F', '').replace('P', '')
+        return int(float(clean_str))
     except (ValueError, IndexError):
         return None
 
@@ -420,7 +421,7 @@ def engineer_features(df):
                 continue
 
             try:
-                pos = int(extract_position(result))
+                pos = extract_position(result)
                 stats['finish_positions'].append(pos)
 
                 if pos == 1:
@@ -433,7 +434,7 @@ def engineer_features(df):
                 elif pos <= 10:
                     stats['points_finishes'] += 1
             except Exception as e:
-                print(e)
+                print(f"Error processing position '{result}': {e}")
                 continue
 
         stats['participation_rate'] = stats['races_completed'] / len(race_cols) if race_cols else 0
@@ -1483,7 +1484,6 @@ print("Creating target variable based on F2 participation...")
 f3_df = create_target_variable(f3_df, f2_df)
 
 print("Engineering features...")
-print(f3_df)
 features_df = engineer_features(f3_df)
 features_df['promoted'] = f3_df['promoted']
 
