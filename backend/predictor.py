@@ -19,10 +19,9 @@ from sklearn.inspection import permutation_importance
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, average_precision_score
-from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.utils import class_weight
+from sklearn.svm import SVC
 
 from loader import load_all_data, load_qualifying_data
 
@@ -39,25 +38,6 @@ if torch.cuda.is_available():
 NOT_PARTICIPATED_CODES = ['', 'DNS', 'WD', 'DNQ', 'DNA', 'C', 'EX']
 RETIREMENT_CODES = ['Ret', 'NC', 'DSQ', 'DSQP']
 CURRENT_YEAR = datetime.now().year
-
-COLUMN_MAPPING = {
-    'Driver name': 'Driver',
-    'Drivers': 'Driver',
-    'Entrant': 'Team'
-}
-
-
-def clean_string_columns(df, columns):
-    """Clean string columns by stripping whitespace."""
-    for col in columns:
-        if col in df.columns:
-            df[col] = df[col].astype(str).str.strip()
-    return df
-
-
-def apply_column_mapping(df):
-    """Apply standard column name mappings."""
-    return df.rename(columns=COLUMN_MAPPING)
 
 
 def get_race_columns(df):
@@ -287,9 +267,6 @@ def calculate_qualifying_features(df, qualifying_df):
         df['avg_quali_pos'] = np.nan
         df['std_quali_pos'] = np.nan
         return df
-
-    qualifying_df = apply_column_mapping(qualifying_df)
-    qualifying_df = clean_string_columns(qualifying_df, ['Driver'])
 
     # Calculate qualifying statistics for each driver-year combination
     qualifying_stats = []
@@ -552,7 +529,7 @@ class RacingPredictor(nn.Module):
 
 
 def train_models(df):
-    """Training function for all model types."""
+    """Training function with temporal split and stratification."""
     if df.empty:
         print("No data available for training")
         return {}, {}, None, None, None
@@ -570,21 +547,35 @@ def train_models(df):
 
     X = df_clean[feature_cols].fillna(0)
     y = df_clean['promoted']
+    years = df_clean['year']
 
-    print(f"Dataset size: {len(X)} drivers")
-    print(f"F2 progressions: {y.sum()} ({y.mean():.2%})")
+    # print(f"Dataset size: {len(X)} drivers")
+    # print(f"F2 progressions: {y.sum()} ({y.mean():.2%})")
+    # print(f"Year range: {years.min()} - {years.max()}")
+
+    # Use 80% of years for training, 20% for testing
+    unique_years = sorted(years.unique())
+    n_train_years = int(len(unique_years) * 0.8)
+    train_years = unique_years[:n_train_years]
+    test_years = unique_years[n_train_years:]
+
+    # Split data based on temporal cutoff
+    train_mask = years.isin(train_years)
+    test_mask = years.isin(test_years)
+
+    X_train = X[train_mask]
+    X_test = X[test_mask]
+    y_train = y[train_mask]
+    y_test = y[test_mask]
+
+    # Check class distribution in both sets
+    # print(f"Training: {len(X_train)} samples, {y_train.sum()} promotions ({y_train.mean():.2%})")
+    # print(f"Test: {len(X_test)} samples, {y_test.sum()} promotions ({y_test.mean():.2%})")
 
     # Scale features
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    # Split data for final evaluation
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=SEED, stratify=y
-    )
-    X_train_scaled, X_test_scaled, _, _ = train_test_split(
-        X_scaled, y, test_size=0.2, random_state=SEED, stratify=y
-    )
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
     # Traditional ML pipelines
     traditional_pipelines = {
@@ -602,25 +593,26 @@ def train_models(df):
         'LightGBM': ImbPipeline([
             ('smote', SMOTE(random_state=SEED)),
             ('classifier', lgb.LGBMClassifier(
-                random_state=SEED,
-                class_weight='balanced',
-                verbosity=-1
-            ))
+                random_state=SEED, class_weight='balanced', verbosity=-1))
         ]),
         'MLP': ImbPipeline([
             ('smote', SMOTE(random_state=SEED)),
             ('classifier', MLPClassifier(random_state=SEED, max_iter=1000))
+        ]),
+        'SVM': ImbPipeline([
+            ('smote', SMOTE(random_state=SEED)),
+            ('classifier', SVC(random_state=SEED, probability=True))
         ])
     }
 
     traditional_results = {}
     deep_results = {}
 
-    # Train traditional models
     print("\n" + "=" * 50)
-    print("TRAINING TRADITIONAL MODELS")
+    print("TRAINING MODELS")
     print("=" * 50)
 
+    # Train traditional models
     for name, pipeline in traditional_pipelines.items():
         print(f"\nTraining {name}:")
         print("-" * 40)
@@ -643,18 +635,7 @@ def train_models(df):
 
         traditional_results[name] = pipeline
 
-    # Train deep learning models
-    print("\n" + "=" * 50)
-    print("TRAINING DEEP LEARNING MODELS")
-    print("=" * 50)
-
-    # Calculate class weights for neural networks
-    class_weights = class_weight.compute_class_weight(
-        'balanced', classes=np.unique(y_train), y=y_train
-    )
-    class_weight_dict = {0: class_weights[0], 1: class_weights[1]}
-
-    # PyTorch Model
+    # Train PyTorch Model models
     print("\nTraining PyTorch Model...")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -675,14 +656,16 @@ def train_models(df):
         optimizer, mode='min', factor=0.5, patience=5)
 
     # Validation split
-    val_size = int(0.2 * len(X_train_torch))
-    indices = torch.randperm(len(X_train_torch))
-    train_idx, val_idx = indices[val_size:], indices[:val_size]
+    train_years_sorted = sorted(X_train.index[years[train_mask].argsort()])
+    val_split_idx = int(len(train_years_sorted) * 0.8)
 
-    X_train_sub = X_train_torch[train_idx]
-    y_train_sub = y_train_torch[train_idx]
-    X_val = X_train_torch[val_idx]
-    y_val = y_train_torch[val_idx]
+    train_indices = train_years_sorted[:val_split_idx]
+    val_indices = train_years_sorted[val_split_idx:]
+
+    X_train_sub = X_train_torch[train_indices]
+    y_train_sub = y_train_torch[train_indices]
+    X_val = X_train_torch[val_indices]
+    y_val = y_train_torch[val_indices]
 
     # Training loop
     best_val_loss = float('inf')
@@ -738,8 +721,6 @@ def train_models(df):
     print("\n" + "=" * 70)
     print("TRAINING COMPLETE")
     print("=" * 70)
-    print(f"Traditional Models: {list(traditional_results.keys())}")
-    print(f"Deep Learning Models: {list(deep_results.keys())}")
 
     return traditional_results, deep_results, X_test, y_test, feature_cols, scaler, X_train, y_train
 
@@ -772,15 +753,12 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
             try:
                 # Get raw probabilities based on model type
                 if model_type == 'Deep Learning':
-                    if 'Keras' in name:  # Keras model
-                        raw_probas = model.predict(X_processed, verbose=0).flatten()
-                    elif 'PyTorch' in name:  # PyTorch model
-                        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                        model.eval()
-                        with torch.no_grad():
-                            X_torch = torch.FloatTensor(X_processed).to(device)
-                            logits = model(X_torch)
-                            raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
+                    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                    model.eval()
+                    with torch.no_grad():
+                        X_torch = torch.FloatTensor(X_processed).to(device)
+                        logits = model(X_torch)
+                        raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
                 else:  # Traditional models
                     raw_probas = model.predict_proba(X_processed)[:, 1]
 
@@ -882,15 +860,12 @@ def analyze_feature_importance(models, deep_models, X_test, y_test, feature_cols
             try:
                 # Create wrapper function for deep learning models
                 def dl_predict_wrapper(X):
-                    if 'Keras' in name:
-                        return model.predict(X, verbose=0).flatten()
-                    elif 'PyTorch' in name:
-                        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                        model.eval()
-                        with torch.no_grad():
-                            X_torch = torch.FloatTensor(X).to(device)
-                            logits = model(X_torch)
-                            return torch.sigmoid(logits).cpu().numpy().flatten()
+                    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                    model.eval()
+                    with torch.no_grad():
+                        X_torch = torch.FloatTensor(X).to(device)
+                        logits = model(X_torch)
+                        return torch.sigmoid(logits).cpu().numpy().flatten()
 
                 importances = []
                 baseline_score = average_precision_score(y_test, dl_predict_wrapper(X_test_scaled))
@@ -980,15 +955,12 @@ def analyze_negative_features(models, deep_models, X_train, y_train,
 
             try:
                 # Get baseline score
-                if 'Keras' in name:
-                    baseline_probas = model.predict(X_test_scaled, verbose=0).flatten()
-                elif 'PyTorch' in name:
-                    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                    model.eval()
-                    with torch.no_grad():
-                        X_torch = torch.FloatTensor(X_test_scaled).to(device)
-                        logits = model(X_torch)
-                        baseline_probas = torch.sigmoid(logits).cpu().numpy().flatten()
+                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                model.eval()
+                with torch.no_grad():
+                    X_torch = torch.FloatTensor(X_test_scaled).to(device)
+                    logits = model(X_torch)
+                    baseline_probas = torch.sigmoid(logits).cpu().numpy().flatten()
 
                 baseline_score = average_precision_score(y_test, baseline_probas)
                 feature_impacts = []
@@ -1270,15 +1242,12 @@ def feature_ablation_study(models, deep_models, X_train, y_train,
 
             try:
                 # Get baseline score
-                if 'Keras' in name:
-                    baseline_probas = model.predict(X_test_scaled, verbose=0).flatten()
-                elif 'PyTorch' in name:
-                    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                    model.eval()
-                    with torch.no_grad():
-                        X_torch = torch.FloatTensor(X_test_scaled).to(device)
-                        logits = model(X_torch)
-                        baseline_probas = torch.sigmoid(logits).cpu().numpy().flatten()
+                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                model.eval()
+                with torch.no_grad():
+                    X_torch = torch.FloatTensor(X_test_scaled).to(device)
+                    logits = model(X_torch)
+                    baseline_probas = torch.sigmoid(logits).cpu().numpy().flatten()
 
                 baseline_score = average_precision_score(y_test, baseline_probas)
                 feature_ablations = []

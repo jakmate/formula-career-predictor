@@ -214,10 +214,11 @@ def save_models():
 
         # Save deep learning models
         for name, model in app_state.deep_models.items():
-            if hasattr(model, 'save'):
-                model.save(os.path.join(MODELS_DIR, f"{name}.keras"))
-            elif isinstance(model, torch.nn.Module):
-                torch.save(model.state_dict(), os.path.join(MODELS_DIR, f"{name}.pt"))
+            torch.save(
+                model.state_dict(),
+                os.path.join(MODELS_DIR, f"{name}.pt"),
+                _use_new_zipfile_serialization=True
+            )
 
         # Save scaler and features
         joblib.dump({
@@ -235,29 +236,58 @@ def load_models():
     """Load models from disk"""
     try:
         # Load preprocessor
-        preprocessor = joblib.load(os.path.join(MODELS_DIR, "preprocessor.joblib"))
-        app_state.scaler = preprocessor['scaler']
-        app_state.feature_cols = preprocessor['feature_cols']
+        try:
+            preprocessor = joblib.load(os.path.join(MODELS_DIR, "preprocessor.joblib"))
+            app_state.scaler = preprocessor['scaler']
+            app_state.feature_cols = preprocessor['feature_cols']
+            logger.info("Preprocessor loaded successfully")
+        except Exception as e:
+            logger.error(f"Error loading preprocessor: {e}")
+            return False
+
+        models_loaded = False
 
         # Load traditional models
         for model_file in os.listdir(MODELS_DIR):
             if model_file.endswith(".joblib") and model_file != "preprocessor.joblib":
                 name = os.path.splitext(model_file)[0]
-                model = joblib.load(os.path.join(MODELS_DIR, model_file))
-                app_state.ml_models[name] = model
+                try:
+                    model = joblib.load(os.path.join(MODELS_DIR, model_file))
+                    app_state.ml_models[name] = model
+                    logger.info(f"Loaded traditional model: {name}")
+                    models_loaded = True
+                except Exception as e:
+                    logger.error(f"Error loading traditional model {model_file}: {e}")
 
         # Load deep learning models
         for model_file in os.listdir(MODELS_DIR):
-            name = os.path.splitext(model_file)[0]
-            model = RacingPredictor(len(app_state.feature_cols))  # Needs input dim
-            model.load_state_dict(torch.load(os.path.join(MODELS_DIR, model_file)))
-            app_state.deep_models[name] = model
+            if model_file.endswith(".pt"):
+                name = os.path.splitext(model_file)[0]
+                try:
+                    model = RacingPredictor(len(app_state.feature_cols))
+
+                    # Load with explicit device mapping
+                    state_dict = torch.load(
+                        os.path.join(MODELS_DIR, model_file),
+                        map_location=torch.device('cpu'),
+                        weights_only=False
+                    )
+                    model.load_state_dict(state_dict)
+                    app_state.deep_models[name] = model
+                    logger.info(f"Loaded PyTorch model: {name}")
+                    models_loaded = True
+                except Exception as e:
+                    logger.error(f"Error loading PyTorch model {model_file}: {e}")
 
         # Update status
-        app_state.system_status["models_available"] = (
-            list(app_state.ml_models.keys()) + list(app_state.deep_models.keys()))
-        logger.info("Models loaded successfully")
-        return True
+        if models_loaded:
+            app_state.system_status["models_available"] = (
+                list(app_state.ml_models.keys()) + list(app_state.deep_models.keys()))
+            logger.info(f"Loaded {len(app_state.ml_models) + len(app_state.deep_models)} models")
+            return True
+
+        logger.error("No models loaded successfully")
+        return False
 
     except Exception as e:
         logger.error(f"Error loading models: {e}")
@@ -382,6 +412,11 @@ def _get_model_predictions(model_name: str, X_current):
     if model_name in app_state.ml_models:
         model = app_state.ml_models[model_name]
         raw_probas = model.predict_proba(X_current)[:, 1]
+
+        if hasattr(model, 'calibrator') and model.calibrator is not None:
+            calibrated_probas = model.calibrator.transform(raw_probas)
+            return calibrated_probas
+
     elif model_name in app_state.deep_models:
         model = app_state.deep_models[model_name]
         X_current_scaled = app_state.scaler.transform(X_current)
@@ -396,24 +431,21 @@ def _get_model_predictions(model_name: str, X_current):
                 raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
         else:
             raw_probas = model.predict(X_current_scaled, verbose=0).flatten()
+
+        if hasattr(model, 'calibrator') and model.calibrator is not None:
+            calibrated_probas = model.calibrator.transform(raw_probas)
+            return calibrated_probas
     else:
         raise ValueError(f"Model {model_name} not found")
 
     return raw_probas
 
 
-def _create_prediction_responses(current_df, raw_probas):
+def _create_prediction_responses(current_df, calibrated_probas):
     """Create standardized prediction response objects"""
     # Apply calibration if available
-    model = (app_state.ml_models.get(list(app_state.ml_models.keys())[0]) or
-             app_state.deep_models.get(list(app_state.deep_models.keys())[0]))
-
-    if hasattr(model, 'calibrator'):
-        empirical_pct = model.calibrator.transform(raw_probas) * 100.0
-    else:
-        empirical_pct = raw_probas * 100
-
-    predictions_binary = (empirical_pct >= 50).astype(int)
+    empirical_pct = calibrated_probas * 100.0
+    predictions_binary = (calibrated_probas >= 0.5).astype(int)
 
     predictions = []
     for idx, (_, row) in enumerate(current_df.iterrows()):
@@ -443,7 +475,7 @@ def _create_prediction_responses(current_df, raw_probas):
             team_points=float(row['team_points']),
             points_vs_team_strength=float(row['points_vs_team_strength']),
             pos_vs_team_strength=float(row['pos_vs_team_strength']),
-            raw_probability=float(raw_probas[idx]),
+            raw_probability=float(calibrated_probas[idx]),
             empirical_percentage=float(empirical_pct[idx]),
             prediction=int(predictions_binary[idx])
         ))

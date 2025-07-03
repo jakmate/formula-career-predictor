@@ -26,6 +26,7 @@ FILE_PATTERNS = {
 COLUMN_MAPPING = {
     'Driver name': 'Driver',
     'Drivers': 'Driver',
+    'Name': 'Driver',
     'Entrant': 'Team',
     'Teams': 'Team'
 }
@@ -41,7 +42,20 @@ def clean_string_columns(df, columns):
 
 def apply_column_mapping(df):
     """Apply standard column name mappings."""
-    return df.rename(columns=COLUMN_MAPPING)
+    df = df.rename(columns=COLUMN_MAPPING)
+
+    # Merge duplicate columns by combining non-null values
+    for col in df.columns:
+        if df.columns.tolist().count(col) > 1:
+            # Get all columns with this name
+            mask = df.columns == col
+            duplicate_cols = df.loc[:, mask]
+
+            # Combine non-null values (first non-null wins)
+            df[col] = duplicate_cols.bfill(axis=1).iloc[:, 0]
+            df = df.loc[:, ~(mask & (df.columns.duplicated()))]
+
+    return df
 
 
 def get_file_pattern(series_type, file_type, series, year, round_num=None):
@@ -218,7 +232,10 @@ def load_qualifying_data(series='F3'):
             continue
 
     if all_qualifying_data:
-        return pd.concat(all_qualifying_data, ignore_index=True)
+        df = pd.concat(all_qualifying_data, ignore_index=True)
+        df = apply_column_mapping(df)
+        df = clean_string_columns(df, ['Driver', 'Team'])
+        return df
     return pd.DataFrame()
 
 
@@ -368,10 +385,6 @@ def load_all_data():
 
     # f3_qualifying_df = load_qualifying_data()
 
-    # print("Rows with NaN values:")
-    # print(f3_qualifying_df.isna().sum())
-    # f3_qualifying_df.isna().sum().to_csv('nan_counts.csv')
-    # print(f3_qualifying_df[f3_qualifying_df['Team'].isna()])
     # print(f3_df[f3_df['year'] == 2012])
 
     return f2_df, f3_df
