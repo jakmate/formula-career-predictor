@@ -6,13 +6,12 @@ import joblib
 import pandas as pd
 import pytz
 import torch
-import uvicorn
+# import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from contextlib import asynccontextmanager
 from datetime import date, datetime
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
-from keras.models import load_model
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 from loader import load_all_data, load_qualifying_data
@@ -249,15 +248,9 @@ def load_models():
 
         # Load deep learning models
         for model_file in os.listdir(MODELS_DIR):
-            if model_file.endswith(".keras"):
-                name = os.path.splitext(model_file)[0]
-                model = load_model(
-                    os.path.join(MODELS_DIR, model_file)
-                )
-            elif model_file.endswith(".pt"):
-                name = os.path.splitext(model_file)[0]
-                model = RacingPredictor(len(app_state.feature_cols))  # Needs input dim
-                model.load_state_dict(torch.load(os.path.join(MODELS_DIR, model_file)))
+            name = os.path.splitext(model_file)[0]
+            model = RacingPredictor(len(app_state.feature_cols))  # Needs input dim
+            model.load_state_dict(torch.load(os.path.join(MODELS_DIR, model_file)))
             app_state.deep_models[name] = model
 
         # Update status
@@ -795,6 +788,15 @@ def convert_race_timezone(race, target_timezone):
         return race
 
 
+# import psutil
+# def log_mem_usage():
+#    process = psutil.Process(os.getpid())
+#    print(f"Memory usage (RSS): {process.memory_info().rss / 1024**2:.1f} MiB")
+
 # if __name__ == "__main__":
 #    port = int(os.environ.get("PORT", 8000))
 #    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info", reload=False)
+
+# if __name__ == "__main__":
+#    log_mem_usage()
+#    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,21 +1,17 @@
 import json
+import lightgbm as lgb
 import numpy as np
 import os
 import pandas as pd
 import random
 import re
-import tensorflow as tf
 import torch.optim as optim
 import torch.nn as nn
 import torch
-import xgboost as xgb
+
 from datetime import datetime
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
-from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.layers import Dense, Dropout, BatchNormalization, Input
-from keras.models import Sequential
-from keras.optimizers import Adam
 from sklearn.base import clone
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE
@@ -34,8 +30,6 @@ SEED = 69
 os.environ['PYTHONHASHSEED'] = str(SEED)
 random.seed(SEED)
 np.random.seed(SEED)
-tf.keras.utils.set_random_seed(SEED)
-tf.config.experimental.enable_op_determinism()
 torch.manual_seed(SEED)
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(SEED)
@@ -534,33 +528,6 @@ def create_target_variable(f3_df, f2_df):
     return f3_df
 
 
-def create_tensorflow_dnn(input_dim, hidden_layers=[128, 64, 32], dropout_rate=0.3):
-    # Input layer
-    model = Sequential([
-        Input(shape=(input_dim,)),
-        Dense(hidden_layers[0], activation='relu'),
-        BatchNormalization(),
-        Dropout(dropout_rate)
-    ])
-
-    # Hidden layers
-    for units in hidden_layers[1:]:
-        model.add(Dense(units, activation='relu'))
-        model.add(BatchNormalization())
-        model.add(Dropout(dropout_rate))
-
-    # Output layer
-    model.add(Dense(1, activation='sigmoid'))
-
-    model.compile(
-        optimizer=Adam(learning_rate=0.001),
-        loss='binary_crossentropy',
-        metrics=['precision', 'recall']
-    )
-
-    return model
-
-
 class RacingPredictor(nn.Module):
     def __init__(self, input_dim, hidden_dims=[128, 64, 32], dropout_rate=0.3):
         super(RacingPredictor, self).__init__()
@@ -630,18 +597,19 @@ def train_models(df):
             ('smote', SMOTE(random_state=SEED)),
             ('scaler', StandardScaler()),
             ('classifier', LogisticRegression(
-                random_state=SEED, class_weight='balanced', max_iter=10000))
+                random_state=SEED, class_weight='balanced', max_iter=1000))
         ]),
-        'XGBoost': ImbPipeline([
+        'LightGBM': ImbPipeline([
             ('smote', SMOTE(random_state=SEED)),
-            ('classifier', xgb.XGBClassifier(
-                random_state=SEED, eval_metric='logloss',
-                scale_pos_weight=len(y_train[y_train == 0]) / len(y_train[y_train == 1])
+            ('classifier', lgb.LGBMClassifier(
+                random_state=SEED,
+                class_weight='balanced',
+                verbosity=-1
             ))
         ]),
         'MLP': ImbPipeline([
             ('smote', SMOTE(random_state=SEED)),
-            ('classifier', MLPClassifier(random_state=SEED, max_iter=10000))
+            ('classifier', MLPClassifier(random_state=SEED, max_iter=1000))
         ])
     }
 
@@ -685,33 +653,6 @@ def train_models(df):
         'balanced', classes=np.unique(y_train), y=y_train
     )
     class_weight_dict = {0: class_weights[0], 1: class_weights[1]}
-
-    # Keras DNN
-    print("\nTraining Keras Deep Neural Network...")
-    dnn_model = create_tensorflow_dnn(X_train_scaled.shape[1])
-
-    callbacks = [
-        EarlyStopping(patience=10, restore_best_weights=True),
-        ReduceLROnPlateau(patience=5, factor=0.5)
-    ]
-
-    dnn_model.fit(
-        X_train_scaled, y_train, validation_split=0.2, epochs=100, batch_size=32,
-        class_weight=class_weight_dict, callbacks=callbacks, verbose=0
-    )
-
-    # Evaluate and calibrate
-    raw_probas_dnn = dnn_model.predict(X_test_scaled, verbose=0).flatten()
-    iso_reg_dnn = IsotonicRegression(out_of_bounds='clip')
-    iso_reg_dnn.fit(raw_probas_dnn, y_test)
-    dnn_model.calibrator = iso_reg_dnn
-
-    dnn_pred = (raw_probas_dnn > 0.5).astype(int)
-    print("Keras DNN Classification Report:")
-    print(classification_report(y_test, dnn_pred))
-    pr_auc_dnn = average_precision_score(y_test, raw_probas_dnn)
-    print(f"Keras DNN Precision-Recall AUC: {pr_auc_dnn:.4f}")
-    deep_results['Keras_DNN'] = dnn_model
 
     # PyTorch Model
     print("\nTraining PyTorch Model...")
@@ -1060,35 +1001,27 @@ def analyze_negative_features(models, deep_models, X_train, y_train,
 
                     try:
                         # Retrain model without this feature
-                        if 'Keras' in name:
-                            temp_model = create_tensorflow_dnn(X_train_reduced.shape[1])
-                            temp_model.fit(
-                                X_train_reduced, y_train, epochs=50,
-                                batch_size=32, verbose=0
-                            )
-                            probas_without = temp_model.predict(X_test_reduced, verbose=0).flatten()
-                        elif 'PyTorch' in name:
-                            temp_model = RacingPredictor(X_train_reduced.shape[1]).to(device)
-                            # Quick training - simplified
-                            criterion = nn.BCEWithLogitsLoss()
-                            optimizer = optim.Adam(temp_model.parameters(), lr=0.001)
+                        temp_model = RacingPredictor(X_train_reduced.shape[1]).to(device)
+                        # Quick training - simplified
+                        criterion = nn.BCEWithLogitsLoss()
+                        optimizer = optim.Adam(temp_model.parameters(), lr=0.001)
 
-                            X_train_torch = torch.FloatTensor(X_train_reduced).to(device)
-                            y_train_torch = torch.FloatTensor(y_train.values).to(device)
+                        X_train_torch = torch.FloatTensor(X_train_reduced).to(device)
+                        y_train_torch = torch.FloatTensor(y_train.values).to(device)
 
-                            for epoch in range(50):
-                                temp_model.train()
-                                optimizer.zero_grad()
-                                outputs = temp_model(X_train_torch).squeeze()
-                                loss = criterion(outputs, y_train_torch)
-                                loss.backward()
-                                optimizer.step()
+                        for epoch in range(50):
+                            temp_model.train()
+                            optimizer.zero_grad()
+                            outputs = temp_model(X_train_torch).squeeze()
+                            loss = criterion(outputs, y_train_torch)
+                            loss.backward()
+                            optimizer.step()
 
-                            temp_model.eval()
-                            with torch.no_grad():
-                                X_test_torch = torch.FloatTensor(X_test_reduced).to(device)
-                                logits = temp_model(X_test_torch)
-                                probas_without = torch.sigmoid(logits).cpu().numpy().flatten()
+                        temp_model.eval()
+                        with torch.no_grad():
+                            X_test_torch = torch.FloatTensor(X_test_reduced).to(device)
+                            logits = temp_model(X_test_torch)
+                            probas_without = torch.sigmoid(logits).cpu().numpy().flatten()
 
                         score_without = average_precision_score(y_test, probas_without)
                         impact = score_without - baseline_score
@@ -1361,36 +1294,28 @@ def feature_ablation_study(models, deep_models, X_train, y_train,
 
                     try:
                         # Retrain model with reduced features
-                        if 'Keras' in name:
-                            temp_model = create_tensorflow_dnn(X_train_reduced.shape[1])
-                            temp_model.fit(
-                                X_train_reduced, y_train, epochs=50,
-                                batch_size=32, verbose=0
-                            )
-                            probas_reduced = temp_model.predict(X_test_reduced, verbose=0).flatten()
-                        elif 'PyTorch' in name:
-                            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                            temp_model = RacingPredictor(X_train_reduced.shape[1]).to(device)
+                        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                        temp_model = RacingPredictor(X_train_reduced.shape[1]).to(device)
 
-                            criterion = nn.BCEWithLogitsLoss()
-                            optimizer = optim.Adam(temp_model.parameters(), lr=0.001)
+                        criterion = nn.BCEWithLogitsLoss()
+                        optimizer = optim.Adam(temp_model.parameters(), lr=0.001)
 
-                            X_train_torch = torch.FloatTensor(X_train_reduced).to(device)
-                            y_train_torch = torch.FloatTensor(y_train.values).to(device)
+                        X_train_torch = torch.FloatTensor(X_train_reduced).to(device)
+                        y_train_torch = torch.FloatTensor(y_train.values).to(device)
 
-                            for epoch in range(50):
-                                temp_model.train()
-                                optimizer.zero_grad()
-                                outputs = temp_model(X_train_torch).squeeze()
-                                loss = criterion(outputs, y_train_torch)
-                                loss.backward()
-                                optimizer.step()
+                        for epoch in range(50):
+                            temp_model.train()
+                            optimizer.zero_grad()
+                            outputs = temp_model(X_train_torch).squeeze()
+                            loss = criterion(outputs, y_train_torch)
+                            loss.backward()
+                            optimizer.step()
 
-                            temp_model.eval()
-                            with torch.no_grad():
-                                X_test_torch = torch.FloatTensor(X_test_reduced).to(device)
-                                logits = temp_model(X_test_torch)
-                                probas_reduced = torch.sigmoid(logits).cpu().numpy().flatten()
+                        temp_model.eval()
+                        with torch.no_grad():
+                            X_test_torch = torch.FloatTensor(X_test_reduced).to(device)
+                            logits = temp_model(X_test_torch)
+                            probas_reduced = torch.sigmoid(logits).cpu().numpy().flatten()
 
                         score = average_precision_score(y_test, probas_reduced)
                         impact = baseline_score - score
