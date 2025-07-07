@@ -9,7 +9,7 @@ interface TableRowProps {
 export const TableRow = ({ driver }: TableRowProps) => (
   <tr
     className={`border-t border-cyan-500/10 hover:bg-cyan-900/10 transition-colors ${
-      driver.prediction === 1
+      driver.empirical_percentage > 50
         ? 'bg-gradient-to-r from-green-900/20 to-cyan-900/20'
         : ''
     }`}

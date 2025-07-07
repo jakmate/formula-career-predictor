@@ -223,9 +223,8 @@ def scrape_f1_schedule():
                             'practice 1': 'fp1',
                             'practice 2': 'fp2',
                             'practice 3': 'fp3',
-                            'qualifying': 'qualifying',
                             'sprint qualifying': 'sprint_qualifying',
-                            'sprint shootout': 'sprint_qualifying',
+                            'qualifying': 'qualifying',
                             'sprint': 'sprint',
                             'race': 'race'
                         }
@@ -267,13 +266,15 @@ def scrape_f1_schedule():
                                     start_time = datetime.strptime(time_str.strip(), "%H:%M").time()
                                     start_dt = datetime.combine(session_date.date(), start_time)
                                     if 'race' in session_name:
-                                        end_dt = start_dt + timedelta(hours=2)
                                         session_info = {
                                             "start": start_dt.isoformat(),
-                                            "end": end_dt.isoformat()
+                                            "end": (start_dt + timedelta(hours=2)).isoformat()
                                         }
                                     else:
-                                        session_info = {"start": start_dt.isoformat()}
+                                        session_info = {
+                                            "start": start_dt.isoformat(),
+                                            "end": (start_dt + timedelta(hours=1)).isoformat()
+                                        }
                             else:
                                 session_info = {"start": session_date.isoformat(), "time": "TBC"}
 

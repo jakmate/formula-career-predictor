@@ -55,17 +55,16 @@ class PredictionResponse(BaseModel):
     experience: int
     age: Optional[float]
     dob: Optional[date] = None
-    avg_pos_diff: float
-    teammate_battles: float
     participation_rate: float
+    pole_rate: float
+    top_10_starts_rate: float
+    teammate_h2h: float
     team: str
     team_pos: int
     team_points: float
-    points_vs_team_strength: float
-    pos_vs_team_strength: float
+    points_share: float
     raw_probability: float
     empirical_percentage: float
-    prediction: int
 
 
 class ModelResults(BaseModel):
@@ -445,7 +444,6 @@ def _create_prediction_responses(current_df, calibrated_probas):
     """Create standardized prediction response objects"""
     # Apply calibration if available
     empirical_pct = calibrated_probas * 100.0
-    predictions_binary = (calibrated_probas >= 0.5).astype(int)
 
     predictions = []
     for idx, (_, row) in enumerate(current_df.iterrows()):
@@ -468,16 +466,15 @@ def _create_prediction_responses(current_df, calibrated_probas):
             dob=row['dob'],
             age=float(row['age']) if pd.notna(row['age']) else None,
             participation_rate=float(row['participation_rate']),
-            avg_pos_diff=float(row['avg_pos_vs_teammates']),
-            teammate_battles=float(row['teammate_battles']),
+            teammate_h2h=float(row['teammate_h2h_rate']),
+            pole_rate=float(row['pole_rate']),
+            top_10_starts_rate=float(row['top_10_starts_rate']),
             team=str(row['team']),
             team_pos=int(row['team_pos']),
             team_points=float(row['team_points']),
-            points_vs_team_strength=float(row['points_vs_team_strength']),
-            pos_vs_team_strength=float(row['pos_vs_team_strength']),
+            points_share=float(row['points_share']),
             raw_probability=float(calibrated_probas[idx]),
             empirical_percentage=float(empirical_pct[idx]),
-            prediction=int(predictions_binary[idx])
         ))
 
     # Sort by empirical percentage (highest first)
@@ -544,7 +541,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="F3/F2 Racing Predictions API",
+    title="F3/F2 Career Predictions API",
     version="1.0.0",
     description="API for predicting F3 to F2 driver transitions",
     lifespan=lifespan
@@ -826,9 +823,6 @@ def convert_race_timezone(race, target_timezone):
 #    print(f"Memory usage (RSS): {process.memory_info().rss / 1024**2:.1f} MiB")
 
 # if __name__ == "__main__":
+#    log_mem_usage()
 #    port = int(os.environ.get("PORT", 8000))
 #    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info", reload=False)
-
-# if __name__ == "__main__":
-#    log_mem_usage()
-#    uvicorn.run(app, host="0.0.0.0", port=8000)

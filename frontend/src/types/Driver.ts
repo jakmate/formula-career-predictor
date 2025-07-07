@@ -9,21 +9,20 @@ export interface Driver {
   top_10_rate: number;
   experience: number;
   empirical_percentage: number;
-  prediction: number;
   nationality: string;
   dob?: string;
   age?: number;
-  team: string;
   avg_finish_pos: number;
   std_finish_pos: number;
   avg_quali_pos?: number;
   std_quali_pos?: number;
   dnf_rate: number;
   participation_rate: number;
-  avg_pos_diff: number;
-  teammate_battles: number;
+  pole_rate: number;
+  top_10_starts_rate: number;
+  teammate_h2h: number;
+  team: string;
   team_pos: number;
   team_points: number;
-  points_vs_team_strength: number;
-  pos_vs_team_strength: number;
+  points_share: number;
 }
