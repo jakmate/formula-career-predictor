@@ -23,38 +23,12 @@ FILE_PATTERNS = {
     }
 }
 
-COLUMN_MAPPING = {
-    'Driver name': 'Driver',
-    'Drivers': 'Driver',
-    'Name': 'Driver',
-    'Entrant': 'Team',
-    'Teams': 'Team'
-}
-
 
 def clean_string_columns(df, columns):
     """Clean string columns by stripping whitespace."""
     for col in columns:
         if col in df.columns:
             df[col] = df[col].astype(str).str.strip()
-    return df
-
-
-def apply_column_mapping(df):
-    """Apply standard column name mappings."""
-    df = df.rename(columns=COLUMN_MAPPING)
-
-    # Merge duplicate columns by combining non-null values
-    for col in df.columns:
-        if df.columns.tolist().count(col) > 1:
-            # Get all columns with this name
-            mask = df.columns == col
-            duplicate_cols = df.loc[:, mask]
-
-            # Combine non-null values (first non-null wins)
-            df[col] = duplicate_cols.bfill(axis=1).iloc[:, 0]
-            df = df.loc[:, ~(mask & (df.columns.duplicated()))]
-
     return df
 
 
@@ -226,7 +200,6 @@ def load_qualifying_data(series='F3'):
 
     if all_qualifying_data:
         df = pd.concat(all_qualifying_data, ignore_index=True)
-        df = apply_column_mapping(df)
         df = clean_string_columns(df, ['Driver', 'Team'])
         return df
     return pd.DataFrame()

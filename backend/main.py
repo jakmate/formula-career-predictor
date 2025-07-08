@@ -9,7 +9,7 @@ import torch
 # import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from contextlib import asynccontextmanager
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -80,6 +80,19 @@ class SystemStatus(BaseModel):
     data_health: Dict[str, int]
 
 
+class RefreshResponse(BaseModel):
+    message: str
+    task_id: Optional[str] = None
+    estimated_completion: Optional[datetime] = None
+
+
+class HealthResponse(BaseModel):
+    status: str
+    timestamp: datetime
+    models_loaded: int
+    last_training: Optional[datetime]
+
+
 class AllPredictionsResponse(BaseModel):
     models: List[str]
     predictions: Dict[str, ModelResults]
@@ -89,8 +102,7 @@ class AllPredictionsResponse(BaseModel):
 # Global State
 class AppState:
     def __init__(self):
-        self.ml_models = {}
-        self.deep_models = {}
+        self.models = {}
         self.feature_cols = []
         self.scaler = None
         self.current_predictions = []
@@ -174,8 +186,7 @@ def initialize_system():
     if not trainable_df.empty:
         logger.info(f"Training models on {len(trainable_df)} historical records")
         (
-            app_state.ml_models,
-            app_state.deep_models,
+            app_state.models,
             _, _,
             app_state.feature_cols,
             app_state.scaler,
@@ -185,8 +196,7 @@ def initialize_system():
         # Update system status
         app_state.system_status["last_training"] = datetime.now()
         app_state.system_status["last_trained_season"] = trainable_df['year'].max()
-        app_state.system_status["models_available"] = (
-            list(app_state.ml_models.keys()) + list(app_state.deep_models.keys()))
+        app_state.system_status["models_available"] = (list(app_state.models.keys()))
         app_state.system_status["data_health"] = {
             "historical_records": len(trainable_df),
             "current_records": len(features_df[features_df['year'] >= CURRENT_YEAR])
@@ -207,17 +217,16 @@ def save_models():
     try:
         os.makedirs(MODELS_DIR, exist_ok=True)
 
-        # Save traditional models
-        for name, model in app_state.ml_models.items():
-            joblib.dump(model, os.path.join(MODELS_DIR, f"{name}.joblib"))
-
-        # Save deep learning models
-        for name, model in app_state.deep_models.items():
-            torch.save(
-                model.state_dict(),
-                os.path.join(MODELS_DIR, f"{name}.pt"),
-                _use_new_zipfile_serialization=True
-            )
+        # Save models
+        for name, model in app_state.models.items():
+            if name == "PyTorch":
+                torch.save(
+                    model.state_dict(),
+                    os.path.join(MODELS_DIR, f"{name}.pt"),
+                    _use_new_zipfile_serialization=True
+                )
+            else:
+                joblib.dump(model, os.path.join(MODELS_DIR, f"{name}.joblib"))
 
         # Save scaler and features
         joblib.dump({
@@ -246,22 +255,18 @@ def load_models():
 
         models_loaded = False
 
-        # Load traditional models
+        # Load models
         for model_file in os.listdir(MODELS_DIR):
+            name = os.path.splitext(model_file)[0]
             if model_file.endswith(".joblib") and model_file != "preprocessor.joblib":
-                name = os.path.splitext(model_file)[0]
                 try:
                     model = joblib.load(os.path.join(MODELS_DIR, model_file))
-                    app_state.ml_models[name] = model
-                    logger.info(f"Loaded traditional model: {name}")
+                    app_state.models[name] = model
+                    logger.info(f"Loaded model: {name}")
                     models_loaded = True
                 except Exception as e:
-                    logger.error(f"Error loading traditional model {model_file}: {e}")
-
-        # Load deep learning models
-        for model_file in os.listdir(MODELS_DIR):
-            if model_file.endswith(".pt"):
-                name = os.path.splitext(model_file)[0]
+                    logger.error(f"Error loading model {model_file}: {e}")
+            elif model_file.endswith(".pt"):
                 try:
                     model = RacingPredictor(len(app_state.feature_cols))
 
@@ -272,17 +277,16 @@ def load_models():
                         weights_only=False
                     )
                     model.load_state_dict(state_dict)
-                    app_state.deep_models[name] = model
-                    logger.info(f"Loaded PyTorch model: {name}")
+                    app_state.models[name] = model
+                    logger.info(f"Loaded model: {name}")
                     models_loaded = True
                 except Exception as e:
-                    logger.error(f"Error loading PyTorch model {model_file}: {e}")
+                    logger.error(f"Error loading model {model_file}: {e}")
 
         # Update status
         if models_loaded:
-            app_state.system_status["models_available"] = (
-                list(app_state.ml_models.keys()) + list(app_state.deep_models.keys()))
-            logger.info(f"Loaded {len(app_state.ml_models) + len(app_state.deep_models)} models")
+            app_state.system_status["models_available"] = (list(app_state.models.keys()))
+            logger.info(f"Loaded {len(app_state.models)} models")
             return True
 
         logger.error("No models loaded successfully")
@@ -382,8 +386,7 @@ async def train_models_task():
 
         logger.info(f"Training models on {len(trainable_df)} new records")
         (
-            app_state.ml_models,
-            app_state.deep_models,
+            app_state.models,
             _, _,
             app_state.feature_cols,
             app_state.scaler,
@@ -393,8 +396,7 @@ async def train_models_task():
         # Update system status
         app_state.system_status["last_training"] = datetime.now()
         app_state.system_status["last_trained_season"] = CURRENT_YEAR
-        app_state.system_status["models_available"] = (
-            list(app_state.ml_models.keys()) + list(app_state.deep_models.keys()))
+        app_state.system_status["models_available"] = (list(app_state.models.keys()))
         app_state.system_status["data_health"]["historical_records"] = len(trainable_df)
 
         # Save models and update predictions
@@ -408,19 +410,10 @@ async def train_models_task():
 # Helper functions
 def _get_model_predictions(model_name: str, X_current):
     """Extract prediction logic for reusability"""
-    if model_name in app_state.ml_models:
-        model = app_state.ml_models[model_name]
-        raw_probas = model.predict_proba(X_current)[:, 1]
-
-        if hasattr(model, 'calibrator') and model.calibrator is not None:
-            calibrated_probas = model.calibrator.transform(raw_probas)
-            return calibrated_probas
-
-    elif model_name in app_state.deep_models:
-        model = app_state.deep_models[model_name]
-        X_current_scaled = app_state.scaler.transform(X_current)
-
+    if model_name in app_state.models:
+        model = app_state.models[model_name]
         if 'PyTorch' in model_name:
+            X_current_scaled = app_state.scaler.transform(X_current)
             model.eval()
             with torch.no_grad():
                 X_torch = torch.FloatTensor(X_current_scaled)
@@ -429,7 +422,7 @@ def _get_model_predictions(model_name: str, X_current):
                 logits = model(X_torch)
                 raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
         else:
-            raw_probas = model.predict(X_current_scaled, verbose=0).flatten()
+            raw_probas = model.predict_proba(X_current)[:, 1]
 
         if hasattr(model, 'calibrator') and model.calibrator is not None:
             calibrated_probas = model.calibrator.transform(raw_probas)
@@ -565,10 +558,25 @@ app.add_middleware(
 @app.get("/", tags=["Health"])
 async def root():
     """Health check endpoint"""
-    return {"message": "F3/F2 Racing Predictions API is running"}
+    return {
+        "name": "F3/F2 Racing Predictions API",
+        "status": "running",
+        "health": "/api/health"
+    }
 
 
-@app.get("/predictions", response_model=AllPredictionsResponse, tags=["Predictions"])
+@app.get("/api/health", response_model=HealthResponse, tags=["Health"])
+async def health_check():
+    """Detailed health check with system status"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(),
+        "models_loaded": len(app_state.models),
+        "last_training": app_state.system_status.get("last_training")
+    }
+
+
+@app.get("/api/predictions", response_model=AllPredictionsResponse, tags=["Predictions"])
 async def get_all_predictions():
     """Get predictions from all models"""
     try:
@@ -577,9 +585,9 @@ async def get_all_predictions():
         X_current = current_df[app_state.feature_cols].fillna(0)
 
         all_predictions = {}
-        all_models = list(app_state.ml_models.keys()) + list(app_state.deep_models.keys())
+        models = list(app_state.models.keys())
 
-        for model_name in all_models:
+        for model_name in models:
             try:
                 raw_probas = _get_model_predictions(model_name, X_current)
                 predictions = _create_prediction_responses(current_df, raw_probas)
@@ -598,7 +606,7 @@ async def get_all_predictions():
                 )
 
         return AllPredictionsResponse(
-            models=all_models,
+            models=models,
             predictions=all_predictions,
             system_status=SystemStatus(**app_state.system_status)
         )
@@ -608,11 +616,14 @@ async def get_all_predictions():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/refresh", tags=["System"])
+@app.post("/api/refresh", response_model=RefreshResponse, tags=["System"])
 async def refresh_data(background_tasks: BackgroundTasks):
     """Trigger data refresh and model retraining"""
     background_tasks.add_task(scrape_and_train_task)
-    return {"message": "Data refresh and training started in background"}
+    return RefreshResponse(
+        message="Data refresh and training started in background",
+        estimated_completion=datetime.now() + timedelta(minutes=2)
+    )
 
 
 @app.get("/api/races/{series}", tags=["Schedule"])

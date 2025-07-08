@@ -146,6 +146,7 @@ def process_championship(soup, championship_type, year,
             col_index += colspan
 
         combined_headers.append("Points")
+        combined_headers = [remove_citations(header) for header in combined_headers]
         writer.writerow(combined_headers)
 
         # Data processing - skip header rows and footer rows

@@ -4,6 +4,11 @@ import requests
 from bs4 import BeautifulSoup
 from scraping.scraping_utils import remove_citations
 
+COLUMN_MAPPING = {
+    'Name': 'Driver',
+    'Entrant': 'Team',
+}
+
 
 def extract_race_report_links(soup):
     """Extract race report links from the season summary table"""
@@ -152,6 +157,7 @@ def extract_quali_table_data(table):
         # Get headers
         header_row = all_rows[0]
         headers = [th.get_text(strip=True) for th in header_row.find_all("th")]
+        headers = [COLUMN_MAPPING.get(h, h) for h in headers]
 
         # Identify Driver column index
         driver_col_index = None

@@ -20,7 +20,7 @@ export const usePredictions = () => {
   const fetchPredictions =
     useCallback(async (): Promise<AllPredictionsResponse> => {
       try {
-        const response = await fetch(`${API_BASE}/predictions`);
+        const response = await fetch(`${API_BASE}/api/predictions`);
         if (!response.ok) {
           throw new Error('Server responded with an error');
         }
@@ -61,7 +61,7 @@ export const usePredictions = () => {
       // Capture current status before refresh
       refreshStatusRef.current = allData?.system_status || null;
 
-      const refreshResponse = await fetch(`${API_BASE}/refresh`, {
+      const refreshResponse = await fetch(`${API_BASE}/api/refresh`, {
         method: 'POST',
       });
       if (!refreshResponse.ok) {

@@ -586,8 +586,7 @@ def train_models(df):
         ]),
     }
 
-    traditional_results = {}
-    deep_results = {}
+    results = {}
 
     print("\n" + "=" * 50)
     print("TRAINING MODELS")
@@ -614,7 +613,7 @@ def train_models(df):
         pr_auc = average_precision_score(y_test, probas_test)
         print(f"Precision-Recall AUC: {pr_auc:.4f}")
 
-        traditional_results[name] = pipeline
+        results[name] = pipeline
 
     # Train PyTorch Model models
     print("\nTraining PyTorch Model...")
@@ -698,16 +697,16 @@ def train_models(df):
     print(classification_report(y_test, pytorch_pred))
     pr_auc_torch = average_precision_score(y_test, raw_probas_torch)
     print(f"PyTorch Precision-Recall AUC: {pr_auc_torch:.4f}")
-    deep_results['PyTorch'] = pytorch_model
+    results['PyTorch'] = pytorch_model
 
     print("\n" + "=" * 70)
     print("TRAINING COMPLETE")
     print("=" * 70)
 
-    return traditional_results, deep_results, X_test, y_test, feature_cols, scaler, X_train, y_train
+    return results, X_test, y_test, feature_cols, scaler, X_train, y_train
 
 
-def predict_drivers(all_models, df, feature_cols, scaler=None):
+def predict_drivers(models, df, feature_cols, scaler=None):
     """Make predictions for F3 2025 drivers"""
     current_year = CURRENT_YEAR
     current_df = df[df['year'] == current_year].copy()
@@ -721,75 +720,73 @@ def predict_drivers(all_models, df, feature_cols, scaler=None):
     X_current = current_df[feature_cols].fillna(0)
     results = None
 
-    for model_type, models in all_models.items():
-        print(f"\n{model_type} Predictions:")
+    for name, model in models.items():
+        print(f"\n{name} Predictions:")
         print("=" * 70)
 
-        # Scale features for deep learning models
-        if model_type == 'Deep Learning' and scaler is not None:
-            X_processed = scaler.transform(X_current)
-        else:
-            X_processed = X_current
-
-        for name, model in models.items():
-            try:
-                # Get raw probabilities based on model type
-                if model_type == 'Deep Learning':
-                    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                    model.eval()
-                    with torch.no_grad():
-                        X_torch = torch.FloatTensor(X_processed).to(device)
-                        logits = model(X_torch)
-                        raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
-                else:  # Traditional models
-                    raw_probas = model.predict_proba(X_processed)[:, 1]
-
-                # Apply calibration if available
-                if hasattr(model, 'calibrator') and model.calibrator is not None:
-                    calibrated_probas = model.calibrator.transform(raw_probas)
+        try:
+            # Get raw probabilities based on model type
+            if name == 'PyTorch':
+                if scaler is not None:
+                    X_processed = scaler.transform(X_current)
                 else:
-                    calibrated_probas = raw_probas
+                    X_processed = X_current
+                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                model.eval()
+                with torch.no_grad():
+                    X_torch = torch.FloatTensor(X_processed).to(device)
+                    logits = model(X_torch)
+                    raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
+            else:  # Traditional models
+                X_processed = X_current
+                raw_probas = model.predict_proba(X_processed)[:, 1]
 
-                empirical_pct = calibrated_probas * 100.0
+            # Apply calibration if available
+            if hasattr(model, 'calibrator') and model.calibrator is not None:
+                calibrated_probas = model.calibrator.transform(raw_probas)
+            else:
+                calibrated_probas = raw_probas
 
-                # Create results DataFrame
-                results = pd.DataFrame({
-                    'Driver': current_df['driver'],
-                    'Nat.': current_df['nationality'],
-                    'Pos': current_df['final_pos'],
-                    'Avg Pos': current_df['avg_finish_pos'],
-                    'Std Pos': current_df['std_finish_pos'],
-                    'Avg Quali': current_df['avg_quali_pos'],
-                    'Std Quali': current_df['std_quali_pos'],
-                    'Points': current_df['points'],
-                    'Wins': current_df['wins'],
-                    'Podiums': current_df['podiums'],
-                    'Win %': current_df['win_rate'],
-                    'Podium %': current_df['podium_rate'],
-                    'Top 10 %': current_df['top_10_rate'],
-                    'DNF %': current_df['dnf_rate'],
-                    'Participation %': current_df['participation_rate'],
-                    'Exp': current_df['experience'],
-                    'DoB': current_df['dob'],
-                    'Age': current_df['age'],
-                    'teammate_h2h_rate': current_df['teammate_h2h_rate'],
-                    'Pole %': current_df['pole_rate'],
-                    'top_10_starts_rate': current_df['top_10_starts_rate'],
-                    'team': current_df['team'],
-                    'team_pos': current_df['team_pos'],
-                    'team_points': current_df['team_points'],
-                    'points_share': current_df['points_share'],
-                    'Raw_Prob': raw_probas,
-                    'Empirical_%': empirical_pct
-                }).sort_values('Empirical_%', ascending=False)
+            empirical_pct = calibrated_probas * 100.0
 
-                print(f"\n{name} Predictions:")
-                print("-" * 50)
-                print(results.head(10).to_string(index=False, float_format='%.3f'))
+            # Create results DataFrame
+            results = pd.DataFrame({
+                'Driver': current_df['driver'],
+                'Nat.': current_df['nationality'],
+                'Pos': current_df['final_pos'],
+                'Avg Pos': current_df['avg_finish_pos'],
+                'Std Pos': current_df['std_finish_pos'],
+                'Avg Quali': current_df['avg_quali_pos'],
+                'Std Quali': current_df['std_quali_pos'],
+                'Points': current_df['points'],
+                'Wins': current_df['wins'],
+                'Podiums': current_df['podiums'],
+                'Win %': current_df['win_rate'],
+                'Podium %': current_df['podium_rate'],
+                'Top 10 %': current_df['top_10_rate'],
+                'DNF %': current_df['dnf_rate'],
+                'Participation %': current_df['participation_rate'],
+                'Exp': current_df['experience'],
+                'DoB': current_df['dob'],
+                'Age': current_df['age'],
+                'teammate_h2h_rate': current_df['teammate_h2h_rate'],
+                'Pole %': current_df['pole_rate'],
+                'top_10_starts_rate': current_df['top_10_starts_rate'],
+                'team': current_df['team'],
+                'team_pos': current_df['team_pos'],
+                'team_points': current_df['team_points'],
+                'points_share': current_df['points_share'],
+                'Raw_Prob': raw_probas,
+                'Empirical_%': empirical_pct
+            }).sort_values('Empirical_%', ascending=False)
 
-            except Exception as e:
-                print(f"Error with {name} model: {e}")
-                continue
+            print(f"\n{name} Predictions:")
+            print("-" * 50)
+            print(results.head(10).to_string(index=False, float_format='%.3f'))
+
+        except Exception as e:
+            print(f"Error with {name} model: {e}")
+            continue
 
     if results is not None:
         return results
@@ -812,12 +809,8 @@ features_df = engineer_features(f3_df)
 features_df['promoted'] = f3_df['promoted']
 
 print("Training all models...")
-models, deep_models, X_test, y_test, feature_cols, scaler, X_train, y_train = train_models(
+models, X_test, y_test, feature_cols, scaler, X_train, y_train = train_models(
     features_df)
 
 print("Making predictions for F3 2025 drivers...")
-all_models = {
-    'Traditional': models,
-    'Deep Learning': deep_models
-}
-predict_drivers(all_models, features_df, feature_cols, scaler)
+predict_drivers(models, features_df, feature_cols, scaler)
