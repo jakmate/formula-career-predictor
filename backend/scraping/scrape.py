@@ -10,9 +10,11 @@ BASE_URL = "https://en.wikipedia.org/wiki/"
 
 
 def scrape():
-    # F2 and F3/GP3 processing
+    # F1, F2 and F3/GP3 processing
     for num in [2, 3]:
         for year in range(2010, 2026):
+            # if num == 1:
+            #    url = f"{BASE_URL}{year}_Formula_One_World_Championship"
             if (year <= 2016 and num == 2) or (year <= 2018 and num == 3):
                 url = f"{BASE_URL}{year}_GP{num}_Series"
             else:
@@ -27,7 +29,7 @@ def scrape():
             try:
                 response = requests.get(url)
                 response.raise_for_status()
-                soup = BeautifulSoup(response.text, "html.parser")
+                soup = BeautifulSoup(response.text, "lxml")
 
                 process_entries(soup, year, num)
                 process_championship(soup, "Teams'", year, "teams_standings", num)
@@ -44,7 +46,7 @@ def scrape():
         try:
             response = requests.get(url)
             response.raise_for_status()
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = BeautifulSoup(response.text, "lxml")
 
             process_entries(soup, year, 3, "f3_euro")
             process_championship(soup, "Teams'", year, "teams_standings", 3, "f3_euro")
@@ -60,6 +62,8 @@ def scrape_current_year():
     current_year = datetime.now().year
 
     for num in [2, 3]:
+        # if num == 1:
+        #    url = f"{BASE_URL}{current_year}_Formula_One_World_Championship"
         if num == 2:
             url = f"{BASE_URL}{current_year}_Formula_{num}_Championship"
         else:
@@ -68,7 +72,7 @@ def scrape_current_year():
         try:
             response = requests.get(url)
             response.raise_for_status()
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = BeautifulSoup(response.text, "lxml")
 
             process_entries(soup, current_year, num)
             process_championship(soup, "Teams'", current_year, "teams_standings", num)

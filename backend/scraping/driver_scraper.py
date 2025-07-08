@@ -7,7 +7,6 @@ import requests
 import time
 from bs4 import BeautifulSoup
 from datetime import datetime
-from scraping.scraping_utils import remove_citations
 
 
 class DriverProfileScraper:
@@ -90,7 +89,7 @@ class DriverProfileScraper:
                         try:
                             page_response = requests.get(url)
                             if page_response.status_code == 200:
-                                soup = BeautifulSoup(page_response.text, 'html.parser')
+                                soup = BeautifulSoup(page_response.text, 'lxml')
                                 if self.is_racing_driver_page(soup):
                                     return url
                         except Exception as e:
@@ -120,7 +119,7 @@ class DriverProfileScraper:
                         page_url = data.get('content_urls', {}).get('desktop', {}).get('page')
                         if page_url:
                             page_response = requests.get(page_url)
-                            soup = BeautifulSoup(page_response.text, 'html.parser')
+                            soup = BeautifulSoup(page_response.text, 'lxml')
                             if self.is_racing_driver_page(soup):
                                 return page_url
             except Exception as e:
@@ -240,7 +239,7 @@ class DriverProfileScraper:
         try:
             response = requests.get(wiki_url)
             response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.text, 'lxml')
 
             # Double-check this is a racing driver page
             if not self.is_racing_driver_page(soup):
@@ -403,8 +402,7 @@ def get_all_drivers_from_data():
                 try:
                     df = pd.read_csv(standings_file)
                     if 'Driver' in df.columns:
-                        drivers = df['Driver'].dropna().apply(
-                            remove_citations).dropna().str.strip().unique()
+                        drivers = df['Driver'].dropna().str.strip().unique()
                         all_drivers.update(drivers)
                 except Exception as e:
                     print(f"Error reading {standings_file}: {e}")
@@ -414,15 +412,9 @@ def get_all_drivers_from_data():
             if os.path.exists(entries_file):
                 try:
                     df = pd.read_csv(entries_file)
-                    # Handle different driver column names
-                    driver_cols = ['Driver', 'Driver name', 'Drivers']
-                    for col in driver_cols:
-                        if col in df.columns:
-                            drivers = df[col].dropna().apply(
-                                remove_citations
-                            ).dropna().str.strip().unique()
-                            all_drivers.update(drivers)
-                            break
+                    if 'Driver' in df.columns:
+                        drivers = df['Driver'].dropna().str.strip().unique()
+                        all_drivers.update(drivers)
                 except Exception as e:
                     print(f"Error reading {entries_file}: {e}")
 

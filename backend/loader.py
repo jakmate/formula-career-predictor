@@ -97,14 +97,7 @@ def load_entries_data(entries_file):
 
     entries_df = pd.read_csv(entries_file)
 
-    # Remove columns from F3 European entries
-    columns_to_drop = ['Chassis', 'Engine', 'Status']
-    for col in columns_to_drop:
-        if col in entries_df.columns:
-            entries_df = entries_df.drop(columns=col)
-
     # Apply column mapping and clean data
-    entries_df = apply_column_mapping(entries_df)
     entries_df = clean_string_columns(entries_df, ['Driver'])
     entries_df['Driver'] = entries_df['Driver'].replace('Robert Visoiu', 'Robert Vișoiu')
 

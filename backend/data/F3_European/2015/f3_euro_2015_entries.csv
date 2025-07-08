@@ -1,48 +1,48 @@
-Team,Chassis,Engine,No.,Driver,Status,Rounds
-Prema Powerteam,F315/006,Mercedes,1,Felix Rosenqvist,,All
-Prema Powerteam,F315/005,Mercedes,2,Jake Dennis,,All
-Prema Powerteam,F312/015,Mercedes,24,Brandon Maïsano,,1–8
-Prema Powerteam,F312/015,Mercedes,24,Nick Cassidy,,9–10
-Prema Powerteam,F312/015,Mercedes,24,Maximilian Günther,R,11
-Prema Powerteam,F315/004,Mercedes,25,Lance Stroll,R,All
-Jagonya Ayam with Carlin,F315/001,Volkswagen,3,Antonio Giovinazzi,,All
-Jagonya Ayam with Carlin,F312/040,Volkswagen,4,Gustavo Menezes,,All
-Jagonya Ayam with Carlin,F312/002,Volkswagen,26,Ryan Tveter,R,All
-kfzteile24 Mücke Motorsport,F312/039,Mercedes,5,Santino Ferrucci,,All
-kfzteile24 Mücke Motorsport,F312/019,Mercedes,6,Michele Beretta,,All
-kfzteile24 Mücke Motorsport,F312/023,Mercedes,27,Mikkel Jensen,R,All
-kfzteile24 Mücke Motorsport,F312/020,Mercedes,28,Maximilian Günther,R,1–9
-kfzteile24 Mücke Motorsport,F312/044,Mercedes,35,Kang Ling,,1–8
-kfzteile24 Mücke Motorsport,F312/044,Mercedes,35,Félix Serrallés,,10
-Van Amersfoort Racing,F316/001,Volkswagen,7,Charles Leclerc,R,All
-Van Amersfoort Racing,F312/052,Volkswagen,8,Alessio Lorandi,R,All
-Van Amersfoort Racing,F312/051,Volkswagen,29,Arjun Maini,R,All
-Carlin,F314/020,Volkswagen,9,Tatiana Calderón,,All
-Carlin,F312/010,Volkswagen,10,George Russell,R,All
-Carlin,F312/004,Volkswagen,30,Callum Ilott,R,All
-Team West-Tec F3,F312/011,Mercedes,11,Fabian Schiller,R,1–8
-Team West-Tec F3,F314/007,Mercedes,38,Raoul Hyman,R,All
-Fortec Motorsports,F315/012,Mercedes,12,Pietro Fittipaldi,R,All
-Fortec Motorsports,F312/007,Mercedes,14,Matthew Rao,,All
-Fortec Motorsports,F312/035,Mercedes,31,Martin Cao,,1–5
-Fortec Motorsports,F312/035,Mercedes,31,Andy Chang,,7–11
-Fortec Motorsports,F312/003,Mercedes,32,Peter Li,,"1–2, 7–11"
-EuroInternational,F312/053,Mercedes,15,Nicolas Beer,R,1–2
-EuroInternational,F312/053,Mercedes,15,Artur Janosz,,4
-EuroInternational,F313/003,Mercedes,16,Gustav Malja,R,3
-EuroInternational,F313/003,Mercedes,16,Facu Regalia,,4
-Threebondwith T-Sport,F312/008,NBE,17,Julio Moreno,R,All
-Double R Racing,F312/043,Mercedes,18,Nicolas Pohler,,"1–7, 10–11"
-Double R Racing,F312/043,Mercedes,18,Matheus Leist,R,8
-Double R Racing,F313/004,Mercedes,19,Matt Solomon,R,All
-Signature,F315/015,Volkswagen,20,Dorian Boccolacci,R,All
-Signature,F315/002,Volkswagen,21,Alexander Albon,R,All
-Motopark,F314/021,Volkswagen,22,Nabil Jeffri,,All
-Motopark,F314/018,Volkswagen,23,Sérgio Sette Câmara,,All
-Motopark,F314/016,Volkswagen,33,Mahaveer Raghunathan,R,1–10
-Motopark,F314/016,Volkswagen,33,Tanart Sathienthirakul,,11
-Motopark,F315/007,Volkswagen,34,Markus Pommer,,All
-Motopark,F315/003,Volkswagen,36,Sam MacLeod,,1–10
-HitechGP,F315/010,Mercedes,39,Alexander Sims,G,"9, 11"
-Artline Engineering,ArtTech P315,NBE,40,Harald Schlegelmilch,G,10–11
-Artline Engineering,ArtTech P315,NBE,41,Marvin Dienst,RG,11
+Team,No.,Driver,Rounds
+Prema Powerteam,1,Felix Rosenqvist,All
+Prema Powerteam,2,Jake Dennis,All
+Prema Powerteam,24,Brandon Maïsano,1–8
+Prema Powerteam,24,Nick Cassidy,9–10
+Prema Powerteam,24,Maximilian Günther,11
+Prema Powerteam,25,Lance Stroll,All
+Jagonya Ayam with Carlin,3,Antonio Giovinazzi,All
+Jagonya Ayam with Carlin,4,Gustavo Menezes,All
+Jagonya Ayam with Carlin,26,Ryan Tveter,All
+kfzteile24 Mücke Motorsport,5,Santino Ferrucci,All
+kfzteile24 Mücke Motorsport,6,Michele Beretta,All
+kfzteile24 Mücke Motorsport,27,Mikkel Jensen,All
+kfzteile24 Mücke Motorsport,28,Maximilian Günther,1–9
+kfzteile24 Mücke Motorsport,35,Kang Ling,1–8
+kfzteile24 Mücke Motorsport,35,Félix Serrallés,10
+Van Amersfoort Racing,7,Charles Leclerc,All
+Van Amersfoort Racing,8,Alessio Lorandi,All
+Van Amersfoort Racing,29,Arjun Maini,All
+Carlin,9,Tatiana Calderón,All
+Carlin,10,George Russell,All
+Carlin,30,Callum Ilott,All
+Team West-Tec F3,11,Fabian Schiller,1–8
+Team West-Tec F3,38,Raoul Hyman,All
+Fortec Motorsports,12,Pietro Fittipaldi,All
+Fortec Motorsports,14,Matthew Rao,All
+Fortec Motorsports,31,Martin Cao,1–5
+Fortec Motorsports,31,Andy Chang,7–11
+Fortec Motorsports,32,Peter Li,"1–2, 7–11"
+EuroInternational,15,Nicolas Beer,1–2
+EuroInternational,15,Artur Janosz,4
+EuroInternational,16,Gustav Malja,3
+EuroInternational,16,Facu Regalia,4
+Threebondwith T-Sport,17,Julio Moreno,All
+Double R Racing,18,Nicolas Pohler,"1–7, 10–11"
+Double R Racing,18,Matheus Leist,8
+Double R Racing,19,Matt Solomon,All
+Signature,20,Dorian Boccolacci,All
+Signature,21,Alexander Albon,All
+Motopark,22,Nabil Jeffri,All
+Motopark,23,Sérgio Sette Câmara,All
+Motopark,33,Mahaveer Raghunathan,1–10
+Motopark,33,Tanart Sathienthirakul,11
+Motopark,34,Markus Pommer,All
+Motopark,36,Sam MacLeod,1–10
+HitechGP,39,Alexander Sims,"9, 11"
+Artline Engineering,40,Harald Schlegelmilch,10–11
+Artline Engineering,41,Marvin Dienst,11

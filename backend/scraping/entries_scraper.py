@@ -2,6 +2,18 @@ import csv
 import os
 from scraping.scraping_utils import remove_citations
 
+HEADER_MAPPING = {
+    'Entrant': 'Team',
+    'Teams': 'Team',
+    'Team': 'Team',
+    'No.': 'No.',
+    'Driver name': 'Driver',
+    'Drivers': 'Driver',
+    'Driver': 'Driver',
+    'Rounds': 'Rounds',
+}
+UNWANTED_COLUMNS = {'chassis', 'engine', 'status'}
+
 
 def process_entries(soup, year, formula, series_type="main"):
     # Determine heading based on series type and year
@@ -47,17 +59,28 @@ def process_entries(soup, year, formula, series_type="main"):
     with open(full_path, "w", newline='', encoding="utf-8") as f:
         writer = csv.writer(f)
 
-        # Extract headers
+        # Process headers
         header_row = all_rows[0]
         headers = [remove_citations(header.get_text(strip=True))
                    for header in header_row.find_all("th")]
-        writer.writerow(headers)
+        headers = [HEADER_MAPPING.get(h, h) for h in headers]
         num_columns = len(headers)
 
-        # Data processing - skip header row
+        # Remove unwanted columns from headers
+        unwanted_indices = [
+            idx for idx, header in enumerate(headers)
+            if header.strip().lower() in UNWANTED_COLUMNS
+        ]
+        # Delete indices in descending order to avoid shifting
+        for idx in sorted(unwanted_indices, reverse=True):
+            del headers[idx]
+
+        writer.writerow(headers)
+
+        # Skip header row
         data_rows = all_rows[1:]
 
-        # Remove footer row (if detected)
+        # Remove footer row
         if len(data_rows) > 0:
             if not (formula == 2 and year < 2018) and not (
                 formula == 3 and year < 2017) and not (
@@ -118,5 +141,10 @@ def process_entries(soup, year, formula, series_type="main"):
                     row_data.append(remove_citations(cell.get_text(strip=True)))
                 else:
                     row_data.append('')
+
+            # Remove unwanted columns from this row
+            for idx in sorted(unwanted_indices, reverse=True):
+                if idx < len(row_data):
+                    del row_data[idx]
 
             writer.writerow(row_data)
