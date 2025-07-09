@@ -4,7 +4,6 @@ import os
 import pandas as pd
 import re
 import requests
-import time
 from bs4 import BeautifulSoup
 from datetime import datetime
 
@@ -12,6 +11,7 @@ from datetime import datetime
 class DriverProfileScraper:
     def __init__(self, profiles_dir="data/driver_profiles"):
         self.profiles_dir = profiles_dir
+        self.session = requests.Session()
         os.makedirs(profiles_dir, exist_ok=True)
 
         # Known driver aliases and redirects
@@ -75,10 +75,11 @@ class DriverProfileScraper:
                 'search': driver_name,
                 'limit': 5,
                 'format': 'json',
-                'redirects': 'resolve'
+                'redirects': 'resolve',
+                'timeout': 10
             }
 
-            response = requests.get(opensearch_url, params=params)
+            response = self.session.get(opensearch_url, params=params)
             if response.status_code == 200:
                 data = response.json()
                 if len(data) >= 4 and data[3]:  # URLs are in the 4th element
@@ -92,6 +93,7 @@ class DriverProfileScraper:
                                 soup = BeautifulSoup(page_response.text, 'lxml')
                                 if self.is_racing_driver_page(soup):
                                     return url
+                                del soup
                         except Exception as e:
                             print(f"Error checking search result {i}: {e}")
                             continue
@@ -112,7 +114,7 @@ class DriverProfileScraper:
 
         for variation in name_variations:
             try:
-                response = requests.get(f"{search_api_url}{variation}")
+                response = self.session.get(f"{search_api_url}{variation}", timeout=10)
                 if response.status_code == 200:
                     data = response.json()
                     if 'extract' in data and len(data['extract']) > 50:
@@ -122,6 +124,7 @@ class DriverProfileScraper:
                             soup = BeautifulSoup(page_response.text, 'lxml')
                             if self.is_racing_driver_page(soup):
                                 return page_url
+                            del soup
             except Exception as e:
                 print(f"Error checking variation {variation}: {e}")
                 continue
@@ -237,7 +240,7 @@ class DriverProfileScraper:
             return profile
 
         try:
-            response = requests.get(wiki_url)
+            response = self.session.get(wiki_url, timeout=10)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'lxml')
 
@@ -259,7 +262,7 @@ class DriverProfileScraper:
             }
 
             self.save_profile(profile_file, profile)
-            time.sleep(1)
+            del soup
             return profile
 
         except Exception as e:
@@ -370,6 +373,9 @@ def get_all_drivers_from_data():
     """Extract all driver names from F2 and F3 data files."""
     all_drivers = set()
     series_map = {
+        'F1': {
+            'standings_pattern': 'f1_{year}_drivers_standings.csv',
+        },
         'F2': {
             'standings_pattern': 'f2_{year}_drivers_standings.csv',
             'entries_pattern': 'f2_{year}_entries.csv'
@@ -394,7 +400,8 @@ def get_all_drivers_from_data():
 
             # Get file patterns for this series
             standings_pattern = patterns['standings_pattern'].format(year=year)
-            entries_pattern = patterns['entries_pattern'].format(year=year)
+            if series != 'F1':
+                entries_pattern = patterns['entries_pattern'].format(year=year)
 
             # Check driver standings file
             standings_file = os.path.join(year_dir, standings_pattern)
@@ -408,21 +415,22 @@ def get_all_drivers_from_data():
                     print(f"Error reading {standings_file}: {e}")
 
             # Check entries file
-            entries_file = os.path.join(year_dir, entries_pattern)
-            if os.path.exists(entries_file):
-                try:
-                    df = pd.read_csv(entries_file)
-                    if 'Driver' in df.columns:
-                        drivers = df['Driver'].dropna().str.strip().unique()
-                        all_drivers.update(drivers)
-                except Exception as e:
-                    print(f"Error reading {entries_file}: {e}")
+            if series != 'F1':
+                entries_file = os.path.join(year_dir, entries_pattern)
+                if os.path.exists(entries_file):
+                    try:
+                        df = pd.read_csv(entries_file)
+                        if 'Driver' in df.columns:
+                            drivers = df['Driver'].dropna().str.strip().unique()
+                            all_drivers.update(drivers)
+                    except Exception as e:
+                        print(f"Error reading {entries_file}: {e}")
 
     return sorted(list(all_drivers))
 
 
 def scrape_drivers():
-    print("Scanning F2/F3 data files for driver names...")
+    print("Scanning data files for driver names...")
     all_drivers = get_all_drivers_from_data()
 
     if not all_drivers:

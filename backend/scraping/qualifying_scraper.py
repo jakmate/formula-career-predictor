@@ -220,6 +220,8 @@ def save_qualifying_data(qualifying_results, year, formula):
 
 
 def scrape_quali(soup, year, num):
+    if num == 1:
+        return
     race_links = extract_race_report_links(soup)
     if race_links:
         quali_results = []

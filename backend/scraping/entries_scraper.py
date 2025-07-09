@@ -16,6 +16,8 @@ UNWANTED_COLUMNS = {'chassis', 'engine', 'status'}
 
 
 def process_entries(soup, year, formula, series_type="main"):
+    if formula == 1:
+        return
     # Determine heading based on series type and year
     if series_type == "f3_euro":
         if year == 2018:

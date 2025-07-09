@@ -6,7 +6,12 @@ from scraping.scraping_utils import remove_citations
 def process_championship(soup, championship_type, year,
                          file_suffix, formula, series_type="main"):
     # Determine heading ID based on year and championship type
-    if series_type == "f3_euro":
+    if formula == 1:
+        if championship_type == 'Drivers\'':
+            heading_id = "World_Drivers\'_Championship_standings"
+        elif championship_type == 'Teams\'':
+            heading_id = "World_Constructors'_Championship_standings"
+    elif series_type == "f3_euro":
         if year == 2012:
             if championship_type == 'Teams\'':
                 return
@@ -112,7 +117,6 @@ def process_championship(soup, championship_type, year,
         # Process all race headers
         for i, th in enumerate(race_headers[col_index:], col_index):
             race_name = th.get_text(strip=True)
-            race_name = remove_citations(race_name)
             # Stop when we hit the Points column
             if not race_name or race_name.lower() in ['points', 'pts']:
                 break
@@ -120,19 +124,19 @@ def process_championship(soup, championship_type, year,
             colspan = int(th.get('colspan', 1))
 
             # Get corresponding round headers for this race
-            if series_type == "f3_euro" or year > 2016 or (
-                    year > 2012 and formula == 3):
+            if series_type == "f3_euro" or (
+                year > 2012 and formula == 3) or (
+                    year > 2016 and formula == 2):
                 race_rounds = []
                 round_start_idx = col_index + i - col_index - 2
                 for j in range(colspan):
                     round_idx = round_start_idx + j
                     if round_idx < len(round_headers):
-                        round_name = round_headers[round_idx].get_text(
-                            strip=True)
+                        round_name = round_headers[round_idx].get_text(strip=True)
                         if round_name:
                             race_rounds.append(round_name)
             else:
-                race_rounds = [f"Race {r+1}" for r in range(colspan)]
+                race_rounds = [f"R{r+1}" for r in range(colspan)]
 
             race_rounds.sort(
                 key=lambda x: int(x.replace('R', ''))
@@ -157,7 +161,8 @@ def process_championship(soup, championship_type, year,
 
         # Remove footer rows (sources/notes)
         if ((series_type == "f3_euro" and championship_type == "Drivers'") or
-                year == 2025 or (series_type == "main" and year < 2013 and formula == 3)):
+                year == 2025 or (series_type == "main" and year < 2013 and formula == 3)
+                or formula == 1):
             if len(data_rows) > 2:
                 data_rows = data_rows[:-2]
         elif formula == 2 and year < 2017:
@@ -247,5 +252,6 @@ def process_championship(soup, championship_type, year,
                 while len(row_data) < len(combined_headers):
                     row_data.append("")
 
+            row_data = [remove_citations(el) for el in row_data]
             # Write the row
             writer.writerow(row_data)
