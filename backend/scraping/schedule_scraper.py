@@ -167,7 +167,7 @@ def scrape_f1_schedule():
     try:
         url = f"https://www.formula1.com/en/racing/{CURRENT_YEAR}.html"
         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.content, 'lxml')
 
         races = []
         race_cards = soup.select('a.group')
@@ -211,7 +211,7 @@ def scrape_f1_schedule():
                     try:
                         full_url = urljoin("https://www.formula1.com", race_url)
                         race_response = requests.get(full_url, headers={'User-Agent': 'Mozilla/5.0'}) # noqa: 501
-                        race_soup = BeautifulSoup(race_response.content, 'html.parser')
+                        race_soup = BeautifulSoup(race_response.content, 'lxml')
 
                         session_container = race_soup.select_one('.flex.flex-col.px-px-8.lg\\:px-px-16.py-px-8.lg\\:py-px-16.bg-surface-neutral-1.rounded-m') # noqa: 501
                         if session_container:
@@ -330,7 +330,7 @@ def scrape_fia_formula_schedule(series_name):
     try:
         url = f"{config['base_url']}/Calendar"
         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.content, 'lxml')
 
         races = []
         race_containers = soup.select('.col-12.col-sm-6.col-lg-4.col-xl-3')
@@ -376,7 +376,7 @@ def scrape_fia_formula_schedule(series_name):
                             detail_url = urljoin(config['base_url'], race_link.get('href'))
 
                         detail_response = requests.get(detail_url, headers={'User-Agent': 'Mozilla/5.0'}) # noqa: 501
-                        detail_soup = BeautifulSoup(detail_response.content, 'html.parser')
+                        detail_soup = BeautifulSoup(detail_response.content, 'lxml')
 
                         # Look for session schedule
                         session_pins = detail_soup.select('.pin')
@@ -447,6 +447,7 @@ def scrape_fia_formula_schedule(series_name):
 
 
 def save_schedules():
+    t0 = time.time()
     series_scrapers = {
         'f1': scrape_f1_schedule,
         'f2': lambda: scrape_fia_formula_schedule('f2'),
@@ -499,6 +500,11 @@ def save_schedules():
 
         except Exception as e:
             print(f"Error saving {name} schedule: {e}")
+
+    t1 = time.time()
+
+    total = t1-t0
+    print(total)
 
 
 if __name__ == "__main__":

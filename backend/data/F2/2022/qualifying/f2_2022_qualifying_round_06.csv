@@ -1,23 +1,23 @@
-Pos.,No.,Driver,Team,Time,GridSR,GridFR
-1,8,Jüri Vips,Hitech Grand Prix,1:53.762,10,1
-2,5,Liam Lawson,Carlin,+0.163,9,2
-3,1,Dennis Hauger,Prema Racing,+0.211,8,3
-4,7,Marcus Armstrong,Hitech Grand Prix,+0.215,7,4
-5,11,Felipe Drugovich,MP Motorsport,+0.238,6,5
-6,20,Richard Verschoor,Trident,+0.267,5,6
-7,6,Logan Sargeant,Carlin,+0.432,4,7
-8,2,Jehan Daruvala,Prema Racing,+0.439,3,8
-9,9,Frederik Vesti,ART Grand Prix,+0.485,2,9
-10,24,Jake Hughes,Van Amersfoort Racing,+0.594,1,10
-11,3,Jack Doohan,Virtuosi Racing,+0.601,11,11
-12,10,Théo Pourchaire,ART Grand Prix,+0.678,12,12
-13,17,Ayumu Iwasa,DAMS,+0.721,13,13
-14,16,Roy Nissany,DAMS,+0.965,14,14
-15,4,Marino Sato,Virtuosi Racing,+0.970,15,15
-16,22,Enzo Fittipaldi,Charouz Racing System,+0.976,16,16
-17,21,Calan Williams,Trident,+1.248,17,17
-18,15,Ralph Boschung,Campos Racing,+1.378,18,18
-19,25,Amaury Cordeel,Van Amersfoort Racing,+1.559,19,19
-20,12,Clément Novalak,MP Motorsport,+1.694,20,20
-21,23,Cem Bölükbaşı,Charouz Racing System,+1.970,21,21
-22,14,Olli Caldwell,Campos Racing,+2.485,22,22
+Pos.,No.,Driver,Team,Time,Grid
+1,8,Jüri Vips,Hitech Grand Prix,1:53.762,1
+2,5,Liam Lawson,Carlin,+0.163,2
+3,1,Dennis Hauger,Prema Racing,+0.211,3
+4,7,Marcus Armstrong,Hitech Grand Prix,+0.215,4
+5,11,Felipe Drugovich,MP Motorsport,+0.238,5
+6,20,Richard Verschoor,Trident,+0.267,6
+7,6,Logan Sargeant,Carlin,+0.432,7
+8,2,Jehan Daruvala,Prema Racing,+0.439,8
+9,9,Frederik Vesti,ART Grand Prix,+0.485,9
+10,24,Jake Hughes,Van Amersfoort Racing,+0.594,10
+11,3,Jack Doohan,Virtuosi Racing,+0.601,11
+12,10,Théo Pourchaire,ART Grand Prix,+0.678,12
+13,17,Ayumu Iwasa,DAMS,+0.721,13
+14,16,Roy Nissany,DAMS,+0.965,14
+15,4,Marino Sato,Virtuosi Racing,+0.970,15
+16,22,Enzo Fittipaldi,Charouz Racing System,+0.976,16
+17,21,Calan Williams,Trident,+1.248,17
+18,15,Ralph Boschung,Campos Racing,+1.378,18
+19,25,Amaury Cordeel,Van Amersfoort Racing,+1.559,19
+20,12,Clément Novalak,MP Motorsport,+1.694,20
+21,23,Cem Bölükbaşı,Charouz Racing System,+1.970,21
+22,14,Olli Caldwell,Campos Racing,+2.485,22

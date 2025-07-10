@@ -153,7 +153,7 @@ def load_standings_data(series, data_type):
     return pd.concat(all_data, ignore_index=True) if all_data else pd.DataFrame()
 
 
-def load_qualifying_data(series='F3'):
+def load_qualifying_data(series):
     """Load qualifying data for a racing series across years."""
     all_qualifying_data = []
     directories = get_series_directories(series)
@@ -166,10 +166,6 @@ def load_qualifying_data(series='F3'):
         year = os.path.basename(year_dir)
         try:
             year_int = int(year)
-            # Skip 2011 as it doesn't have qualifying data
-            if year_int == 2011:
-                continue
-
             qualifying_dir = os.path.join(year_dir, 'qualifying')
             if not os.path.exists(qualifying_dir):
                 continue
@@ -348,8 +344,6 @@ def load_all_data():
 
     print("Merge team data")
     f3_df = merge_team_data(f3_df, f3_team_df)
-
-    # f3_qualifying_df = load_qualifying_data()
 
     # print(f3_df[f3_df['year'] == 2012])
 

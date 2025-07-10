@@ -1,31 +1,31 @@
-Pos.,No.,Driver,Team,Time/Gap,GridSR,GridFR
-1,8,Grégoire Saucy,ART Grand Prix,1:20.457,12,1
-2,2,Dino Beganovic,Prema Racing,+0.004,11,2
-3,5,Gabriel Bortoleto,Trident,+0.017,9,3
-4,1,Paul Aron,Prema Racing,+0.064,8,4
-5,17,Caio Collet,Van Amersfoort Racing,+0.090,7,5
-6,3,Zak O'Sullivan,Prema Racing,+0.109,101,6
-7,10,Franco Colapinto,MP Motorsport,+0.147,5,7
-8,6,Oliver Goethe,Trident,+0.185,4,8
-9,7,Kaylen Frederick,ART Grand Prix,+0.196,3,9
-10,24,Christian Mansell,Campos Racing,+0.287,62,10
-11,15,Gabriele Minì,Hitech Pulse-Eight,+0.341,2,11
-12,23,Pepe Martí,Campos Racing,+0.362,1,12
-13,11,Mari Boya,MP Motorsport,+0.367,13,13
-14,16,Luke Browning,Hitech Pulse-Eight,+0.523,14,14
-15,14,Sebastián Montoya,Hitech Pulse-Eight,+0.527,15,15
-16,12,Jonny Edgar,MP Motorsport,+0.615,16,16
-17,9,Nikola Tsolov,ART Grand Prix,+0.626,17,17
-18,27,Taylor Barnard,Jenzer Motorsport,+0.670,18,18
-19,25,Hugh Barter,Campos Racing,+0.685,19,19
-20,20,Oliver Gray,Rodin Carlin,+0.750,20,25
-21,29,Sophia Flörsch,PHM RacingbyCharouz,+0.810,21,20
-22,26,Nikita Bedrin,Jenzer Motorsport,+0.863,22,21
-23,31,McKenzy Cresswell,PHM RacingbyCharouz,+0.905,23,22
-24,21,Hunter Yeany,Rodin Carlin,+1.052,294,23
-25,22,Ido Cohen,Rodin Carlin,+1.061,24,24
-26,18,Rafael Villagómez,Van Amersfoort Racing,+1.063,25,26
-27,28,Alex García,Jenzer Motorsport,+1.477,26,27
-28,19,Tommy Smith,Van Amersfoort Racing,+1.805,27,28
-29,30,Roberto Faria,PHM RacingbyCharouz,+1.918,28,29
-—,4,Leonardo Fornaroli,Trident,+25.983,30,30
+Pos.,No.,Driver,Team,Time,Grid
+1,8,Grégoire Saucy,ART Grand Prix,1:20.457,1
+2,2,Dino Beganovic,Prema Racing,1:20.461,2
+3,5,Gabriel Bortoleto,Trident,1:20.474,3
+4,1,Paul Aron,Prema Racing,1:20.521,4
+5,17,Caio Collet,Van Amersfoort Racing,1:20.547,5
+6,3,Zak O'Sullivan,Prema Racing,1:20.566,6
+7,10,Franco Colapinto,MP Motorsport,1:20.604,7
+8,6,Oliver Goethe,Trident,1:20.642,8
+9,7,Kaylen Frederick,ART Grand Prix,1:20.653,9
+10,24,Christian Mansell,Campos Racing,1:20.744,10
+11,15,Gabriele Minì,Hitech Pulse-Eight,1:20.798,11
+12,23,Pepe Martí,Campos Racing,1:20.819,12
+13,11,Mari Boya,MP Motorsport,1:20.824,13
+14,16,Luke Browning,Hitech Pulse-Eight,1:20.980,14
+15,14,Sebastián Montoya,Hitech Pulse-Eight,1:20.984,15
+16,12,Jonny Edgar,MP Motorsport,1:21.072,16
+17,9,Nikola Tsolov,ART Grand Prix,1:21.083,17
+18,27,Taylor Barnard,Jenzer Motorsport,1:21.127,18
+19,25,Hugh Barter,Campos Racing,1:21.142,19
+20,20,Oliver Gray,Rodin Carlin,1:21.207,25
+21,29,Sophia Flörsch,PHM RacingbyCharouz,1:21.267,20
+22,26,Nikita Bedrin,Jenzer Motorsport,1:21.320,21
+23,31,McKenzy Cresswell,PHM RacingbyCharouz,1:21.362,22
+24,21,Hunter Yeany,Rodin Carlin,1:21.509,23
+25,22,Ido Cohen,Rodin Carlin,1:21.518,24
+26,18,Rafael Villagómez,Van Amersfoort Racing,1:21.520,26
+27,28,Alex García,Jenzer Motorsport,1:21.934,27
+28,19,Tommy Smith,Van Amersfoort Racing,1:22.262,28
+29,30,Roberto Faria,PHM RacingbyCharouz,1:22.375,29
+—,4,Leonardo Fornaroli,Trident,1:46.440,30

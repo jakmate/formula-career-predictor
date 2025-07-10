@@ -1,21 +1,21 @@
-Pos.,No.,Driver,Team,Time,Gap,Grid
-1,5,Alexander Albon,DAMS,1:54.480,–,1
-2,19,Lando Norris,Carlin,1:54.694,+0.214,2
-3,8,George Russell,ART Grand Prix,1:54.842,+0.362,3
-4,14,Luca Ghiotto,Campos Vexatec Racing,1:54.980,+0.500,4
-DSQ1,17,Santino Ferrucci,Trident,1:55.200,+0.720,19
-5,18,Sérgio Sette Câmara,Carlin,1:55.212,+0.732,5
-6,7,Jack Aitken,ART Grand Prix,1:55.236,+0.756,6
-7,16,Arjun Maini,Trident,1:55.474,+0.994,7
-8,4,Nyck de Vries,Pertamina Prema Theodore Racing,1:55.728,+1.248,8
-9,10,Ralph Boschung,MP Motorsport,1:55.761,+1.281,9
-DSQ2,11,Maximilian Günther,BWT Arden,1:55.970,+1.490,17
-10,2,Tadasuke Makino,Russian Time,1:56.139,+1.659,10
-11,9,Roberto Merhi,MP Motorsport,1:56.532,+2.052,11
-12,21,Antonio Fuoco,Charouz Racing System,1:57.090,+2.610,12
-13,20,Louis Delétraz,Charouz Racing System,1:57.105,+2.625,13
-DSQ2,12,Nirei Fukuzumi,BWT Arden,1:57.351,+2.871,18
-14,3,Sean Gelael,Pertamina Prema Theodore Racing,1:57.508,+3.028,14
-15,1,Artem Markelov,Russian Time,1:57.604,+3.124,15
-16,15,Roy Nissany,Campos Vexatec Racing,2:01.902,+7.422,16
-NC3,6,Nicholas Latifi,DAMS,2:02.970,+8.490,20
+Pos.,No.,Driver,Team,Time,Grid
+1,5,Alexander Albon,DAMS,1:54.480,1
+2,19,Lando Norris,Carlin,1:54.694,2
+3,8,George Russell,ART Grand Prix,1:54.842,3
+4,14,Luca Ghiotto,Campos Vexatec Racing,1:54.980,4
+DSQ,17,Santino Ferrucci,Trident,1:55.200,19
+5,18,Sérgio Sette Câmara,Carlin,1:55.212,5
+6,7,Jack Aitken,ART Grand Prix,1:55.236,6
+7,16,Arjun Maini,Trident,1:55.474,7
+8,4,Nyck de Vries,Pertamina Prema Theodore Racing,1:55.728,8
+9,10,Ralph Boschung,MP Motorsport,1:55.761,9
+DSQ,11,Maximilian Günther,BWT Arden,1:55.970,17
+10,2,Tadasuke Makino,Russian Time,1:56.139,10
+11,9,Roberto Merhi,MP Motorsport,1:56.532,11
+12,21,Antonio Fuoco,Charouz Racing System,1:57.090,12
+13,20,Louis Delétraz,Charouz Racing System,1:57.105,13
+DSQ,12,Nirei Fukuzumi,BWT Arden,1:57.351,18
+14,3,Sean Gelael,Pertamina Prema Theodore Racing,1:57.508,14
+15,1,Artem Markelov,Russian Time,1:57.604,15
+16,15,Roy Nissany,Campos Vexatec Racing,2:01.902,16
+NC,6,Nicholas Latifi,DAMS,2:02.970,20

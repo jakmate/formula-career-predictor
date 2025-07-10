@@ -258,13 +258,7 @@ def calculate_qualifying_features(df, qualifying_df):
     for (driver, year), driver_data in qualifying_df.groupby(['Driver', 'year']):
         positions = []
         # Define priority order for qualifying position columns
-        position_columns = [
-            'Grid',     # Highest priority
-            'GridFR',  # Secondary priority
-            'R2',       # Tertiary priority
-            'Pos',      # Fallback options
-            'Pos.'
-        ]
+        position_columns = ['Pos.', 'Grid'] # Grid as backup
 
         # Extract qualifying positions from all rounds
         for _, row in driver_data.iterrows():

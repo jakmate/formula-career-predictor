@@ -7,7 +7,60 @@ from scraping.scraping_utils import remove_citations
 COLUMN_MAPPING = {
     'Name': 'Driver',
     'Entrant': 'Team',
+    'Part 1': 'Q1',
+    'Part 2': 'Q2',
+    'Part 3': 'Q3',
+    'Finalgrid': 'Grid',
+    'Pos': 'Pos.',
+    'Carno.': 'No.',
+    'No': 'No.',
+    'Constructor': 'Team',
+    'GridFR': 'Grid',
+    'R2': 'Grid',
+    'Q2 Time': 'Time'
 }
+
+
+def add_time_gap(base_time, gap):
+    """Add gap time to base time (e.g., '1:19.429' + '0.016' = '1:19.445')"""
+    try:
+        # Parse base time
+        if ':' in base_time:
+            time_parts = base_time.split(':')
+            minutes = int(time_parts[0])
+            seconds = float(time_parts[1])
+        else:
+            minutes = 0
+            seconds = float(base_time)
+        
+        # Add gap
+        gap_seconds = float(gap)
+        total_seconds = seconds + gap_seconds
+        
+        # Handle minute overflow
+        if total_seconds >= 60:
+            minutes += int(total_seconds // 60)
+            total_seconds = total_seconds % 60
+        
+        # Format result
+        if minutes > 0:
+            return f"{minutes}:{total_seconds:06.3f}"
+        else:
+            return f"{total_seconds:.3f}"
+    except (ValueError, IndexError):
+        # If parsing fails, return original base time
+        return base_time
+
+
+def clean_cell_text(cell):
+    """Clean cell text by removing sup elements and extracting clean text"""
+    # Remove all sup elements (citations, footnotes, etc.)
+    for sup in cell.find_all("sup"):
+        sup.decompose()
+    
+    # Get clean text
+    text = cell.get_text(strip=True)
+    return text
 
 
 def extract_race_report_links(soup):
@@ -15,7 +68,8 @@ def extract_race_report_links(soup):
     # Find Season summary heading
     season_heading = (soup.find("h3", {"id": "Season_summary"}) or
                       soup.find("h3", {"id": "Summary"}) or
-                      soup.find("h2", {"id": "Results"}))
+                      soup.find("h2", {"id": "Results"}) or 
+                      soup.find("h2", {"id": "Results_and_standings"}))
 
     if not season_heading:
         print("No season summary table found")
@@ -45,7 +99,7 @@ def process_qualifying_data(race_url, round_info):
     try:
         response = requests.get(race_url)
         response.raise_for_status()
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(response.text, "lxml")
 
         # Find Qualifying heading
         qualifying_heading = (soup.find("h3", {"id": "Qualifying"}) or
@@ -154,32 +208,86 @@ def extract_quali_table_data(table):
         if len(all_rows) < 2:
             return None
 
-        # Get headers
-        header_row = all_rows[0]
-        headers = [th.get_text(strip=True) for th in header_row.find_all("th")]
+        # Check if we have a two-row header (F1 2015+)
+        first_row = all_rows[0]
+        second_row = all_rows[1] if len(all_rows) > 1 else None
+        
+        # Check if second row contains th elements
+        has_two_row_header = (second_row and 
+                             len(second_row.find_all("th")) > 0 and
+                             len(second_row.find_all("td")) == 0)
+        
+        if has_two_row_header:
+            # Process two-row header structure
+            headers = []
+            first_row_headers = first_row.find_all("th")
+            second_row_headers = second_row.find_all("th")
+            
+            # First, collect all rowspan=2 headers in order
+            for th in first_row_headers:
+                text = clean_cell_text(th)
+                rowspan = int(th.get("rowspan", 1))
+                
+                if rowspan == 2:
+                    headers.append(text)
+            
+            # Then add the second row headers (Q1, Q2, Q3)
+            for th in second_row_headers:
+                text = clean_cell_text(th)
+                headers.append(text)
+            
+            # Finally, add the last rowspan=2 header (Grid)
+            for th in first_row_headers:
+                text = clean_cell_text(th)
+                rowspan = int(th.get("rowspan", 1))
+                colspan = int(th.get("colspan", 1))
+                
+                if rowspan == 2 and colspan == 1:
+                    # Check if this is the last column
+                    if th == first_row_headers[-1]:
+                        headers.append(text)
+            
+            data_start_index = 2  # Data starts from third row
+        else:
+            # Single row header
+            header_row = all_rows[0]
+            headers = [clean_cell_text(th) for th in header_row.find_all("th")]
+            data_start_index = 1  # Data starts from second row
+        
+        # Apply column mapping
         headers = [COLUMN_MAPPING.get(h, h) for h in headers]
-
-        # Identify Driver column index
-        driver_col_index = None
-        for idx, header in enumerate(headers):
-            if header.lower() in ["driver", "name"]:
-                driver_col_index = idx
-                break
+        
+        # Drop unwanted columns for single row headers
+        if not has_two_row_header:
+            columns_to_drop = {'R1', 'GridSR', 'Gap', 'Q1 Time', 'Rank'}
+            indices_to_keep = [i for i, h in enumerate(headers) if h not in columns_to_drop]
+            headers = [headers[i] for i in indices_to_keep]
 
         # Get data rows
         data_rows = []
-        for row in all_rows[1:]:
+        for row in all_rows[data_start_index:]:
             cells = row.find_all(["td", "th"])
             if len(cells) < 4:  # Need at least Pos, No, Driver, Team
                 continue
 
             row_data = []
             for cell in cells:
-                # Clean up cell text, remove flag icons and links
-                text = cell.get_text(strip=True)
+                # Clean up cell text, remove sup elements and citations
+                text = clean_cell_text(cell)
                 row_data.append(text)
 
             if row_data:
+                # Apply column filtering for single row headers
+                if not has_two_row_header:
+                    row_data = [row_data[i] for i in indices_to_keep if i < len(row_data)]
+                
+                # Update driver column index after filtering
+                driver_col_index = None
+                for idx, header in enumerate(headers):
+                    if header.lower() == "driver":
+                        driver_col_index = idx
+                        break
+                
                 if driver_col_index is not None and len(row_data) > driver_col_index:
                     row_data[driver_col_index] = remove_citations(row_data[driver_col_index])
 
@@ -188,6 +296,27 @@ def extract_quali_table_data(table):
                 if grid_value.isdigit() and len(grid_value) > 2:
                     row_data[-1] = grid_value[:2]  # Truncate to first two digits
                 data_rows.append(row_data)
+
+        # Convert Time/Gap column to actual times
+        time_gap_col_index = None
+        for idx, header in enumerate(headers):
+            if header.lower() == "time/gap":
+                headers[idx] = "Time"  # Rename column
+                time_gap_col_index = idx
+                break
+        
+        if time_gap_col_index is not None and data_rows:
+            # Get pole position time (first row)
+            pole_time = data_rows[0][time_gap_col_index]
+            
+            # Convert gaps to actual times
+            for row in data_rows:
+                if time_gap_col_index < len(row):
+                    gap_value = row[time_gap_col_index]
+                    if gap_value.startswith('+'):
+                        # Convert gap to actual time
+                        actual_time = add_time_gap(pole_time, gap_value[1:])
+                        row[time_gap_col_index] = actual_time
 
         return {'headers': headers, 'data': data_rows}
 
@@ -220,8 +349,6 @@ def save_qualifying_data(qualifying_results, year, formula):
 
 
 def scrape_quali(soup, year, num):
-    if num == 1:
-        return
     race_links = extract_race_report_links(soup)
     if race_links:
         quali_results = []

@@ -1,23 +1,23 @@
-Pos.,No.,Driver,Team,Time,GridSR,GridFR
-1,17,Ayumu Iwasa,DAMS,1:27.930,10,1
-2,7,Marcus Armstrong,Hitech Grand Prix,+0.381,9,2
-3,11,Felipe Drugovich,MP Motorsport,+0.410,8,3
-4,10,Théo Pourchaire,ART Grand Prix,+0.429,7,4
-5,6,Logan Sargeant,Carlin,+0.451,6,5
-6,8,Jüri Vips,Hitech Grand Prix,+0.461,5,6
-7,9,Frederik Vesti,ART Grand Prix,+0.632,4,7
-8,1,Dennis Hauger,Prema Racing,+0.674,3,8
-9,22,Enzo Fittipaldi,Charouz Racing System,+0.756,2,9
-10,3,Jack Doohan,Virtuosi Racing,+0.761,1,10
-11,5,Liam Lawson,Carlin,+0.820,11,11
-12,2,Jehan Daruvala,Prema Racing,+0.856,12,12
-13,14,Olli Caldwell,Campos Racing,+0.873,13,13
-14,20,Richard Verschoor,Trident,+0.919,14,14
-15,4,Marino Sato,Virtuosi Racing,+1.088,15,15
-16,23,Cem Bölükbaşı,Charouz Racing System,+1.172,16,16
-17,24,David Beckmann,Van Amersfoort Racing,+1.413,17,17
-18,21,Calan Williams,Trident,+1.416,18,18
-19,12,Clément Novalak,MP Motorsport,+1.551,19,19
-20,15,Roberto Merhi,Campos Racing,+1.617,20,20
-21,16,Roy Nissany,DAMS,+1.676,21,21
-22,25,Amaury Cordeel,Van Amersfoort Racing,+1.862,22,22
+Pos.,No.,Driver,Team,Time,Grid
+1,17,Ayumu Iwasa,DAMS,1:27.930,1
+2,7,Marcus Armstrong,Hitech Grand Prix,+0.381,2
+3,11,Felipe Drugovich,MP Motorsport,+0.410,3
+4,10,Théo Pourchaire,ART Grand Prix,+0.429,4
+5,6,Logan Sargeant,Carlin,+0.451,5
+6,8,Jüri Vips,Hitech Grand Prix,+0.461,6
+7,9,Frederik Vesti,ART Grand Prix,+0.632,7
+8,1,Dennis Hauger,Prema Racing,+0.674,8
+9,22,Enzo Fittipaldi,Charouz Racing System,+0.756,9
+10,3,Jack Doohan,Virtuosi Racing,+0.761,10
+11,5,Liam Lawson,Carlin,+0.820,11
+12,2,Jehan Daruvala,Prema Racing,+0.856,12
+13,14,Olli Caldwell,Campos Racing,+0.873,13
+14,20,Richard Verschoor,Trident,+0.919,14
+15,4,Marino Sato,Virtuosi Racing,+1.088,15
+16,23,Cem Bölükbaşı,Charouz Racing System,+1.172,16
+17,24,David Beckmann,Van Amersfoort Racing,+1.413,17
+18,21,Calan Williams,Trident,+1.416,18
+19,12,Clément Novalak,MP Motorsport,+1.551,19
+20,15,Roberto Merhi,Campos Racing,+1.617,20
+21,16,Roy Nissany,DAMS,+1.676,21
+22,25,Amaury Cordeel,Van Amersfoort Racing,+1.862,22

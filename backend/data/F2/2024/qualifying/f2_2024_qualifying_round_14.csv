@@ -1,23 +1,23 @@
-Pos.,No.,Driver,Team,Time/Gap,GridSR,GridFR
-1,1,Victor Martins,ART Grand Prix,1:35.745,10,1
-2,10,Gabriel Bortoleto,Invicta Racing,+0.035,9,2
-3,17,Paul Aron,Hitech Pulse-Eight,+0.068,7,PL1
-4,20,Isack Hadjar,Campos Racing,+0.128,6,3
-5,8,Dino Beganovic,DAMS Lucas Oil,+0.161,5,4
-6,9,Kush Maini,Invicta Racing,+0.205,82,5
-7,21,Pepe Martí,Campos Racing,+0.312,4,6
-8,6,Ritomo Miyata,Rodin Motorsport,+0.370,3,7
-9,24,Joshua Dürksen,AIX Racing,+0.3973,2,8
-10,16,Amaury Cordeel,Hitech Pulse-Eight,1,9
-11,4,Andrea Kimi Antonelli,Prema Racing,+0.645,—4,10
-12,12,Oliver Goethe,MP Motorsport,+0.671,11,11
-13,5,Leonardo Fornaroli,Rodin Motorsport,+0.705,12,12
-14,11,Richard Verschoor,MP Motorsport,+0.710,13,13
-15,3,Oliver Bearman,Prema Racing,+0.802,14,14
-16,7,Jak Crawford,DAMS Lucas Oil,+1.008,205,15
-17,2,Luke Browning,ART Grand Prix,+1.201,15,16
-18,15,Rafael Villagómez,Van Amersfoort Racing,+1.240,16,17
-19,22,Max Esterson,Trident,+1.684,17,18
-20,14,John Bennett,Van Amersfoort Racing,+1.889,18,19
-21,23,Christian Mansell,Trident,+2.389,19,20
-22,25,Cian Shields,AIX Racing,+3.023,21,21
+Pos.,No.,Driver,Team,Time,Grid
+1,1,Victor Martins,ART Grand Prix,1:35.745,1
+2,10,Gabriel Bortoleto,Invicta Racing,1:35.780,2
+3,17,Paul Aron,Hitech Pulse-Eight,1:35.813,PL
+4,20,Isack Hadjar,Campos Racing,1:35.873,3
+5,8,Dino Beganovic,DAMS Lucas Oil,1:35.906,4
+6,9,Kush Maini,Invicta Racing,1:35.950,5
+7,21,Pepe Martí,Campos Racing,1:36.057,6
+8,6,Ritomo Miyata,Rodin Motorsport,1:36.115,7
+9,24,Joshua Dürksen,AIX Racing,1:36.142,8
+10,16,Amaury Cordeel,Hitech Pulse-Eight,1
+11,4,Andrea Kimi Antonelli,Prema Racing,1:36.390,10
+12,12,Oliver Goethe,MP Motorsport,1:36.416,11
+13,5,Leonardo Fornaroli,Rodin Motorsport,1:36.450,12
+14,11,Richard Verschoor,MP Motorsport,1:36.455,13
+15,3,Oliver Bearman,Prema Racing,1:36.547,14
+16,7,Jak Crawford,DAMS Lucas Oil,1:36.753,15
+17,2,Luke Browning,ART Grand Prix,1:36.946,16
+18,15,Rafael Villagómez,Van Amersfoort Racing,1:36.985,17
+19,22,Max Esterson,Trident,1:37.429,18
+20,14,John Bennett,Van Amersfoort Racing,1:37.634,19
+21,23,Christian Mansell,Trident,1:38.134,20
+22,25,Cian Shields,AIX Racing,1:38.768,21

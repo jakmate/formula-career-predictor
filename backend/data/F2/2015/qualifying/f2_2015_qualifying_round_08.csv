@@ -1,26 +1,26 @@
-Pos.,No.,Driver,Team,Time,Gap,Grid
-1,1,Pierre Gasly,DAMS,1:31.272,,1
-2,9,Mitch Evans,Russian Time,1:31.424,+0.152,23
-3,5,Stoffel Vandoorne,ART Grand Prix,1:31.478,+0.206,2
-4,2,Alex Lynn,DAMS,1:31.615,+0.343,3
-5,18,Sergey Sirotkin,Rapax,1:31.640,+0.368,4
-6,15,Rio Haryanto,Campos Racing,1:31.898,+0.626,5
-7,14,Arthur Pic,Campos Racing,1:31.938,+0.666,6
-8,23,Richie Stanaway,Status Grand Prix,1:31.985,+0.713,7
-9,27,Sergio Canamasas,Daiko Team Lazarus,1:32.000,+0.728,24
-10,8,Alexander Rossi,Racing Engineering,1:32.014,+0.742,8
-11,11,Raffaele Marciello,Trident,1:32.071,+0.799,9
-12,6,Nobuharu Matsushita,ART Grand Prix,1:32.100,+0.828,10
-13,19,Robert Vișoiu,Rapax,1:32.155,+0.883,11
-14,3,Julián Leal,Carlin,1:32.159,+0.887,12
-15,21,Norman Nato,Arden International,1:32.174,+0.902,13
-16,12,Johnny Cecotto Jr.,Trident,1:32.176,+0.904,14
-17,7,Jordan King,Racing Engineering,1:32.283,+1.011,15
-18,20,André Negrão,Arden International,1:32.386,+1.114,16
-19,4,Jann Mardenborough,Carlin,1:32.398,+1.126,17
-20,17,René Binder,MP Motorsport,1:32.447,+1.175,18
-21,22,Marlon Stöckinger,Status Grand Prix,1:32.619,+1.347,22
-22,10,Artem Markelov,Russian Time,1:32.637,+1.365,19
-23,24,Simon Trummer,Hilmer Motorsport,1:32.794,+1.522,20
-24,26,Patric Niederhauser,Daiko Team Lazarus,1:32.913,+1.641,21
-25,16,Meindert van Buuren,MP Motorsport,1:33.126,+1.854,25
+Pos.,No.,Driver,Team,Time,Grid
+1,1,Pierre Gasly,DAMS,1:31.272,1
+2,9,Mitch Evans,Russian Time,1:31.424,23
+3,5,Stoffel Vandoorne,ART Grand Prix,1:31.478,2
+4,2,Alex Lynn,DAMS,1:31.615,3
+5,18,Sergey Sirotkin,Rapax,1:31.640,4
+6,15,Rio Haryanto,Campos Racing,1:31.898,5
+7,14,Arthur Pic,Campos Racing,1:31.938,6
+8,23,Richie Stanaway,Status Grand Prix,1:31.985,7
+9,27,Sergio Canamasas,Daiko Team Lazarus,1:32.000,24
+10,8,Alexander Rossi,Racing Engineering,1:32.014,8
+11,11,Raffaele Marciello,Trident,1:32.071,9
+12,6,Nobuharu Matsushita,ART Grand Prix,1:32.100,10
+13,19,Robert Vișoiu,Rapax,1:32.155,11
+14,3,Julián Leal,Carlin,1:32.159,12
+15,21,Norman Nato,Arden International,1:32.174,13
+16,12,Johnny Cecotto Jr.,Trident,1:32.176,14
+17,7,Jordan King,Racing Engineering,1:32.283,15
+18,20,André Negrão,Arden International,1:32.386,16
+19,4,Jann Mardenborough,Carlin,1:32.398,17
+20,17,René Binder,MP Motorsport,1:32.447,18
+21,22,Marlon Stöckinger,Status Grand Prix,1:32.619,22
+22,10,Artem Markelov,Russian Time,1:32.637,19
+23,24,Simon Trummer,Hilmer Motorsport,1:32.794,20
+24,26,Patric Niederhauser,Daiko Team Lazarus,1:32.913,21
+25,16,Meindert van Buuren,MP Motorsport,1:33.126,25

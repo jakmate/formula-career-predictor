@@ -1,5 +1,6 @@
 import csv
 import os
+from bs4 import BeautifulSoup
 from scraping.scraping_utils import remove_citations
 
 HEADER_MAPPING = {
@@ -9,30 +10,38 @@ HEADER_MAPPING = {
     'No.': 'No.',
     'Driver name': 'Driver',
     'Drivers': 'Driver',
+    'Race Drivers': 'Driver',
+    'Race drivers': 'Driver',
     'Driver': 'Driver',
     'Rounds': 'Rounds',
 }
-UNWANTED_COLUMNS = {'chassis', 'engine', 'status'}
+UNWANTED_COLUMNS = {'chassis', 'engine', 'status', 'constructor', 'power unit'}
+
+
+def map_url(soup, year, formula, series_type="main"):
+    if formula == 1:
+        if year >= 2018 or year == 2016:
+            return soup.find("h2", {"id": "Entries"})
+        else:
+            return soup.find("h2", {"id": "Teams_and_drivers"})
+    elif series_type == "f3_euro":
+        if year == 2018:
+            return soup.find("h2", {"id": "Entries"})
+        elif year < 2016:
+            return soup.find("h2", {"id": "Drivers_and_teams"})
+        else:
+            return soup.find("h2", {"id": "Teams_and_drivers"})
+    elif year == 2018 and formula == 2:
+        return soup.find("h2", {"id": "Entries"})
+    elif year <= 2018 or (formula == 3 and year == 2019):
+        return soup.find("h2", {"id": "Teams_and_drivers"})
+    else:
+        return soup.find("h2", {"id": "Entries"})
 
 
 def process_entries(soup, year, formula, series_type="main"):
-    if formula == 1:
-        return
     # Determine heading based on series type and year
-    if series_type == "f3_euro":
-        if year == 2018:
-            heading = soup.find("h2", {"id": "Entries"})
-        elif year < 2016:
-            heading = soup.find("h2", {"id": "Drivers_and_teams"})
-        else:
-            heading = soup.find("h2", {"id": "Teams_and_drivers"})
-    elif year == 2018 and formula == 2:
-        heading = soup.find("h2", {"id": "Entries"})
-    elif year <= 2018 or (formula == 3 and year == 2019):
-        heading = soup.find("h2", {"id": "Teams_and_drivers"})
-    else:
-        heading = soup.find("h2", {"id": "Entries"})
-
+    heading = map_url(soup, year, formula, series_type)
     if not heading:
         print(f"No entries heading found for F{formula} {year} {series_type}")
         return
@@ -62,9 +71,45 @@ def process_entries(soup, year, formula, series_type="main"):
         writer = csv.writer(f)
 
         # Process headers
-        header_row = all_rows[0]
-        headers = [remove_citations(header.get_text(strip=True))
-                   for header in header_row.find_all("th")]
+        if formula == 1 and year > 2015:
+            # Two-row header structure for F1 2016+
+            if len(all_rows) < 2:
+                headers = [remove_citations(th.get_text(strip=True)) 
+                           for th in all_rows[0].find_all("th")]
+            else:
+                # Process first header row
+                headers_row1 = all_rows[0].find_all("th")
+                combined_headers = []
+                for th in headers_row1:
+                    colspan = int(th.get('colspan', '1'))
+                    if colspan > 1:
+                        # Expand colspan into placeholders
+                        combined_headers.extend([None] * colspan)
+                    else:
+                        text = remove_citations(th.get_text(strip=True))
+                        combined_headers.append(text)
+                
+                # Process second header row
+                headers_row2 = all_rows[1].find_all("th")
+                h2_iter = iter(headers_row2)
+                # Replace placeholders with actual headers
+                for i in range(len(combined_headers)):
+                    if combined_headers[i] is None:
+                        try:
+                            th = next(h2_iter)
+                            text = remove_citations(th.get_text(strip=True))
+                            combined_headers[i] = text
+                        except StopIteration:
+                            pass  # No more headers to fill
+                headers = combined_headers
+            data_rows = all_rows[2:]
+        else:
+            # Single-row header processing
+            header_row = all_rows[0]
+            headers = [remove_citations(header.get_text(strip=True))
+                       for header in header_row.find_all("th")]
+            data_rows = all_rows[1:]
+
         headers = [HEADER_MAPPING.get(h, h) for h in headers]
         num_columns = len(headers)
 
@@ -79,20 +124,19 @@ def process_entries(soup, year, formula, series_type="main"):
 
         writer.writerow(headers)
 
-        # Skip header row
-        data_rows = all_rows[1:]
-
         # Remove footer row
         if len(data_rows) > 0:
             if not (formula == 2 and year < 2018) and not (
                 formula == 3 and year < 2017) and not (
-                    formula == 3 and year == 2017 and series_type == 'f3_euro'):
+                    year == 2017 and series_type == 'f3_euro') and not (
+                        formula == 1 and year <= 2013
+                    ):
                 last_row = data_rows[-1]
                 if len(last_row.find_all(["td", "th"])) < num_columns:
                     data_rows = data_rows[:-1]
 
         # Determine rowspan columns based on series and year
-        if series_type == "f3_euro" and 2012 <= year <= 2018:
+        if series_type == "f3_euro" or formula == 1:
             rowspan_columns = 4  # Team, Chassis, Engine, No.
         else:
             rowspan_columns = 2  # Entrant/Team, No.
@@ -136,17 +180,52 @@ def process_entries(soup, year, formula, series_type="main"):
                         row_data.append('')
 
             # Process remaining columns (no rowspan)
-            while len(row_data) < num_columns:
-                if cell_index < len(cells):
-                    cell = cells[cell_index]
-                    cell_index += 1
-                    row_data.append(remove_citations(cell.get_text(strip=True)))
-                else:
-                    row_data.append('')
+            remaining_cells = cells[cell_index:]
+            if formula == 1 and year >= 2014:
+                # F1 2014+ structure with multiple drivers in one row
+                for cell in remaining_cells:
+                    # Create a copy to avoid modifying original
+                    cell_copy = BeautifulSoup(str(cell), 'lxml').find()
+                    # Remove citations
+                    for sup in cell_copy.find_all('sup'):
+                        sup.decompose()
+                    # Extract text lines
+                    lines = [s.strip() for s in cell_copy.stripped_strings]
+                    row_data.append(lines)
+                
+                # Split into separate rows per driver
+                driver_count = max(len(driver_data) for driver_data in row_data[4:]) if len(row_data) > 4 else 0
+                for i in range(driver_count):
+                    driver_row = row_data[:4]  # Team data
+                    for driver_data in row_data[4:]:
+                        if i < len(driver_data):
+                            driver_row.append(driver_data[i])
+                        else:
+                            driver_row.append('')
+                    
+                    # Remove unwanted columns
+                    final_row = driver_row.copy()
+                    for idx in sorted(unwanted_indices, reverse=True):
+                        if idx < len(final_row):
+                            del final_row[idx]
+                    
+                    writer.writerow(final_row)
+            else:
+                # Normal structure
+                while len(row_data) < num_columns:
+                    if cell_index < len(cells):
+                        cell = cells[cell_index]
+                        cell_index += 1
+                        row_data.append(remove_citations(cell.get_text(strip=True)))
+                    else:
+                        row_data.append('')
 
-            # Remove unwanted columns from this row
-            for idx in sorted(unwanted_indices, reverse=True):
-                if idx < len(row_data):
-                    del row_data[idx]
-
-            writer.writerow(row_data)
+                if any("ineligible" in cell.lower() for cell in row_data):
+                    continue
+                
+                # Remove unwanted columns
+                for idx in sorted(unwanted_indices, reverse=True):
+                    if idx < len(row_data):
+                        del row_data[idx]
+                
+                writer.writerow(row_data)

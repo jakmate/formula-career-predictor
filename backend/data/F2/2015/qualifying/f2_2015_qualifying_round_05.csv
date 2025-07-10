@@ -1,27 +1,27 @@
-Pos.,No.,Driver,Team,Time,Gap,Grid
-1,18,Sergey Sirotkin,Rapax,1:39.949,,1
-2,5,Stoffel Vandoorne,ART Grand Prix,1:40.134,+ 0.185 s,2
-3,23,Richie Stanaway,Status Grand Prix,1:40.378,+ 0.429 s,3
-4,8,Alexander Rossi,Racing Engineering,1:40.419,+ 0.470 s,4
-5,14,Arthur Pic,Campos Racing,1:40.434,+ 0.485 s,5
-6,1,Pierre Gasly,DAMS,1:40.498,+ 0.549 s,6
-7,6,Nobuharu Matsushita,ART Grand Prix,1:40.520,+ 0.571 s,7
-8,11,Raffaele Marciello,Trident,1:40.533,+ 0.584 s,8
-9,16,Oliver Rowland,MP Motorsport,1:40.537,+ 0.588 s,9
-10,3,Julián Leal,Carlin,1:40.547,+ 0.598 s,10
-11,24,Nick Yelloly,Hilmer Motorsport,1:40.697,+ 0.748 s,11
-12,2,Alex Lynn,DAMS,1:40.708,+ 0.759 s,12
-13,7,Jordan King,Racing Engineering,1:40.765,+ 0.816 s,13
-14,27,Sergio Canamasas,Venezuela Team Lazarus,1:40.789,+ 0.840 s,14
-15,15,Rio Haryanto,Campos Racing,1:40.793,+ 0.844 s,15
-16,20,André Negrão,Arden International,1:41.039,+ 1.090 s,16
-17,26,Nathanaël Berthon,Venezuela Team Lazarus,1:41.046,+ 1.097 s,17
-18,4,Johnny Cecotto Jr.,Carlin,1:41.064,+ 1.115 s,18
-19,19,Robert Vișoiu,Rapax,1:41.118,+ 1.169 s,22
-20,21,Norman Nato,Arden International,1:41.252,+ 1.303 s,19
-21,9,Mitch Evans,Russian Time,1:41.275,+ 1.326 s,20
-22,17,Daniël de Jong,MP Motorsport,1:41.542,+ 1.593 s,21
-23,12,René Binder,Trident,1:41.762,+ 1.813 s,23
-24,22,Marlon Stöckinger,Status Grand Prix,1:41.802,+ 1.853 s,24
-25,10,Artem Markelov,Russian Time,1:41.805,+ 1.856 s,25
--,25,Jon Lancaster,Hilmer Motorsport,No Time,-,26
+Pos.,No.,Driver,Team,Time,Grid
+1,18,Sergey Sirotkin,Rapax,1:39.949,1
+2,5,Stoffel Vandoorne,ART Grand Prix,1:40.134,2
+3,23,Richie Stanaway,Status Grand Prix,1:40.378,3
+4,8,Alexander Rossi,Racing Engineering,1:40.419,4
+5,14,Arthur Pic,Campos Racing,1:40.434,5
+6,1,Pierre Gasly,DAMS,1:40.498,6
+7,6,Nobuharu Matsushita,ART Grand Prix,1:40.520,7
+8,11,Raffaele Marciello,Trident,1:40.533,8
+9,16,Oliver Rowland,MP Motorsport,1:40.537,9
+10,3,Julián Leal,Carlin,1:40.547,10
+11,24,Nick Yelloly,Hilmer Motorsport,1:40.697,11
+12,2,Alex Lynn,DAMS,1:40.708,12
+13,7,Jordan King,Racing Engineering,1:40.765,13
+14,27,Sergio Canamasas,Venezuela Team Lazarus,1:40.789,14
+15,15,Rio Haryanto,Campos Racing,1:40.793,15
+16,20,André Negrão,Arden International,1:41.039,16
+17,26,Nathanaël Berthon,Venezuela Team Lazarus,1:41.046,17
+18,4,Johnny Cecotto Jr.,Carlin,1:41.064,18
+19,19,Robert Vișoiu,Rapax,1:41.118,22
+20,21,Norman Nato,Arden International,1:41.252,19
+21,9,Mitch Evans,Russian Time,1:41.275,20
+22,17,Daniël de Jong,MP Motorsport,1:41.542,21
+23,12,René Binder,Trident,1:41.762,23
+24,22,Marlon Stöckinger,Status Grand Prix,1:41.802,24
+25,10,Artem Markelov,Russian Time,1:41.805,25
+-,25,Jon Lancaster,Hilmer Motorsport,No Time,26

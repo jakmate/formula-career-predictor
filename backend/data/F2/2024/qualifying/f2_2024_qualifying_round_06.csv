@@ -1,23 +1,23 @@
-Pos.,No.,Driver,Team,Time,GridSR,GridFR
-1,17,Paul Aron,Hitech Pulse-Eight,1:24.766,9,1
-2,7,Jak Crawford,DAMS Lucas Oil,+0.002,8,2
-3,12,Franco Colapinto,MP Motorsport,+0.006,7,3
-4,10,Gabriel Bortoleto,Invicta Racing,+0.055,6,4
-5,4,Andrea Kimi Antonelli,Prema Racing,+0.105,5,5
-6,6,Ritomo Miyata,Rodin Motorsport,+0.182,4,6
-7,24,Joshua Dürksen,AIX Racing,+0.222,141,7
-8,8,Juan Manuel Correa,DAMS Lucas Oil,+0.246,3,8
-9,1,Victor Martins,ART Grand Prix,+0.405,2,9
-10,9,Kush Maini,Invicta Racing,+0.433,1,10
-11,20,Isack Hadjar,Campos Racing,+0.439,10,11
-12,2,Zak O'Sullivan,ART Grand Prix,+0.459,11,12
-13,11,Dennis Hauger,MP Motorsport,+0.483,12,13
-14,21,Pepe Martí,Campos Racing,+0.519,13,14
-15,3,Oliver Bearman,Prema Racing,+0.555,15,15
-16,14,Enzo Fittipaldi,Van Amersfoort Racing,+0.576,16,16
-17,5,Zane Maloney,Rodin Motorsport,+0.578,17,17
-18,16,Amaury Cordeel,Hitech Pulse-Eight,+0.646,18,18
-19,22,Richard Verschoor,Trident,+0.804,19,19
-20,15,Rafael Villagómez,Van Amersfoort Racing,+1.019,20,20
-21,23,Roman Staněk,Trident,+1.449,21,21
-—,25,Taylor Barnard,AIX Racing,+18.701,222,22
+Pos.,No.,Driver,Team,Time,Grid
+1,17,Paul Aron,Hitech Pulse-Eight,1:24.766,1
+2,7,Jak Crawford,DAMS Lucas Oil,+0.002,2
+3,12,Franco Colapinto,MP Motorsport,+0.006,3
+4,10,Gabriel Bortoleto,Invicta Racing,+0.055,4
+5,4,Andrea Kimi Antonelli,Prema Racing,+0.105,5
+6,6,Ritomo Miyata,Rodin Motorsport,+0.182,6
+7,24,Joshua Dürksen,AIX Racing,+0.222,7
+8,8,Juan Manuel Correa,DAMS Lucas Oil,+0.246,8
+9,1,Victor Martins,ART Grand Prix,+0.405,9
+10,9,Kush Maini,Invicta Racing,+0.433,10
+11,20,Isack Hadjar,Campos Racing,+0.439,11
+12,2,Zak O'Sullivan,ART Grand Prix,+0.459,12
+13,11,Dennis Hauger,MP Motorsport,+0.483,13
+14,21,Pepe Martí,Campos Racing,+0.519,14
+15,3,Oliver Bearman,Prema Racing,+0.555,15
+16,14,Enzo Fittipaldi,Van Amersfoort Racing,+0.576,16
+17,5,Zane Maloney,Rodin Motorsport,+0.578,17
+18,16,Amaury Cordeel,Hitech Pulse-Eight,+0.646,18
+19,22,Richard Verschoor,Trident,+0.804,19
+20,15,Rafael Villagómez,Van Amersfoort Racing,+1.019,20
+21,23,Roman Staněk,Trident,+1.449,21
+—,25,Taylor Barnard,AIX Racing,+18.701,22

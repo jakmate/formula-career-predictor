@@ -1,23 +1,23 @@
-Pos.,No.,Driver,Team,Time,GridSR,GridFR
-1,17,Ayumu Iwasa,DAMS,1:36.290,10,1
-2,16,Roy Nissany,DAMS,+0.036,9,2
-3,10,Théo Pourchaire,ART Grand Prix,+0.082,8,3
-4,11,Felipe Drugovich,MP Motorsport,+0.192,7,4
-5,3,Jack Doohan,Virtuosi Racing,+0.220,6,5
-6,6,Logan Sargeant,Carlin,+0.224,5,6
-7,1,Dennis Hauger,Prema Racing,+0.260,4,7
-8,25,Amaury Cordeel,Van Amersfoort Racing,+0.288,3,8
-9,5,Liam Lawson,Carlin,+0.298,2,9
-10,20,Richard Verschoor,Trident,+0.298,1,10
-11,7,Marcus Armstrong,Hitech Grand Prix,+0.329,11,11
-12,2,Jehan Daruvala,Prema Racing,+0.340,12,12
-13,22,Enzo Fittipaldi,Charouz Racing System,+0.390,13,13
-14,15,Ralph Boschung,Campos Racing,+0.395,171,14
-15,8,Jüri Vips,Hitech Grand Prix,+0.504,14,15
-16,9,Frederik Vesti,ART Grand Prix,+0.733,15,16
-17,12,Clément Novalak,MP Motorsport,+0.755,16,17
-18,24,Juan Manuel Correa,Van Amersfoort Racing,+0.794,18,18
-19,21,Zane Maloney,Trident,+0.810,19,19
-20,14,Olli Caldwell,Campos Racing,+0.918,20,20
-21,23,Tatiana Calderón,Charouz Racing System,+1.538,21,21
-—,4,Marino Sato,Virtuosi Racing,+23.455,22,22
+Pos.,No.,Driver,Team,Time,Grid
+1,17,Ayumu Iwasa,DAMS,1:36.290,1
+2,16,Roy Nissany,DAMS,+0.036,2
+3,10,Théo Pourchaire,ART Grand Prix,+0.082,3
+4,11,Felipe Drugovich,MP Motorsport,+0.192,4
+5,3,Jack Doohan,Virtuosi Racing,+0.220,5
+6,6,Logan Sargeant,Carlin,+0.224,6
+7,1,Dennis Hauger,Prema Racing,+0.260,7
+8,25,Amaury Cordeel,Van Amersfoort Racing,+0.288,8
+9,5,Liam Lawson,Carlin,+0.298,9
+10,20,Richard Verschoor,Trident,+0.298,10
+11,7,Marcus Armstrong,Hitech Grand Prix,+0.329,11
+12,2,Jehan Daruvala,Prema Racing,+0.340,12
+13,22,Enzo Fittipaldi,Charouz Racing System,+0.390,13
+14,15,Ralph Boschung,Campos Racing,+0.395,14
+15,8,Jüri Vips,Hitech Grand Prix,+0.504,15
+16,9,Frederik Vesti,ART Grand Prix,+0.733,16
+17,12,Clément Novalak,MP Motorsport,+0.755,17
+18,24,Juan Manuel Correa,Van Amersfoort Racing,+0.794,18
+19,21,Zane Maloney,Trident,+0.810,19
+20,14,Olli Caldwell,Campos Racing,+0.918,20
+21,23,Tatiana Calderón,Charouz Racing System,+1.538,21
+—,4,Marino Sato,Virtuosi Racing,+23.455,22

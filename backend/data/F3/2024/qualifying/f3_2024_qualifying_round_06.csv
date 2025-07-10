@@ -1,31 +1,31 @@
-Pos.,No.,Driver,Team,Time/Gap,GridSR,GridFR
-1,14,Luke Browning,Hitech Pulse-Eight,1:20.222,12,1
-2,3,Arvid Lindblad,Prema Racing,+0.084,11,2
-3,7,Tim Tramnitz,MP Motorsport,+0.189,10,3
-4,2,Gabriele Minì,Prema Racing,+0.195,9,4
-5,1,Dino Beganovic,Prema Racing,+0.202,8,5
-6,10,Oliver Goethe,Campos Racing,+0.245,7,6
-7,24,Laurens van Hoepen,ART Grand Prix,+0.295,6,7
-8,11,Sebastián Montoya,Campos Racing,+0.326,5,8
-9,9,Alex Dunne,MP Motorsport,+0.341,4,9
-10,25,Nikola Tsolov,ART Grand Prix,+0.387,3,10
-11,23,Christian Mansell,ART Grand Prix,+0.387,2,11
-12,15,Martinius Stenshorne,Hitech Pulse-Eight,+0.443,1,12
-13,20,Noel León,Van Amersfoort Racing,+0.458,13,13
-14,27,Nikita Bedrin,AIX Racing,+0.643,14,14
-15,6,Santiago Ramos,Trident,+0.764,15,15
-16,5,Sami Meguetounif,Trident,+0.767,16,16
-17,16,Cian Shields,Hitech Pulse-Eight,+0.776,17,17
-18,18,Max Esterson,Jenzer Motorsport,+0.812,18,18
-19,21,Sophia Flörsch,Van Amersfoort Racing,+0.834,19,19
-20,28,Joshua Dufek,AIX Racing,+0.849,20,20
-21,22,Tommy Smith,Van Amersfoort Racing,+0.854,21,21
-22,12,Mari Boya,Campos Racing,+0.856,22,22
-23,19,Matías Zagazeta,Jenzer Motorsport,+0.909,23,23
-24,4,Leonardo Fornaroli,Trident,+0.938,24,24
-25,8,Kacper Sztuka,MP Motorsport,+1.077,25,25
-26,17,Charlie Wurz,Jenzer Motorsport,+1.181,26,26
-27,26,Tasanapol Inthraphuvasak,AIX Racing,+1.264,27,27
-28,31,Joseph Loake,Rodin Motorsport,+1.453,28,28
-29,29,Callum Voisin,Rodin Motorsport,+1.766,29,29
-30,30,Piotr Wiśnicki,Rodin Motorsport,+1.836,30,30
+Pos.,No.,Driver,Team,Time,Grid
+1,14,Luke Browning,Hitech Pulse-Eight,1:20.222,1
+2,3,Arvid Lindblad,Prema Racing,1:20.306,2
+3,7,Tim Tramnitz,MP Motorsport,1:20.411,3
+4,2,Gabriele Minì,Prema Racing,1:20.417,4
+5,1,Dino Beganovic,Prema Racing,1:20.424,5
+6,10,Oliver Goethe,Campos Racing,1:20.467,6
+7,24,Laurens van Hoepen,ART Grand Prix,1:20.517,7
+8,11,Sebastián Montoya,Campos Racing,1:20.548,8
+9,9,Alex Dunne,MP Motorsport,1:20.563,9
+10,25,Nikola Tsolov,ART Grand Prix,1:20.609,10
+11,23,Christian Mansell,ART Grand Prix,1:20.609,11
+12,15,Martinius Stenshorne,Hitech Pulse-Eight,1:20.665,12
+13,20,Noel León,Van Amersfoort Racing,1:20.680,13
+14,27,Nikita Bedrin,AIX Racing,1:20.865,14
+15,6,Santiago Ramos,Trident,1:20.986,15
+16,5,Sami Meguetounif,Trident,1:20.989,16
+17,16,Cian Shields,Hitech Pulse-Eight,1:20.998,17
+18,18,Max Esterson,Jenzer Motorsport,1:21.034,18
+19,21,Sophia Flörsch,Van Amersfoort Racing,1:21.056,19
+20,28,Joshua Dufek,AIX Racing,1:21.071,20
+21,22,Tommy Smith,Van Amersfoort Racing,1:21.076,21
+22,12,Mari Boya,Campos Racing,1:21.078,22
+23,19,Matías Zagazeta,Jenzer Motorsport,1:21.131,23
+24,4,Leonardo Fornaroli,Trident,1:21.160,24
+25,8,Kacper Sztuka,MP Motorsport,1:21.299,25
+26,17,Charlie Wurz,Jenzer Motorsport,1:21.403,26
+27,26,Tasanapol Inthraphuvasak,AIX Racing,1:21.486,27
+28,31,Joseph Loake,Rodin Motorsport,1:21.675,28
+29,29,Callum Voisin,Rodin Motorsport,1:21.988,29
+30,30,Piotr Wiśnicki,Rodin Motorsport,1:22.058,30

@@ -1,23 +1,23 @@
-Pos.,No.,Driver,Team,Time,GridSR,GridFR
-1,6,Victor Martins,ART Grand Prix,1:14.643,10,1
-2,7,Frederik Vesti,Prema Racing,+0.139,9,2
-3,5,Théo Pourchaire,ART Grand Prix,+0.170,8,3
-4,24,Kush Maini,Campos Racing,+0.215,7,4
-5,14,Jack Doohan,Invicta Virtuosi Racing,+0.217,6,5
-6,4,Enzo Fittipaldi,Rodin Carlin,+0.310,5,93
-7,15,Amaury Cordeel,Invicta Virtuosi Racing,+0.344,4,6
-8,12,Arthur Leclerc,DAMS,+0.374,3,7
-9,2,Jehan Daruvala,MP Motorsport,+0.442,2,8
-10,9,Jak Crawford,Hitech Pulse-Eight,+0.444,1,10
-11,22,Richard Verschoor,Van Amersfoort Racing,+0.485,11,11
-12,23,Juan Manuel Correa,Van Amersfoort Racing,+0.560,12,12
-13,1,Dennis Hauger,MP Motorsport,+0.594,13,13
-14,16,Roy Nissany,PHM RacingbyCharouz,+0.601,14,14
-15,3,Zane Maloney,Rodin Carlin,+0.731,15,15
-16,11,Ayumu Iwasa,DAMS,+0.826,16,16
-17,20,Roman Staněk,Trident,+0.859,17,17
-18,17,Brad Benavides,PHM RacingbyCharouz,+1.007,18,18
-19,8,Oliver Bearman,Prema Racing,+1.047,19,19
-20,21,Clément Novalak,Trident,+1.059,20,20
-21,10,Isack Hadjar,Hitech Pulse-Eight,+1.165,211,21
-22,25,Ralph Boschung,Campos Racing,+1.185,222,22
+Pos.,No.,Driver,Team,Time,Grid
+1,6,Victor Martins,ART Grand Prix,1:14.643,1
+2,7,Frederik Vesti,Prema Racing,+0.139,2
+3,5,Théo Pourchaire,ART Grand Prix,+0.170,3
+4,24,Kush Maini,Campos Racing,+0.215,4
+5,14,Jack Doohan,Invicta Virtuosi Racing,+0.217,5
+6,4,Enzo Fittipaldi,Rodin Carlin,+0.310,9
+7,15,Amaury Cordeel,Invicta Virtuosi Racing,+0.344,6
+8,12,Arthur Leclerc,DAMS,+0.374,7
+9,2,Jehan Daruvala,MP Motorsport,+0.442,8
+10,9,Jak Crawford,Hitech Pulse-Eight,+0.444,10
+11,22,Richard Verschoor,Van Amersfoort Racing,+0.485,11
+12,23,Juan Manuel Correa,Van Amersfoort Racing,+0.560,12
+13,1,Dennis Hauger,MP Motorsport,+0.594,13
+14,16,Roy Nissany,PHM RacingbyCharouz,+0.601,14
+15,3,Zane Maloney,Rodin Carlin,+0.731,15
+16,11,Ayumu Iwasa,DAMS,+0.826,16
+17,20,Roman Staněk,Trident,+0.859,17
+18,17,Brad Benavides,PHM RacingbyCharouz,+1.007,18
+19,8,Oliver Bearman,Prema Racing,+1.047,19
+20,21,Clément Novalak,Trident,+1.059,20
+21,10,Isack Hadjar,Hitech Pulse-Eight,+1.165,21
+22,25,Ralph Boschung,Campos Racing,+1.185,22

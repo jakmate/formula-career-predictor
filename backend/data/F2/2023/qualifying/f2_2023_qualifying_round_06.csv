@@ -1,23 +1,23 @@
-Pos.,No.,Driver,Team,Time,GridSR,GridFR
-1,8,Oliver Bearman,Prema Racing,1:23.546,10,1
-2,4,Enzo Fittipaldi,Rodin Carlin,+0.077,8,2
-3,14,Jack Doohan,Invicta Virtuosi Racing,+0.110,7,3
-4,11,Ayumu Iwasa,DAMS,+0.193,6,4
-5,5,Théo Pourchaire,ART Grand Prix,+0.193,91,5
-6,1,Dennis Hauger,MP Motorsport,+0.377,5,6
-7,6,Victor Martins,ART Grand Prix,+0.432,4,7
-8,7,Frederik Vesti,Prema Racing,+0.463,3,8
-9,9,Jak Crawford,Hitech Pulse-Eight,+0.523,2,9
-10,15,Amaury Cordeel,Invicta Virtuosi Racing,+0.541,1,10
-11,23,Juan Manuel Correa,Van Amersfoort Racing,+0.560,11,14
-12,22,Richard Verschoor,Van Amersfoort Racing,+0.564,12,11
-13,12,Arthur Leclerc,DAMS,+0.682,13,12
-14,24,Kush Maini,Campos Racing,+0.698,14,13
-15,2,Jehan Daruvala,MP Motorsport,+0.710,15,15
-16,16,Roy Nissany,PHM RacingbyCharouz,+0.810,16,21
-17,25,Ralph Boschung,Campos Racing,+0.951,17,16
-18,20,Roman Staněk,Trident,+0.954,18,17
-19,21,Clément Novalak,Trident,+0.986,19,18
-20,10,Isack Hadjar,Hitech Pulse-Eight,+1.020,20,19
-21,3,Zane Maloney,Rodin Carlin,+1.115,21,20
-22,17,Brad Benavides,PHM RacingbyCharouz,+1.257,22,22
+Pos.,No.,Driver,Team,Time,Grid
+1,8,Oliver Bearman,Prema Racing,1:23.546,1
+2,4,Enzo Fittipaldi,Rodin Carlin,+0.077,2
+3,14,Jack Doohan,Invicta Virtuosi Racing,+0.110,3
+4,11,Ayumu Iwasa,DAMS,+0.193,4
+5,5,Théo Pourchaire,ART Grand Prix,+0.193,5
+6,1,Dennis Hauger,MP Motorsport,+0.377,6
+7,6,Victor Martins,ART Grand Prix,+0.432,7
+8,7,Frederik Vesti,Prema Racing,+0.463,8
+9,9,Jak Crawford,Hitech Pulse-Eight,+0.523,9
+10,15,Amaury Cordeel,Invicta Virtuosi Racing,+0.541,10
+11,23,Juan Manuel Correa,Van Amersfoort Racing,+0.560,14
+12,22,Richard Verschoor,Van Amersfoort Racing,+0.564,11
+13,12,Arthur Leclerc,DAMS,+0.682,12
+14,24,Kush Maini,Campos Racing,+0.698,13
+15,2,Jehan Daruvala,MP Motorsport,+0.710,15
+16,16,Roy Nissany,PHM RacingbyCharouz,+0.810,21
+17,25,Ralph Boschung,Campos Racing,+0.951,16
+18,20,Roman Staněk,Trident,+0.954,17
+19,21,Clément Novalak,Trident,+0.986,18
+20,10,Isack Hadjar,Hitech Pulse-Eight,+1.020,19
+21,3,Zane Maloney,Rodin Carlin,+1.115,20
+22,17,Brad Benavides,PHM RacingbyCharouz,+1.257,22

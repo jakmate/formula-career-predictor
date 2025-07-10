@@ -1,21 +1,21 @@
-Pos.,No.,Driver,Team,Time,Gap,Grid
-1,4,Nyck de Vries,ART Grand Prix,1:49.809,–,1
-2,8,Luca Ghiotto,UNI-Virtuosi,1:50.036,+0.227,2
-3,6,Nicholas Latifi,DAMS,1:50.578,+0.769,3
-4,9,Mick Schumacher,Prema Racing,1:50.748,+0.939,4
-5,1,Louis Delétraz,Carlin,1:50.853,+1.044,5
-6,11,Callum Ilott,Sauber Junior Team by Charouz,1:50.871,+1.062,6
-7,15,Jack Aitken,Campos Racing,1:50.962,+1.153,7
-8,2,Nobuharu Matsushita,Carlin,1:51.408,+1.599,8
-9,7,Guanyu Zhou,UNI-Virtuosi,1:51.573,+1.764,9
-10,16,Jordan King,MP Motorsport,1:51.717,+1.908,10
-11,12,Juan Manuel Correa,Sauber Junior Team by Charouz,1:51.788,+1.979,11
-12,5,Sérgio Sette Câmara,DAMS,1:51.817,+2.008,12
-13,20,Giuliano Alesi,Trident,1:52.644,+2.835,13
-14,14,Arjun Maini,Campos Racing,1:52.718,+2.909,14
-15,21,Ralph Boschung,Trident,1:52.956,+3.147,15
-16,10,Sean Gelael,Prema Racing,1:52.995,+3.186,17
-17,17,Mahaveer Raghunathan,MP Motorsport,1:55.217,+5.408,16
-EX,19,Anthoine Hubert,BWT Arden,no time,,18
-EX,18,Tatiana Calderón,BWT Arden,no time,,20
-—,3,Nikita Mazepin,ART Grand Prix,no time,,19
+Pos.,No.,Driver,Team,Time,Grid
+1,4,Nyck de Vries,ART Grand Prix,1:49.809,1
+2,8,Luca Ghiotto,UNI-Virtuosi,1:50.036,2
+3,6,Nicholas Latifi,DAMS,1:50.578,3
+4,9,Mick Schumacher,Prema Racing,1:50.748,4
+5,1,Louis Delétraz,Carlin,1:50.853,5
+6,11,Callum Ilott,Sauber Junior Team by Charouz,1:50.871,6
+7,15,Jack Aitken,Campos Racing,1:50.962,7
+8,2,Nobuharu Matsushita,Carlin,1:51.408,8
+9,7,Guanyu Zhou,UNI-Virtuosi,1:51.573,9
+10,16,Jordan King,MP Motorsport,1:51.717,10
+11,12,Juan Manuel Correa,Sauber Junior Team by Charouz,1:51.788,11
+12,5,Sérgio Sette Câmara,DAMS,1:51.817,12
+13,20,Giuliano Alesi,Trident,1:52.644,13
+14,14,Arjun Maini,Campos Racing,1:52.718,14
+15,21,Ralph Boschung,Trident,1:52.956,15
+16,10,Sean Gelael,Prema Racing,1:52.995,17
+17,17,Mahaveer Raghunathan,MP Motorsport,1:55.217,16
+EX,19,Anthoine Hubert,BWT Arden,no time,18
+EX,18,Tatiana Calderón,BWT Arden,no time,20
+—,3,Nikita Mazepin,ART Grand Prix,no time,19
