@@ -2,7 +2,7 @@ import csv
 import os
 import requests
 from bs4 import BeautifulSoup
-from scraping.scraping_utils import remove_citations
+from scraping.scraping_utils import remove_superscripts
 
 COLUMN_MAPPING = {
     'Name': 'Driver',
@@ -32,16 +32,16 @@ def add_time_gap(base_time, gap):
         else:
             minutes = 0
             seconds = float(base_time)
-        
+
         # Add gap
         gap_seconds = float(gap)
         total_seconds = seconds + gap_seconds
-        
-        # Handle minute overflow
+
+        # Minute overflow
         if total_seconds >= 60:
             minutes += int(total_seconds // 60)
             total_seconds = total_seconds % 60
-        
+
         # Format result
         if minutes > 0:
             return f"{minutes}:{total_seconds:06.3f}"
@@ -52,23 +52,12 @@ def add_time_gap(base_time, gap):
         return base_time
 
 
-def clean_cell_text(cell):
-    """Clean cell text by removing sup elements and extracting clean text"""
-    # Remove all sup elements (citations, footnotes, etc.)
-    for sup in cell.find_all("sup"):
-        sup.decompose()
-    
-    # Get clean text
-    text = cell.get_text(strip=True)
-    return text
-
-
 def extract_race_report_links(soup):
     """Extract race report links from the season summary table"""
     # Find Season summary heading
     season_heading = (soup.find("h3", {"id": "Season_summary"}) or
                       soup.find("h3", {"id": "Summary"}) or
-                      soup.find("h2", {"id": "Results"}) or 
+                      soup.find("h2", {"id": "Results"}) or
                       soup.find("h2", {"id": "Results_and_standings"}))
 
     if not season_heading:
@@ -211,52 +200,52 @@ def extract_quali_table_data(table):
         # Check if we have a two-row header (F1 2015+)
         first_row = all_rows[0]
         second_row = all_rows[1] if len(all_rows) > 1 else None
-        
+
         # Check if second row contains th elements
-        has_two_row_header = (second_row and 
-                             len(second_row.find_all("th")) > 0 and
-                             len(second_row.find_all("td")) == 0)
-        
+        has_two_row_header = (second_row and
+                              len(second_row.find_all("th")) > 0 and
+                              len(second_row.find_all("td")) == 0)
+
         if has_two_row_header:
             # Process two-row header structure
             headers = []
             first_row_headers = first_row.find_all("th")
             second_row_headers = second_row.find_all("th")
-            
+
             # First, collect all rowspan=2 headers in order
             for th in first_row_headers:
-                text = clean_cell_text(th)
+                text = remove_superscripts(th)
                 rowspan = int(th.get("rowspan", 1))
-                
+
                 if rowspan == 2:
                     headers.append(text)
-            
-            # Then add the second row headers (Q1, Q2, Q3)
+
+            # Add the second row headers (Q1, Q2, Q3)
             for th in second_row_headers:
-                text = clean_cell_text(th)
+                text = remove_superscripts(th)
                 headers.append(text)
-            
-            # Finally, add the last rowspan=2 header (Grid)
+
+            # Add the last rowspan=2 header (Grid)
             for th in first_row_headers:
-                text = clean_cell_text(th)
+                text = remove_superscripts(th)
                 rowspan = int(th.get("rowspan", 1))
                 colspan = int(th.get("colspan", 1))
-                
+
                 if rowspan == 2 and colspan == 1:
                     # Check if this is the last column
                     if th == first_row_headers[-1]:
                         headers.append(text)
-            
+
             data_start_index = 2  # Data starts from third row
         else:
             # Single row header
             header_row = all_rows[0]
-            headers = [clean_cell_text(th) for th in header_row.find_all("th")]
+            headers = [remove_superscripts(th) for th in header_row.find_all("th")]
             data_start_index = 1  # Data starts from second row
-        
+
         # Apply column mapping
         headers = [COLUMN_MAPPING.get(h, h) for h in headers]
-        
+
         # Drop unwanted columns for single row headers
         if not has_two_row_header:
             columns_to_drop = {'R1', 'GridSR', 'Gap', 'Q1 Time', 'Rank'}
@@ -273,23 +262,13 @@ def extract_quali_table_data(table):
             row_data = []
             for cell in cells:
                 # Clean up cell text, remove sup elements and citations
-                text = clean_cell_text(cell)
+                text = remove_superscripts(cell)
                 row_data.append(text)
 
             if row_data:
                 # Apply column filtering for single row headers
                 if not has_two_row_header:
                     row_data = [row_data[i] for i in indices_to_keep if i < len(row_data)]
-                
-                # Update driver column index after filtering
-                driver_col_index = None
-                for idx, header in enumerate(headers):
-                    if header.lower() == "driver":
-                        driver_col_index = idx
-                        break
-                
-                if driver_col_index is not None and len(row_data) > driver_col_index:
-                    row_data[driver_col_index] = remove_citations(row_data[driver_col_index])
 
                 # Process grid column (last column) truncation
                 grid_value = row_data[-1]
@@ -304,11 +283,11 @@ def extract_quali_table_data(table):
                 headers[idx] = "Time"  # Rename column
                 time_gap_col_index = idx
                 break
-        
+
         if time_gap_col_index is not None and data_rows:
             # Get pole position time (first row)
             pole_time = data_rows[0][time_gap_col_index]
-            
+
             # Convert gaps to actual times
             for row in data_rows:
                 if time_gap_col_index < len(row):

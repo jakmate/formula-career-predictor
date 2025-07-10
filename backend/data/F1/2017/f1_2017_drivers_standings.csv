@@ -1,11 +1,11 @@
 Pos,Driver,AUS R1,CHN R1,BHR R1,RUS R1,ESP R1,MON R1,CAN R1,AZE R1,AUT R1,GBR R1,HUN R1,BEL R1,ITA R1,SIN R1,MAL R1,JPN R1,USA R1,MEX R1,BRA R1,ABU R1,Points
-1,Lewis Hamilton,2P,1PF,2F,4,1PF,7,1PF,5P,4F,1PF,4,1P,1P,1F,2P,1P,1P,9,4,2,363
-2,Sebastian Vettel,1,2,1,2P,2,1,4,4F,2,7,1P,2F,3,RetP,4F,Ret,2F,4PF,1,3,317
-3,Valtteri Bottas,3,6,3P,1,Ret,4,2,2,1P,2,3,5,2,3,5,4F,5,2,2P,1PF,305
-4,Kimi Räikkönen,4F,5,4,3F,Ret,2P,7,14†,5,3,2,4,5,Ret,DNS,5,3,3,3,4,205
-5,Daniel Ricciardo,Ret,4,5,Ret,3,3,3,1,3,5,Ret,3,4F,2,3,3,Ret,Ret,6,Ret,200
-6,Max Verstappen,5,3,Ret,5,Ret,5,Ret,Ret,Ret,4,5,Ret,10,Ret,1,2,4,1,5F,5,168
-7,Sergio Pérez,7,9,7,6,4,13F,5,Ret,7,9,8,17†,9,5,6,7,8,7,9,7,100
+1,Lewis Hamilton,2,1,2,4,1,7,1,5,4,1,4,1,1,1,2,1,1,9,4,2,363
+2,Sebastian Vettel,1,2,1,2,2,1,4,4,2,7,1,2,3,Ret,4,Ret,2,4,1,3,317
+3,Valtteri Bottas,3,6,3,1,Ret,4,2,2,1,2,3,5,2,3,5,4,5,2,2,1,305
+4,Kimi Räikkönen,4,5,4,3,Ret,2,7,14†,5,3,2,4,5,Ret,DNS,5,3,3,3,4,205
+5,Daniel Ricciardo,Ret,4,5,Ret,3,3,3,1,3,5,Ret,3,4,2,3,3,Ret,Ret,6,Ret,200
+6,Max Verstappen,5,3,Ret,5,Ret,5,Ret,Ret,Ret,4,5,Ret,10,Ret,1,2,4,1,5,5,168
+7,Sergio Pérez,7,9,7,6,4,13,5,Ret,7,9,8,17†,9,5,6,7,8,7,9,7,100
 8,Esteban Ocon,10,10,10,7,5,12,6,6,8,8,9,9,6,10,10,6,6,5,Ret,8,87
 9,Carlos Sainz Jr.,8,7,Ret,10,7,6,Ret,8,Ret,Ret,7,10,14,4,Ret,Ret,7,Ret,11,Ret,54
 10,Nico Hülkenberg,11,12,9,8,6,Ret,8,Ret,13,6,17†,6,13,Ret,16,Ret,Ret,Ret,10,6,43
@@ -13,7 +13,7 @@ Pos,Driver,AUS R1,CHN R1,BHR R1,RUS R1,ESP R1,MON R1,CAN R1,AZE R1,AUT R1,GBR R1
 12,Lance Stroll,Ret,Ret,Ret,11,16,15†,9,3,10,16,14,11,7,8,8,Ret,11,6,16,18,40
 13,Romain Grosjean,Ret,11,8,Ret,10,8,10,13,6,13,Ret,7,15,9,13,9,14,15,15,11,28
 14,Kevin Magnussen,Ret,8,Ret,13,14,10,12,7,Ret,12,13,15,11,Ret,12,8,16,8,Ret,13,19
-15,Fernando Alonso,Ret,Ret,14†,DNS,12,,16†,9,Ret,Ret,6F,Ret,17†,Ret,11,11,Ret,10,8,9,17
+15,Fernando Alonso,Ret,Ret,14†,DNS,12,,16†,9,Ret,Ret,6,Ret,17†,Ret,11,11,Ret,10,8,9,17
 16,Stoffel Vandoorne,13,Ret,DNS,14,Ret,Ret,14,12,12,11,10,14,Ret,7,7,14,12,12,Ret,12,13
 17,Jolyon Palmer,Ret,13,13,Ret,15,11,11,Ret,11,DNS,12,13,Ret,6,15,12,,,,,8
 18,Pascal Wehrlein,WD,,11,16,8,Ret,15,10,14,17,15,Ret,16,12,17,15,Ret,14,14,14,5

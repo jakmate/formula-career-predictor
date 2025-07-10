@@ -1,18 +1,18 @@
 Pos,Driver,ALB SR,ALB FR,BHR FR,BHR SR,IMO SR,IMO FR,MON FR,MON SR,CAT SR,CAT FR,RBR FR,RBR SR,SIL SR,SIL FR,SPA FR,SPA SR,HUN SR,HUN FR,MNZ FR,MNZ SR,Points
-1,Rafael Câmara,Ret,1P F,12,1P F,11,3P,7,Ret,Ret,1P F,9,5,8,22,,,,,,,120
+1,Rafael Câmara,Ret,1,12,1,11,3,7,Ret,Ret,1,9,5,8,22,,,,,,,120
 2,Tim Tramnitz,NC,5,6,3,1,6,5,5,Ret,7,6,2,11,18,,,,,,,93
-3,Nikola Tsolov,8,Ret,1,5,3,9,24,1P F,3,5,3,DSQP,29,20P,,,,,,,91
-4,Mari Boya,13,17,15,8,Ret,5,8,3,7,22,5,3F,3,1,,,,,,,85
-5,Martinius Stenshorne,2F,8,5,18,13,11,1F,8,Ret,9,7F,1,2,17,,,,,,,76
-6,Noah Strømsted,Ret,2,10,6,6F,2F,Ret,18,Ret,8,20,7,13,28,,,,,,,62
+3,Nikola Tsolov,8,Ret,1,5,3,9,24,1,3,5,3,DSQ,29,20,,,,,,,91
+4,Mari Boya,13,17,15,8,Ret,5,8,3,7,22,5,3,3,1,,,,,,,85
+5,Martinius Stenshorne,2,8,5,18,13,11,1,8,Ret,9,7,1,2,17,,,,,,,76
+6,Noah Strømsted,Ret,2,10,6,6,2,Ret,18,Ret,8,20,7,13,28,,,,,,,62
 7,Théophile Naël,7,3,Ret,15,20,26,16,22†,5,2,11,10,19,2,,,,,,,58
 8,Alessandro Giusti,11,25,7,7,10,7,4,10,6,3,2,12,12,14,,,,,,,54
 9,Tuukka Taponen,14,20,3,4,7,4,2,7,Ret,19,Ret,20,18,10,,,,,,,52
 10,Roman Bilinski,3,9,20,13,5,8,11,2,Ret,Ret,15,23,10,4,,,,,,,49
-11,Santiago Ramos,1,16,Ret,14,27†,1,Ret,16,2F,Ret,13,27,15,8,,,,,,,48
+11,Santiago Ramos,1,16,Ret,14,27†,1,Ret,16,2,Ret,13,27,15,8,,,,,,,48
 12,Callum Voisin,9,Ret,4,2,26,18,10,4,16,10,8,8,22,19,,,,,,,48
-13,Laurens van Hoepen,Ret,12,16,12,17,10,3,6,4,4,12,DSQ,4,7F,,,,,,,48
-14,Tasanapol Inthraphuvasak,4,7,18,16,19,17,23,12,9,11,4,15,1F,13,,,,,,,33
+13,Laurens van Hoepen,Ret,12,16,12,17,10,3,6,4,4,12,DSQ,4,7,,,,,,,48
+14,Tasanapol Inthraphuvasak,4,7,18,16,19,17,23,12,9,11,4,15,1,13,,,,,,,33
 15,Charlie Wurz,Ret,6,9,11,23,16,6,Ret,14,13,Ret,6,9,16,,,,,,,25
 16,Ugo Ugochukwu,12,10,Ret,27,8,14,13,14,22,20,16,4,5,21,,,,,,,22
 17,Noel León,10,13,11,17,9,28†,Ret,Ret,10,18,10,11,7,3,,,,,,,21
@@ -22,7 +22,7 @@ Pos,Driver,ALB SR,ALB FR,BHR FR,BHR SR,IMO SR,IMO FR,MON FR,MON SR,CAT SR,CAT FR
 21,Christian Ho,15,Ret,8,10,21,21,15,13,11,14,Ret,24,6,5,,,,,,,17
 22,Bruno del Pino,Ret,23,19,9,2,27,22,NC,12,17,22,19,20,9,,,,,,,13
 23,Louis Sharp,18,14,14,23,4,12,9,9,13,12,Ret,16,21,Ret,,,,,,,11
-24,Freddie Slater,,,2F,Ret,,,,,,,,,,,,,,,,,10
+24,Freddie Slater,,,2,Ret,,,,,,,,,,,,,,,,,10
 25,Matías Zagazeta,5,22,17,29,Ret,22,17,15,18,15,17,18,25,24,,,,,,,6
 26,Brad Benavides,,,,,12,24,12,Ret,15,24,Ret,9,14,Ret,,,,,,,2
 27,Joshua Dufek,22,11,Ret,22,14,15,14,17,,,,,,,,,,,,,0

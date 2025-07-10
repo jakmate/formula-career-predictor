@@ -72,7 +72,7 @@ def extract_position(result_str):
         return None
 
     try:
-        clean_str = result_str.split()[0].replace('†', '').replace('F', '').replace('P', '')
+        clean_str = result_str.split()[0].replace('†', '')
         return int(float(clean_str))
     except (ValueError, IndexError):
         return None
@@ -258,7 +258,7 @@ def calculate_qualifying_features(df, qualifying_df):
     for (driver, year), driver_data in qualifying_df.groupby(['Driver', 'year']):
         positions = []
         # Define priority order for qualifying position columns
-        position_columns = ['Pos.', 'Grid'] # Grid as backup
+        position_columns = ['Pos.', 'Grid']  # Grid as backup
 
         # Extract qualifying positions from all rounds
         for _, row in driver_data.iterrows():

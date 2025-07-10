@@ -1,22 +1,22 @@
 Pos,Team,AUS R1,MAL R1,CHN R1,TUR R1,ESP R1,MON R1,CAN R1,EUR R1,GBR R1,GER R1,HUN R1,BEL R1,ITA R1,SIN R1,JPN R1,KOR R1,IND R1,ABU R1,BRA R1,Points
-1,Red Bull Racing-Renault,1P,1P,2P,1P,1,1P,2P,1PF,2,4,2P,1P,1P,1P,3P,1F,1PF,RetP,2P,650
-1,Red Bull Racing-Renault,5,4F,3F,2F,4P,4F,3,3,3P,3P,5,2F,Ret,3,4,3,4,4F,1F,650
-2,McLaren-Mercedes,2,8,1,4,2F,6,Ret,4,4,1F,4,Ret,4F,5,5,2P,7,1,Ret,497
-2,McLaren-Mercedes,6,2,4,6,3,3,1F,6,Ret,Ret,1,3,2,2F,1F,4,2,3,3,497
-3,Ferrari,4,6,7,3,5,2,Ret,2,1F,2,3,4,3,4,2,5,3,2,4,375
-3,Ferrari,7F,5,6,11,Ret,Ret,6,5,5,5,6F,8,6,9,7,6,Ret,5,5,375
+1,Red Bull Racing-Renault,1,1,2,1,1,1,2,1,2,4,2,1,1,1,3,1,1,Ret,2,650
+1,Red Bull Racing-Renault,5,4,3,2,4,4,3,3,3,3,5,2,Ret,3,4,3,4,4,1,650
+2,McLaren-Mercedes,2,8,1,4,2,6,Ret,4,4,1,4,Ret,4,5,5,2,7,1,Ret,497
+2,McLaren-Mercedes,6,2,4,6,3,3,1,6,Ret,Ret,1,3,2,2,1,4,2,3,3,497
+3,Ferrari,4,6,7,3,5,2,Ret,2,1,2,3,4,3,4,2,5,3,2,4,375
+3,Ferrari,7,5,6,11,Ret,Ret,6,5,5,5,6,8,6,9,7,6,Ret,5,5,375
 4,Mercedes,Ret,9,8,12,6,Ret,4,17,9,8,Ret,5,5,Ret,6,Ret,5,7,15,165
 4,Mercedes,Ret,12,5,5,7,11,11,7,6,7,9,6,Ret,7,10,8,6,6,7,165
 5,Renault,12,3,12,7,8,8,Ret,10,8,Ret,Ret,13,9,15,16,13,12,16,17,73
-5,Renault,3,17†,9,8,11,Ret,5,15,12,10,12,9,Ret,17,9,Ret,11,13,10,73
+5,Renault,3,17,9,8,11,Ret,5,15,12,10,12,9,Ret,17,9,Ret,11,13,10,73
 6,Force India-Mercedes,9,11,15,13,13,7,Ret,9,11,6,14,7,Ret,8,11,11,9,8,6,69
-6,Force India-Mercedes,10,10,11,Ret,12,12,18†,14,15,13,7,11,8,6,12,10,13,9,8,69
+6,Force India-Mercedes,10,10,11,Ret,12,12,18,14,15,13,7,11,8,6,12,10,13,9,8,69
 7,Sauber-Ferrari,DSQ,7,10,10,10,5,7,16,Ret,9,11,12,Ret,14,13,15,Ret,10,9,44
 7,Sauber-Ferrari,DSQ,Ret,17,14,9,DNS,12,11,7,11,15,Ret,Ret,10,8,16,10,11,13,44
 8,Toro Rosso-Ferrari,8,13,14,9,14,10,10,13,Ret,15,8,Ret,10,12,Ret,9,Ret,Ret,12,41
-8,Toro Rosso-Ferrari,11,14,Ret,16,16,Ret,8,8,10,12,10,Ret,7,21†,15,7,8,15,11,41
+8,Toro Rosso-Ferrari,11,14,Ret,16,16,Ret,8,8,10,12,10,Ret,7,21,15,7,8,15,11,41
 9,Williams-Cosworth,Ret,Ret,13,15,17,9,9,12,13,Ret,13,16,12,13,17,12,15,12,14,5
-9,Williams-Cosworth,Ret,Ret,18,17,15,18†,Ret,18,14,14,16,10,11,11,14,Ret,Ret,14,Ret,5
+9,Williams-Cosworth,Ret,Ret,18,17,15,18,Ret,18,14,14,16,10,11,11,14,Ret,Ret,14,Ret,5
 10,Lotus-Renault,Ret,15,16,19,Ret,14,Ret,19,Ret,16,Ret,15,13,16,18,14,14,17,16,0
 10,Lotus-Renault,13,Ret,19,18,18,13,16,20,Ret,20,Ret,14,14,Ret,19,17,19,18,18,0
 11,HRT-Cosworth,DNQ,Ret,23,21,21,17,17,24,19,19,18,Ret,NC,19,22,19,17,Ret,20,0

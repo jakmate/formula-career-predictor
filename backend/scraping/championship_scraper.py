@@ -1,6 +1,6 @@
 import csv
 import os
-from scraping.scraping_utils import remove_citations
+from scraping.scraping_utils import remove_superscripts
 
 
 def process_championship(soup, championship_type, year,
@@ -77,9 +77,9 @@ def process_championship(soup, championship_type, year,
             for row in data_rows:
                 cells = row.find_all(["th", "td"])
                 if len(cells) >= 3:
-                    pos = cells[0].get_text(strip=True)
-                    team = cells[1].get_text(strip=True)
-                    points = cells[2].get_text(strip=True)
+                    pos = remove_superscripts(cells[0])
+                    team = remove_superscripts(cells[1])
+                    points = remove_superscripts(cells[2])
 
                     # Skip rows that aren't actual standings (like "Guest team
                     # ineligible")
@@ -104,7 +104,7 @@ def process_championship(soup, championship_type, year,
 
         has_no_column = False
         if len(race_headers) > 2:
-            second_header = race_headers[2].get_text(strip=True).lower()
+            second_header = remove_superscripts(race_headers[2]).lower()
             if "no." in second_header or ("no" == second_header and year == 2010):
                 has_no_column = True
 
@@ -116,7 +116,7 @@ def process_championship(soup, championship_type, year,
 
         # Process all race headers
         for i, th in enumerate(race_headers[col_index:], col_index):
-            race_name = th.get_text(strip=True)
+            race_name = remove_superscripts(th)
             # Stop when we hit the Points column
             if not race_name or race_name.lower() in ['points', 'pts']:
                 break
@@ -132,7 +132,7 @@ def process_championship(soup, championship_type, year,
                 for j in range(colspan):
                     round_idx = round_start_idx + j
                     if round_idx < len(round_headers):
-                        round_name = round_headers[round_idx].get_text(strip=True)
+                        round_name = remove_superscripts(round_headers[round_idx])
                         if round_name:
                             race_rounds.append(round_name)
             else:
@@ -150,7 +150,6 @@ def process_championship(soup, championship_type, year,
             col_index += colspan
 
         combined_headers.append("Points")
-        combined_headers = [remove_citations(header) for header in combined_headers]
         writer.writerow(combined_headers)
 
         # Data processing - skip header rows and footer rows
@@ -197,7 +196,7 @@ def process_championship(soup, championship_type, year,
             # Handle position column with rowspan
             if pos_rowspan <= 0:
                 pos_cell = cells[cell_index]
-                current_pos = pos_cell.get_text(strip=True)
+                current_pos = remove_superscripts(pos_cell)
                 pos_rowspan = int(pos_cell.get('rowspan', 1))
                 cell_index += 1
             pos_rowspan -= 1
@@ -206,7 +205,7 @@ def process_championship(soup, championship_type, year,
             # Handle team/driver column with rowspan
             if team_rowspan <= 0:
                 team_cell = cells[cell_index]
-                current_team = team_cell.get_text(strip=True)
+                current_team = remove_superscripts(team_cell)
                 team_rowspan = int(team_cell.get('rowspan', 1))
                 cell_index += 1
             team_rowspan -= 1
@@ -223,7 +222,7 @@ def process_championship(soup, championship_type, year,
             race_cells = race_cells[:num_race_columns]
 
             for cell in race_cells:
-                text = cell.get_text(strip=True)
+                text = remove_superscripts(cell)
                 row_data.append(text)
 
             # Pad with empty strings if fewer race cells than expected
@@ -237,7 +236,7 @@ def process_championship(soup, championship_type, year,
                 # Search starting from the end of the race cells
                 if cell_index + num_race_columns < len(cells):
                     points_cell = cells[cell_index + num_race_columns]
-                    current_points = points_cell.get_text(strip=True)
+                    current_points = remove_superscripts(points_cell)
                     points_rowspan = int(points_cell.get('rowspan', 1))
                 else:
                     # If points cell not found, retain current_points
@@ -252,6 +251,5 @@ def process_championship(soup, championship_type, year,
                 while len(row_data) < len(combined_headers):
                     row_data.append("")
 
-            row_data = [remove_citations(el) for el in row_data]
             # Write the row
             writer.writerow(row_data)

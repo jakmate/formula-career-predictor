@@ -1,7 +1,7 @@
 import csv
 import os
 from bs4 import BeautifulSoup
-from scraping.scraping_utils import remove_citations
+from scraping.scraping_utils import remove_superscripts
 
 HEADER_MAPPING = {
     'Entrant': 'Team',
@@ -74,7 +74,7 @@ def process_entries(soup, year, formula, series_type="main"):
         if formula == 1 and year > 2015:
             # Two-row header structure for F1 2016+
             if len(all_rows) < 2:
-                headers = [remove_citations(th.get_text(strip=True)) 
+                headers = [remove_superscripts(th)
                            for th in all_rows[0].find_all("th")]
             else:
                 # Process first header row
@@ -86,9 +86,9 @@ def process_entries(soup, year, formula, series_type="main"):
                         # Expand colspan into placeholders
                         combined_headers.extend([None] * colspan)
                     else:
-                        text = remove_citations(th.get_text(strip=True))
+                        text = remove_superscripts(th)
                         combined_headers.append(text)
-                
+
                 # Process second header row
                 headers_row2 = all_rows[1].find_all("th")
                 h2_iter = iter(headers_row2)
@@ -97,7 +97,7 @@ def process_entries(soup, year, formula, series_type="main"):
                     if combined_headers[i] is None:
                         try:
                             th = next(h2_iter)
-                            text = remove_citations(th.get_text(strip=True))
+                            text = remove_superscripts(th)
                             combined_headers[i] = text
                         except StopIteration:
                             pass  # No more headers to fill
@@ -106,7 +106,7 @@ def process_entries(soup, year, formula, series_type="main"):
         else:
             # Single-row header processing
             header_row = all_rows[0]
-            headers = [remove_citations(header.get_text(strip=True))
+            headers = [remove_superscripts(header)
                        for header in header_row.find_all("th")]
             data_rows = all_rows[1:]
 
@@ -163,7 +163,7 @@ def process_entries(soup, year, formula, series_type="main"):
                     if cell_index < len(cells):
                         cell = cells[cell_index]
                         cell_index += 1
-                        value = remove_citations(cell.get_text(strip=True))
+                        value = remove_superscripts(cell)
                         # Get rowspan value (default 1 if missing/invalid)
                         rowspan_attr = cell.get('rowspan', '1')
                         try:
@@ -186,15 +186,17 @@ def process_entries(soup, year, formula, series_type="main"):
                 for cell in remaining_cells:
                     # Create a copy to avoid modifying original
                     cell_copy = BeautifulSoup(str(cell), 'lxml').find()
-                    # Remove citations
+                    # Remove superscripts
                     for sup in cell_copy.find_all('sup'):
                         sup.decompose()
                     # Extract text lines
                     lines = [s.strip() for s in cell_copy.stripped_strings]
                     row_data.append(lines)
-                
+
                 # Split into separate rows per driver
-                driver_count = max(len(driver_data) for driver_data in row_data[4:]) if len(row_data) > 4 else 0
+                driver_count = 0
+                if len(row_data) > 4:
+                    driver_count = max(len(driver_data) for driver_data in row_data[4:])
                 for i in range(driver_count):
                     driver_row = row_data[:4]  # Team data
                     for driver_data in row_data[4:]:
@@ -202,13 +204,13 @@ def process_entries(soup, year, formula, series_type="main"):
                             driver_row.append(driver_data[i])
                         else:
                             driver_row.append('')
-                    
+
                     # Remove unwanted columns
                     final_row = driver_row.copy()
                     for idx in sorted(unwanted_indices, reverse=True):
                         if idx < len(final_row):
                             del final_row[idx]
-                    
+
                     writer.writerow(final_row)
             else:
                 # Normal structure
@@ -216,16 +218,16 @@ def process_entries(soup, year, formula, series_type="main"):
                     if cell_index < len(cells):
                         cell = cells[cell_index]
                         cell_index += 1
-                        row_data.append(remove_citations(cell.get_text(strip=True)))
+                        row_data.append(remove_superscripts(cell))
                     else:
                         row_data.append('')
 
                 if any("ineligible" in cell.lower() for cell in row_data):
                     continue
-                
+
                 # Remove unwanted columns
                 for idx in sorted(unwanted_indices, reverse=True):
                     if idx < len(row_data):
                         del row_data[idx]
-                
+
                 writer.writerow(row_data)

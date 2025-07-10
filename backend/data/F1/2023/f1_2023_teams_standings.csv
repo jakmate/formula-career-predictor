@@ -1,21 +1,21 @@
 Pos,Team,BHR R1,SAU R1,AUS R1,AZE R1,MIA R1,MON R1,ESP R1,CAN R1,AUT R1,GBR R1,HUN R1,BEL R1,NED R1,ITA R1,SIN R1,JPN R1,QAT R1,USA R1,MXC R1,SAP R1,LVG R1,ABU R1,Points
-1,Red Bull Racing-Honda RBPT,1P,1P,1P,11,1F,1P,1PF,1P,1P 1 F,1PF,1F,11,1P,1,5,1PF,1P 2 F,11,1,1P 1,1,1PF,860
-1,Red Bull Racing-Honda RBPT,2,2F,5F,23,2P,16,4,6F,32,6,3,2,4,2,8,Ret,10,45,Ret,43,3,4,860
-2,Mercedes,5,4,2,67,4,4F,2,3,78,3,4P,47 F,6,5,3F,5,44,58,2F,87,7,3,409
-2,Mercedes,7,5,Ret,84 F,6,5,3,Ret,8,5,6,68,17,6,16†,7,Ret5,DSQ2,6,Ret4,8,9,409
-3,Ferrari,4,6,12,3P 2,5,6,5,4,2,9,7,3P 5,5,3P,1P,4,5,36,3P,68,2P,2,406
-3,Ferrari,Ret,7,Ret,55,7,8,11,5,63,10,8,Ret4,Ret,4,4,6,DNS6,DSQP 3,4,DNS5,6,18†,406
-4,McLaren-Mercedes,17,15,6,9,17,9,13,11,4,2,2,76,7,8,2,2,21,24,5,22 F,10F,5,302
-4,McLaren-Mercedes,Ret,17,8,11,19,10,17,13,16,4,5,Ret2,9,12F,7,3,33,Ret,8,14,Ret,6,302
-5,Aston Martin Aramco-Mercedes,3,3,3,46,3,2,6,2,55,7,9,5,2F,9,15,8,68,7,17†,3,5,7,280
-5,Aston Martin Aramco-Mercedes,6,Ret,4,78,12,Ret,7,9,94,14,10,9,11,16,WD,Ret,11,Ret,Ret,5,9,10,280
-6,Alpine-Renault,9,8,13†,14,8,3,8,8,10,18†,Ret,8,3,15,6,9,7,67,10,7,4,12,120
-6,Alpine-Renault,Ret,9,14†,15,9,7,10,12,147,Ret,Ret,113,10,Ret,Ret,10,12,Ret,11,10,11,13,120
-7,Williams-Mercedes,10,16,16†,12,14,14,16,7,11,8,11,14,8,7,11,Ret,137,9,9,11,12,14,28
+1,Red Bull Racing-Honda RBPT,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,1,1,860
+1,Red Bull Racing-Honda RBPT,2,2,5,2,2,16,4,6,3,6,3,2,4,2,8,Ret,10,4,Ret,4,3,4,860
+2,Mercedes,5,4,2,6,4,4,2,3,7,3,4,4,6,5,3,5,4,5,2,8,7,3,409
+2,Mercedes,7,5,Ret,8,6,5,3,Ret,8,5,6,6,17,6,16†,7,Ret,DSQ,6,Ret,8,9,409
+3,Ferrari,4,6,12,3,5,6,5,4,2,9,7,3,5,3,1,4,5,3,3,6,2,2,406
+3,Ferrari,Ret,7,Ret,5,7,8,11,5,6,10,8,Ret,Ret,4,4,6,DNS,DSQ,4,DNS,6,18†,406
+4,McLaren-Mercedes,17,15,6,9,17,9,13,11,4,2,2,7,7,8,2,2,2,2,5,2,10,5,302
+4,McLaren-Mercedes,Ret,17,8,11,19,10,17,13,16,4,5,Ret,9,12,7,3,3,Ret,8,14,Ret,6,302
+5,Aston Martin Aramco-Mercedes,3,3,3,4,3,2,6,2,5,7,9,5,2,9,15,8,6,7,17†,3,5,7,280
+5,Aston Martin Aramco-Mercedes,6,Ret,4,7,12,Ret,7,9,9,14,10,9,11,16,WD,Ret,11,Ret,Ret,5,9,10,280
+6,Alpine-Renault,9,8,13†,14,8,3,8,8,10,18†,Ret,8,3,15,6,9,7,6,10,7,4,12,120
+6,Alpine-Renault,Ret,9,14†,15,9,7,10,12,14,Ret,Ret,11,10,Ret,Ret,10,12,Ret,11,10,11,13,120
+7,Williams-Mercedes,10,16,16†,12,14,14,16,7,11,8,11,14,8,7,11,Ret,13,9,9,11,12,14,28
 7,Williams-Mercedes,12,Ret,Ret,16,20,18,20,Ret,13,11,18†,17,Ret,13,14,Ret,Ret,10,16†,Ret,16,16,28
-8,AlphaTauri-Honda RBPT,11,11,10,10,11,12,12,14,17,16,13,10,13,11,9,11,15,8F,7,96,14,8,25
+8,AlphaTauri-Honda RBPT,11,11,10,10,11,12,12,14,17,16,13,10,13,11,9,11,15,8,7,9,14,8,25
 8,AlphaTauri-Honda RBPT,14,14,15†,Ret,18,15,14,18,19,17,15,16,15,DNS,Ret,12,17,15,12,13,18†,11,25
 9,Alfa Romeo-Ferrari,8,13,9,18,13,11,9,10,12,12,12,12,14,10,12,13,8,12,14,Ret,15,17,16
-9,Alfa Romeo-Ferrari,16F,18,11,Ret,16,13,19,16,15,15,16,13,Ret,14,Ret,Ret,9,13,15,Ret,17,19,16
+9,Alfa Romeo-Ferrari,16,18,11,Ret,16,13,19,16,15,15,16,13,Ret,14,Ret,Ret,9,13,15,Ret,17,19,16
 10,Haas-Ferrari,13,10,7,13,10,17,15,15,18,13,14,15,12,17,10,14,14,11,13,12,13,15,12
-10,Haas-Ferrari,15,12,17†,17,15,19†,18,17,Ret6,Ret,17,18,16,18,13,15,16,14,Ret,Ret,19†,20,12
+10,Haas-Ferrari,15,12,17†,17,15,19†,18,17,Ret,Ret,17,18,16,18,13,15,16,14,Ret,Ret,19†,20,12

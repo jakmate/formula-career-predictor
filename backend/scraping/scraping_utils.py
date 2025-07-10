@@ -1,6 +1,8 @@
-import re
+def remove_superscripts(cell):
+    """Clean cell text by removing sup elements and extracting clean text"""
+    # Remove all sup elements (citations, footnotes, etc.)
+    for sup in cell.find_all("sup"):
+        sup.decompose()
 
-
-def remove_citations(text):
-    """Remove Wikipedia-style citations (e.g., [1], [a], [Note]) from text."""
-    return re.sub(r'\[[^\]]+\]', '', text)
+    # Get clean text
+    return cell.get_text(strip=True)

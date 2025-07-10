@@ -1,14 +1,14 @@
 Pos,Team,AUS R1,BHR R1,CHN R1,AZE R1,ESP R1,MON R1,CAN R1,FRA R1,AUT R1,GBR R1,GER R1,HUN R1,BEL R1,ITA R1,SIN R1,RUS R1,JPN R1,USA R1,MEX R1,BRA R1,ABU R1,Points
-1,Mercedes,2P,2F,2,1,1P,3,2,1P,RetP,2P,1F,1P,2P,1F,1P,1,1P,3PF,4,1P,1P,655
-1,Mercedes,8,3,4,14F†,2,5,5,7F,Ret,4,2,5,4F,3,4,2PF,2,5,5F,5F,5,655
-2,Ferrari,1,1P,3,2,4,2,1P,3,2F,1F,3,2,1,2P,3,3,5,1,2,3,2F,571
-2,Ferrari,3,Ret,8P,4P,Ret,4,6,5,3,3,RetP,3,Ret,4,5,4,6F,4,3,6,Ret,571
-3,Red Bull Racing-TAG Heuer,4F,Ret,1F,Ret,3,1P,3F,2,1,5,4,4F,3,5,2,5,3,2,1,2,3,419
-3,Red Bull Racing-TAG Heuer,6,Ret,5,Ret,5F,9F,4,4,Ret,15†,Ret,Ret,Ret,Ret,6,6,4,Ret,RetP,4,4,419
+1,Mercedes,2,2,2,1,1,3,2,1,Ret,2,1,1,2,1,1,1,1,3,4,1,1,655
+1,Mercedes,8,3,4,14†,2,5,5,7,Ret,4,2,5,4,3,4,2,2,5,5,5,5,655
+2,Ferrari,1,1,3,2,4,2,1,3,2,1,3,2,1,2,3,3,5,1,2,3,2,571
+2,Ferrari,3,Ret,8,4,Ret,4,6,5,3,3,Ret,3,Ret,4,5,4,6,4,3,6,Ret,571
+3,Red Bull Racing-TAG Heuer,4,Ret,1,Ret,3,1,3,2,1,5,4,4,3,5,2,5,3,2,1,2,3,419
+3,Red Bull Racing-TAG Heuer,6,Ret,5,Ret,5,9,4,4,Ret,15†,Ret,Ret,Ret,Ret,6,6,4,Ret,Ret,4,4,419
 4,Renault,7,6,6,5,7,8,7,8,12,6,5,9,11,8,8,12,10,6,6,12,6,122
 4,Renault,10,11,9,Ret,Ret,10,8,9,Ret,Ret,12,12,Ret,13,10,17,Ret,7,Ret,Ret,Ret,122
 5,Haas-Ferrari,Ret,5,10,13,6,13,12,6,4,9,6,7,7,16,15,8,8,Ret,15,8,9,93
-5,Haas-Ferrari,Ret,13,17,Ret,Ret,15,13,11,5,Ret,11,10,8,DSQ,18F,11,Ret,DSQ,16,9,10,93
+5,Haas-Ferrari,Ret,13,17,Ret,Ret,15,13,11,5,Ret,11,10,8,DSQ,18,11,Ret,DSQ,16,9,10,93
 6,McLaren-Renault,5,7,7,7,8,14,16,12,8,8,13,8,15,12,7,14,14,11,8,15,11,62
 6,McLaren-Renault,9,8,13,9,Ret,Ret,Ret,16†,15†,11,16†,Ret,Ret,Ret,12,16,15,Ret,Ret,17,14,62
 7,Force India-Mercedes,,,,,,,,,,,,,5,6,16,9,7,8,11,10,8,52

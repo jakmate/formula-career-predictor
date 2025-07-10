@@ -1,23 +1,23 @@
 Pos,Driver,AUS R1,MAL R1,CHN R1,BHR R1,ESP R1,MON R1,CAN R1,AUT R1,GBR R1,HUN R1,BEL R1,ITA R1,SIN R1,JPN R1,RUS R1,USA R1,MEX R1,BRA R1,ABU R1,Points
-1,Lewis Hamilton,1PF,2P,1PF,1P,2F,3P,1P,2P,1PF,6P,1P,1PF,Ret,1F,1,1,2,2F,2F,381
-2,Nico Rosberg,2,3F,2,3,1P,1,2,1F,2,8,2F,17†,4,2P,RetP,2PF,1PF,1P,1P,322
-3,Sebastian Vettel,3,1,3,5,3,2,5,4,3,1,12†,2,1P,3,2F,3,Ret,3,4,278
-4,Kimi Räikkönen,Ret,4,4,2F,5,6,4F,Ret,8,Ret,7,5,3,4,8,Ret,Ret,4,3,150
-5,Valtteri Bottas,DNS,5,6,4,4,14,3,5,5,13,9,4,5,5,12†,Ret,3,5,13,136
+1,Lewis Hamilton,1,2,1,1,2,3,1,2,1,6,1,1,Ret,1,1,1,2,2,2,381
+2,Nico Rosberg,2,3,2,3,1,1,2,1,2,8,2,17,4,2,Ret,2,1,1,1,322
+3,Sebastian Vettel,3,1,3,5,3,2,5,4,3,1,12,2,1,3,2,3,Ret,3,4,278
+4,Kimi Räikkönen,Ret,4,4,2,5,6,4,Ret,8,Ret,7,5,3,4,8,Ret,Ret,4,3,150
+5,Valtteri Bottas,DNS,5,6,4,4,14,3,5,5,13,9,4,5,5,12,Ret,3,5,13,136
 6,Felipe Massa,4,6,5,10,6,15,6,3,4,12,6,3,Ret,17,4,Ret,6,DSQ,8,121
 7,Daniil Kvyat,DNS,9,Ret,9,10,4,9,12,6,2,4,10,6,13,5,Ret,4,7,10,95
-8,Daniel Ricciardo,6,10,9,6,7,5F,13,10,Ret,3F,Ret,8,2F,15,15†,10,5,11,6,92
+8,Daniel Ricciardo,6,10,9,6,7,5,13,10,Ret,3,Ret,8,2,15,15,10,5,11,6,92
 9,Sergio Pérez,10,13,11,8,13,7,11,9,9,Ret,5,6,7,12,3,5,8,12,5,78
 10,Nico Hülkenberg,7,14,Ret,13,15,11,8,6,7,Ret,DNS,7,Ret,6,Ret,Ret,7,6,7,58
-11,Romain Grosjean,Ret,11,7,7,8,12,10,Ret,Ret,7,3,Ret,13†,7,Ret,Ret,10,8,9,51
-12,Max Verstappen,Ret,7,17†,Ret,11,Ret,15,8,Ret,4,8,12,8,9,10,4,9,9,16,49
-13,Felipe Nasr,5,12,8,12,12,9,16,11,DNS,11,11,13,10,20†,6,9,Ret,13,15,27
+11,Romain Grosjean,Ret,11,7,7,8,12,10,Ret,Ret,7,3,Ret,13,7,Ret,Ret,10,8,9,51
+12,Max Verstappen,Ret,7,17,Ret,11,Ret,15,8,Ret,4,8,12,8,9,10,4,9,9,16,49
+13,Felipe Nasr,5,12,8,12,12,9,16,11,DNS,11,11,13,10,20,6,9,Ret,13,15,27
 14,Pastor Maldonado,Ret,Ret,Ret,15,Ret,Ret,7,7,Ret,14,Ret,Ret,12,8,7,8,11,10,Ret,27
 15,Carlos Sainz Jr.,9,8,13,Ret,9,10,12,Ret,Ret,Ret,Ret,11,9,10,Ret,7,13,Ret,11,18
 16,Jenson Button,11,Ret,14,DNS,16,8,Ret,Ret,Ret,9,14,14,Ret,16,9,6,14,14,12,16
-17,Fernando Alonso,,Ret,12,11,Ret,Ret,Ret,Ret,10,5,13,18†,Ret,11,11,11,Ret,15,17,11
+17,Fernando Alonso,,Ret,12,11,Ret,Ret,Ret,Ret,10,5,13,18,Ret,11,11,11,Ret,15,17,11
 18,Marcus Ericsson,8,Ret,10,14,14,13,14,13,11,10,10,9,11,14,Ret,Ret,12,16,14,9
 19,Roberto Merhi,DNP,15,16,17,18,16,Ret,14,12,15,15,16,,,13,,,,19,0
 20,Alexander Rossi,,,,,,,,,,,,,14,18,,12,15,18,,0
-21,Will Stevens,DNP,DNS,15,16,17,17,17,Ret,13,16†,16,15,15,19,14,Ret,16,17,18,0
+21,Will Stevens,DNP,DNS,15,16,17,17,17,Ret,13,16,16,15,15,19,14,Ret,16,17,18,0
 —,Kevin Magnussen,DNS,,,,,,,,,,,,,,,,,,,0

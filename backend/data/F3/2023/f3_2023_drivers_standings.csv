@@ -1,20 +1,20 @@
 Pos,Driver,BHR SR,BHR FR,ALB FR,ALB SR,MON SR,MON FR,CAT FR,CAT SR,RBR SR,RBR FR,SIL FR,SIL SR,HUN SR,HUN FR,SPA FR,SPA SR,MNZ SR,MNZ FR,Points
-1,Gabriel Bortoleto,19,1F,6,1P,6,5,4,4,10,2,2,6,2F,7,Ret,11,2,5F,164
-2,Zak O'Sullivan,12,11,1,5,13,7,1F,8,4,1,16,18,22,1P F,15,12,11,2,119
-3,Paul Aron,5,12,3,6,10,3,5,5,1F,25,12,4,4,5,3,8,Ret,7,112
+1,Gabriel Bortoleto,19,1,6,1,6,5,4,4,10,2,2,6,2,7,Ret,11,2,5,164
+2,Zak O'Sullivan,12,11,1,5,13,7,1,8,4,1,16,18,22,1,15,12,11,2,119
+3,Paul Aron,5,12,3,6,10,3,5,5,1,25,12,4,4,5,3,8,Ret,7,112
 4,Franco Colapinto,2,10,DSQ,Ret,4,6,6,2,13,4,1,8,7,3,5,10,1,Ret,110
-5,Pepe Martí,1F,6,13,7,1,9,8,1P F,6,9,10,3F,20,6,Ret,9P F,Ret,Ret,105
-6,Dino Beganovic,4,3,5,13,12,2,Ret,3,8,5F,13,14,10,2,22,16,13,9,96
-7,Gabriele Minì,17,8P,4,3,11,1P F,20,14,2,Ret,5,7,1,16,Ret,DNS,6,19,92
-8,Oliver Goethe,6,2,Ret,22,17,13,11,16,26,11,17,1,5,4,Ret,Ret,5F,RetP,75
-9,Caio Collet,3,14,21,16,9,Ret,17,12,3,3,4,15,23,19,1F,5,19,4,73
+5,Pepe Martí,1,6,13,7,1,9,8,1,6,9,10,3,20,6,Ret,9,Ret,Ret,105
+6,Dino Beganovic,4,3,5,13,12,2,Ret,3,8,5,13,14,10,2,22,16,13,9,96
+7,Gabriele Minì,17,8,4,3,11,1,20,14,2,Ret,5,7,1,16,Ret,DNS,6,19,92
+8,Oliver Goethe,6,2,Ret,22,17,13,11,16,26,11,17,1,5,4,Ret,Ret,5,Ret,75
+9,Caio Collet,3,14,21,16,9,Ret,17,12,3,3,4,15,23,19,1,5,19,4,73
 10,Taylor Barnard,14,16,12,9,5,8,9,9,27,12,30,21,11,14,2,1,4,3,72
-11,Leonardo Fornaroli,8,27,7,4,2,24,3,NC,15,10,7F,2P,13,9,9,14,8,15,69
-12,Christian Mansell,13,13,9F,10,20,17,Ret,10,14,7,3,5,6,11,19,2,7,8,60
+11,Leonardo Fornaroli,8,27,7,4,2,24,3,NC,15,10,7,2,13,9,9,14,8,15,69
+12,Christian Mansell,13,13,9,10,20,17,Ret,10,14,7,3,5,6,11,19,2,7,8,60
 13,Jonny Edgar,9,23,DSQ,11,Ret,14,12,15,5,6,28,NC,8,8,4,19,Ret,1,55
-14,Grégoire Saucy,7,4,8,2F,3,10,23,27,20,27P,21,9,9,15,10,20,22,Ret,54
+14,Grégoire Saucy,7,4,8,2,3,10,23,27,20,27,21,9,9,15,10,20,22,Ret,54
 15,Luke Browning,Ret,5,17,8,8,4,2,Ret,11,22,14,Ret,16,12,8,23,DSQ,18,41
-16,Sebastián Montoya,10,9,2,Ret,7F,DSQ,26,7,9,20,8,10,Ret,24,Ret,6,12,Ret,37
+16,Sebastián Montoya,10,9,2,Ret,7,DSQ,26,7,9,20,8,10,Ret,24,Ret,6,12,Ret,37
 17,Mari Boya,15,Ret,DSQ,Ret,Ret,18,7,6,12,24,29,12,21,10,16,13,3,6,29
 18,Nikita Bedrin,16,17,15,23†,15,12,10,11,25,13,18,17,3,23,11,3,15,Ret,24
 19,Hugh Barter,11,26,19,15,25,26,19,13,22,8,6,13,25,13,6,22,,,14
