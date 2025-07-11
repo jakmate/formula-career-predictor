@@ -6,14 +6,10 @@ from scraping.scraping_utils import remove_superscripts
 HEADER_MAPPING = {
     'Entrant': 'Team',
     'Teams': 'Team',
-    'Team': 'Team',
-    'No.': 'No.',
     'Driver name': 'Driver',
     'Drivers': 'Driver',
     'Race Drivers': 'Driver',
     'Race drivers': 'Driver',
-    'Driver': 'Driver',
-    'Rounds': 'Rounds',
 }
 UNWANTED_COLUMNS = {'chassis', 'engine', 'status', 'constructor', 'power unit'}
 
@@ -147,6 +143,8 @@ def process_entries(soup, year, formula, series_type="main"):
             for _ in range(rowspan_columns)
         ]
 
+        driver_idx = headers.index("Driver")
+
         for row in data_rows:
             cells = row.find_all(["td", "th"])
             row_data = []
@@ -224,6 +222,9 @@ def process_entries(soup, year, formula, series_type="main"):
 
                 if any("ineligible" in cell.lower() for cell in row_data):
                     continue
+
+                if driver_idx is not None and row_data[driver_idx] == "Robert Visoiu":
+                    row_data[driver_idx] = "Robert Vișoiu"
 
                 # Remove unwanted columns
                 for idx in sorted(unwanted_indices, reverse=True):

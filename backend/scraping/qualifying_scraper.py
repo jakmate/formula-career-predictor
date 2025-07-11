@@ -112,6 +112,32 @@ def process_qualifying_data(race_url, round_info):
         return None
 
 
+def parse_time_to_seconds(t):
+    """Convert a time string to total seconds."""
+    t = t.strip()
+    # Case 1: “M:SS.mmm”
+    if ':' in t:
+        minutes, sec_ms = t.split(':', 1)
+    # Case 2: “M.SS.mmm”
+    elif t.count('.') >= 2:
+        minutes, sec_ms = t.split('.', 1)
+    else:
+        raise ValueError(f"Unrecognized time format: '{t}'")
+    return int(minutes) * 60 + float(sec_ms)
+
+
+def normalize_time_str(t):
+    """Turn 'M.SS.mmm' into 'M:SS.mmm', or leave 'M:SS.mmm' untouched."""
+    t = t.strip()
+    if ':' in t:
+        return t
+    if t.count('.') >= 2:
+        mins, rest = t.split('.', 1)
+        return f"{mins}:{rest}"
+    # if it’s totally unrecognized, just return it
+    return t
+
+
 def process_monte_carlo_qualifying(group_a_head, group_b_head, round_info, race_url):
     """Process Monte Carlo qualifying with Group A and Group B"""
     try:
@@ -138,26 +164,43 @@ def process_monte_carlo_qualifying(group_a_head, group_b_head, round_info, race_
         elif group_b_data:
             headers = group_b_data['headers']
 
-        # Combine data from both groups
-        combined_data = []
-        if group_a_data:
-            combined_data.extend(group_a_data['data'])
-        if group_b_data:
-            combined_data.extend(group_b_data['data'])
+        # Separate the data by group and sort each group by their original position
+        group_a_rows = []
+        group_b_rows = []
 
-        # Sort by position
-        try:
-            combined_data.sort(key=lambda x: int(x[-1]) if x[-1].isdigit() else float('inf'))
-        except (ValueError, IndexError):
-            # If sorting fails, keep original order
-            pass
+        if group_a_data:
+            group_a_rows = sorted(group_a_data['data'], key=lambda x: int(x[0]) if x[0].isdigit() else float('inf'))  # noqa: 501
+        if group_b_data:
+            group_b_rows = sorted(group_b_data['data'], key=lambda x: int(x[0]) if x[0].isdigit() else float('inf'))  # noqa: 501
+
+        # Get faster group
+        time_idx = headers.index("Time")
+        tA = parse_time_to_seconds(group_a_rows[0][time_idx])
+        tB = parse_time_to_seconds(group_b_rows[0][time_idx])
+        start_with_a = (tA <= tB)
+
+        # Create alternating grid pattern
+        combined_data = []
+        max_len = max(len(group_a_rows), len(group_b_rows))
+
+        # Determine order: ['A','B'] or ['B','A']
+        order = ['A', 'B'] if start_with_a else ['B', 'A']
+        pos = 1
+
+        for i in range(max_len):
+            for grp in order:
+                rows = group_a_rows if grp == 'A' else group_b_rows
+                if i < len(rows):
+                    row = rows[i][:]
+                    row[0] = str(pos)  # update Pos.
+                    combined_data.append(row)
+                    pos += 1
 
         return {
             'headers': headers,
             'data': combined_data,
             'round_info': round_info,
             'url': race_url,
-            'qualifying_type': 'Monte Carlo Groups'
         }
 
     except Exception as e:
@@ -166,7 +209,7 @@ def process_monte_carlo_qualifying(group_a_head, group_b_head, round_info, race_
 
 
 def process_single_qualifying_table(qualifying_heading, round_info, race_url):
-    """Process standard single qualifying table"""
+    """Process standard single qualifying table, normalizing any dotted time formats."""
     try:
         table = qualifying_heading.find_next("table", {"class": "wikitable"})
         if not table:
@@ -177,16 +220,18 @@ def process_single_qualifying_table(qualifying_heading, round_info, race_url):
         if not table_data:
             return None
 
+        headers = table_data['headers']
+        data = table_data['data']
+
         return {
-            'headers': table_data['headers'],
-            'data': table_data['data'],
+            'headers': headers,
+            'data': data,
             'round_info': round_info,
             'url': race_url,
-            'qualifying_type': 'Standard'
         }
 
     except Exception as e:
-        print(f"Error processing single qualifying table: {race_url}: {str(e)}")
+        print(f"Error processing single qualifying table: {race_url}: {e}")
         return None
 
 
@@ -296,6 +341,18 @@ def extract_quali_table_data(table):
                         # Convert gap to actual time
                         actual_time = add_time_gap(pole_time, gap_value[1:])
                         row[time_gap_col_index] = actual_time
+
+        if "Time" in headers:
+            time_idx = headers.index("Time")
+        else:
+            time_idx = None
+
+        # Walk every row and normalize time
+        if time_idx is not None:
+            for row in data_rows:
+                # guard against short rows
+                if time_idx < len(row):
+                    row[time_idx] = normalize_time_str(row[time_idx])
 
         return {'headers': headers, 'data': data_rows}
 

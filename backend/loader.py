@@ -24,14 +24,6 @@ FILE_PATTERNS = {
 }
 
 
-def clean_string_columns(df, columns):
-    """Clean string columns by stripping whitespace."""
-    for col in columns:
-        if col in df.columns:
-            df[col] = df[col].astype(str).str.strip()
-    return df
-
-
 def get_file_pattern(series_type, file_type, series, year, round_num=None):
     """Get file pattern based on series type."""
     if series_type == 'F3_European':
@@ -68,12 +60,7 @@ def load_entries_data(entries_file):
     """Load and preprocess entries data."""
     if not os.path.exists(entries_file):
         return None
-
     entries_df = pd.read_csv(entries_file)
-
-    # Apply column mapping and clean data
-    entries_df = clean_string_columns(entries_df, ['Driver'])
-    entries_df['Driver'] = entries_df['Driver'].replace('Robert Visoiu', 'Robert Vișoiu')
 
     return entries_df
 
@@ -196,7 +183,6 @@ def load_qualifying_data(series):
 
     if all_qualifying_data:
         df = pd.concat(all_qualifying_data, ignore_index=True)
-        df = clean_string_columns(df, ['Driver', 'Team'])
         return df
     return pd.DataFrame()
 
@@ -221,7 +207,6 @@ def merge_entries(driver_df, entries_df):
         return driver_df
 
     all_team_df = pd.concat(all_team_data, ignore_index=True)
-    driver_df = clean_string_columns(driver_df, ['Driver'])
 
     return driver_df.merge(
         all_team_df[['Driver', 'Team', 'team_count', 'year', 'series', 'series_type']],
