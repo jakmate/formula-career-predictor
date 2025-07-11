@@ -355,19 +355,15 @@ def get_all_drivers_from_data():
     all_drivers = set()
     series_map = {
         'F1': {
-            'standings_pattern': 'f1_{year}_drivers_standings.csv',
             'entries_pattern': 'f1_{year}_entries.csv'
         },
         'F2': {
-            'standings_pattern': 'f2_{year}_drivers_standings.csv',
             'entries_pattern': 'f2_{year}_entries.csv'
         },
         'F3': {
-            'standings_pattern': 'f3_{year}_drivers_standings.csv',
             'entries_pattern': 'f3_{year}_entries.csv'
         },
         'F3_European': {
-            'standings_pattern': 'f3_euro_{year}_drivers_standings.csv',
             'entries_pattern': 'f3_euro_{year}_entries.csv'
         }
     }
@@ -381,19 +377,7 @@ def get_all_drivers_from_data():
                 continue
 
             # Get file patterns for this series
-            standings_pattern = patterns['standings_pattern'].format(year=year)
             entries_pattern = patterns['entries_pattern'].format(year=year)
-
-            # Check driver standings file
-            standings_file = os.path.join(year_dir, standings_pattern)
-            if os.path.exists(standings_file):
-                try:
-                    df = pd.read_csv(standings_file)
-                    if 'Driver' in df.columns:
-                        drivers = df['Driver'].dropna().str.strip().unique()
-                        all_drivers.update(drivers)
-                except Exception as e:
-                    print(f"Error reading {standings_file}: {e}")
 
             # Check entries file
             entries_file = os.path.join(year_dir, entries_pattern)

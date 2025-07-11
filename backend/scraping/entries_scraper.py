@@ -123,8 +123,13 @@ def process_entries(soup, year, formula, series_type="main"):
                     data_rows = data_rows[:-1]
 
         # Determine rowspan columns based on series and year
-        if series_type == "f3_euro" or formula == 1:
+        if series_type == "f3_euro":
             rowspan_columns = 4  # Team, Chassis, Engine, No.
+        elif formula == 1:
+            if year <= 2013:
+                rowspan_columns = 6  # Team, Constructor, Chassis, Engine, No.
+            else:
+                rowspan_columns = 4  # Team, Chassis, Engine, No.
         else:
             rowspan_columns = 2  # Entrant/Team, No.
 
@@ -154,11 +159,7 @@ def process_entries(soup, year, formula, series_type="main"):
                         cell_index += 1
                         value = remove_superscripts(cell)
                         # Get rowspan value (default 1 if missing/invalid)
-                        rowspan_attr = cell.get('rowspan', '1')
-                        try:
-                            rowspan_val = int(rowspan_attr)
-                        except ValueError:
-                            rowspan_val = 1
+                        rowspan_val = int(cell.get('rowspan', '1'))
                         # Update tracker
                         trackers[col_idx] = {
                             'value': value,
@@ -178,6 +179,16 @@ def process_entries(soup, year, formula, series_type="main"):
                         sup.decompose()
                     # Extract text lines
                     lines = list(cell.stripped_strings)
+                    merged = []
+                    i = 0
+                    while i < len(lines):
+                        if lines[i].isdigit() and i+1 < len(lines) and lines[i+1].startswith('–'):
+                            merged.append(lines[i] + lines[i+1])
+                            i += 2
+                        else:
+                            merged.append(lines[i])
+                            i += 1
+                    lines = merged
                     row_data.append(lines)
 
                 # Split into separate rows per driver
