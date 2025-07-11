@@ -1,6 +1,5 @@
 import csv
 import os
-from bs4 import BeautifulSoup
 from scraping.scraping_utils import remove_superscripts
 
 HEADER_MAPPING = {
@@ -11,28 +10,26 @@ HEADER_MAPPING = {
     'Race Drivers': 'Driver',
     'Race drivers': 'Driver',
 }
-UNWANTED_COLUMNS = {'chassis', 'engine', 'status', 'constructor', 'power unit'}
+
+UNWANTED_COLUMNS = {'Chassis', 'Engine', 'Status', 'Constructor', 'Power unit'}
 
 
 def map_url(soup, year, formula, series_type="main"):
     if formula == 1:
         if year >= 2018 or year == 2016:
             return soup.find("h2", {"id": "Entries"})
-        else:
-            return soup.find("h2", {"id": "Teams_and_drivers"})
-    elif series_type == "f3_euro":
+        return soup.find("h2", {"id": "Teams_and_drivers"})
+    if series_type == "f3_euro":
         if year == 2018:
             return soup.find("h2", {"id": "Entries"})
-        elif year < 2016:
+        if year < 2016:
             return soup.find("h2", {"id": "Drivers_and_teams"})
-        else:
-            return soup.find("h2", {"id": "Teams_and_drivers"})
-    elif year == 2018 and formula == 2:
-        return soup.find("h2", {"id": "Entries"})
-    elif year <= 2018 or (formula == 3 and year == 2019):
         return soup.find("h2", {"id": "Teams_and_drivers"})
-    else:
+    if year == 2018 and formula == 2:
         return soup.find("h2", {"id": "Entries"})
+    if year <= 2018 or (formula == 3 and year == 2019):
+        return soup.find("h2", {"id": "Teams_and_drivers"})
+    return soup.find("h2", {"id": "Entries"})
 
 
 def process_entries(soup, year, formula, series_type="main"):
@@ -69,35 +66,29 @@ def process_entries(soup, year, formula, series_type="main"):
         # Process headers
         if formula == 1 and year > 2015:
             # Two-row header structure for F1 2016+
-            if len(all_rows) < 2:
-                headers = [remove_superscripts(th)
-                           for th in all_rows[0].find_all("th")]
-            else:
-                # Process first header row
-                headers_row1 = all_rows[0].find_all("th")
-                combined_headers = []
-                for th in headers_row1:
-                    colspan = int(th.get('colspan', '1'))
-                    if colspan > 1:
-                        # Expand colspan into placeholders
-                        combined_headers.extend([None] * colspan)
-                    else:
-                        text = remove_superscripts(th)
-                        combined_headers.append(text)
+            headers_row1 = all_rows[0].find_all("th")
+            combined_headers = []
+            for th in headers_row1:
+                colspan = int(th.get('colspan', '1'))
+                if colspan > 1:
+                    # Expand colspan into placeholders
+                    combined_headers.extend([None] * colspan)
+                else:
+                    text = remove_superscripts(th)
+                    combined_headers.append(text)
 
-                # Process second header row
-                headers_row2 = all_rows[1].find_all("th")
-                h2_iter = iter(headers_row2)
-                # Replace placeholders with actual headers
-                for i in range(len(combined_headers)):
-                    if combined_headers[i] is None:
-                        try:
-                            th = next(h2_iter)
-                            text = remove_superscripts(th)
-                            combined_headers[i] = text
-                        except StopIteration:
-                            pass  # No more headers to fill
-                headers = combined_headers
+            headers_row2 = all_rows[1].find_all("th")
+            h2_iter = iter(headers_row2)
+            # Replace placeholders with actual headers
+            for i in range(len(combined_headers)):
+                if combined_headers[i] is None:
+                    try:
+                        th = next(h2_iter)
+                        text = remove_superscripts(th)
+                        combined_headers[i] = text
+                    except StopIteration:
+                        pass  # No more headers to fill
+            headers = combined_headers
             data_rows = all_rows[2:]
         else:
             # Single-row header processing
@@ -112,7 +103,7 @@ def process_entries(soup, year, formula, series_type="main"):
         # Remove unwanted columns from headers
         unwanted_indices = [
             idx for idx, header in enumerate(headers)
-            if header.strip().lower() in UNWANTED_COLUMNS
+            if header.strip() in UNWANTED_COLUMNS
         ]
         # Delete indices in descending order to avoid shifting
         for idx in sorted(unwanted_indices, reverse=True):
@@ -182,13 +173,11 @@ def process_entries(soup, year, formula, series_type="main"):
             if formula == 1 and year >= 2014:
                 # F1 2014+ structure with multiple drivers in one row
                 for cell in remaining_cells:
-                    # Create a copy to avoid modifying original
-                    cell_copy = BeautifulSoup(str(cell), 'lxml').find()
                     # Remove superscripts
-                    for sup in cell_copy.find_all('sup'):
+                    for sup in cell.find_all('sup'):
                         sup.decompose()
                     # Extract text lines
-                    lines = [s.strip() for s in cell_copy.stripped_strings]
+                    lines = list(cell.stripped_strings)
                     row_data.append(lines)
 
                 # Split into separate rows per driver
@@ -220,11 +209,13 @@ def process_entries(soup, year, formula, series_type="main"):
                     else:
                         row_data.append('')
 
-                if any("ineligible" in cell.lower() for cell in row_data):
-                    continue
-
-                if driver_idx is not None and row_data[driver_idx] == "Robert Visoiu":
-                    row_data[driver_idx] = "Robert Vișoiu"
+                if formula == 3:
+                    if series_type == 'f3_euro':
+                        if any("ineligible" in cell for cell in row_data):
+                            continue
+                    if series_type == 'main':
+                        if driver_idx is not None and row_data[driver_idx] == "Robert Visoiu":
+                            row_data[driver_idx] = "Robert Vișoiu"
 
                 # Remove unwanted columns
                 for idx in sorted(unwanted_indices, reverse=True):

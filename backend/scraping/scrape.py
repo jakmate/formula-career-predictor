@@ -1,3 +1,4 @@
+import gc
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -40,6 +41,7 @@ def scrape():
                     scrape_quali(soup, year, num)
 
                     del soup
+                    gc.collect()
 
                 except Exception as e:
                     print(f"Error processing {year}: {str(e)}")
@@ -58,13 +60,14 @@ def scrape():
                 process_championship(soup, "Drivers'", year, "drivers_standings", 3, "f3_euro")
 
                 del soup
+                gc.collect()
 
             except Exception as e:
                 print(f"Error processing F3 European {year}: {str(e)}")
-
-        scrape_drivers()
     finally:
         session.close()
+
+    scrape_drivers()
 
 
 def scrape_current_year():
@@ -88,6 +91,9 @@ def scrape_current_year():
             process_championship(soup, "Teams'", current_year, "teams_standings", num)
             process_championship(soup, "Drivers'", current_year, "drivers_standings", num)
             scrape_quali(soup, current_year, num)
+
+            del soup
+            gc.collect()
 
         except Exception as e:
             print(f"Error processing current year F{num}: {str(e)}")

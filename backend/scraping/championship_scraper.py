@@ -3,31 +3,33 @@ import os
 from scraping.scraping_utils import remove_superscripts
 
 
-def process_championship(soup, championship_type, year,
-                         file_suffix, formula, series_type="main"):
+def map_url(championship_type, formula, year, series_type="main"):
     # Determine heading ID based on year and championship type
     if formula == 1:
         if championship_type == 'Drivers\'':
-            heading_id = "World_Drivers\'_Championship_standings"
+            return "World_Drivers\'_Championship_standings"
         elif championship_type == 'Teams\'':
-            heading_id = "World_Constructors'_Championship_standings"
+            return "World_Constructors\'_Championship_standings"
     elif series_type == "f3_euro":
         if year == 2012:
             if championship_type == 'Teams\'':
-                return
-            heading_id = "Championship_standings"
+                return ""
+            return "Championship_standings"
         elif year == 2013 and championship_type == 'Teams\'':
-            heading_id = "Ravenol_Team_Trophy"
-        else:
-            heading_id = f"{championship_type}_championship"
+            return "Ravenol_Team_Trophy"
+        return f"{championship_type}_championship"
     elif year == 2013 and formula == 2 and championship_type == 'Drivers\'':
-        heading_id = f"{championship_type}_championship"
+        return f"{championship_type}_championship"
     elif year < 2013:
-        heading_id = f"{championship_type}_Championship"
+        return f"{championship_type}_Championship"
     elif year < 2023:
-        heading_id = f"{championship_type}_championship"
-    else:
-        heading_id = f"{championship_type}_Championship_standings"
+        return f"{championship_type}_championship"
+    return f"{championship_type}_Championship_standings"
+
+
+def process_championship(soup, championship_type, year,
+                         file_suffix, formula, series_type="main"):
+    heading_id = map_url(championship_type, formula, year, series_type)
 
     if series_type == "f3_euro" and year == 2012:
         heading = soup.find("h2", {"id": heading_id})
@@ -83,12 +85,9 @@ def process_championship(soup, championship_type, year,
 
                     # Skip rows that aren't actual standings (like "Guest team
                     # ineligible")
-                    if pos and not pos.lower().startswith('guest'):
+                    if pos and not pos.startswith('Guest'):
                         writer.writerow([pos, team, points])
             return
-
-        # Check if it's team or driver standings
-        is_team_standings = "team" in file_suffix.lower()
 
         race_header_row = all_rows[0]
 
@@ -104,12 +103,12 @@ def process_championship(soup, championship_type, year,
 
         has_no_column = False
         if len(race_headers) > 2:
-            second_header = remove_superscripts(race_headers[2]).lower()
-            if "no." in second_header or ("no" == second_header and year == 2010):
+            second_header = remove_superscripts(race_headers[2])
+            if "No." in second_header or ("No" == second_header and year == 2010):
                 has_no_column = True
 
         # Start building headers - skip Pos and Driver/Team columns
-        combined_headers = ["Pos", "Team" if is_team_standings else "Driver"]
+        combined_headers = ["Pos", "Team" if "team" in file_suffix.lower() else "Driver"]
 
         # Start after Pos, Driver/Team (and No.)
         col_index = 3 if has_no_column else 2
@@ -118,7 +117,7 @@ def process_championship(soup, championship_type, year,
         for i, th in enumerate(race_headers[col_index:], col_index):
             race_name = remove_superscripts(th)
             # Stop when we hit the Points column
-            if not race_name or race_name.lower() in ['points', 'pts']:
+            if not race_name or race_name in ['Points', 'Pts']:
                 break
 
             colspan = int(th.get('colspan', 1))
