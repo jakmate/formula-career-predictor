@@ -169,6 +169,8 @@ def scrape_f1_schedule():
         url = f"https://www.formula1.com/en/racing/{CURRENT_YEAR}.html"
         response = session.get(url, timeout=10)
         soup = BeautifulSoup(response.content, 'lxml')
+        response.close()
+        del response
 
         races = []
         race_cards = soup.select('a.group')
@@ -213,6 +215,8 @@ def scrape_f1_schedule():
                         full_url = urljoin("https://www.formula1.com", race_url)
                         race_response = session.get(full_url, timeout=10)
                         race_soup = BeautifulSoup(race_response.content, 'lxml')
+                        race_response.close()
+                        del race_response
 
                         session_container = race_soup.select_one('.flex.flex-col.px-px-8.lg\\:px-px-16.py-px-8.lg\\:py-px-16.bg-surface-neutral-1.rounded-m') # noqa: 501
                         if session_container:
@@ -288,7 +292,7 @@ def scrape_f1_schedule():
                             if session_key and session_info:
                                 sessions[session_key] = session_info
 
-                        del race_soup
+                        race_soup.decompose()
                     except Exception as e:
                         print(f"Error scraping F1 race details for round {round_num}: {e}")
 
@@ -307,7 +311,7 @@ def scrape_f1_schedule():
             except Exception as e:
                 print(f"Error processing F1 race card: {e}")
 
-        del soup
+        soup.decompose()
         return races
     except Exception as e:
         print(f"Error scraping F1 schedule: {e}")
@@ -329,6 +333,8 @@ def scrape_fia_formula_schedule(series_name):
         url = f"{config['base_url']}/Calendar"
         response = session.get(url, timeout=10)
         soup = BeautifulSoup(response.content, 'lxml')
+        response.close()
+        del response
 
         races = []
         race_containers = soup.select('.col-12.col-sm-6.col-lg-4.col-xl-3')
@@ -375,6 +381,8 @@ def scrape_fia_formula_schedule(series_name):
 
                         detail_response = session.get(detail_url, timeout=10)
                         detail_soup = BeautifulSoup(detail_response.content, 'lxml')
+                        detail_response.close()
+                        del detail_response
 
                         # Look for session schedule
                         session_pins = detail_soup.select('.pin')
@@ -421,7 +429,7 @@ def scrape_fia_formula_schedule(series_name):
                                     elif 'feature' in session_name:
                                         sessions['race'] = session_dt
 
-                        del detail_soup
+                        detail_soup.decompose()
                     except Exception as e:
                         print(f"Error scraping {series_name.upper()} race details for round {round_num}: {e}") # noqa: 501
 
@@ -438,7 +446,7 @@ def scrape_fia_formula_schedule(series_name):
             except Exception as e:
                 print(f"Error processing {series_name.upper()} race container: {e}")
 
-        del soup
+        soup.decompose()
         return races
     except Exception as e:
         print(f"Error scraping {series_name.upper()} schedule: {e}")

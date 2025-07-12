@@ -76,7 +76,7 @@ def extract_race_report_links(soup):
             href = report_link.get("href")
             if href and href.startswith("/wiki/"):
                 race_links.append("https://en.wikipedia.org" + href)
-                
+
     return race_links
 
 
@@ -86,6 +86,8 @@ def process_qualifying_data(race_url, round_info, session):
         response = session.get(race_url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "lxml")
+        response.close()
+        del response
 
         # Find Qualifying heading
         qualifying_heading = (soup.find("h3", {"id": "Qualifying"}) or
@@ -100,11 +102,11 @@ def process_qualifying_data(race_url, round_info, session):
         group_b_head = soup.find("h4", {"id": "Group_B"}) or soup.find("dt", string="Group B")
 
         if group_a_head and group_b_head:
-            result = process_monte_carlo_qualifying(group_a_head, group_b_head, round_info, race_url)
+            result = process_two_table_qualifying(group_a_head, group_b_head, round_info, race_url)
         else:
             result = process_single_qualifying_table(qualifying_heading, round_info, race_url)
 
-        del soup
+        soup.decompose()
         return result
 
     except Exception as e:
@@ -127,18 +129,15 @@ def parse_time_to_seconds(t):
 
 
 def normalize_time_str(t):
-    """Turn 'M.SS.mmm' into 'M:SS.mmm', or leave 'M:SS.mmm' untouched."""
+    """Turn 'M.SS.mmm' into 'M:SS.mmm'."""
     t = t.strip()
-    if ':' in t:
-        return t
     if t.count('.') >= 2:
         mins, rest = t.split('.', 1)
         return f"{mins}:{rest}"
-    # if it’s totally unrecognized, just return it
     return t
 
 
-def process_monte_carlo_qualifying(group_a_head, group_b_head, round_info, race_url):
+def process_two_table_qualifying(group_a_head, group_b_head, round_info, race_url):
     """Process Monte Carlo qualifying with Group A and Group B"""
     try:
         # Process Group A

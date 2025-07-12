@@ -51,7 +51,8 @@ class DriverProfileScraper:
 
         # SPARQL query to find racing drivers by name
         query = f"""
-        SELECT ?person ?personLabel ?dob ?nationality ?nationalityLabel ?citizenship ?citizenshipLabel WHERE {{
+        SELECT ?person ?personLabel ?dob ?nationality ?nationalityLabel
+            ?citizenship ?citizenshipLabel WHERE {{
           {{
             ?person rdfs:label "{driver_name}"@en .
           }} UNION {{
@@ -59,7 +60,8 @@ class DriverProfileScraper:
           }}
           ?person wdt:P106 ?occupation .
           # racing automobile driver or racing driver or Formula One driver
-          FILTER(?occupation = wd:Q10349745 || ?occupation = wd:Q378622 || ?occupation = wd:Q10841764)
+          FILTER(?occupation = wd:Q10349745 ||
+            ?occupation = wd:Q378622 || ?occupation = wd:Q10841764)
 
           OPTIONAL {{ ?person wdt:P569 ?dob }}
           OPTIONAL {{ ?person wdt:P1532 ?nationality }}  # country for sport
@@ -76,7 +78,7 @@ class DriverProfileScraper:
                 headers={'User-Agent': 'DriverProfileScraper/1.0'},
                 timeout=10
             )
-            
+
             if response.status_code == 200:
                 data = response.json()
                 if data['results']['bindings']:
@@ -219,7 +221,7 @@ def get_all_drivers_from_data():
 
             entries_pattern = patterns['entries_pattern'].format(year=year)
             entries_file = os.path.join(year_dir, entries_pattern)
-            
+
             if os.path.exists(entries_file):
                 try:
                     df = pd.read_csv(entries_file)
