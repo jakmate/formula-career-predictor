@@ -1,8 +1,9 @@
 {
   "name": "Laurens van Hoepen",
   "dob": "2005-09-06",
-  "nationality": "Dutch",
-  "wiki_url": "https://en.wikipedia.org/wiki/Laurens_van_Hoepen",
+  "nationality": null,
+  "wikidata_id": "Q111418072",
+  "wikidata_url": "http://www.wikidata.org/entity/Q111418072",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:15.027185"
+  "scraped_date": "2025-07-12T10:17:43.982530"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Roman de Beer",
   "dob": "1994-10-06",
-  "nationality": "South, African",
-  "wiki_url": "https://en.wikipedia.org/wiki/Roman_de_Beer",
+  "nationality": "South Africa",
+  "wikidata_id": "Q15622949",
+  "wikidata_url": "http://www.wikidata.org/entity/Q15622949",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:06.486852"
+  "scraped_date": "2025-07-12T10:17:35.543951"
 }

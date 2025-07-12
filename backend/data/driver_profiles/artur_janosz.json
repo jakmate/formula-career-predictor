@@ -1,8 +1,9 @@
 {
   "name": "Artur Janosz",
   "dob": "1993-06-16",
-  "nationality": "Polish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Artur_Janosz",
+  "nationality": "Poland",
+  "wikidata_id": "Q19381427",
+  "wikidata_url": "http://www.wikidata.org/entity/Q19381427",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:17.822853"
+  "scraped_date": "2025-07-12T10:17:41.799480"
 }

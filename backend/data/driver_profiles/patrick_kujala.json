@@ -1,8 +1,9 @@
 {
   "name": "Patrick Kujala",
   "dob": "1996-05-15",
-  "nationality": "Finnish, Spanish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Patrick_Kujala",
+  "nationality": "Finland",
+  "wikidata_id": "Q4453860",
+  "wikidata_url": "http://www.wikidata.org/entity/Q4453860",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:16:42.624378"
+  "scraped_date": "2025-07-12T10:17:47.590563"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Daniel Morad",
   "dob": "1990-04-24",
-  "nationality": "Canadian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Daniel_Morad",
+  "nationality": "Canada",
+  "wikidata_id": "Q745885",
+  "wikidata_url": "http://www.wikidata.org/entity/Q745885",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:45.907214"
+  "scraped_date": "2025-07-12T10:17:29.721602"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Felix Rosenqvist",
   "dob": "1991-11-07",
-  "nationality": "Swedish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Felix_Rosenqvist",
+  "nationality": "Sweden",
+  "wikidata_id": "Q1403778",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1403778",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:57.773292"
+  "scraped_date": "2025-07-12T10:17:48.086827"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Jonny Edgar",
   "dob": "2004-02-13",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jonny_Edgar",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q104554111",
+  "wikidata_url": "http://www.wikidata.org/entity/Q104554111",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:52.285066"
+  "scraped_date": "2025-07-12T10:17:31.900534"
 }

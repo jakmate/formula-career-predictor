@@ -1,8 +1,9 @@
 {
   "name": "Arjun Maini",
   "dob": "1997-12-10",
-  "nationality": "Indian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Arjun_Maini",
+  "nationality": "India",
+  "wikidata_id": "Q19360043",
+  "wikidata_url": "http://www.wikidata.org/entity/Q19360043",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:51.841720"
+  "scraped_date": "2025-07-12T10:17:33.984195"
 }

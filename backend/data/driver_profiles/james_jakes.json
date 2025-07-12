@@ -1,8 +1,9 @@
 {
   "name": "James Jakes",
   "dob": "1987-08-04",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/James_Jakes",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q1332516",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1332516",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:57.813249"
+  "scraped_date": "2025-07-12T10:17:33.297757"
 }

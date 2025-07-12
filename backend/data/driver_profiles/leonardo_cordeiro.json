@@ -1,8 +1,9 @@
 {
   "name": "Leonardo Cordeiro",
   "dob": "1989-11-08",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Leonardo_Cordeiro",
+  "nationality": "Brazil",
+  "wikidata_id": "Q739043",
+  "wikidata_url": "http://www.wikidata.org/entity/Q739043",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:48.764488"
+  "scraped_date": "2025-07-12T10:17:38.068205"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Will Palmer",
   "dob": "1997-02-15",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Will_Palmer",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q24688850",
+  "wikidata_url": "http://www.wikidata.org/entity/Q24688850",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:29.785758"
+  "scraped_date": "2025-07-12T10:17:46.884745"
 }

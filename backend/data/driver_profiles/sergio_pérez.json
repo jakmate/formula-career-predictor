@@ -1,8 +1,9 @@
 {
   "name": "Sergio Pérez",
   "dob": "1990-01-26",
-  "nationality": "Mexican",
-  "wiki_url": "https://en.wikipedia.org/wiki/Sergio_P%C3%A9rez",
+  "nationality": "Mexico",
+  "wikidata_id": "Q82805",
+  "wikidata_url": "http://www.wikidata.org/entity/Q82805",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:16:44.621927"
+  "scraped_date": "2025-07-12T10:17:41.574595"
 }

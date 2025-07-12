@@ -1,8 +1,9 @@
 {
   "name": "Heikki Kovalainen",
   "dob": "1981-10-19",
-  "nationality": "Finnish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Heikki_Kovalainen",
+  "nationality": "Finland",
+  "wikidata_id": "Q82891",
+  "wikidata_url": "http://www.wikidata.org/entity/Q82891",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:34.876638"
+  "scraped_date": "2025-07-12T10:17:49.128932"
 }

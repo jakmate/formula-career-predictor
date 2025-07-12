@@ -1,8 +1,9 @@
 {
   "name": "Ben Barnicoat",
   "dob": "1996-12-20",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ben_Barnicoat",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q18097498",
+  "wikidata_url": "http://www.wikidata.org/entity/Q18097498",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:39.815044"
+  "scraped_date": "2025-07-12T10:17:46.410973"
 }

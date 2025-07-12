@@ -1,8 +1,9 @@
 {
   "name": "Antonio Spavone",
   "dob": "1994-06-02",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Antonio_Spavone",
+  "nationality": "Italy",
+  "wikidata_id": "Q605248",
+  "wikidata_url": "http://www.wikidata.org/entity/Q605248",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:49.099632"
+  "scraped_date": "2025-07-12T10:17:53.505958"
 }

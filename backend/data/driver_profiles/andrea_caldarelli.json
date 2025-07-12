@@ -1,8 +1,9 @@
 {
   "name": "Andrea Caldarelli",
   "dob": "1990-02-14",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Andrea_Caldarelli",
+  "nationality": "Italy",
+  "wikidata_id": "Q1401357",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1401357",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:16.467803"
+  "scraped_date": "2025-07-12T10:17:36.838053"
 }

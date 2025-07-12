@@ -1,8 +1,9 @@
 {
   "name": "Paul Aron",
   "dob": "2004-02-04",
-  "nationality": "Estonian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Paul_Aron",
+  "nationality": "Estonia",
+  "wikidata_id": "Q93973312",
+  "wikidata_url": "http://www.wikidata.org/entity/Q93973312",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:33.796184"
+  "scraped_date": "2025-07-12T10:17:47.433722"
 }

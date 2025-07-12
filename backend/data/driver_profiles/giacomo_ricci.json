@@ -1,8 +1,9 @@
 {
   "name": "Giacomo Ricci",
   "dob": "1985-03-30",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Giacomo_Ricci",
+  "nationality": "Italy",
+  "wikidata_id": "Q933482",
+  "wikidata_url": "http://www.wikidata.org/entity/Q933482",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:50.930230"
+  "scraped_date": "2025-07-12T10:17:44.311466"
 }

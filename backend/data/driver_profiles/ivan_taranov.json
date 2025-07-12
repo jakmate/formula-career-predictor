@@ -1,8 +1,9 @@
 {
   "name": "Ivan Taranov",
   "dob": "1994-10-30",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ivan_Taranov_(racing_driver)",
+  "nationality": "Russia",
+  "wikidata_id": "Q16005490",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16005490",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:40.198358"
+  "scraped_date": "2025-07-12T10:17:34.761464"
 }

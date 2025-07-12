@@ -1,8 +1,9 @@
 {
   "name": "Jenson Button",
   "dob": "1980-01-19",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jenson_Button",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q10510",
+  "wikidata_url": "http://www.wikidata.org/entity/Q10510",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:21.445732"
+  "scraped_date": "2025-07-12T10:17:38.548223"
 }

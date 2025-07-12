@@ -1,8 +1,9 @@
 {
   "name": "Tim Tramnitz",
   "dob": "2004-11-16",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tim_Tramnitz",
+  "nationality": null,
+  "wikidata_id": "Q111363917",
+  "wikidata_url": "http://www.wikidata.org/entity/Q111363917",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:10.474402"
+  "scraped_date": "2025-07-12T10:17:31.722591"
 }

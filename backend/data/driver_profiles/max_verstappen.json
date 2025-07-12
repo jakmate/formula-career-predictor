@@ -1,8 +1,9 @@
 {
   "name": "Max Verstappen",
   "dob": "1997-09-30",
-  "nationality": "Dutch",
-  "wiki_url": "https://en.wikipedia.org/wiki/Max_Verstappen",
+  "nationality": "Netherlands",
+  "wikidata_id": "Q2239218",
+  "wikidata_url": "http://www.wikidata.org/entity/Q2239218",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:19.064498"
+  "scraped_date": "2025-07-12T10:17:38.668153"
 }

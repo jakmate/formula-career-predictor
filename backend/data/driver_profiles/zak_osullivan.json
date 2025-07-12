@@ -1,8 +1,9 @@
 {
   "name": "Zak O'Sullivan",
   "dob": "2005-02-06",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Zak_O%27Sullivan",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q107021746",
+  "wikidata_url": "http://www.wikidata.org/entity/Q107021746",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:21.320279"
+  "scraped_date": "2025-07-12T10:17:53.249349"
 }

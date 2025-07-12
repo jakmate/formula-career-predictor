@@ -1,8 +1,9 @@
 {
   "name": "Jules Bianchi",
   "dob": "1989-08-03",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jules_Bianchi",
+  "nationality": "France",
+  "wikidata_id": "Q281294",
+  "wikidata_url": "http://www.wikidata.org/entity/Q281294",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:39.021295"
+  "scraped_date": "2025-07-12T10:17:36.883782"
 }

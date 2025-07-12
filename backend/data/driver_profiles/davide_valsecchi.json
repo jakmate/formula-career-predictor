@@ -1,8 +1,9 @@
 {
   "name": "Davide Valsecchi",
   "dob": "1987-01-24",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Davide_Valsecchi",
+  "nationality": "Italy",
+  "wikidata_id": "Q470709",
+  "wikidata_url": "http://www.wikidata.org/entity/Q470709",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:15.245481"
+  "scraped_date": "2025-07-12T10:17:43.540530"
 }

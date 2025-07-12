@@ -1,8 +1,9 @@
 {
   "name": "Edoardo Piscopo",
   "dob": "1988-02-04",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Edoardo_Piscopo",
+  "nationality": "Italy",
+  "wikidata_id": "Q201744",
+  "wikidata_url": "http://www.wikidata.org/entity/Q201744",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:43.488636"
+  "scraped_date": "2025-07-12T10:17:35.816610"
 }

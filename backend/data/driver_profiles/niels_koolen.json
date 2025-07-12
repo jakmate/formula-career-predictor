@@ -1,8 +1,9 @@
 {
   "name": "Niels Koolen",
   "dob": "2001-05-25",
-  "nationality": "Dutch",
-  "wiki_url": "https://en.wikipedia.org/wiki/Niels_Koolen",
+  "nationality": null,
+  "wikidata_id": "Q123954006",
+  "wikidata_url": "http://www.wikidata.org/entity/Q123954006",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:48.657595"
+  "scraped_date": "2025-07-12T10:17:33.537439"
 }

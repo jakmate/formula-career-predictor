@@ -1,8 +1,9 @@
 {
   "name": "Enzo Trulli",
   "dob": "2005-04-15",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Enzo_Trulli",
+  "nationality": "Italy",
+  "wikidata_id": "Q108837796",
+  "wikidata_url": "http://www.wikidata.org/entity/Q108837796",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:03.133415"
+  "scraped_date": "2025-07-12T10:17:42.654479"
 }

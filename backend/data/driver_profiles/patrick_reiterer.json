@@ -1,5 +1,9 @@
 {
   "name": "Patrick Reiterer",
-  "dob": null,
-  "scraped": false
+  "dob": "1990-09-28",
+  "nationality": "Italy",
+  "wikidata_id": "Q2057915",
+  "wikidata_url": "http://www.wikidata.org/entity/Q2057915",
+  "scraped": true,
+  "scraped_date": "2025-07-12T10:17:51.893612"
 }

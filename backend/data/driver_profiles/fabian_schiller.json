@@ -1,8 +1,9 @@
 {
   "name": "Fabian Schiller",
   "dob": "1997-05-24",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Fabian_Schiller",
+  "nationality": "Germany",
+  "wikidata_id": "Q19360108",
+  "wikidata_url": "http://www.wikidata.org/entity/Q19360108",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:42.381287"
+  "scraped_date": "2025-07-12T10:17:33.444538"
 }

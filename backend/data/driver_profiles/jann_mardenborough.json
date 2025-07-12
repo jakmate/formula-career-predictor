@@ -1,8 +1,9 @@
 {
   "name": "Jann Mardenborough",
   "dob": "1991-09-09",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jann_Mardenborough",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q6512064",
+  "wikidata_url": "http://www.wikidata.org/entity/Q6512064",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:42.236584"
+  "scraped_date": "2025-07-12T10:17:37.847378"
 }

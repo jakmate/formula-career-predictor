@@ -1,8 +1,9 @@
 {
   "name": "Yuki Tsunoda",
   "dob": "2000-05-11",
-  "nationality": "Japanese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Yuki_Tsunoda",
+  "nationality": "Japan",
+  "wikidata_id": "Q59209579",
+  "wikidata_url": "http://www.wikidata.org/entity/Q59209579",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:45.754447"
+  "scraped_date": "2025-07-12T10:17:33.008459"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Stefano Coletti",
   "dob": "1989-04-06",
-  "nationality": "Monégasque",
-  "wiki_url": "https://en.wikipedia.org/wiki/Stefano_Coletti",
+  "nationality": "Monaco",
+  "wikidata_id": "Q530043",
+  "wikidata_url": "http://www.wikidata.org/entity/Q530043",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:35.269343"
+  "scraped_date": "2025-07-12T10:17:43.170568"
 }

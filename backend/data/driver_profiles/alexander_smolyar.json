@@ -1,8 +1,9 @@
 {
   "name": "Alexander Smolyar",
   "dob": "2001-07-19",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alexander_Smolyar",
+  "nationality": "Russia",
+  "wikidata_id": "Q79488722",
+  "wikidata_url": "http://www.wikidata.org/entity/Q79488722",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:51.918535"
+  "scraped_date": "2025-07-12T10:17:32.344173"
 }

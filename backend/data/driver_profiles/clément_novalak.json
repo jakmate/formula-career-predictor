@@ -1,8 +1,9 @@
 {
   "name": "Clément Novalak",
   "dob": "2000-12-23",
-  "nationality": "French, Swiss",
-  "wiki_url": "https://en.wikipedia.org/wiki/Cl%C3%A9ment_Novalak",
+  "nationality": "France",
+  "wikidata_id": "Q86274904",
+  "wikidata_url": "http://www.wikidata.org/entity/Q86274904",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:12.464002"
+  "scraped_date": "2025-07-12T10:17:31.563225"
 }

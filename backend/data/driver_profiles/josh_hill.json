@@ -1,8 +1,9 @@
 {
   "name": "Josh Hill",
   "dob": "1991-01-09",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Josh_Hill_(racing_driver)",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q2507381",
+  "wikidata_url": "http://www.wikidata.org/entity/Q2507381",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:42.149573"
+  "scraped_date": "2025-07-12T10:17:46.959313"
 }

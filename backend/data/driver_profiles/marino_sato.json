@@ -1,8 +1,9 @@
 {
   "name": "Marino Sato",
   "dob": "1999-05-12",
-  "nationality": "Japanese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Marino_Sato",
+  "nationality": "Japan",
+  "wikidata_id": "Q28777402",
+  "wikidata_url": "http://www.wikidata.org/entity/Q28777402",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:30.182639"
+  "scraped_date": "2025-07-12T10:17:30.842055"
 }

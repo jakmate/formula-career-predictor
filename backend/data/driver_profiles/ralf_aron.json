@@ -1,8 +1,9 @@
 {
   "name": "Ralf Aron",
   "dob": "1998-03-21",
-  "nationality": "Estonian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ralf_Aron",
+  "nationality": "Estonia",
+  "wikidata_id": "Q21004868",
+  "wikidata_url": "http://www.wikidata.org/entity/Q21004868",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:02.294967"
+  "scraped_date": "2025-07-12T10:17:41.966593"
 }

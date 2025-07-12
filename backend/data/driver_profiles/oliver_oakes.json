@@ -1,8 +1,9 @@
 {
   "name": "Oliver Oakes",
   "dob": "1988-01-11",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Oliver_Oakes",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q1852998",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1852998",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:05.951199"
+  "scraped_date": "2025-07-12T10:17:51.121048"
 }

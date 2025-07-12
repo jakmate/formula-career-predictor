@@ -1,8 +1,9 @@
 {
   "name": "Ayumu Iwasa",
   "dob": "2001-09-22",
-  "nationality": "Japanese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ayumu_Iwasa",
+  "nationality": "Japan",
+  "wikidata_id": "Q104848832",
+  "wikidata_url": "http://www.wikidata.org/entity/Q104848832",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:51.994800"
+  "scraped_date": "2025-07-12T10:17:40.201494"
 }

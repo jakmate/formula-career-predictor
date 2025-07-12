@@ -1,8 +1,9 @@
 {
   "name": "Igor Fraga",
   "dob": "1998-09-26",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Igor_Fraga",
+  "nationality": "Brazil",
+  "wikidata_id": "Q62001910",
+  "wikidata_url": "http://www.wikidata.org/entity/Q62001910",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:53.774648"
+  "scraped_date": "2025-07-12T10:17:39.572896"
 }

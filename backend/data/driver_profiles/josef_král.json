@@ -1,8 +1,9 @@
 {
   "name": "Josef Král",
   "dob": "1990-06-15",
-  "nationality": "Czech",
-  "wiki_url": "https://en.wikipedia.org/wiki/Josef_Kr%C3%A1l",
+  "nationality": "Czech Republic",
+  "wikidata_id": "Q929063",
+  "wikidata_url": "http://www.wikidata.org/entity/Q929063",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:21.230549"
+  "scraped_date": "2025-07-12T10:17:51.709252"
 }

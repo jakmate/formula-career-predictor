@@ -1,8 +1,9 @@
 {
   "name": "Nelson Mason",
   "dob": "1987-10-13",
-  "nationality": "Canadian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nelson_Mason",
+  "nationality": "Canada",
+  "wikidata_id": "Q16467088",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16467088",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:31.941489"
+  "scraped_date": "2025-07-12T10:17:47.637563"
 }

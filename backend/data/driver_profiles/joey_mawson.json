@@ -1,8 +1,9 @@
 {
   "name": "Joey Mawson",
   "dob": "1996-03-27",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Joey_Mawson",
+  "nationality": "Australia",
+  "wikidata_id": "Q22278445",
+  "wikidata_url": "http://www.wikidata.org/entity/Q22278445",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:11.774426"
+  "scraped_date": "2025-07-12T10:17:39.090051"
 }

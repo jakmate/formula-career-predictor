@@ -1,8 +1,9 @@
 {
   "name": "Harry Tincknell",
   "dob": "1991-10-29",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Harry_Tincknell",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q1448596",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1448596",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:25.939049"
+  "scraped_date": "2025-07-12T10:17:30.603372"
 }

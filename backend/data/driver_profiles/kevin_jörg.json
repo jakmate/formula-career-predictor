@@ -1,8 +1,9 @@
 {
   "name": "Kevin Jörg",
   "dob": "1995-09-11",
-  "nationality": "Swiss",
-  "wiki_url": "https://en.wikipedia.org/wiki/Kevin_J%C3%B6rg",
+  "nationality": "Switzerland",
+  "wikidata_id": "Q16566414",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16566414",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:37.378477"
+  "scraped_date": "2025-07-12T10:17:29.942301"
 }

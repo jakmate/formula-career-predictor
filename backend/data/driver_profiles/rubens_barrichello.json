@@ -1,8 +1,9 @@
 {
   "name": "Rubens Barrichello",
   "dob": "1972-05-23",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Rubens_Barrichello",
+  "nationality": "Brazil",
+  "wikidata_id": "Q169846",
+  "wikidata_url": "http://www.wikidata.org/entity/Q169846",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:00.437622"
+  "scraped_date": "2025-07-12T10:17:31.450537"
 }

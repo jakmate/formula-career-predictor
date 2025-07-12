@@ -1,8 +1,9 @@
 {
   "name": "Nico Rosberg",
   "dob": "1985-06-27",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nico_Rosberg",
+  "nationality": "Germany",
+  "wikidata_id": "Q75820",
+  "wikidata_url": "http://www.wikidata.org/entity/Q75820",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:32.806291"
+  "scraped_date": "2025-07-12T10:17:42.419036"
 }

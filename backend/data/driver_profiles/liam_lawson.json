@@ -1,8 +1,9 @@
 {
   "name": "Liam Lawson",
   "dob": "2002-02-11",
-  "nationality": "New, Zealander",
-  "wiki_url": "https://en.wikipedia.org/wiki/Liam_Lawson",
+  "nationality": "New Zealand",
+  "wikidata_id": "Q59180330",
+  "wikidata_url": "http://www.wikidata.org/entity/Q59180330",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:53.637551"
+  "scraped_date": "2025-07-12T10:17:43.634120"
 }

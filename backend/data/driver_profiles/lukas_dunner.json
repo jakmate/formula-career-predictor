@@ -1,8 +1,9 @@
 {
   "name": "Lukas Dunner",
   "dob": "2002-02-12",
-  "nationality": "Austrian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Lukas_Dunner",
+  "nationality": "Austria",
+  "wikidata_id": "Q86400418",
+  "wikidata_url": "http://www.wikidata.org/entity/Q86400418",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:15.433612"
+  "scraped_date": "2025-07-12T10:17:30.519578"
 }

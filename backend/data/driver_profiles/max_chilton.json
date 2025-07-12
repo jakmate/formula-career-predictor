@@ -1,8 +1,9 @@
 {
   "name": "Max Chilton",
   "dob": "1991-04-21",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Max_Chilton",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q613590",
+  "wikidata_url": "http://www.wikidata.org/entity/Q613590",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:00.110065"
+  "scraped_date": "2025-07-12T10:17:41.243300"
 }

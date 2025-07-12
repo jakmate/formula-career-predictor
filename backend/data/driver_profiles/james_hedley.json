@@ -1,8 +1,9 @@
 {
   "name": "James Hedley",
   "dob": "2003-09-01",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/James_Hedley",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q126179749",
+  "wikidata_url": "http://www.wikidata.org/entity/Q126179749",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:45.098397"
+  "scraped_date": "2025-07-12T10:17:37.249229"
 }

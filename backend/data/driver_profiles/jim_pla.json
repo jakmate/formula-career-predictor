@@ -1,8 +1,9 @@
 {
   "name": "Jim Pla",
   "dob": "1992-10-06",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jim_Pla",
+  "nationality": "France",
+  "wikidata_id": "Q1689194",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1689194",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:01.483533"
+  "scraped_date": "2025-07-12T10:17:49.523742"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Josh Webster",
   "dob": "1994-02-06",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Josh_Webster",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q5049310",
+  "wikidata_url": "http://www.wikidata.org/entity/Q5049310",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:16.131194"
+  "scraped_date": "2025-07-12T10:17:51.220513"
 }

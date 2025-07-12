@@ -1,8 +1,9 @@
 {
   "name": "Christophe Hurni",
   "dob": "1962-12-01",
-  "nationality": "Swiss",
-  "wiki_url": "https://en.wikipedia.org/wiki/Christophe_Hurni",
+  "nationality": "Switzerland",
+  "wikidata_id": "Q124801",
+  "wikidata_url": "http://www.wikidata.org/entity/Q124801",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:44.274974"
+  "scraped_date": "2025-07-12T10:17:31.645590"
 }

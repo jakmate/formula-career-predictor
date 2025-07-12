@@ -1,8 +1,9 @@
 {
   "name": "Mikhail Aleshin",
   "dob": "1987-05-22",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Mikhail_Aleshin",
+  "nationality": "Russia",
+  "wikidata_id": "Q369087",
+  "wikidata_url": "http://www.wikidata.org/entity/Q369087",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:23.915918"
+  "scraped_date": "2025-07-12T10:17:37.805364"
 }

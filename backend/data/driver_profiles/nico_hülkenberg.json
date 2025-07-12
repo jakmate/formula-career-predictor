@@ -1,8 +1,9 @@
 {
   "name": "Nico Hülkenberg",
   "dob": "1987-08-19",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nico_H%C3%BClkenberg",
+  "nationality": "Germany",
+  "wikidata_id": "Q76547",
+  "wikidata_url": "http://www.wikidata.org/entity/Q76547",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:49:01.414298"
+  "scraped_date": "2025-07-12T10:17:34.250490"
 }

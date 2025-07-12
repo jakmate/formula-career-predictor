@@ -1,8 +1,9 @@
 {
   "name": "Jehan Daruvala",
   "dob": "1998-10-01",
-  "nationality": "Indian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jehan_Daruvala",
+  "nationality": "India",
+  "wikidata_id": "Q27899139",
+  "wikidata_url": "http://www.wikidata.org/entity/Q27899139",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:27.618706"
+  "scraped_date": "2025-07-12T10:17:46.549496"
 }

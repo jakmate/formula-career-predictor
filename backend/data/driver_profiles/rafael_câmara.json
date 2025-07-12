@@ -1,8 +1,9 @@
 {
   "name": "Rafael Câmara",
   "dob": "2005-05-05",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Rafael_C%C3%A2mara",
+  "nationality": "Brazil",
+  "wikidata_id": "Q114284706",
+  "wikidata_url": "http://www.wikidata.org/entity/Q114284706",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:43.825740"
+  "scraped_date": "2025-07-12T10:17:40.290483"
 }

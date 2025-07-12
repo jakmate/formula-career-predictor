@@ -1,8 +1,9 @@
 {
   "name": "Facu Regalia",
   "dob": "1991-11-23",
-  "nationality": "Argentine",
-  "wiki_url": "https://en.wikipedia.org/wiki/Facu_Regalia",
+  "nationality": "Argentina",
+  "wikidata_id": "Q1335272",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1335272",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:13.180507"
+  "scraped_date": "2025-07-12T10:17:43.596002"
 }

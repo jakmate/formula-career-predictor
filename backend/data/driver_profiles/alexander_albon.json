@@ -1,8 +1,9 @@
 {
   "name": "Alexander Albon",
   "dob": "1996-03-23",
-  "nationality": "Thai",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alex_Albon",
+  "nationality": "Thailand",
+  "wikidata_id": "Q16149172",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16149172",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:23.798598"
+  "scraped_date": "2025-07-12T10:17:43.341529"
 }

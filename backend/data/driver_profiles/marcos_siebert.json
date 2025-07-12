@@ -1,8 +1,9 @@
 {
   "name": "Marcos Siebert",
   "dob": "1996-03-16",
-  "nationality": "Argentine",
-  "wiki_url": "https://en.wikipedia.org/wiki/Marcos_Siebert",
+  "nationality": "Argentina",
+  "wikidata_id": "Q15176698",
+  "wikidata_url": "http://www.wikidata.org/entity/Q15176698",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:25.322487"
+  "scraped_date": "2025-07-12T10:17:52.567125"
 }

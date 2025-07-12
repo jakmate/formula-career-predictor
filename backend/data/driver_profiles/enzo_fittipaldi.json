@@ -1,8 +1,9 @@
 {
   "name": "Enzo Fittipaldi",
   "dob": "2001-07-18",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Enzo_Fittipaldi",
+  "nationality": "Brazil",
+  "wikidata_id": "Q28054103",
+  "wikidata_url": "http://www.wikidata.org/entity/Q28054103",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:26.887213"
+  "scraped_date": "2025-07-12T10:17:33.945166"
 }

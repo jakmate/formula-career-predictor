@@ -1,8 +1,9 @@
 {
   "name": "Tom Dillmann",
   "dob": "1989-04-06",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tom_Dillmann",
+  "nationality": "France",
+  "wikidata_id": "Q1400906",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1400906",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:07.752530"
+  "scraped_date": "2025-07-12T10:17:31.059955"
 }

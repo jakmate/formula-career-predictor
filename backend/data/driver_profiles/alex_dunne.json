@@ -1,8 +1,9 @@
 {
   "name": "Alex Dunne",
   "dob": "2005-11-11",
-  "nationality": "Irish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alex_Dunne",
+  "nationality": "Ireland",
+  "wikidata_id": "Q113227141",
+  "wikidata_url": "http://www.wikidata.org/entity/Q113227141",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:46.381077"
+  "scraped_date": "2025-07-12T10:17:52.406273"
 }

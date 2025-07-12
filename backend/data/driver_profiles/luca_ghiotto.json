@@ -1,8 +1,9 @@
 {
   "name": "Luca Ghiotto",
   "dob": "1995-02-24",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Luca_Ghiotto",
+  "nationality": "Italy",
+  "wikidata_id": "Q15710861",
+  "wikidata_url": "http://www.wikidata.org/entity/Q15710861",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:33.517784"
+  "scraped_date": "2025-07-12T10:17:45.388694"
 }

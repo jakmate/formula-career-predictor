@@ -1,8 +1,9 @@
 {
   "name": "Felipe Massa",
   "dob": "1981-04-25",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Felipe_Massa",
+  "nationality": "Brazil",
+  "wikidata_id": "Q82652",
+  "wikidata_url": "http://www.wikidata.org/entity/Q82652",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:55.739239"
+  "scraped_date": "2025-07-12T10:17:49.274820"
 }

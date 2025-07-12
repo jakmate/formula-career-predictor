@@ -1,8 +1,9 @@
 {
   "name": "Federico Leo",
   "dob": "1988-08-27",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Federico_Leo",
+  "nationality": "Italy",
+  "wikidata_id": "Q1273288",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1273288",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:05.652037"
+  "scraped_date": "2025-07-12T10:17:40.657221"
 }

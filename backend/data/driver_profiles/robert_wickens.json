@@ -1,8 +1,9 @@
 {
   "name": "Robert Wickens",
   "dob": "1989-03-13",
-  "nationality": "Canadian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Robert_Wickens",
+  "nationality": "Canada",
+  "wikidata_id": "Q113936",
+  "wikidata_url": "http://www.wikidata.org/entity/Q113936",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:30.385914"
+  "scraped_date": "2025-07-12T10:17:33.668864"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Adrien Tambay",
   "dob": "1991-02-25",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Adrien_Tambay",
+  "nationality": "France",
+  "wikidata_id": "Q377246",
+  "wikidata_url": "http://www.wikidata.org/entity/Q377246",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:10.407931"
+  "scraped_date": "2025-07-12T10:17:39.610202"
 }

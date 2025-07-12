@@ -1,8 +1,9 @@
 {
   "name": "Sebastian Vettel",
   "dob": "1987-07-03",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Sebastian_Vettel",
+  "nationality": "Germany",
+  "wikidata_id": "Q42311",
+  "wikidata_url": "http://www.wikidata.org/entity/Q42311",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:53.769741"
+  "scraped_date": "2025-07-12T10:17:46.336384"
 }

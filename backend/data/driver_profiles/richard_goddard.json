@@ -1,8 +1,9 @@
 {
   "name": "Richard Goddard",
   "dob": "1992-08-17",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Spike_Goddard",
+  "nationality": "Australia",
+  "wikidata_id": "Q6858388",
+  "wikidata_url": "http://www.wikidata.org/entity/Q6858388",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:14.560912"
+  "scraped_date": "2025-07-12T10:17:50.153008"
 }

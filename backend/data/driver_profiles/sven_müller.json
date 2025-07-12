@@ -1,8 +1,9 @@
 {
   "name": "Sven Müller",
   "dob": "1992-02-07",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Sven_M%C3%BCller_(racing_driver)",
+  "nationality": "Germany",
+  "wikidata_id": "Q73296",
+  "wikidata_url": "http://www.wikidata.org/entity/Q73296",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:05.813773"
+  "scraped_date": "2025-07-12T10:17:38.720263"
 }

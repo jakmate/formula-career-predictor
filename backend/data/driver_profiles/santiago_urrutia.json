@@ -1,8 +1,9 @@
 {
   "name": "Santiago Urrutia",
   "dob": "1996-08-30",
-  "nationality": "Uruguayan",
-  "wiki_url": "https://en.wikipedia.org/wiki/Santiago_Urrutia",
+  "nationality": "Uruguay",
+  "wikidata_id": "Q7497570",
+  "wikidata_url": "http://www.wikidata.org/entity/Q7497570",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:55.615575"
+  "scraped_date": "2025-07-12T10:17:32.796228"
 }

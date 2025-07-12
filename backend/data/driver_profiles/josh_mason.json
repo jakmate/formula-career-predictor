@@ -1,8 +1,9 @@
 {
   "name": "Josh Mason",
   "dob": "2002-03-19",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Josh_Mason",
+  "nationality": null,
+  "wikidata_id": "Q108913723",
+  "wikidata_url": "http://www.wikidata.org/entity/Q108913723",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:42.353781"
+  "scraped_date": "2025-07-12T10:17:38.189885"
 }

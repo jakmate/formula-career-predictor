@@ -1,8 +1,9 @@
 {
   "name": "Pierre Gasly",
   "dob": "1996-02-07",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Pierre_Gasly",
+  "nationality": "France",
+  "wikidata_id": "Q11816647",
+  "wikidata_url": "http://www.wikidata.org/entity/Q11816647",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:34.396178"
+  "scraped_date": "2025-07-12T10:17:47.490162"
 }

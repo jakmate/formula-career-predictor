@@ -1,8 +1,9 @@
 {
   "name": "Francesco Pizzi",
   "dob": "2004-11-12",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Francesco_Pizzi",
+  "nationality": "Italy",
+  "wikidata_id": "Q106634917",
+  "wikidata_url": "http://www.wikidata.org/entity/Q106634917",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:47.419151"
+  "scraped_date": "2025-07-12T10:17:47.926620"
 }

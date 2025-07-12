@@ -1,8 +1,9 @@
 {
   "name": "Dan Ticktum",
   "dob": "1999-06-08",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Dan_Ticktum",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q28420178",
+  "wikidata_url": "http://www.wikidata.org/entity/Q28420178",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:36.626169"
+  "scraped_date": "2025-07-12T10:17:35.033020"
 }

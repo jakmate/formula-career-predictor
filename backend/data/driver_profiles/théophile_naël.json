@@ -1,8 +1,9 @@
 {
   "name": "Théophile Naël",
-  "dob": "2007-06-27",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Th%C3%A9ophile_Na%C3%ABl",
+  "dob": "2007-06-22",
+  "nationality": null,
+  "wikidata_id": "Q123404906",
+  "wikidata_url": "http://www.wikidata.org/entity/Q123404906",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:00.798793"
+  "scraped_date": "2025-07-12T10:17:52.351073"
 }

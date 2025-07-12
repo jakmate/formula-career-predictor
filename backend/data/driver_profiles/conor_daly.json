@@ -1,8 +1,9 @@
 {
   "name": "Conor Daly",
   "dob": "1991-12-15",
-  "nationality": "American",
-  "wiki_url": "https://en.wikipedia.org/wiki/Conor_Daly",
+  "nationality": "United States",
+  "wikidata_id": "Q973010",
+  "wikidata_url": "http://www.wikidata.org/entity/Q973010",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:48.645639"
+  "scraped_date": "2025-07-12T10:17:48.909170"
 }

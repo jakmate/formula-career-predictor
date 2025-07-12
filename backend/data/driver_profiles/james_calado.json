@@ -1,8 +1,9 @@
 {
   "name": "James Calado",
   "dob": "1989-06-13",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/James_Calado",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q1680121",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1680121",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:47.745243"
+  "scraped_date": "2025-07-12T10:17:46.157969"
 }

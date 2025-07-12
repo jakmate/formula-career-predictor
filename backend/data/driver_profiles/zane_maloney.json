@@ -1,8 +1,9 @@
 {
   "name": "Zane Maloney",
   "dob": "2003-10-02",
-  "nationality": "Barbadian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Zane_Maloney",
+  "nationality": "Barbados",
+  "wikidata_id": "Q86923950",
+  "wikidata_url": "http://www.wikidata.org/entity/Q86923950",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:22.394265"
+  "scraped_date": "2025-07-12T10:17:51.937604"
 }

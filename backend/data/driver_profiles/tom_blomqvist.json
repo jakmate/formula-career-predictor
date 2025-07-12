@@ -1,8 +1,9 @@
 {
   "name": "Tom Blomqvist",
   "dob": "1993-11-30",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tom_Blomqvist",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q971617",
+  "wikidata_url": "http://www.wikidata.org/entity/Q971617",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:28.531611"
+  "scraped_date": "2025-07-12T10:17:34.384749"
 }

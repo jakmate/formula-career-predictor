@@ -1,8 +1,9 @@
 {
   "name": "Gustavo Menezes",
   "dob": "1994-09-19",
-  "nationality": "American",
-  "wiki_url": "https://en.wikipedia.org/wiki/Gustavo_Menezes",
+  "nationality": "United States",
+  "wikidata_id": "Q15613580",
+  "wikidata_url": "http://www.wikidata.org/entity/Q15613580",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:09.861616"
+  "scraped_date": "2025-07-12T10:17:34.123779"
 }

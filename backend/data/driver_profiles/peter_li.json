@@ -1,8 +1,9 @@
 {
   "name": "Peter Li",
   "dob": "1993-08-25",
-  "nationality": "Chinese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Li_Zhicong",
+  "nationality": "People's Republic of China",
+  "wikidata_id": "Q19478935",
+  "wikidata_url": "http://www.wikidata.org/entity/Q19478935",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:08.632418"
+  "scraped_date": "2025-07-12T10:17:36.024448"
 }

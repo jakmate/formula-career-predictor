@@ -1,8 +1,9 @@
 {
   "name": "Jake Dennis",
   "dob": "1995-06-16",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jake_Dennis",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q1027125",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1027125",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:20.784166"
+  "scraped_date": "2025-07-12T10:17:40.816697"
 }

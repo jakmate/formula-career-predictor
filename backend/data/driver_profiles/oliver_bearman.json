@@ -1,8 +1,9 @@
 {
   "name": "Oliver Bearman",
   "dob": "2005-05-08",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Oliver_Bearman",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q107023292",
+  "wikidata_url": "http://www.wikidata.org/entity/Q107023292",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:04.475875"
+  "scraped_date": "2025-07-12T10:17:38.230462"
 }

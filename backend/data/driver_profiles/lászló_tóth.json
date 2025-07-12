@@ -1,8 +1,9 @@
 {
   "name": "László Tóth",
   "dob": "2000-06-02",
-  "nationality": "Hungarian",
-  "wiki_url": "https://en.wikipedia.org/wiki/L%C3%A1szl%C3%B3_T%C3%B3th_(racing_driver)",
+  "nationality": "Hungary",
+  "wikidata_id": "Q97192306",
+  "wikidata_url": "http://www.wikidata.org/entity/Q97192306",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:04.426386"
+  "scraped_date": "2025-07-12T10:17:41.534187"
 }

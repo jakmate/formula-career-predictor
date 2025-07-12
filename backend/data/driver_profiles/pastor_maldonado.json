@@ -1,8 +1,9 @@
 {
   "name": "Pastor Maldonado",
   "dob": "1985-03-09",
-  "nationality": "Venezuelan",
-  "wiki_url": "https://en.wikipedia.org/wiki/Pastor_Maldonado",
+  "nationality": "Venezuela",
+  "wikidata_id": "Q82845",
+  "wikidata_url": "http://www.wikidata.org/entity/Q82845",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:50.205604"
+  "scraped_date": "2025-07-12T10:17:52.235248"
 }

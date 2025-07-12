@@ -1,8 +1,9 @@
 {
   "name": "Richard Gonda",
   "dob": "1994-03-14",
-  "nationality": "Slovak",
-  "wiki_url": "https://en.wikipedia.org/wiki/Richard_Gonda",
+  "nationality": "Slovakia",
+  "wikidata_id": "Q1406615",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1406615",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:53.516252"
+  "scraped_date": "2025-07-12T10:17:52.097414"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Joshua Dufek",
   "dob": "2004-12-13",
-  "nationality": "Swiss, Austrian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Joshua_Dufek",
+  "nationality": null,
+  "wikidata_id": "Q115585044",
+  "wikidata_url": "http://www.wikidata.org/entity/Q115585044",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:16:51.911376"
+  "scraped_date": "2025-07-12T10:17:39.333912"
 }

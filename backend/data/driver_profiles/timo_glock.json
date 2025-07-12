@@ -1,8 +1,9 @@
 {
   "name": "Timo Glock",
   "dob": "1982-03-18",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Timo_Glock",
+  "nationality": "Germany",
+  "wikidata_id": "Q76719",
+  "wikidata_url": "http://www.wikidata.org/entity/Q76719",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:25.423693"
+  "scraped_date": "2025-07-12T10:17:49.704438"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Philo Paz Armand",
   "dob": "1996-03-12",
-  "nationality": "Indonesian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Philo_Paz_Armand",
+  "nationality": "Indonesia",
+  "wikidata_id": "Q19702167",
+  "wikidata_url": "http://www.wikidata.org/entity/Q19702167",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:04.172627"
+  "scraped_date": "2025-07-12T10:17:34.836904"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Fabrizio Crestani",
   "dob": "1987-12-17",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Fabrizio_Crestani",
+  "nationality": "Italy",
+  "wikidata_id": "Q1386628",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1386628",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:14.499888"
+  "scraped_date": "2025-07-12T10:17:49.912844"
 }

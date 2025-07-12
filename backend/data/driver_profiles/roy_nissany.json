@@ -1,8 +1,9 @@
 {
   "name": "Roy Nissany",
   "dob": "1994-11-30",
-  "nationality": "Israeli",
-  "wiki_url": "https://en.wikipedia.org/wiki/Roy_Nissany",
+  "nationality": "Israel",
+  "wikidata_id": "Q7373213",
+  "wikidata_url": "http://www.wikidata.org/entity/Q7373213",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:19.807982"
+  "scraped_date": "2025-07-12T10:17:37.659336"
 }

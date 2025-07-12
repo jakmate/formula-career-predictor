@@ -1,8 +1,9 @@
 {
   "name": "Alessio Lorandi",
   "dob": "1998-09-08",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alessio_Lorandi",
+  "nationality": "Italy",
+  "wikidata_id": "Q18755616",
+  "wikidata_url": "http://www.wikidata.org/entity/Q18755616",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:29.915686"
+  "scraped_date": "2025-07-12T10:17:31.525663"
 }

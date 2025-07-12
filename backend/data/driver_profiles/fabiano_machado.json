@@ -1,8 +1,9 @@
 {
   "name": "Fabiano Machado",
   "dob": "1986-05-28",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Fabiano_Machado",
+  "nationality": "Brazil",
+  "wikidata_id": "Q1336666",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1336666",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:50.414210"
+  "scraped_date": "2025-07-12T10:17:48.514609"
 }

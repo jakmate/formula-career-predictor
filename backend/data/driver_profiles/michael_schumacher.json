@@ -1,8 +1,9 @@
 {
   "name": "Michael Schumacher",
   "dob": "1969-01-03",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Michael_Schumacher",
+  "nationality": "Luxembourg",
+  "wikidata_id": "Q9671",
+  "wikidata_url": "http://www.wikidata.org/entity/Q9671",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:28.484769"
+  "scraped_date": "2025-07-12T10:17:45.657460"
 }

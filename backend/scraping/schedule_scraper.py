@@ -3,7 +3,6 @@ import json
 import pytz
 import re
 import requests
-import time
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
 from geopy.geocoders import Nominatim
@@ -14,6 +13,8 @@ from urllib.parse import urljoin
 CURRENT_YEAR = datetime.now().year
 SCHEDULE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'schedules', str(CURRENT_YEAR))
 os.makedirs(SCHEDULE_DIR, exist_ok=True)
+
+session = requests.Session()
 
 # Initialize geocoding cache
 location_timezone_cache = {}
@@ -166,7 +167,7 @@ def parse_time_to_datetime(time_str, base_date, day_name=None, location=None):
 def scrape_f1_schedule():
     try:
         url = f"https://www.formula1.com/en/racing/{CURRENT_YEAR}.html"
-        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = session.get(url, timeout=10)
         soup = BeautifulSoup(response.content, 'lxml')
 
         races = []
@@ -210,7 +211,7 @@ def scrape_f1_schedule():
                 if race_url:
                     try:
                         full_url = urljoin("https://www.formula1.com", race_url)
-                        race_response = requests.get(full_url, headers={'User-Agent': 'Mozilla/5.0'}) # noqa: 501
+                        race_response = session.get(full_url, timeout=10)
                         race_soup = BeautifulSoup(race_response.content, 'lxml')
 
                         session_container = race_soup.select_one('.flex.flex-col.px-px-8.lg\\:px-px-16.py-px-8.lg\\:py-px-16.bg-surface-neutral-1.rounded-m') # noqa: 501
@@ -229,8 +230,8 @@ def scrape_f1_schedule():
                             'race': 'race'
                         }
 
-                        for session in session_elements:
-                            date_container = session.select_one('.min-w-\\[44px\\]')
+                        for session_el in session_elements:
+                            date_container = session_el.select_one('.min-w-\\[44px\\]')
                             if date_container:
                                 day = date_container.select_one('.typography-module_technical-l-bold__AKrZb').text.strip() # noqa: 501
                                 month = date_container.select_one('.typography-module_technical-s-regular__6LvKq').text.strip() # noqa: 501
@@ -238,10 +239,10 @@ def scrape_f1_schedule():
                             else:
                                 session_date = date_obj
 
-                            session_name = session.select_one('.typography-module_display-m-bold__qgZFB') # noqa: 501
+                            session_name = session_el.select_one('.typography-module_display-m-bold__qgZFB') # noqa: 501
                             session_name = session_name.text.strip().lower() if session_name else ""
 
-                            time_span = session.select_one('.typography-module_technical-s-regular__6LvKq.text-text-5') # noqa: 501
+                            time_span = session_el.select_one('.typography-module_technical-s-regular__6LvKq.text-text-5') # noqa: 501
                             if time_span:
                                 time_str = time_span.get_text(strip=True)
                                 time_str = re.sub(r'<time>|</time>', '', time_str)
@@ -287,7 +288,7 @@ def scrape_f1_schedule():
                             if session_key and session_info:
                                 sessions[session_key] = session_info
 
-                        time.sleep(0.5)
+                        del race_soup
                     except Exception as e:
                         print(f"Error scraping F1 race details for round {round_num}: {e}")
 
@@ -306,6 +307,7 @@ def scrape_f1_schedule():
             except Exception as e:
                 print(f"Error processing F1 race card: {e}")
 
+        del soup
         return races
     except Exception as e:
         print(f"Error scraping F1 schedule: {e}")
@@ -315,12 +317,8 @@ def scrape_f1_schedule():
 def scrape_fia_formula_schedule(series_name):
     """Generic scraper for F2 and F3 schedules"""
     series_config = {
-        'f2': {
-            'base_url': 'https://www.fiaformula2.com'
-        },
-        'f3': {
-            'base_url': 'https://www.fiaformula3.com'
-        }
+        'f2': {'base_url': 'https://www.fiaformula2.com'},
+        'f3': {'base_url': 'https://www.fiaformula3.com'}
     }
 
     config = series_config.get(series_name)
@@ -329,7 +327,7 @@ def scrape_fia_formula_schedule(series_name):
 
     try:
         url = f"{config['base_url']}/Calendar"
-        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = session.get(url, timeout=10)
         soup = BeautifulSoup(response.content, 'lxml')
 
         races = []
@@ -375,7 +373,7 @@ def scrape_fia_formula_schedule(series_name):
                         else:
                             detail_url = urljoin(config['base_url'], race_link.get('href'))
 
-                        detail_response = requests.get(detail_url, headers={'User-Agent': 'Mozilla/5.0'}) # noqa: 501
+                        detail_response = session.get(detail_url, timeout=10)
                         detail_soup = BeautifulSoup(detail_response.content, 'lxml')
 
                         # Look for session schedule
@@ -423,7 +421,7 @@ def scrape_fia_formula_schedule(series_name):
                                     elif 'feature' in session_name:
                                         sessions['race'] = session_dt
 
-                        time.sleep(0.5)
+                        del detail_soup
                     except Exception as e:
                         print(f"Error scraping {series_name.upper()} race details for round {round_num}: {e}") # noqa: 501
 
@@ -440,6 +438,7 @@ def scrape_fia_formula_schedule(series_name):
             except Exception as e:
                 print(f"Error processing {series_name.upper()} race container: {e}")
 
+        del soup
         return races
     except Exception as e:
         print(f"Error scraping {series_name.upper()} schedule: {e}")
@@ -447,7 +446,6 @@ def scrape_fia_formula_schedule(series_name):
 
 
 def save_schedules():
-    t0 = time.time()
     series_scrapers = {
         'f1': scrape_f1_schedule,
         'f2': lambda: scrape_fia_formula_schedule('f2'),
@@ -500,11 +498,6 @@ def save_schedules():
 
         except Exception as e:
             print(f"Error saving {name} schedule: {e}")
-
-    t1 = time.time()
-
-    total = t1-t0
-    print(total)
 
 
 if __name__ == "__main__":

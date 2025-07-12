@@ -1,8 +1,9 @@
 {
   "name": "Charles Pic",
   "dob": "1990-02-15",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Charles_Pic",
+  "nationality": "France",
+  "wikidata_id": "Q82965",
+  "wikidata_url": "http://www.wikidata.org/entity/Q82965",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:14.276684"
+  "scraped_date": "2025-07-12T10:17:35.981966"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Dmitry Suranovich",
   "dob": "1995-06-27",
-  "nationality": "Russian, Belarusian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Dmitry_Suranovich",
+  "nationality": "Russia",
+  "wikidata_id": "Q1232705",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1232705",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:17.856593"
+  "scraped_date": "2025-07-12T10:17:53.207032"
 }

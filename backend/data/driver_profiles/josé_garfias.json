@@ -1,8 +1,9 @@
 {
   "name": "José Garfias",
   "dob": "2004-10-25",
-  "nationality": "Mexican",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jos%C3%A9_Garfias",
+  "nationality": "Mexico",
+  "wikidata_id": "Q108602403",
+  "wikidata_url": "http://www.wikidata.org/entity/Q108602403",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:28.234449"
+  "scraped_date": "2025-07-12T10:17:38.461177"
 }

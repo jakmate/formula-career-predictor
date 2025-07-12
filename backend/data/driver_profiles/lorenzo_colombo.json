@@ -1,8 +1,9 @@
 {
   "name": "Lorenzo Colombo",
   "dob": "2000-09-13",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Lorenzo_Colombo_(racing_driver)",
+  "nationality": "Italy",
+  "wikidata_id": "Q104587850",
+  "wikidata_url": "http://www.wikidata.org/entity/Q104587850",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:59.396258"
+  "scraped_date": "2025-07-12T10:17:34.346886"
 }

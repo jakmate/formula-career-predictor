@@ -1,5 +1,9 @@
 {
   "name": "Matthew Rao",
-  "dob": null,
-  "scraped": false
+  "dob": "1994-05-03",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q18431930",
+  "wikidata_url": "http://www.wikidata.org/entity/Q18431930",
+  "scraped": true,
+  "scraped_date": "2025-07-12T10:17:40.330493"
 }

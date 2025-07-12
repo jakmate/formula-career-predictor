@@ -1,8 +1,9 @@
 {
   "name": "Fabio Onidi",
   "dob": "1988-03-09",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Fabio_Onidi",
+  "nationality": "Italy",
+  "wikidata_id": "Q1390572",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1390572",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:26.717562"
+  "scraped_date": "2025-07-12T10:17:42.925068"
 }

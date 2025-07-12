@@ -1,8 +1,9 @@
 {
   "name": "Brando Badoer",
   "dob": "2006-09-15",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Brando_Badoer",
+  "nationality": "Italy",
+  "wikidata_id": "Q125716910",
+  "wikidata_url": "http://www.wikidata.org/entity/Q125716910",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:59.308626"
+  "scraped_date": "2025-07-12T10:17:31.319673"
 }

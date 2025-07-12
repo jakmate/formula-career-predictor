@@ -1,8 +1,9 @@
 {
   "name": "Kevin Ceccon",
   "dob": "1993-09-24",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Kevin_Ceccon",
+  "nationality": "Italy",
+  "wikidata_id": "Q1357220",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1357220",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:09.567577"
+  "scraped_date": "2025-07-12T10:17:49.230344"
 }

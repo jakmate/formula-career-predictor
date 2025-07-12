@@ -1,8 +1,9 @@
 {
   "name": "Oliver Turvey",
   "dob": "1987-04-01",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Oliver_Turvey",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q716324",
+  "wikidata_url": "http://www.wikidata.org/entity/Q716324",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:34.328996"
+  "scraped_date": "2025-07-12T10:17:40.368513"
 }

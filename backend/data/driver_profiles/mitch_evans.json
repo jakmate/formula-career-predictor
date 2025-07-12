@@ -1,8 +1,9 @@
 {
   "name": "Mitch Evans",
   "dob": "1994-06-24",
-  "nationality": "New, Zealander",
-  "wiki_url": "https://en.wikipedia.org/wiki/Mitch_Evans",
+  "nationality": "New Zealand",
+  "wikidata_id": "Q735803",
+  "wikidata_url": "http://www.wikidata.org/entity/Q735803",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:30.782589"
+  "scraped_date": "2025-07-12T10:17:47.320730"
 }

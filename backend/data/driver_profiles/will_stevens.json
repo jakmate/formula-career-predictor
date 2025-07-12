@@ -1,8 +1,9 @@
 {
   "name": "Will Stevens",
   "dob": "1991-06-28",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Will_Stevens",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q538467",
+  "wikidata_url": "http://www.wikidata.org/entity/Q538467",
   "scraped": true,
-  "scraped_date": "2025-07-09T21:01:42.647709"
+  "scraped_date": "2025-07-12T10:17:34.083083"
 }

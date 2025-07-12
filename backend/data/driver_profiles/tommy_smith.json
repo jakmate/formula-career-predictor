@@ -1,8 +1,9 @@
 {
   "name": "Tommy Smith",
   "dob": "2002-06-06",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tommy_Smith_(racing_driver)",
+  "nationality": "Australia",
+  "wikidata_id": "Q93771182",
+  "wikidata_url": "http://www.wikidata.org/entity/Q93771182",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:58.466190"
+  "scraped_date": "2025-07-12T10:17:47.536562"
 }

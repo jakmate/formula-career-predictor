@@ -1,8 +1,9 @@
 {
   "name": "Esteban Gutiérrez",
   "dob": "1991-08-05",
-  "nationality": "Mexican",
-  "wiki_url": "https://en.wikipedia.org/wiki/Esteban_Guti%C3%A9rrez",
+  "nationality": "Mexico",
+  "wikidata_id": "Q18915",
+  "wikidata_url": "http://www.wikidata.org/entity/Q18915",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:21.614386"
+  "scraped_date": "2025-07-12T10:17:46.809667"
 }

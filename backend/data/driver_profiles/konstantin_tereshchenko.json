@@ -1,8 +1,9 @@
 {
   "name": "Konstantin Tereshchenko",
   "dob": "1994-06-17",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Konstantin_Tereshchenko",
+  "nationality": "Russia",
+  "wikidata_id": "Q16567646",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16567646",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:36.835958"
+  "scraped_date": "2025-07-12T10:17:45.894907"
 }

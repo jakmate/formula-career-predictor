@@ -1,8 +1,9 @@
 {
   "name": "Kacper Sztuka",
   "dob": "2006-01-28",
-  "nationality": "Polish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Kacper_Sztuka",
+  "nationality": "Poland",
+  "wikidata_id": "Q112119269",
+  "wikidata_url": "http://www.wikidata.org/entity/Q112119269",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:32.480967"
+  "scraped_date": "2025-07-12T10:17:37.125906"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Guilherme Samaia",
   "dob": "1996-10-02",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Guilherme_Samaia",
+  "nationality": "Brazil",
+  "wikidata_id": "Q23893605",
+  "wikidata_url": "http://www.wikidata.org/entity/Q23893605",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:22.323678"
+  "scraped_date": "2025-07-12T10:17:36.783262"
 }

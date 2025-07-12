@@ -1,5 +1,9 @@
 {
   "name": "Nicolas Pohler",
-  "dob": null,
-  "scraped": false
+  "dob": "1995-09-21",
+  "nationality": "Germany",
+  "wikidata_id": "Q18195612",
+  "wikidata_url": "http://www.wikidata.org/entity/Q18195612",
+  "scraped": true,
+  "scraped_date": "2025-07-12T10:17:48.010098"
 }

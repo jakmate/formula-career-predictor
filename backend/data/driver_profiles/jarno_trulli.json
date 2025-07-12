@@ -1,8 +1,9 @@
 {
   "name": "Jarno Trulli",
   "dob": "1974-07-13",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jarno_Trulli",
+  "nationality": "Italy",
+  "wikidata_id": "Q171350",
+  "wikidata_url": "http://www.wikidata.org/entity/Q171350",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:42.457032"
+  "scraped_date": "2025-07-12T10:17:29.978366"
 }

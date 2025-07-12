@@ -1,8 +1,9 @@
 {
   "name": "Victor Guerin",
   "dob": "1992-06-17",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Victor_Guerin_(racing_driver)",
+  "nationality": "Brazil",
+  "wikidata_id": "Q1891576",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1891576",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:25.840566"
+  "scraped_date": "2025-07-12T10:17:51.532088"
 }

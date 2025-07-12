@@ -1,8 +1,9 @@
 {
   "name": "Diego Menchaca",
   "dob": "1994-10-20",
-  "nationality": "Mexican",
-  "wiki_url": "https://en.wikipedia.org/wiki/Diego_Menchaca",
+  "nationality": "Mexico",
+  "wikidata_id": "Q27964980",
+  "wikidata_url": "http://www.wikidata.org/entity/Q27964980",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:39.324120"
+  "scraped_date": "2025-07-12T10:17:34.593168"
 }

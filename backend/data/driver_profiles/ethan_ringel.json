@@ -1,8 +1,9 @@
 {
   "name": "Ethan Ringel",
   "dob": "1994-08-12",
-  "nationality": "American",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ethan_Ringel",
+  "nationality": "United States",
+  "wikidata_id": "Q539173",
+  "wikidata_url": "http://www.wikidata.org/entity/Q539173",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:02.399005"
+  "scraped_date": "2025-07-12T10:17:48.412996"
 }

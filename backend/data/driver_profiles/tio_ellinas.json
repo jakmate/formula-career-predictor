@@ -1,8 +1,9 @@
 {
   "name": "Tio Ellinas",
   "dob": "1992-01-27",
-  "nationality": "Cypriot",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tio_Ellinas",
+  "nationality": "Cyprus",
+  "wikidata_id": "Q222188",
+  "wikidata_url": "http://www.wikidata.org/entity/Q222188",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:38.971944"
+  "scraped_date": "2025-07-12T10:17:43.393613"
 }

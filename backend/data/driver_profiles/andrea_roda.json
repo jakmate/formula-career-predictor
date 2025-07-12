@@ -1,5 +1,9 @@
 {
   "name": "Andrea Roda",
-  "dob": null,
-  "scraped": false
+  "dob": "1990-04-11",
+  "nationality": "Italy",
+  "wikidata_id": "Q2846402",
+  "wikidata_url": "http://www.wikidata.org/entity/Q2846402",
+  "scraped": true,
+  "scraped_date": "2025-07-12T10:17:48.291343"
 }

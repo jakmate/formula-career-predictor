@@ -1,8 +1,9 @@
 {
   "name": "Lucas Auer",
   "dob": "1994-09-11",
-  "nationality": "Austrian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Lucas_Auer",
+  "nationality": "Austria",
+  "wikidata_id": "Q38338",
+  "wikidata_url": "http://www.wikidata.org/entity/Q38338",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:10.606700"
+  "scraped_date": "2025-07-12T10:17:41.493298"
 }

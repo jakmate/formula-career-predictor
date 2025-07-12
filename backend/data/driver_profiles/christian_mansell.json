@@ -1,8 +1,9 @@
 {
   "name": "Christian Mansell",
   "dob": "2005-02-09",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Christian_Mansell",
+  "nationality": "Australia",
+  "wikidata_id": "Q107309880",
+  "wikidata_url": "http://www.wikidata.org/entity/Q107309880",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:27.588629"
+  "scraped_date": "2025-07-12T10:17:49.742756"
 }

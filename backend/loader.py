@@ -330,8 +330,6 @@ def load_all_data():
     print("Merge team data")
     f3_df = merge_team_data(f3_df, f3_team_df)
 
-    # print(f3_df[f3_df['year'] == 2012])
-
     return f2_df, f3_df
 
 

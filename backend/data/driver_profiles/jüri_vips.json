@@ -1,8 +1,9 @@
 {
   "name": "Jüri Vips",
   "dob": "2000-08-10",
-  "nationality": "Estonian",
-  "wiki_url": "https://en.wikipedia.org/wiki/J%C3%BCri_Vips",
+  "nationality": "Estonia",
+  "wikidata_id": "Q27924792",
+  "wikidata_url": "http://www.wikidata.org/entity/Q27924792",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:39.377377"
+  "scraped_date": "2025-07-12T10:17:47.840505"
 }

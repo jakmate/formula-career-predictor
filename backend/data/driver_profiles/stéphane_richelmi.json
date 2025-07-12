@@ -1,8 +1,9 @@
 {
   "name": "Stéphane Richelmi",
   "dob": "1990-03-17",
-  "nationality": "Monégasque",
-  "wiki_url": "https://en.wikipedia.org/wiki/St%C3%A9phane_Richelmi",
+  "nationality": "Monaco",
+  "wikidata_id": "Q616303",
+  "wikidata_url": "http://www.wikidata.org/entity/Q616303",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:53.394152"
+  "scraped_date": "2025-07-12T10:17:39.650019"
 }

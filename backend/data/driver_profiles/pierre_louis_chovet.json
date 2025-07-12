@@ -1,8 +1,9 @@
 {
   "name": "Pierre-Louis Chovet",
   "dob": "2002-04-11",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Pierre-Louis_Chovet",
+  "nationality": "France",
+  "wikidata_id": "Q96483289",
+  "wikidata_url": "http://www.wikidata.org/entity/Q96483289",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:17.835673"
+  "scraped_date": "2025-07-12T10:17:37.892183"
 }

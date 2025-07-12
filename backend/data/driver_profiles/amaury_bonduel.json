@@ -1,8 +1,9 @@
 {
   "name": "Amaury Bonduel",
   "dob": "1999-03-03",
-  "nationality": "Belgian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Amaury_Bonduel",
+  "nationality": "France",
+  "wikidata_id": "Q20900723",
+  "wikidata_url": "http://www.wikidata.org/entity/Q20900723",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:44.683631"
+  "scraped_date": "2025-07-12T10:17:50.439773"
 }

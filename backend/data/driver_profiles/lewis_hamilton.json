@@ -1,8 +1,9 @@
 {
   "name": "Lewis Hamilton",
   "dob": "1985-01-07",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Lewis_Hamilton",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q9673",
+  "wikidata_url": "http://www.wikidata.org/entity/Q9673",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:45.170813"
+  "scraped_date": "2025-07-12T10:17:36.920705"
 }

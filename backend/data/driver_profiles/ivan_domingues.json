@@ -1,8 +1,9 @@
 {
   "name": "Ivan Domingues",
-  "dob": "2006-05-05",
-  "nationality": "Portuguese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ivan_Domingues",
+  "dob": "2006-01-01",
+  "nationality": "Portugal",
+  "wikidata_id": "Q113141083",
+  "wikidata_url": "http://www.wikidata.org/entity/Q113141083",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:29.126812"
+  "scraped_date": "2025-07-12T10:17:49.484832"
 }

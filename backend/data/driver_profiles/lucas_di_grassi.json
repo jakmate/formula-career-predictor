@@ -1,8 +1,9 @@
 {
   "name": "Lucas di Grassi",
   "dob": "1984-08-11",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Lucas_di_Grassi",
+  "nationality": "Brazil",
+  "wikidata_id": "Q172783",
+  "wikidata_url": "http://www.wikidata.org/entity/Q172783",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:18.545168"
+  "scraped_date": "2025-07-12T10:17:52.692751"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Arthur Leclerc",
   "dob": "2000-10-14",
-  "nationality": "Monégasque",
-  "wiki_url": "https://en.wikipedia.org/wiki/Arthur_Leclerc",
+  "nationality": "Monaco",
+  "wikidata_id": "Q63111192",
+  "wikidata_url": "http://www.wikidata.org/entity/Q63111192",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:42.258654"
+  "scraped_date": "2025-07-12T10:17:52.859219"
 }

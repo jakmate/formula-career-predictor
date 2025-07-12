@@ -1,8 +1,9 @@
 {
   "name": "Alexander Rossi",
   "dob": "1991-09-25",
-  "nationality": "American",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alexander_Rossi",
+  "nationality": "United States",
+  "wikidata_id": "Q559962",
+  "wikidata_url": "http://www.wikidata.org/entity/Q559962",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:03.095150"
+  "scraped_date": "2025-07-12T10:17:50.327687"
 }

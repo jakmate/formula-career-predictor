@@ -1,8 +1,9 @@
 {
   "name": "Cem Bölükbaşı",
   "dob": "1998-02-09",
-  "nationality": "Turkish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Cem_B%C3%B6l%C3%BCkba%C5%9F%C4%B1",
+  "nationality": "Turkey",
+  "wikidata_id": "Q97230435",
+  "wikidata_url": "http://www.wikidata.org/entity/Q97230435",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:25.853447"
+  "scraped_date": "2025-07-12T10:17:47.397698"
 }

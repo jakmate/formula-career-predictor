@@ -1,8 +1,9 @@
 {
   "name": "John Bennett",
   "dob": "2003-09-15",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/John_Bennett_(racing_driver)",
+  "nationality": null,
+  "wikidata_id": "Q126897772",
+  "wikidata_url": "http://www.wikidata.org/entity/Q126897772",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:31.893464"
+  "scraped_date": "2025-07-12T10:17:51.018453"
 }

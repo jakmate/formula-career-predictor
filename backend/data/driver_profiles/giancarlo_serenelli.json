@@ -1,8 +1,9 @@
 {
   "name": "Giancarlo Serenelli",
   "dob": "1981-07-10",
-  "nationality": "Venezuelan",
-  "wiki_url": "https://en.wikipedia.org/wiki/Giancarlo_Serenelli",
+  "nationality": "Venezuela",
+  "wikidata_id": "Q1522382",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1522382",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:20.365242"
+  "scraped_date": "2025-07-12T10:17:43.437718"
 }

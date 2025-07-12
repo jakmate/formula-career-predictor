@@ -1,8 +1,9 @@
 {
   "name": "Robert Vișoiu",
   "dob": "1996-02-10",
-  "nationality": "Romanian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Robert_Vi%C8%99oiu",
+  "nationality": "Romania",
+  "wikidata_id": "Q1335780",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1335780",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:19.291792"
+  "scraped_date": "2025-07-12T10:17:49.405335"
 }

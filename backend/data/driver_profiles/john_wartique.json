@@ -1,8 +1,9 @@
 {
   "name": "John Wartique",
   "dob": "1990-06-25",
-  "nationality": "Belgian",
-  "wiki_url": "https://en.wikipedia.org/wiki/John_Wartique",
+  "nationality": "Belgium",
+  "wikidata_id": "Q551107",
+  "wikidata_url": "http://www.wikidata.org/entity/Q551107",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:10.418142"
+  "scraped_date": "2025-07-12T10:17:38.629679"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Fabio Gamberini",
   "dob": "1992-09-22",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/F%C3%A1bio_Gamberini",
+  "nationality": "Brazil",
+  "wikidata_id": "Q979891",
+  "wikidata_url": "http://www.wikidata.org/entity/Q979891",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:00.723871"
+  "scraped_date": "2025-07-12T10:17:45.031867"
 }

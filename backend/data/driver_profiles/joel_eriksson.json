@@ -1,8 +1,9 @@
 {
   "name": "Joel Eriksson",
   "dob": "1998-06-28",
-  "nationality": "Swedish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Joel_Eriksson_(racing_driver)",
+  "nationality": "Sweden",
+  "wikidata_id": "Q22253417",
+  "wikidata_url": "http://www.wikidata.org/entity/Q22253417",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:04.201527"
+  "scraped_date": "2025-07-12T10:17:45.734367"
 }

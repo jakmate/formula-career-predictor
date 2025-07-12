@@ -1,8 +1,9 @@
 {
   "name": "Nicholas Latifi",
   "dob": "1995-06-29",
-  "nationality": "Canadian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nicholas_Latifi",
+  "nationality": "Canada",
+  "wikidata_id": "Q8898994",
+  "wikidata_url": "http://www.wikidata.org/entity/Q8898994",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:20.450936"
+  "scraped_date": "2025-07-12T10:17:46.037876"
 }

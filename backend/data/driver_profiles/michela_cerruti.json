@@ -1,8 +1,9 @@
 {
   "name": "Michela Cerruti",
   "dob": "1987-02-18",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Michela_Cerruti",
+  "nationality": "Italy",
+  "wikidata_id": "Q1396050",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1396050",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:23.249150"
+  "scraped_date": "2025-07-12T10:17:50.665002"
 }

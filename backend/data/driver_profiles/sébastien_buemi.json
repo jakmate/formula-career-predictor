@@ -1,8 +1,9 @@
 {
   "name": "Sébastien Buemi",
   "dob": "1988-10-31",
-  "nationality": "Swiss",
-  "wiki_url": "https://en.wikipedia.org/wiki/S%C3%A9bastien_Buemi",
+  "nationality": "Switzerland",
+  "wikidata_id": "Q171310",
+  "wikidata_url": "http://www.wikidata.org/entity/Q171310",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:40.701404"
+  "scraped_date": "2025-07-12T10:17:38.152608"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Ivan Lukashevich",
   "dob": "1991-05-09",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ivan_Lukashevich",
+  "nationality": "Russia",
+  "wikidata_id": "Q1605650",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1605650",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:22.086334"
+  "scraped_date": "2025-07-12T10:17:48.661587"
 }

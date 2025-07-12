@@ -1,8 +1,9 @@
 {
   "name": "Charles Leong",
   "dob": "2001-09-12",
-  "nationality": "Macanese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Hon_Chio_Leong",
+  "nationality": "Macau",
+  "wikidata_id": "Q56560514",
+  "wikidata_url": "http://www.wikidata.org/entity/Q56560514",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:54.655882"
+  "scraped_date": "2025-07-12T10:17:51.055523"
 }

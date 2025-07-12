@@ -1,8 +1,9 @@
 {
   "name": "Ed Jones",
   "dob": "1995-02-12",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ed_Jones_(racing_driver)",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q9250258",
+  "wikidata_url": "http://www.wikidata.org/entity/Q9250258",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:16:55.162062"
+  "scraped_date": "2025-07-12T10:17:32.966599"
 }

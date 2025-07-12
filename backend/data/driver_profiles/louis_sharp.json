@@ -1,8 +1,9 @@
 {
   "name": "Louis Sharp",
   "dob": "2007-05-11",
-  "nationality": "New, Zealand",
-  "wiki_url": "https://en.wikipedia.org/wiki/Louis_Sharp",
+  "nationality": "New Zealand",
+  "wikidata_id": "Q112262887",
+  "wikidata_url": "http://www.wikidata.org/entity/Q112262887",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:06.879232"
+  "scraped_date": "2025-07-12T10:17:42.252461"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Jack Harvey",
   "dob": "1993-04-15",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jack_Harvey_(racing_driver)",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q964752",
+  "wikidata_url": "http://www.wikidata.org/entity/Q964752",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:19.776850"
+  "scraped_date": "2025-07-12T10:17:32.103373"
 }

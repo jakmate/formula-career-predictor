@@ -1,8 +1,9 @@
 {
   "name": "Luke Browning",
   "dob": "2002-01-31",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Luke_Browning",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q108545692",
+  "wikidata_url": "http://www.wikidata.org/entity/Q108545692",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:16.331985"
+  "scraped_date": "2025-07-12T10:17:29.374416"
 }

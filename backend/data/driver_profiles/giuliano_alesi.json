@@ -1,8 +1,9 @@
 {
   "name": "Giuliano Alesi",
   "dob": "1999-09-20",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Giuliano_Alesi",
+  "nationality": "France",
+  "wikidata_id": "Q22003067",
+  "wikidata_url": "http://www.wikidata.org/entity/Q22003067",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:00.846989"
+  "scraped_date": "2025-07-12T10:17:33.816180"
 }

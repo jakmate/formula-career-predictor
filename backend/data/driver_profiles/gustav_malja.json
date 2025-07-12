@@ -1,8 +1,9 @@
 {
   "name": "Gustav Malja",
   "dob": "1995-11-04",
-  "nationality": "Swedish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Gustav_Malja",
+  "nationality": "Sweden",
+  "wikidata_id": "Q16556167",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16556167",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:30.374228"
+  "scraped_date": "2025-07-12T10:17:29.466952"
 }

@@ -1,8 +1,9 @@
 {
   "name": "James Wharton",
   "dob": "2006-07-08",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/James_Wharton_(racing_driver)",
+  "nationality": "Australia",
+  "wikidata_id": "Q114285074",
+  "wikidata_url": "http://www.wikidata.org/entity/Q114285074",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:08.297663"
+  "scraped_date": "2025-07-12T10:17:48.216276"
 }

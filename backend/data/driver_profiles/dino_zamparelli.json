@@ -1,8 +1,9 @@
 {
   "name": "Dino Zamparelli",
   "dob": "1992-10-05",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Dino_Zamparelli",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q547172",
+  "wikidata_url": "http://www.wikidata.org/entity/Q547172",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:03.872625"
+  "scraped_date": "2025-07-12T10:17:42.339288"
 }

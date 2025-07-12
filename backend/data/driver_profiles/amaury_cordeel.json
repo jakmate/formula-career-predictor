@@ -1,8 +1,9 @@
 {
   "name": "Amaury Cordeel",
   "dob": "2002-07-09",
-  "nationality": "Belgian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Amaury_Cordeel",
+  "nationality": "Belgium",
+  "wikidata_id": "Q105311478",
+  "wikidata_url": "http://www.wikidata.org/entity/Q105311478",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:14.727936"
+  "scraped_date": "2025-07-12T10:17:31.489104"
 }

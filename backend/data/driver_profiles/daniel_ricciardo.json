@@ -1,8 +1,9 @@
 {
   "name": "Daniel Ricciardo",
   "dob": "1989-07-01",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Daniel_Ricciardo",
+  "nationality": "Australia",
+  "wikidata_id": "Q82816",
+  "wikidata_url": "http://www.wikidata.org/entity/Q82816",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:47:51.137739"
+  "scraped_date": "2025-07-12T10:17:42.122077"
 }

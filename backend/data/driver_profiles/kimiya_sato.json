@@ -1,8 +1,9 @@
 {
   "name": "Kimiya Sato",
   "dob": "1989-10-05",
-  "nationality": "Japanese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Kimiya_Sato",
+  "nationality": "Japan",
+  "wikidata_id": "Q1741643",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1741643",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:49.274318"
+  "scraped_date": "2025-07-12T10:17:30.183041"
 }

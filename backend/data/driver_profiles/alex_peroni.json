@@ -1,8 +1,9 @@
 {
   "name": "Alex Peroni",
   "dob": "1999-11-27",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alex_Peroni",
+  "nationality": "Australia",
+  "wikidata_id": "Q27979044",
+  "wikidata_url": "http://www.wikidata.org/entity/Q27979044",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:25.891453"
+  "scraped_date": "2025-07-12T10:17:32.665893"
 }

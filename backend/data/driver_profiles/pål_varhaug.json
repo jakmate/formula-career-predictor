@@ -1,8 +1,9 @@
 {
   "name": "Pål Varhaug",
   "dob": "1991-01-26",
-  "nationality": "Norwegian",
-  "wiki_url": "https://en.wikipedia.org/wiki/P%C3%A5l_Varhaug",
+  "nationality": "Norway",
+  "wikidata_id": "Q719737",
+  "wikidata_url": "http://www.wikidata.org/entity/Q719737",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:29.785131"
+  "scraped_date": "2025-07-12T10:17:37.615605"
 }

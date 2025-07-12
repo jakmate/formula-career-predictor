@@ -1,8 +1,9 @@
 {
   "name": "Nick Heidfeld",
   "dob": "1977-05-10",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nick_Heidfeld",
+  "nationality": "Germany",
+  "wikidata_id": "Q75810",
+  "wikidata_url": "http://www.wikidata.org/entity/Q75810",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:10.170466"
+  "scraped_date": "2025-07-12T10:17:30.058426"
 }

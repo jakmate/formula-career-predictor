@@ -1,8 +1,9 @@
 {
   "name": "Jannes Fittje",
   "dob": "1999-07-22",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jannes_Fittje",
+  "nationality": "Germany",
+  "wikidata_id": "Q56276737",
+  "wikidata_url": "http://www.wikidata.org/entity/Q56276737",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:45.376950"
+  "scraped_date": "2025-07-12T10:17:46.640998"
 }

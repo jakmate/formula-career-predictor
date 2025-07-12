@@ -1,8 +1,9 @@
 {
   "name": "Charlie Wurz",
   "dob": "2005-12-02",
-  "nationality": "Austrian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Charlie_Wurz",
+  "nationality": "Austria",
+  "wikidata_id": "Q111967085",
+  "wikidata_url": "http://www.wikidata.org/entity/Q111967085",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:45.915486"
+  "scraped_date": "2025-07-12T10:17:46.771325"
 }

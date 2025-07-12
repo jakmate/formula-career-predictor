@@ -1,8 +1,9 @@
 {
   "name": "Pato O'Ward",
   "dob": "1999-05-06",
-  "nationality": "Mexican",
-  "wiki_url": "https://en.wikipedia.org/wiki/Pato_O%27Ward",
+  "nationality": "Mexico",
+  "wikidata_id": "Q23800002",
+  "wikidata_url": "http://www.wikidata.org/entity/Q23800002",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:25.326780"
+  "scraped_date": "2025-07-12T10:17:53.003072"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Norman Nato",
   "dob": "1992-07-08",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Norman_Nato",
+  "nationality": "France",
+  "wikidata_id": "Q495561",
+  "wikidata_url": "http://www.wikidata.org/entity/Q495561",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:08.541696"
+  "scraped_date": "2025-07-12T10:17:48.865440"
 }

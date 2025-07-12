@@ -1,8 +1,9 @@
 {
   "name": "Antonio Fuoco",
   "dob": "1996-05-20",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Antonio_Fuoco",
+  "nationality": "Italy",
+  "wikidata_id": "Q15550466",
+  "wikidata_url": "http://www.wikidata.org/entity/Q15550466",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:07.567719"
+  "scraped_date": "2025-07-12T10:17:39.239187"
 }

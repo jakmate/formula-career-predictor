@@ -1,8 +1,9 @@
 {
   "name": "Artem Markelov",
   "dob": "1994-09-10",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Artem_Markelov",
+  "nationality": "Russia",
+  "wikidata_id": "Q14924659",
+  "wikidata_url": "http://www.wikidata.org/entity/Q14924659",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:38.186941"
+  "scraped_date": "2025-07-12T10:17:31.682590"
 }

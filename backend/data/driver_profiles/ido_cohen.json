@@ -1,8 +1,9 @@
 {
   "name": "Ido Cohen",
   "dob": "2001-08-16",
-  "nationality": "Israeli",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ido_Cohen",
+  "nationality": "Israel",
+  "wikidata_id": "Q105531578",
+  "wikidata_url": "http://www.wikidata.org/entity/Q105531578",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:21.932674"
+  "scraped_date": "2025-07-12T10:17:44.053426"
 }

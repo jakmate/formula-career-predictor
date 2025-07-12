@@ -1,8 +1,9 @@
 {
   "name": "Tuukka Taponen",
   "dob": "2006-10-26",
-  "nationality": "Finnish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tuukka_Taponen",
+  "nationality": "Finland",
+  "wikidata_id": "Q110322464",
+  "wikidata_url": "http://www.wikidata.org/entity/Q110322464",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:26.922504"
+  "scraped_date": "2025-07-12T10:17:50.086384"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Harald Schlegelmilch",
   "dob": "1987-12-06",
-  "nationality": "Latvian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Harald_Schlegelmilch",
+  "nationality": "Latvia",
+  "wikidata_id": "Q984239",
+  "wikidata_url": "http://www.wikidata.org/entity/Q984239",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:13.864385"
+  "scraped_date": "2025-07-12T10:17:48.615556"
 }

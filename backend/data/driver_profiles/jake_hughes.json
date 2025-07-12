@@ -1,8 +1,9 @@
 {
   "name": "Jake Hughes",
   "dob": "1994-05-30",
-  "nationality": "English",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jake_Hughes",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q17541830",
+  "wikidata_url": "http://www.wikidata.org/entity/Q17541830",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:57.898953"
+  "scraped_date": "2025-07-12T10:17:42.164616"
 }

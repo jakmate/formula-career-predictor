@@ -1,8 +1,9 @@
 {
   "name": "Pedro Piquet",
   "dob": "1998-07-03",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Pedro_Piquet",
+  "nationality": "Brazil",
+  "wikidata_id": "Q16940532",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16940532",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:22.825554"
+  "scraped_date": "2025-07-12T10:17:52.733236"
 }

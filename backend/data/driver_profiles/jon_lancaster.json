@@ -1,8 +1,9 @@
 {
   "name": "Jon Lancaster",
   "dob": "1988-12-10",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jon_Lancaster",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q1702799",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1702799",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:36.168965"
+  "scraped_date": "2025-07-12T10:17:37.934448"
 }

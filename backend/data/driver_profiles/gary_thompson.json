@@ -1,8 +1,9 @@
 {
   "name": "Gary Thompson",
   "dob": "1992-05-31",
-  "nationality": "Irish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Gary_Thompson_(racing_driver)",
+  "nationality": "Ireland",
+  "wikidata_id": "Q5526060",
+  "wikidata_url": "http://www.wikidata.org/entity/Q5526060",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:55.891930"
+  "scraped_date": "2025-07-12T10:17:40.981773"
 }

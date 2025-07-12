@@ -1,8 +1,9 @@
 {
   "name": "Alex Fontana",
   "dob": "1992-08-05",
-  "nationality": "Swiss, Greek",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alex_Fontana",
+  "nationality": "Switzerland",
+  "wikidata_id": "Q115982",
+  "wikidata_url": "http://www.wikidata.org/entity/Q115982",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:08.240552"
+  "scraped_date": "2025-07-12T10:17:47.282505"
 }

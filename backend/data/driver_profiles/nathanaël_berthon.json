@@ -1,8 +1,9 @@
 {
   "name": "Nathanaël Berthon",
   "dob": "1989-07-01",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nathana%C3%ABl_Berthon",
+  "nationality": "France",
+  "wikidata_id": "Q1361680",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1361680",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:44.079625"
+  "scraped_date": "2025-07-12T10:17:39.959558"
 }

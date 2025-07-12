@@ -1,8 +1,9 @@
 {
   "name": "Tamás Pál Kiss",
   "dob": "1991-05-19",
-  "nationality": "Hungarian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tam%C3%A1s_P%C3%A1l_Kiss",
+  "nationality": "Hungary",
+  "wikidata_id": "Q906985",
+  "wikidata_url": "http://www.wikidata.org/entity/Q906985",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:07.491661"
+  "scraped_date": "2025-07-12T10:17:42.208886"
 }

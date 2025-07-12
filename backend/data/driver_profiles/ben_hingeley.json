@@ -1,5 +1,9 @@
 {
   "name": "Ben Hingeley",
-  "dob": null,
-  "scraped": false
+  "dob": "1997-05-30",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q47671584",
+  "wikidata_url": "http://www.wikidata.org/entity/Q47671584",
+  "scraped": true,
+  "scraped_date": "2025-07-12T10:17:48.740371"
 }

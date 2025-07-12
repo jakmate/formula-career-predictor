@@ -1,8 +1,9 @@
 {
   "name": "Felipe Guimarães",
   "dob": "1991-03-22",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Felipe_Guimar%C3%A3es",
+  "nationality": "Brazil",
+  "wikidata_id": "Q1403201",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1403201",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:11.159115"
+  "scraped_date": "2025-07-12T10:17:34.723656"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Matias Laine",
   "dob": "1990-04-25",
-  "nationality": "Finnish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Matias_Laine",
+  "nationality": "Finland",
+  "wikidata_id": "Q961404",
+  "wikidata_url": "http://www.wikidata.org/entity/Q961404",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:36.797567"
+  "scraped_date": "2025-07-12T10:17:43.670759"
 }

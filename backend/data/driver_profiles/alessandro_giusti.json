@@ -1,8 +1,9 @@
 {
   "name": "Alessandro Giusti",
   "dob": "2006-09-10",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alessandro_Giusti",
+  "nationality": "France",
+  "wikidata_id": "Q114708426",
+  "wikidata_url": "http://www.wikidata.org/entity/Q114708426",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:00.813687"
+  "scraped_date": "2025-07-12T10:17:36.678553"
 }

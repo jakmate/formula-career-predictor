@@ -1,8 +1,9 @@
 {
   "name": "Francesco Simonazzi",
-  "dob": "2004-03-08",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Francesco_Simonazzi",
+  "dob": "2002-01-01",
+  "nationality": null,
+  "wikidata_id": "Q108774013",
+  "wikidata_url": "http://www.wikidata.org/entity/Q108774013",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:52.524883"
+  "scraped_date": "2025-07-12T10:17:30.021175"
 }

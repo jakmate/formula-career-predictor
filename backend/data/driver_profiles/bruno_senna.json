@@ -1,8 +1,9 @@
 {
   "name": "Bruno Senna",
   "dob": "1983-10-15",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Bruno_Senna",
+  "nationality": "Brazil",
+  "wikidata_id": "Q82864",
+  "wikidata_url": "http://www.wikidata.org/entity/Q82864",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:12.145015"
+  "scraped_date": "2025-07-12T10:17:42.884487"
 }

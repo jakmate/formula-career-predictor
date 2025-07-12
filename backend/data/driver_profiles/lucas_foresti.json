@@ -1,8 +1,9 @@
 {
   "name": "Lucas Foresti",
   "dob": "1992-05-12",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Lucas_Foresti",
+  "nationality": "Brazil",
+  "wikidata_id": "Q1308972",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1308972",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:25.363035"
+  "scraped_date": "2025-07-12T10:17:39.845151"
 }

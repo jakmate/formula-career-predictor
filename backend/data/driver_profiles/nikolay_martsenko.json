@@ -1,8 +1,9 @@
 {
   "name": "Nikolay Martsenko",
   "dob": "1993-05-25",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nikolay_Martsenko",
+  "nationality": "Russia",
+  "wikidata_id": "Q783777",
+  "wikidata_url": "http://www.wikidata.org/entity/Q783777",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:17.485983"
+  "scraped_date": "2025-07-12T10:17:44.152163"
 }

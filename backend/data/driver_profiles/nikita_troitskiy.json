@@ -1,8 +1,9 @@
 {
   "name": "Nikita Troitskiy",
   "dob": "1999-04-16",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nikita_Troitskiy",
+  "nationality": "Russia",
+  "wikidata_id": "Q28065939",
+  "wikidata_url": "http://www.wikidata.org/entity/Q28065939",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:20.609452"
+  "scraped_date": "2025-07-12T10:17:33.200623"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Roberto Faria",
   "dob": "2004-01-15",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Roberto_Faria",
+  "nationality": "Brazil",
+  "wikidata_id": "Q108743792",
+  "wikidata_url": "http://www.wikidata.org/entity/Q108743792",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:16:36.426627"
+  "scraped_date": "2025-07-12T10:17:45.937244"
 }

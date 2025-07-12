@@ -71,22 +71,19 @@ def extract_race_report_links(soup):
 
     race_links = []
     for row in table.find_all("tr")[1:]:
-        # Look for Report column (usually last column)
-        for cell in row.find_all(["td", "th"]):
-            for link in cell.find_all("a"):
-                if link.get_text(strip=True).lower() == "report":
-                    href = link.get("href")
-                    if href and href.startswith("/wiki/"):
-                        race_links.append("https://en.wikipedia.org" + href)
-                    break
-
+        report_link = row.find("a", string="Report")
+        if report_link:
+            href = report_link.get("href")
+            if href and href.startswith("/wiki/"):
+                race_links.append("https://en.wikipedia.org" + href)
+                
     return race_links
 
 
-def process_qualifying_data(race_url, round_info):
+def process_qualifying_data(race_url, round_info, session):
     """Process qualifying data from a race report page"""
     try:
-        response = requests.get(race_url)
+        response = session.get(race_url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "lxml")
 
@@ -103,9 +100,12 @@ def process_qualifying_data(race_url, round_info):
         group_b_head = soup.find("h4", {"id": "Group_B"}) or soup.find("dt", string="Group B")
 
         if group_a_head and group_b_head:
-            return process_monte_carlo_qualifying(group_a_head, group_b_head, round_info, race_url)
+            result = process_monte_carlo_qualifying(group_a_head, group_b_head, round_info, race_url)
         else:
-            return process_single_qualifying_table(qualifying_heading, round_info, race_url)
+            result = process_single_qualifying_table(qualifying_heading, round_info, race_url)
+
+        del soup
+        return result
 
     except Exception as e:
         print(f"Error processing qualifying data from {race_url}: {str(e)}")
@@ -143,35 +143,25 @@ def process_monte_carlo_qualifying(group_a_head, group_b_head, round_info, race_
     try:
         # Process Group A
         group_a_table = group_a_head.find_next("table", {"class": "wikitable"})
-        group_a_data = []
-        if group_a_table:
-            group_a_data = extract_quali_table_data(group_a_table)
+        group_a_data = extract_quali_table_data(group_a_table) if group_a_table else None
 
         # Process Group B
         group_b_table = group_b_head.find_next("table", {"class": "wikitable"})
-        group_b_data = []
-        if group_b_table:
-            group_b_data = extract_quali_table_data(group_b_table)
+        group_b_data = extract_quali_table_data(group_b_table) if group_b_table else None
 
         if not group_a_data and not group_b_data:
             print(f"No qualifying data found in either group for {race_url}")
             return None
 
         # Get headers from the first available table
-        headers = []
-        if group_a_data:
-            headers = group_a_data['headers']
-        elif group_b_data:
-            headers = group_b_data['headers']
+        headers = group_a_data['headers'] if group_a_data else group_b_data['headers']
 
         # Separate the data by group and sort each group by their original position
-        group_a_rows = []
-        group_b_rows = []
+        def sort_key(x):
+            return int(x[0]) if x[0].isdigit() else float('inf')
 
-        if group_a_data:
-            group_a_rows = sorted(group_a_data['data'], key=lambda x: int(x[0]) if x[0].isdigit() else float('inf'))  # noqa: 501
-        if group_b_data:
-            group_b_rows = sorted(group_b_data['data'], key=lambda x: int(x[0]) if x[0].isdigit() else float('inf'))  # noqa: 501
+        group_a_rows = sorted(group_a_data['data'], key=sort_key) if group_a_data else []
+        group_b_rows = sorted(group_b_data['data'], key=sort_key) if group_b_data else []
 
         # Get faster group
         time_idx = headers.index("Time")
@@ -220,12 +210,9 @@ def process_single_qualifying_table(qualifying_heading, round_info, race_url):
         if not table_data:
             return None
 
-        headers = table_data['headers']
-        data = table_data['data']
-
         return {
-            'headers': headers,
-            'data': data,
+            'headers': table_data['headers'],
+            'data': table_data['data'],
             'round_info': round_info,
             'url': race_url,
         }
@@ -266,9 +253,7 @@ def extract_quali_table_data(table):
                     headers.append(text)
 
             # Add the second row headers (Q1, Q2, Q3)
-            for th in second_row_headers:
-                text = remove_superscripts(th)
-                headers.append(text)
+            headers.extend(remove_superscripts(th) for th in second_row_headers)
 
             # Add the last rowspan=2 header (Grid)
             for th in first_row_headers:
@@ -276,10 +261,8 @@ def extract_quali_table_data(table):
                 rowspan = int(th.get("rowspan", 1))
                 colspan = int(th.get("colspan", 1))
 
-                if rowspan == 2 and colspan == 1:
-                    # Check if this is the last column
-                    if th == first_row_headers[-1]:
-                        headers.append(text)
+                if rowspan == 2 and colspan == 1 and th == first_row_headers[-1]:
+                    headers.append(text)
 
             data_start_index = 2  # Data starts from third row
         else:
@@ -304,11 +287,7 @@ def extract_quali_table_data(table):
             if len(cells) < 4:  # Need at least Pos, No, Driver, Team
                 continue
 
-            row_data = []
-            for cell in cells:
-                # Clean up cell text, remove sup elements and citations
-                text = remove_superscripts(cell)
-                row_data.append(text)
+            row_data = [remove_superscripts(cell) for cell in cells]
 
             if row_data:
                 # Apply column filtering for single row headers
@@ -316,9 +295,8 @@ def extract_quali_table_data(table):
                     row_data = [row_data[i] for i in indices_to_keep if i < len(row_data)]
 
                 # Process grid column (last column) truncation
-                grid_value = row_data[-1]
-                if grid_value.isdigit() and len(grid_value) > 2:
-                    row_data[-1] = grid_value[:2]  # Truncate to first two digits
+                if row_data and row_data[-1].isdigit() and len(row_data[-1]) > 2:
+                    row_data[-1] = row_data[-1][:2]  # Truncate to first two digits
                 data_rows.append(row_data)
 
         # Convert Time/Gap column to actual times
@@ -342,10 +320,9 @@ def extract_quali_table_data(table):
                         actual_time = add_time_gap(pole_time, gap_value[1:])
                         row[time_gap_col_index] = actual_time
 
+        time_idx = None
         if "Time" in headers:
             time_idx = headers.index("Time")
-        else:
-            time_idx = None
 
         # Walk every row and normalize time
         if time_idx is not None:
@@ -384,15 +361,19 @@ def save_qualifying_data(qualifying_results, year, formula):
             writer.writerows(result['data'])
 
 
-def scrape_quali(soup, year, num):
-    race_links = extract_race_report_links(soup)
-    if race_links:
-        quali_results = []
-        for i, link in enumerate(race_links, 1):
-            result = process_qualifying_data(link, f"Round {i}")
-            quali_results.append(result)
+def scrape_quali(soup, year, num, session=None):
+    if session is None:
+        session = requests.Session()
 
-        save_qualifying_data(quali_results, year, num)
-        print(f"Saved {len([r for r in quali_results if r])} qualifying sessions")
-    else:
+    race_links = extract_race_report_links(soup)
+    if not race_links:
         print(f"No race report links found for F{num} {year}")
+        return
+
+    quali_results = []
+    for i, link in enumerate(race_links, 1):
+        result = process_qualifying_data(link, f"Round {i}", session)
+        quali_results.append(result)
+
+    save_qualifying_data(quali_results, year, num)
+    print(f"Saved {len([r for r in quali_results if r])} qualifying sessions")

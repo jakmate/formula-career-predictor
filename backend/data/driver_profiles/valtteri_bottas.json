@@ -1,8 +1,9 @@
 {
   "name": "Valtteri Bottas",
   "dob": "1989-08-28",
-  "nationality": "Finnish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Valtteri_Bottas",
+  "nationality": "Finland",
+  "wikidata_id": "Q138745",
+  "wikidata_url": "http://www.wikidata.org/entity/Q138745",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:06.111990"
+  "scraped_date": "2025-07-12T10:17:53.326397"
 }

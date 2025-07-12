@@ -1,8 +1,9 @@
 {
   "name": "Lance Stroll",
   "dob": "1998-10-29",
-  "nationality": "Canadian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Lance_Stroll",
+  "nationality": "Canada",
+  "wikidata_id": "Q16238921",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16238921",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:11.439576"
+  "scraped_date": "2025-07-12T10:17:40.897005"
 }

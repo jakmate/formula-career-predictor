@@ -1,8 +1,9 @@
 {
   "name": "Caio Collet",
   "dob": "2002-04-03",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Caio_Collet",
+  "nationality": "Brazil",
+  "wikidata_id": "Q85844001",
+  "wikidata_url": "http://www.wikidata.org/entity/Q85844001",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:06.125780"
+  "scraped_date": "2025-07-12T10:17:42.303103"
 }

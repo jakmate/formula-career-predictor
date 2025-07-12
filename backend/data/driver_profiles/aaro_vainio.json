@@ -1,8 +1,9 @@
 {
   "name": "Aaro Vainio",
   "dob": "1993-10-02",
-  "nationality": "Finnish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Aaro_Vainio",
+  "nationality": "Finland",
+  "wikidata_id": "Q301588",
+  "wikidata_url": "http://www.wikidata.org/entity/Q301588",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:11.496177"
+  "scraped_date": "2025-07-12T10:17:50.941168"
 }

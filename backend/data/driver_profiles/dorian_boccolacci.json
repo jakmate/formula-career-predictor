@@ -1,8 +1,9 @@
 {
   "name": "Dorian Boccolacci",
   "dob": "1998-09-09",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Dorian_Boccolacci",
+  "nationality": "France",
+  "wikidata_id": "Q18777205",
+  "wikidata_url": "http://www.wikidata.org/entity/Q18777205",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:48.768269"
+  "scraped_date": "2025-07-12T10:17:49.178566"
 }

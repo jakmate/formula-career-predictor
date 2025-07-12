@@ -1,8 +1,9 @@
 {
   "name": "Kevin Korjus",
   "dob": "1993-01-09",
-  "nationality": "Estonian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Kevin_Korjus",
+  "nationality": "Estonia",
+  "wikidata_id": "Q862059",
+  "wikidata_url": "http://www.wikidata.org/entity/Q862059",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:48.630984"
+  "scraped_date": "2025-07-12T10:17:38.886744"
 }

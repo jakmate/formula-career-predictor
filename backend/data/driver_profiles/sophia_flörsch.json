@@ -1,8 +1,9 @@
 {
   "name": "Sophia Flörsch",
   "dob": "2000-12-01",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Sophia_Fl%C3%B6rsch",
+  "nationality": "Germany",
+  "wikidata_id": "Q20973715",
+  "wikidata_url": "http://www.wikidata.org/entity/Q20973715",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:10.084421"
+  "scraped_date": "2025-07-12T10:17:35.619443"
 }

@@ -1,8 +1,9 @@
 {
   "name": "André Negrão",
   "dob": "1992-06-17",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Andr%C3%A9_Negr%C3%A3o",
+  "nationality": "Brazil",
+  "wikidata_id": "Q506359",
+  "wikidata_url": "http://www.wikidata.org/entity/Q506359",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:30.530672"
+  "scraped_date": "2025-07-12T10:17:34.798083"
 }

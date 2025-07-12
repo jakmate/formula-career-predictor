@@ -1,8 +1,9 @@
 {
   "name": "Mark Webber",
   "dob": "1976-08-27",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Mark_Webber_(racing_driver)",
+  "nationality": "Australia",
+  "wikidata_id": "Q82667",
+  "wikidata_url": "http://www.wikidata.org/entity/Q82667",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:47:56.621173"
+  "scraped_date": "2025-07-12T10:17:42.616884"
 }

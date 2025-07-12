@@ -1,8 +1,9 @@
 {
   "name": "René Binder",
   "dob": "1992-01-01",
-  "nationality": "Austrian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ren%C3%A9_Binder",
+  "nationality": "Austria",
+  "wikidata_id": "Q84528",
+  "wikidata_url": "http://www.wikidata.org/entity/Q84528",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:41.953324"
+  "scraped_date": "2025-07-12T10:17:52.487991"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Tatiana Calderón",
   "dob": "1993-03-10",
-  "nationality": "Colombian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tatiana_Calder%C3%B3n",
+  "nationality": "Colombia",
+  "wikidata_id": "Q6454881",
+  "wikidata_url": "http://www.wikidata.org/entity/Q6454881",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:30.221452"
+  "scraped_date": "2025-07-12T10:17:42.712706"
 }

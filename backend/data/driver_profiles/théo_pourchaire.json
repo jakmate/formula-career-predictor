@@ -1,8 +1,9 @@
 {
   "name": "Théo Pourchaire",
   "dob": "2003-08-20",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Th%C3%A9o_Pourchaire",
+  "nationality": "France",
+  "wikidata_id": "Q61766530",
+  "wikidata_url": "http://www.wikidata.org/entity/Q61766530",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:44.125191"
+  "scraped_date": "2025-07-12T10:17:51.261106"
 }

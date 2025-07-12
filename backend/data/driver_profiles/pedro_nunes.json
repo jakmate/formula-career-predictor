@@ -1,8 +1,9 @@
 {
   "name": "Pedro Nunes",
   "dob": "1988-08-22",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Pedro_Nunes_(racing_driver)",
+  "nationality": "Brazil",
+  "wikidata_id": "Q678940",
+  "wikidata_url": "http://www.wikidata.org/entity/Q678940",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:22.740576"
+  "scraped_date": "2025-07-12T10:17:33.343804"
 }

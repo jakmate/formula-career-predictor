@@ -1,8 +1,9 @@
 {
   "name": "Jordan King",
   "dob": "1994-02-26",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jordan_King",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q979879",
+  "wikidata_url": "http://www.wikidata.org/entity/Q979879",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:05.344235"
+  "scraped_date": "2025-07-12T10:17:42.035500"
 }

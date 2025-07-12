@@ -1,8 +1,9 @@
 {
   "name": "Fabio Scherer",
   "dob": "1999-06-13",
-  "nationality": "Swiss",
-  "wiki_url": "https://en.wikipedia.org/wiki/Fabio_Scherer",
+  "nationality": "Switzerland",
+  "wikidata_id": "Q47092130",
+  "wikidata_url": "http://www.wikidata.org/entity/Q47092130",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:59.416921"
+  "scraped_date": "2025-07-12T10:17:45.528080"
 }

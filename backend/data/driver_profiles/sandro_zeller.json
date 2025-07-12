@@ -1,8 +1,9 @@
 {
   "name": "Sandro Zeller",
   "dob": "1991-11-16",
-  "nationality": "Swiss",
-  "wiki_url": "https://en.wikipedia.org/wiki/Sandro_Zeller",
+  "nationality": "Switzerland",
+  "wikidata_id": "Q117657",
+  "wikidata_url": "http://www.wikidata.org/entity/Q117657",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:20.665014"
+  "scraped_date": "2025-07-12T10:17:37.972930"
 }

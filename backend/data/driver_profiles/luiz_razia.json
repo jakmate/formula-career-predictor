@@ -1,8 +1,9 @@
 {
   "name": "Luiz Razia",
   "dob": "1989-04-04",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Luiz_Razia",
+  "nationality": "Brazil",
+  "wikidata_id": "Q453192",
+  "wikidata_url": "http://www.wikidata.org/entity/Q453192",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:21.779039"
+  "scraped_date": "2025-07-12T10:17:37.703131"
 }

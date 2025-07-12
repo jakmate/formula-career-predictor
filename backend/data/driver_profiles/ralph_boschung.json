@@ -1,8 +1,9 @@
 {
   "name": "Ralph Boschung",
   "dob": "1997-09-23",
-  "nationality": "Swiss",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ralph_Boschung",
+  "nationality": "Switzerland",
+  "wikidata_id": "Q19477224",
+  "wikidata_url": "http://www.wikidata.org/entity/Q19477224",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:51.059435"
+  "scraped_date": "2025-07-12T10:17:29.551276"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Arthur Pic",
   "dob": "1991-10-05",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Arthur_Pic",
+  "nationality": "France",
+  "wikidata_id": "Q710992",
+  "wikidata_url": "http://www.wikidata.org/entity/Q710992",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:25:36.200091"
+  "scraped_date": "2025-07-12T10:17:42.965906"
 }

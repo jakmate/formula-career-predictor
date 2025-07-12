@@ -1,8 +1,9 @@
 {
   "name": "Victor Martins",
   "dob": "2001-06-16",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Victor_Martins",
+  "nationality": "France",
+  "wikidata_id": "Q28043364",
+  "wikidata_url": "http://www.wikidata.org/entity/Q28043364",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:30.992374"
+  "scraped_date": "2025-07-12T10:17:38.757541"
 }

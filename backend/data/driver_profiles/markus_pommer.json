@@ -1,8 +1,9 @@
 {
   "name": "Markus Pommer",
   "dob": "1991-01-27",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Markus_Pommer",
+  "nationality": "Germany",
+  "wikidata_id": "Q75578",
+  "wikidata_url": "http://www.wikidata.org/entity/Q75578",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:20:16.355629"
+  "scraped_date": "2025-07-12T10:17:34.551252"
 }

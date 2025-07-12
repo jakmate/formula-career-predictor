@@ -1,8 +1,9 @@
 {
   "name": "Adrian Sutil",
   "dob": "1983-01-11",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Adrian_Sutil",
+  "nationality": "Germany",
+  "wikidata_id": "Q49235",
+  "wikidata_url": "http://www.wikidata.org/entity/Q49235",
   "scraped": true,
-  "scraped_date": "2025-07-09T21:01:43.197823"
+  "scraped_date": "2025-07-12T10:17:31.189350"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Jack Aitken",
   "dob": "1995-09-23",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Jack_Aitken",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q15292751",
+  "wikidata_url": "http://www.wikidata.org/entity/Q15292751",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:09.431730"
+  "scraped_date": "2025-07-12T10:17:40.859588"
 }

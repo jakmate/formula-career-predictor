@@ -1,8 +1,9 @@
 {
   "name": "Eric Lichtenstein",
   "dob": "1994-10-06",
-  "nationality": "Argentine",
-  "wiki_url": "https://en.wikipedia.org/wiki/Eric_Lichtenstein",
+  "nationality": "Argentina",
+  "wikidata_id": "Q943015",
+  "wikidata_url": "http://www.wikidata.org/entity/Q943015",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:32.461176"
+  "scraped_date": "2025-07-12T10:17:52.776153"
 }

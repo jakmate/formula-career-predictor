@@ -1,8 +1,9 @@
 {
   "name": "Michele Beretta",
   "dob": "1994-10-22",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Michele_Beretta",
+  "nationality": "Italy",
+  "wikidata_id": "Q15889452",
+  "wikidata_url": "http://www.wikidata.org/entity/Q15889452",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:01.917307"
+  "scraped_date": "2025-07-12T10:17:51.800625"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Nicola Marinangeli",
   "dob": "2003-05-14",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nicola_Marinangeli",
+  "nationality": "Italy",
+  "wikidata_id": "Q99237181",
+  "wikidata_url": "http://www.wikidata.org/entity/Q99237181",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:03.867242"
+  "scraped_date": "2025-07-12T10:17:49.786350"
 }

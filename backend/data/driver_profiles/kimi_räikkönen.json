@@ -1,8 +1,9 @@
 {
   "name": "Kimi Räikkönen",
   "dob": "1979-10-17",
-  "nationality": "Finnish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Kimi_R%C3%A4ikk%C3%B6nen",
+  "nationality": "Finland",
+  "wikidata_id": "Q11192",
+  "wikidata_url": "http://www.wikidata.org/entity/Q11192",
   "scraped": true,
-  "scraped_date": "2025-07-09T20:48:37.010330"
+  "scraped_date": "2025-07-12T10:17:41.709755"
 }

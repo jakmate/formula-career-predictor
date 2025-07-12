@@ -1,8 +1,9 @@
 {
   "name": "Oliver Gray",
-  "dob": "2005-04-28",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Oliver_Gray",
+  "dob": "2004-04-28",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q116233920",
+  "wikidata_url": "http://www.wikidata.org/entity/Q116233920",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:44.422365"
+  "scraped_date": "2025-07-12T10:17:30.286644"
 }

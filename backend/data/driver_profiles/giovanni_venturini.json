@@ -1,8 +1,9 @@
 {
   "name": "Giovanni Venturini",
   "dob": "1991-11-09",
-  "nationality": "Italian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Giovanni_Venturini",
+  "nationality": "Italy",
+  "wikidata_id": "Q1313752",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1313752",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:27:25.729747"
+  "scraped_date": "2025-07-12T10:17:32.464325"
 }

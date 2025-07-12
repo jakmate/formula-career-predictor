@@ -1,8 +1,9 @@
 {
   "name": "Tobias Hegewald",
   "dob": "1989-08-03",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Tobias_Hegewald",
+  "nationality": "Germany",
+  "wikidata_id": "Q62787",
+  "wikidata_url": "http://www.wikidata.org/entity/Q62787",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:28.254443"
+  "scraped_date": "2025-07-12T10:17:50.402819"
 }

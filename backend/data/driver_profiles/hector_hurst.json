@@ -1,8 +1,9 @@
 {
   "name": "Hector Hurst",
   "dob": "1992-07-15",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Hector_Hurst",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q1593122",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1593122",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:09.141401"
+  "scraped_date": "2025-07-12T10:17:40.733698"
 }

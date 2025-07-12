@@ -1,8 +1,9 @@
 {
   "name": "Johnathan Hoggard",
   "dob": "2000-11-15",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Johnathan_Hoggard",
+  "nationality": null,
+  "wikidata_id": "Q93130609",
+  "wikidata_url": "http://www.wikidata.org/entity/Q93130609",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:29:16.552086"
+  "scraped_date": "2025-07-12T10:17:53.371126"
 }

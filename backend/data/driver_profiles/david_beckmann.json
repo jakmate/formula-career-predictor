@@ -1,8 +1,9 @@
 {
   "name": "David Beckmann",
   "dob": "2000-04-27",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/David_Beckmann",
+  "nationality": "Germany",
+  "wikidata_id": "Q20752093",
+  "wikidata_url": "http://www.wikidata.org/entity/Q20752093",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:21:49.756368"
+  "scraped_date": "2025-07-12T10:17:33.050915"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Nikola Tsolov",
   "dob": "2006-12-21",
-  "nationality": "Bulgarian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nikola_Tsolov",
+  "nationality": "Bulgaria",
+  "wikidata_id": "Q111797244",
+  "wikidata_url": "http://www.wikidata.org/entity/Q111797244",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:24:46.620798"
+  "scraped_date": "2025-07-12T10:17:30.983389"
 }

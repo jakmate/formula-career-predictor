@@ -1,8 +1,9 @@
 {
   "name": "Julien Falchero",
   "dob": "1997-03-02",
-  "nationality": "French",
-  "wiki_url": "https://en.wikipedia.org/wiki/Julien_Falchero",
+  "nationality": "France",
+  "wikidata_id": "Q27947755",
+  "wikidata_url": "http://www.wikidata.org/entity/Q27947755",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:56.432814"
+  "scraped_date": "2025-07-12T10:17:50.365438"
 }

@@ -1,5 +1,9 @@
 {
   "name": "Denis Nagulin",
-  "dob": null,
-  "scraped": false
+  "dob": "1992-11-27",
+  "nationality": "Russia",
+  "wikidata_id": "Q16540006",
+  "wikidata_url": "http://www.wikidata.org/entity/Q16540006",
+  "scraped": true,
+  "scraped_date": "2025-07-12T10:17:39.530887"
 }

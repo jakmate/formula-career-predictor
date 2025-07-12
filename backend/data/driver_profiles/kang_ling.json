@@ -1,8 +1,9 @@
 {
   "name": "Kang Ling",
   "dob": "1997-03-14",
-  "nationality": "Chinese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ling_Kang",
+  "nationality": "People's Republic of China",
+  "wikidata_id": "Q18560575",
+  "wikidata_url": "http://www.wikidata.org/entity/Q18560575",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:47.520254"
+  "scraped_date": "2025-07-12T10:17:51.670029"
 }

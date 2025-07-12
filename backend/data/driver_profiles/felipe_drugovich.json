@@ -1,8 +1,9 @@
 {
   "name": "Felipe Drugovich",
   "dob": "2000-05-23",
-  "nationality": "Brazilian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Felipe_Drugovich",
+  "nationality": "Brazil",
+  "wikidata_id": "Q28549814",
+  "wikidata_url": "http://www.wikidata.org/entity/Q28549814",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:44.366835"
+  "scraped_date": "2025-07-12T10:17:30.230606"
 }

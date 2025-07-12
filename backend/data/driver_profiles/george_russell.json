@@ -1,8 +1,9 @@
 {
   "name": "George Russell",
   "dob": "1998-02-15",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/George_Russell_(racing_driver)",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q17319645",
+  "wikidata_url": "http://www.wikidata.org/entity/Q17319645",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:19:18.521255"
+  "scraped_date": "2025-07-12T10:17:47.694955"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Michael Belov",
   "dob": "2001-11-21",
-  "nationality": "Russian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Michael_Belov",
+  "nationality": null,
+  "wikidata_id": "Q98690874",
+  "wikidata_url": "http://www.wikidata.org/entity/Q98690874",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:09.802636"
+  "scraped_date": "2025-07-12T10:17:48.455087"
 }

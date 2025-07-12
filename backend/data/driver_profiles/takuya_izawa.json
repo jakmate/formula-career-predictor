@@ -1,8 +1,9 @@
 {
   "name": "Takuya Izawa",
   "dob": "1984-06-01",
-  "nationality": "Japanese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Takuya_Izawa",
+  "nationality": "Japan",
+  "wikidata_id": "Q1613016",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1613016",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:38.838722"
+  "scraped_date": "2025-07-12T10:17:41.184560"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Ryan Cullen",
   "dob": "1991-03-26",
-  "nationality": "Irish",
-  "wiki_url": "https://en.wikipedia.org/wiki/Ryan_Cullen",
+  "nationality": "Ireland",
+  "wikidata_id": "Q12423885",
+  "wikidata_url": "http://www.wikidata.org/entity/Q12423885",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:49.021721"
+  "scraped_date": "2025-07-12T10:17:48.979427"
 }

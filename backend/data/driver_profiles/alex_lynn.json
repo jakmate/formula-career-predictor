@@ -1,8 +1,9 @@
 {
   "name": "Alex Lynn",
   "dob": "1993-09-17",
-  "nationality": "British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Alex_Lynn",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q2545218",
+  "wikidata_url": "http://www.wikidata.org/entity/Q2545218",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:35.409487"
+  "scraped_date": "2025-07-12T10:17:29.298292"
 }

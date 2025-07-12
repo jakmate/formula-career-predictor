@@ -1,8 +1,9 @@
 {
   "name": "Marcus Armstrong",
   "dob": "2000-07-29",
-  "nationality": "New, Zealander",
-  "wiki_url": "https://en.wikipedia.org/wiki/Marcus_Armstrong",
+  "nationality": "New Zealand",
+  "wikidata_id": "Q27889082",
+  "wikidata_url": "http://www.wikidata.org/entity/Q27889082",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:59.350341"
+  "scraped_date": "2025-07-12T10:17:35.203616"
 }

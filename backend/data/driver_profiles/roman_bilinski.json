@@ -1,8 +1,9 @@
 {
   "name": "Roman Bilinski",
-  "dob": "2004-03-04",
-  "nationality": "Polish, British",
-  "wiki_url": "https://en.wikipedia.org/wiki/Roman_Bili%C5%84ski",
+  "dob": "2004-01-01",
+  "nationality": "Poland",
+  "wikidata_id": "Q108006520",
+  "wikidata_url": "http://www.wikidata.org/entity/Q108006520",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:49.449212"
+  "scraped_date": "2025-07-12T10:17:39.137170"
 }

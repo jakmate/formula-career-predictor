@@ -1,5 +1,9 @@
 {
   "name": "Pedro Pablo Calbimonte",
-  "dob": null,
-  "scraped": false
+  "dob": "1991-04-10",
+  "nationality": "Bolivia",
+  "wikidata_id": "Q10583586",
+  "wikidata_url": "http://www.wikidata.org/entity/Q10583586",
+  "scraped": true,
+  "scraped_date": "2025-07-12T10:17:44.846315"
 }

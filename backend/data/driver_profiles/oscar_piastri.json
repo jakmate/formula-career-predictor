@@ -1,8 +1,9 @@
 {
   "name": "Oscar Piastri",
   "dob": "2001-04-06",
-  "nationality": "Australian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Oscar_Piastri",
+  "nationality": "Australia",
+  "wikidata_id": "Q28741262",
+  "wikidata_url": "http://www.wikidata.org/entity/Q28741262",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:22:16.323629"
+  "scraped_date": "2025-07-12T10:17:49.872842"
 }

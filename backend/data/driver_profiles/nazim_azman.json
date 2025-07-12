@@ -1,8 +1,9 @@
 {
   "name": "Nazim Azman",
   "dob": "2001-08-17",
-  "nationality": "Malaysian",
-  "wiki_url": "https://en.wikipedia.org/wiki/Nazim_Azman",
+  "nationality": "Malaysia",
+  "wikidata_id": "Q108744789",
+  "wikidata_url": "http://www.wikidata.org/entity/Q108744789",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:28:53.539011"
+  "scraped_date": "2025-07-12T10:17:50.606523"
 }

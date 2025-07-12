@@ -1,8 +1,9 @@
 {
   "name": "Mathéo Tuscher",
   "dob": "1996-12-12",
-  "nationality": "Swiss",
-  "wiki_url": "https://en.wikipedia.org/wiki/Math%C3%A9o_Tuscher",
+  "nationality": "Switzerland",
+  "wikidata_id": "Q124809",
+  "wikidata_url": "http://www.wikidata.org/entity/Q124809",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:18:50.483018"
+  "scraped_date": "2025-07-12T10:17:47.193797"
 }

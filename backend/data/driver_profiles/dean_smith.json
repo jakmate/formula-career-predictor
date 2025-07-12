@@ -1,8 +1,9 @@
 {
   "name": "Dean Smith",
-  "dob": "1931-02-28",
-  "nationality": "American",
-  "wiki_url": "https://en.wikipedia.org/wiki/Dean_Smith",
+  "dob": "1988-03-22",
+  "nationality": "United Kingdom",
+  "wikidata_id": "Q1181132",
+  "wikidata_url": "http://www.wikidata.org/entity/Q1181132",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:23:19.283619"
+  "scraped_date": "2025-07-12T10:17:44.623728"
 }

@@ -1,8 +1,9 @@
 {
   "name": "Mick Schumacher",
   "dob": "1999-03-22",
-  "nationality": "German",
-  "wiki_url": "https://en.wikipedia.org/wiki/Mick_Schumacher",
+  "nationality": "Germany",
+  "wikidata_id": "Q18119599",
+  "wikidata_url": "http://www.wikidata.org/entity/Q18119599",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:17:18.793979"
+  "scraped_date": "2025-07-12T10:17:50.903605"
 }

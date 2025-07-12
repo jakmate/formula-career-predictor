@@ -1,8 +1,9 @@
 {
   "name": "Teppei Natori",
   "dob": "2000-09-11",
-  "nationality": "Japanese",
-  "wiki_url": "https://en.wikipedia.org/wiki/Teppei_Natori",
+  "nationality": "Japan",
+  "wikidata_id": "Q60595150",
+  "wikidata_url": "http://www.wikidata.org/entity/Q60595150",
   "scraped": true,
-  "scraped_date": "2025-06-21T10:26:40.795193"
+  "scraped_date": "2025-07-12T10:17:32.548305"
 }
