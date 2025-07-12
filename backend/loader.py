@@ -27,7 +27,7 @@ FILE_PATTERNS = {
 def get_file_pattern(series_type, file_type, series, year, round_num=None):
     """Get file pattern based on series type."""
     if series_type == 'F3_European':
-        FILE_PATTERNS['F3_European'][file_type].format(year=year)
+        return FILE_PATTERNS['F3_European'][file_type].format(year=year)
 
     pattern = FILE_PATTERNS['default'][file_type]
     if round_num:
@@ -56,15 +56,6 @@ def determine_series_type(series_pattern, series):
     return SERIES_CONFIG[series]['main_type']
 
 
-def load_entries_data(entries_file):
-    """Load and preprocess entries data."""
-    if not os.path.exists(entries_file):
-        return None
-    entries_df = pd.read_csv(entries_file)
-
-    return entries_df
-
-
 def load_all_entries_data(series):
     """Load all entries data for a series at once."""
     all_entries = []
@@ -81,7 +72,10 @@ def load_all_entries_data(series):
                 get_file_pattern(series_type, 'entries', series, year)
             )
 
-            entries_df = load_entries_data(entries_file)
+            if not os.path.exists(entries_file):
+                return None
+            entries_df = pd.read_csv(entries_file)
+
             if entries_df is not None:
                 entries_df['year'] = year_int
                 entries_df['series'] = series
@@ -311,27 +305,24 @@ def merge_team_data(driver_df, team_df):
     return enhanced_df
 
 
-def load_all_data():
-    print("Loading F3 data...")
-    f3_df = load_standings_data('F3', 'drivers')
+def load_data(series):
+    print(f"Loading {series} driver data")
+    driver_df = load_standings_data(series, 'drivers')
 
-    print("Loading F2 data...")
-    f2_df = load_standings_data('F2', 'drivers')
+    print(f"Loading {series} team data")
+    team_df = load_standings_data(series, 'teams')
 
-    print("Loading F3 team championship data...")
-    f3_team_df = load_standings_data('F3', 'teams')
+    print(f"Loading {series} entries")
+    entries_df = load_all_entries_data(series)
 
-    print("Loading F3 entries...")
-    f3_entries_df = load_all_entries_data('F3')
-
-    print("Merging entries...")
-    f3_df = merge_entries(f3_df, f3_entries_df)
+    print("Merging entries")
+    df = merge_entries(driver_df, entries_df)
 
     print("Merge team data")
-    f3_df = merge_team_data(f3_df, f3_team_df)
+    df = merge_team_data(df, team_df)
 
-    return f2_df, f3_df
+    return df
 
 
 if __name__ == "__main__":
-    f2_df, f3_df = load_all_data()
+    load_data('F3')

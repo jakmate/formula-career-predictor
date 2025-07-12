@@ -14,7 +14,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
-from loader import load_all_data, load_qualifying_data
+from loader import load_data, load_qualifying_data, load_standings_data
 from scraping.scrape import scrape_current_year
 from predictor import (
     RacingPredictor,
@@ -169,7 +169,8 @@ def initialize_system():
     logger.info("Initializing system...")
 
     # Load data
-    f2_df, f3_df = load_all_data()
+    f3_df = load_data('F3')
+    f2_df = load_standings_data('F2', 'drivers')
     f3_qualifying_df = load_qualifying_data('F3')
 
     # Process data
@@ -365,7 +366,8 @@ async def train_models_task():
     """Train models on newly available complete seasons"""
     try:
         # Load newly scraped data
-        f2_df, f3_df = load_all_data()
+        f3_df = load_data('F3')
+        f2_df = load_standings_data('F2', 'drivers')
         f3_qualifying_df = load_qualifying_data('F3')
 
         # Process data
@@ -477,7 +479,8 @@ def _create_prediction_responses(current_df, calibrated_probas):
 
 def _load_current_data():
     """Load and process current racing data"""
-    f2_df, f3_df = load_all_data()
+    f3_df = load_data('F3')
+    f2_df = load_standings_data('F2', 'drivers')
 
     if f3_df.empty:
         raise HTTPException(status_code=404, detail="No F3 data available")

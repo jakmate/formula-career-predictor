@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 from lightgbm import LGBMRegressor
 
-from loader import load_all_data, load_qualifying_data
+from loader import load_data, load_qualifying_data, load_standings_data
 
 SEED = 69
 os.environ['PYTHONHASHSEED'] = str(SEED)
@@ -777,7 +777,8 @@ def predict_final_championship_standings(models, df, feature_cols, scaler=None):
 print("Loading F3 qualifying data...")
 f3_qualifying_df = load_qualifying_data('F3')
 
-f2_df, f3_df = load_all_data()
+f3_df = load_data('F3')
+f2_df = load_standings_data('F2', 'drivers')
 
 print("Adding qualifying features...")
 f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
