@@ -7,6 +7,9 @@ omit =
     */data/*
     */models/*
     system_state.json
+    */__init__.py
+    config.py
+    routes/router.py
 
 [report]
 fail_under = 0

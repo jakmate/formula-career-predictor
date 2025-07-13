@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 class DriverProfileScraper:
-    def __init__(self, profiles_dir="data/driver_profiles"):
+    def __init__(self, profiles_dir="../data/driver_profiles"):
         self.profiles_dir = profiles_dir
         self.session = requests.Session()
         os.makedirs(profiles_dir, exist_ok=True)

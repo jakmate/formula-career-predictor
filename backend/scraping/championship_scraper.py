@@ -56,10 +56,10 @@ def process_championship(soup, championship_type, year,
 
     # Use different folder for F3 European
     if series_type == "f3_euro":
-        dir_path = os.path.join("data/F3_European", str(year))
+        dir_path = os.path.join("../data/F3_European", str(year))
         filename = f"f3_euro_{year}_{file_suffix}.csv"
     else:
-        dir_path = os.path.join(f"data/F{formula}", str(year))
+        dir_path = os.path.join(f"../data/F{formula}", str(year))
         filename = f"f{formula}_{year}_{file_suffix}.csv"
 
     os.makedirs(dir_path, exist_ok=True)

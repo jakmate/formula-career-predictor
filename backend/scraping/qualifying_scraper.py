@@ -342,7 +342,7 @@ def save_qualifying_data(qualifying_results, year, formula):
     if not qualifying_results:
         return
 
-    dir_path = os.path.join(f"data/F{formula}", str(year), "qualifying")
+    dir_path = os.path.join(f"../data/F{formula}", str(year), "qualifying")
     base_filename = f"f{formula}_{year}_qualifying"
     os.makedirs(dir_path, exist_ok=True)
 

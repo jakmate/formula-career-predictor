@@ -1,7 +1,11 @@
 import glob
 import os
+from pathlib import Path
 import pandas as pd
 
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent  # backend/ directory
+DATA_DIR = BASE_DIR / "data"
 
 SERIES_CONFIG = {
     'F3': {'patterns': ['F3'], 'main_type': 'F3_Main'},  # w/o 'F3_European',
@@ -41,7 +45,7 @@ def get_series_directories(series):
     directories = []
 
     for series_pattern in config['patterns']:
-        pattern = os.path.join("data", series_pattern, "*")
+        pattern = os.path.join(DATA_DIR, series_pattern, "*")
         series_dirs = glob.glob(pattern)
         for year_dir in series_dirs:
             directories.append((year_dir, series_pattern))

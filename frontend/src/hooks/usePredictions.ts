@@ -61,7 +61,7 @@ export const usePredictions = () => {
       // Capture current status before refresh
       refreshStatusRef.current = allData?.system_status || null;
 
-      const refreshResponse = await fetch(`${API_BASE}/api/refresh`, {
+      const refreshResponse = await fetch(`${API_BASE}/api/system/refresh`, {
         method: 'POST',
       });
       if (!refreshResponse.ok) {

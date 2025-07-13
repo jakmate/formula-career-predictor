@@ -51,10 +51,10 @@ def process_entries(soup, year, formula, series_type="main"):
 
     # Create directories
     if series_type == "f3_euro":
-        dir_path = os.path.join("data/F3_European", str(year))
+        dir_path = os.path.join("../data/F3_European", str(year))
         filename = f"f3_euro_{year}_entries.csv"
     else:
-        dir_path = os.path.join(f"data/F{formula}", str(year))
+        dir_path = os.path.join(f"../data/F{formula}", str(year))
         filename = f"f{formula}_{year}_entries.csv"
 
     os.makedirs(dir_path, exist_ok=True)
