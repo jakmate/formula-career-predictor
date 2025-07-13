@@ -137,7 +137,7 @@
   {
     "round": 6,
     "name": "CRYPTO.COM MIAMI",
-    "location": "Miami",
+    "location": "United States",
     "sessions": {
       "fp1": {
         "start": "2025-05-02T16:30:00",
@@ -164,7 +164,7 @@
   {
     "round": 7,
     "name": "AWS GRAN PREMIO DEL MADE IN ITALY E DELL'EMILIA-ROMAGNA",
-    "location": "Emilia-Romagna",
+    "location": "Italy",
     "sessions": {
       "fp1": {
         "start": "2025-05-16T11:30:00",
@@ -569,7 +569,7 @@
   {
     "round": 22,
     "name": "HEINEKEN LAS VEGAS",
-    "location": "Las Vegas",
+    "location": "United States",
     "sessions": {
       "fp1": {
         "start": "2025-11-21T00:30:00",
@@ -623,7 +623,7 @@
   {
     "round": 24,
     "name": "ETIHAD AIRWAYS ABU DHABI",
-    "location": "Abu Dhabi",
+    "location": "United Arab Emirates",
     "sessions": {
       "fp1": {
         "start": "2025-12-05T09:30:00",

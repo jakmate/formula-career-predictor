@@ -188,10 +188,8 @@ def initialize_system():
         logger.info(f"Training models on {len(trainable_df)} historical records")
         (
             app_state.models,
-            _, _,
             app_state.feature_cols,
-            app_state.scaler,
-            _, _
+            app_state.scaler
         ) = train_models(trainable_df)
 
         # Update system status
@@ -389,10 +387,8 @@ async def train_models_task():
         logger.info(f"Training models on {len(trainable_df)} new records")
         (
             app_state.models,
-            _, _,
             app_state.feature_cols,
-            app_state.scaler,
-            _, _
+            app_state.scaler
         ) = train_models(trainable_df)
 
         # Update system status

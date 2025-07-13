@@ -2,7 +2,7 @@
   {
     "round": 1,
     "name": "Melbourne",
-    "location": "Melbourne",
+    "location": "Australia",
     "sessions": {
       "practice": {
         "start": "2025-03-14T01:00:00",
@@ -25,7 +25,7 @@
   {
     "round": 2,
     "name": "Sakhir",
-    "location": "Sakhir",
+    "location": "Bahrain",
     "sessions": {
       "practice": {
         "start": "2025-04-11T11:00:00",
@@ -48,7 +48,7 @@
   {
     "round": 3,
     "name": "Imola",
-    "location": "Imola",
+    "location": "Italy",
     "sessions": {
       "practice": {
         "start": "2025-05-16T09:00:00",
@@ -94,7 +94,7 @@
   {
     "round": 5,
     "name": "Barcelona",
-    "location": "Barcelona",
+    "location": "Spain",
     "sessions": {
       "practice": {
         "start": "2025-05-30T09:00:00",
@@ -117,7 +117,7 @@
   {
     "round": 6,
     "name": "Spielberg",
-    "location": "Spielberg",
+    "location": "Austria",
     "sessions": {
       "practice": {
         "start": "2025-06-27T09:55:00",
@@ -140,7 +140,7 @@
   {
     "round": 7,
     "name": "Silverstone",
-    "location": "Silverstone",
+    "location": "United Kingdom",
     "sessions": {
       "practice": {
         "start": "2025-07-04T07:45:00",
@@ -163,30 +163,30 @@
   {
     "round": 8,
     "name": "Spa-Francorchamps",
-    "location": "Spa-Francorchamps",
+    "location": "Belgium",
     "sessions": {
       "practice": {
-        "start": "2025-07-24T23:45:00",
-        "end": "2025-07-25T00:30:00"
+        "start": "2025-07-25T06:45:00",
+        "end": "2025-07-25T07:30:00"
       },
       "qualifying": {
-        "start": "2025-07-25T05:00:00",
-        "end": "2025-07-25T05:30:00"
+        "start": "2025-07-25T12:00:00",
+        "end": "2025-07-25T12:30:00"
       },
       "sprint": {
-        "start": "2025-07-26T00:15:00",
-        "end": "2025-07-26T00:55:00"
+        "start": "2025-07-26T07:15:00",
+        "end": "2025-07-26T07:55:00"
       },
       "race": {
-        "start": "2025-07-26T23:30:00",
-        "end": "2025-07-27T00:15:00"
+        "start": "2025-07-27T06:30:00",
+        "end": "2025-07-27T07:15:00"
       }
     }
   },
   {
     "round": 9,
     "name": "Budapest",
-    "location": "Budapest",
+    "location": "Hungary",
     "sessions": {
       "practice": {
         "start": "2025-08-01",
@@ -209,7 +209,7 @@
   {
     "round": 10,
     "name": "Monza",
-    "location": "Monza",
+    "location": "Italy",
     "sessions": {
       "practice": {
         "start": "2025-09-05",

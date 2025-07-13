@@ -1,4 +1,5 @@
 import { Calendar, MapPin } from 'lucide-react';
+import { getFlagComponent } from '../../utils/flags';
 
 interface SessionDetails {
   start?: string;
@@ -125,6 +126,7 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
                 <div className="flex items-center mb-3 text-white/70">
                   <MapPin className="w-4 h-4 mr-1" />
                   <span className="text-sm">{race.location}</span>
+                  <div className="ml-2">{getFlagComponent(race.location)}</div>
                 </div>
 
                 {raceDate && (

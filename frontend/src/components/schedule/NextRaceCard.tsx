@@ -1,5 +1,6 @@
 import { Clock, MapPin, Calendar, Trophy } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { getFlagComponent } from '../../utils/flags';
 
 const sessionDisplayNames: Record<string, string> = {
   practice: 'PRACTICE',
@@ -181,6 +182,7 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
           <h2 className="text-2xl md:text-3xl font-bold text-white">
             NEXT RACE: {nextRace.name} GP
           </h2>
+          <div className="ml-2 mt-1">{getFlagComponent(nextRace.location)}</div>
         </div>
 
         <div className="bg-cyan-900/40 px-4 py-1.5 rounded-full flex items-center border border-cyan-500/30">

@@ -13,16 +13,60 @@ from urllib.parse import urljoin
 CURRENT_YEAR = datetime.now().year
 SCHEDULE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'schedules', str(CURRENT_YEAR))
 os.makedirs(SCHEDULE_DIR, exist_ok=True)
+TRACK_TIMEZONES = {
+    "Sakhir": "Asia/Bahrain",
+    "Barcelona": "Europe/Madrid",
+    "Imola": "Europe/Rome",
+    "Monaco": "Europe/Monaco",
+    "Spielberg": "Europe/Vienna",
+    "Silverstone": "Europe/London",
+    "Budapest": "Europe/Budapest",
+    "Spa-Francorchamps": "Europe/Brussels",
+    "Zandvoort": "Europe/Amsterdam",
+    "Monza": "Europe/Rome",
+    "Yas Island": "Asia/Dubai",
+    "Jeddah": "Asia/Riyadh",
+    "Baku": "Asia/Baku",
+    "Melbourne": "Australia/Melbourne",
+    "Lusail": "Asia/Doha"
+}
+TRACK_COUNTRIES = {
+    "Sakhir": "Bahrain",
+    "Barcelona": "Spain",
+    "Imola": "Italy",
+    "Monaco": "Monaco",
+    "Spielberg": "Austria",
+    "Silverstone": "United Kingdom",
+    "Budapest": "Hungary",
+    "Spa-Francorchamps": "Belgium",
+    "Zandvoort": "Netherlands",
+    "Monza": "Italy",
+    "Yas Island": "United Arab Emirates",
+    "Jeddah": "Saudi Arabia",
+    "Baku": "Azerbaijan",
+    "Melbourne": "Australia",
+    "Lusail": "Qatar",
+    "Las Vegas": 'United States',
+    "Miami": 'United States',
+    "Emilia-Romagna": 'Italy',
+    "Abu Dhabi": "United Arab Emirates"
+}
+
 
 session = requests.Session()
 
-# Initialize geocoding cache
-location_timezone_cache = {}
+
+def get_country_for_location(location_str):
+    country = TRACK_COUNTRIES.get(location_str)
+    if country:
+        return country
+    return location_str
 
 
 def get_timezone_for_location(location_str):
-    if location_str in location_timezone_cache:
-        return location_timezone_cache[location_str]
+    tz = TRACK_TIMEZONES.get(location_str)
+    if tz:
+        return tz
 
     try:
         geolocator = Nominatim(user_agent="f1_schedule_scraper")
@@ -31,7 +75,6 @@ def get_timezone_for_location(location_str):
             tf = TimezoneFinder()
             timezone_str = tf.timezone_at(lat=location.latitude, lng=location.longitude)
             if timezone_str:
-                location_timezone_cache[location_str] = timezone_str
                 return timezone_str
     except Exception as e:
         print(f"Geocoding error for '{location_str}': {str(e)}")
@@ -48,48 +91,31 @@ def format_utc_datetime(dt):
 def is_race_completed_or_ongoing(race):
     """Check if a race is completed or currently ongoing"""
     now = datetime.now(timezone.utc).replace(tzinfo=None)
-
-    # Get all session start times
-    session_starts = []
-    for session in race['sessions'].values():
-        start_str = session.get('start')
-        if not start_str:
-            continue
-
-        # Handle TBC sessions
-        if isinstance(start_str, dict) and start_str.get('time') == 'TBC':
-            try:
-                date_val = datetime.strptime(start_str['start'], "%Y-%m-%d").date()
-                # Use start of day for comparison
-                session_starts.append(datetime.combine(date_val, datetime.min.time()))
-            except Exception as e:
-                print(e)
-                continue
-        # Handle regular datetime strings
-        else:
-            try:
-                if 'T' in start_str:
-                    session_dt = datetime.fromisoformat(start_str)
-                    # Convert to naive datetime if it has timezone info
-                    if session_dt.tzinfo is not None:
-                        session_dt = session_dt.replace(tzinfo=None)
-                else:
-                    # Date only
-                    date_val = datetime.strptime(start_str, "%Y-%m-%d").date()
-                    session_dt = datetime.combine(date_val, datetime.min.time())
-                session_starts.append(session_dt)
-            except Exception as e:
-                print(e)
-                continue
-
-    if not session_starts:
+    sessions = race.get('sessions', {})
+    if not sessions:
         return False
 
-    # Find earliest session time
-    earliest_session = min(session_starts)
+    first_session = next(iter(sessions.values()))
+    start_str = first_session.get('start')
+    if not start_str:
+        return False
+
+    try:
+        if 'T' in start_str:
+            session_dt = datetime.fromisoformat(start_str)
+            # Convert to naive datetime if it has timezone info
+            if session_dt.tzinfo is not None:
+                session_dt = session_dt.replace(tzinfo=None)
+        else:
+            # Date only
+            date_val = datetime.strptime(start_str, "%Y-%m-%d").date()
+            session_dt = datetime.combine(date_val, datetime.min.time())
+    except Exception as e:
+        print(e)
+        return False
 
     # Race is completed/ongoing if its weekend has started
-    return now >= earliest_session
+    return now >= session_dt
 
 
 def parse_time_to_datetime(time_str, base_date, day_name=None, location=None):
@@ -305,7 +331,7 @@ def scrape_f1_schedule():
                 races.append({
                     "round": round_num,
                     "name": clean_name,
-                    "location": location,
+                    "location": get_country_for_location(location),
                     "sessions": sessions
                 })
             except Exception as e:
@@ -354,14 +380,9 @@ def scrape_fia_formula_schedule(series_name):
                 # Extract date components
                 date_p = container.select_one('p.date')
                 if date_p:
-                    start_date = date_p.select_one('.start-date').text.strip()
                     end_date = date_p.select_one('.end-date').text.strip()
                     month = date_p.select_one('.month').text.strip()
-
-                    if int(start_date) > int(end_date):
-                        date_str = f"{end_date} {month} {CURRENT_YEAR}"
-                    else:
-                        date_str = f"{end_date} {month} {CURRENT_YEAR}"
+                    date_str = f"{end_date} {month} {CURRENT_YEAR}"
 
                     race_date = datetime.strptime(date_str, "%d %B %Y")
                 else:
@@ -373,11 +394,7 @@ def scrape_fia_formula_schedule(series_name):
 
                 if race_link and race_link.get('href'):
                     try:
-                        if series_name == 'f3' and 'raceid=' in race_link.get('href'):
-                            race_id = race_link.get('href').split('raceid=')[-1]
-                            detail_url = f"{config['base_url']}/Results?raceid={race_id}"
-                        else:
-                            detail_url = urljoin(config['base_url'], race_link.get('href'))
+                        detail_url = urljoin(config['base_url'], race_link.get('href'))
 
                         detail_response = session.get(detail_url, timeout=10)
                         detail_soup = BeautifulSoup(detail_response.content, 'lxml')
@@ -389,7 +406,7 @@ def scrape_fia_formula_schedule(series_name):
 
                         for pin in session_pins:
                             session_divs = pin.select('div')
-                            if (len(session_divs) < 2 or 'Summary' in pin.text or 'Standings' in pin.text or 'hint' in pin.get('class', []) or pin.select_one('.position')):  # noqa: 501
+                            if (len(session_divs) < 2 or pin.select_one('.position')):
                                 continue
 
                             session_name = session_divs[0].text.strip().lower()
@@ -416,7 +433,7 @@ def scrape_fia_formula_schedule(series_name):
                                     time_str,
                                     race_date,
                                     day_name,
-                                    location  # Pass location for timezone conversion
+                                    location
                                 )
 
                                 if session_dt:
@@ -440,7 +457,7 @@ def scrape_fia_formula_schedule(series_name):
                 races.append({
                     "round": round_num,
                     "name": location,
-                    "location": location,
+                    "location": get_country_for_location(location),
                     "sessions": sessions
                 })
             except Exception as e:
