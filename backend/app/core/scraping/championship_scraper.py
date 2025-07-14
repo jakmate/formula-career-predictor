@@ -1,6 +1,7 @@
 import csv
 import os
-from scraping.scraping_utils import remove_superscripts
+from app.config import DATA_DIR
+from app.core.scraping.scraping_utils import remove_superscripts
 
 
 def map_url(championship_type, formula, year, series_type="main"):
@@ -56,10 +57,10 @@ def process_championship(soup, championship_type, year,
 
     # Use different folder for F3 European
     if series_type == "f3_euro":
-        dir_path = os.path.join("../data/F3_European", str(year))
+        dir_path = os.path.join(DATA_DIR, "F3_European", str(year))
         filename = f"f3_euro_{year}_{file_suffix}.csv"
     else:
-        dir_path = os.path.join(f"../data/F{formula}", str(year))
+        dir_path = os.path.join(DATA_DIR, f"F{formula}", str(year))
         filename = f"f{formula}_{year}_{file_suffix}.csv"
 
     os.makedirs(dir_path, exist_ok=True)
@@ -115,7 +116,7 @@ def process_championship(soup, championship_type, year,
 
         # Process all race headers
         for i, th in enumerate(race_headers[col_index:], col_index):
-            race_name = remove_superscripts(th)
+            race_name = remove_superscripts(th, False)
             # Stop when we hit the Points column
             if not race_name or race_name in ['Points', 'Pts']:
                 break
@@ -131,7 +132,7 @@ def process_championship(soup, championship_type, year,
                 for j in range(colspan):
                     round_idx = round_start_idx + j
                     if round_idx < len(round_headers):
-                        round_name = remove_superscripts(round_headers[round_idx])
+                        round_name = remove_superscripts(round_headers[round_idx], False)
                         if round_name:
                             race_rounds.append(round_name)
             else:
@@ -221,7 +222,7 @@ def process_championship(soup, championship_type, year,
             race_cells = race_cells[:num_race_columns]
 
             for cell in race_cells:
-                text = remove_superscripts(cell)
+                text = remove_superscripts(cell, False)
                 row_data.append(text)
 
             # Pad with empty strings if fewer race cells than expected

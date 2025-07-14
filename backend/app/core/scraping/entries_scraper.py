@@ -1,6 +1,7 @@
 import csv
 import os
-from scraping.scraping_utils import remove_superscripts
+from app.config import DATA_DIR
+from app.core.scraping.scraping_utils import remove_superscripts
 
 HEADER_MAPPING = {
     'Entrant': 'Team',
@@ -51,10 +52,10 @@ def process_entries(soup, year, formula, series_type="main"):
 
     # Create directories
     if series_type == "f3_euro":
-        dir_path = os.path.join("../data/F3_European", str(year))
+        dir_path = os.path.join(DATA_DIR, "F3_European", str(year))
         filename = f"f3_euro_{year}_entries.csv"
     else:
-        dir_path = os.path.join(f"../data/F{formula}", str(year))
+        dir_path = os.path.join(DATA_DIR, f"F{formula}", str(year))
         filename = f"f{formula}_{year}_entries.csv"
 
     os.makedirs(dir_path, exist_ok=True)

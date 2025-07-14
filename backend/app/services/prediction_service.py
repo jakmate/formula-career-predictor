@@ -83,7 +83,7 @@ class PredictionService:
             predictions.append(PredictionResponse(
                 driver=row['driver'],
                 nationality=row['nationality'],
-                position=int(row['final_pos']),
+                position=int(row['pos']),
                 points=float(row['points']),
                 avg_finish_pos=float(row['avg_finish_pos']),
                 std_finish_pos=float(row['std_finish_pos']),
@@ -106,7 +106,6 @@ class PredictionService:
                 team_pos=int(row['team_pos']),
                 team_points=float(row['team_points']),
                 points_share=float(row['points_share']),
-                raw_probability=float(calibrated_probas[idx]),
                 empirical_percentage=float(empirical_pct[idx]),
             ))
 

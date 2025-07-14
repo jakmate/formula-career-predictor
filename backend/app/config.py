@@ -9,7 +9,9 @@ SEASON_END_MONTH = 12
 BASE_DIR = Path(__file__).resolve().parent.parent
 MODELS_DIR = BASE_DIR / 'models'
 STATE_FILE = BASE_DIR / 'system_state.json'
-SCHEDULE_DIR = BASE_DIR / 'data' / 'schedules' / str(CURRENT_YEAR)
+DATA_DIR = BASE_DIR / "data"
+SCHEDULE_DIR = DATA_DIR / 'schedules' / str(CURRENT_YEAR)
+PROFILES_DIR = DATA_DIR / 'driver_profiles'
 
 PORT = int(os.environ.get("PORT", 8000))
 

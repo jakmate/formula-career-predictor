@@ -1,11 +1,11 @@
 import glob
+import json
 import os
-from pathlib import Path
+import re
 import pandas as pd
 
+from app.config import DATA_DIR, PROFILES_DIR
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # backend/ directory
-DATA_DIR = BASE_DIR / "data"
 
 SERIES_CONFIG = {
     'F3': {'patterns': ['F3'], 'main_type': 'F3_Main'},  # w/o 'F3_European',
@@ -185,6 +185,50 @@ def load_qualifying_data(series):
     return pd.DataFrame()
 
 
+def get_driver_filename(driver_name):
+    safe_name = re.sub(r'[^\w\s-]', '', driver_name)
+    safe_name = re.sub(r'[-\s]+', '_', safe_name)
+    return f"{safe_name.lower()}.json"
+
+
+def load_driver_data(df):
+    """Add features from cached JSON profiles."""
+    default_profile = {'dob': None, 'nationality': None}
+
+    # Load cached profiles
+    profiles = {}
+    if os.path.exists(PROFILES_DIR):
+        for driver in df['Driver'].unique():
+            profile_file = os.path.join(PROFILES_DIR, get_driver_filename(driver))
+            try:
+                if os.path.exists(profile_file):
+                    with open(profile_file, 'r', encoding='utf-8') as f:
+                        profile_data = json.load(f)
+
+                        # Check if driver was successfully scraped
+                        if profile_data.get('scraped', True):
+                            profiles[driver] = profile_data
+                        else:
+                            profiles[driver] = default_profile
+                else:
+                    profiles[driver] = default_profile
+            except BaseException:
+                profiles[driver] = default_profile
+
+    # Add features
+    feature_data = []
+    for _, row in df.iterrows():
+        profile = profiles.get(row['Driver'], {})
+        feature_data.append({
+            'dob': profile.get('dob'),
+            'nationality': profile.get('nationality', 'Unknown')
+        })
+
+    for key in ['dob', 'nationality']:
+        df[key] = [item[key] for item in feature_data]
+    return df
+
+
 def merge_entries(driver_df, entries_df):
     """Merge all entries data with driver standings at once."""
     if entries_df.empty:
@@ -324,6 +368,9 @@ def load_data(series):
 
     print("Merge team data")
     df = merge_team_data(df, team_df)
+
+    print("Loading driver data")
+    df = load_driver_data(df)
 
     return df
 

@@ -2,7 +2,8 @@ import csv
 import os
 import requests
 from bs4 import BeautifulSoup
-from scraping.scraping_utils import remove_superscripts
+from app.config import DATA_DIR
+from app.core.scraping.scraping_utils import remove_superscripts
 
 COLUMN_MAPPING = {
     'Name': 'Driver',
@@ -245,18 +246,18 @@ def extract_quali_table_data(table):
 
             # First, collect all rowspan=2 headers in order
             for th in first_row_headers:
-                text = remove_superscripts(th)
+                text = remove_superscripts(th, False)
                 rowspan = int(th.get("rowspan", 1))
 
                 if rowspan == 2:
                     headers.append(text)
 
             # Add the second row headers (Q1, Q2, Q3)
-            headers.extend(remove_superscripts(th) for th in second_row_headers)
+            headers.extend(remove_superscripts(th, False) for th in second_row_headers)
 
             # Add the last rowspan=2 header (Grid)
             for th in first_row_headers:
-                text = remove_superscripts(th)
+                text = remove_superscripts(th, False)
                 rowspan = int(th.get("rowspan", 1))
                 colspan = int(th.get("colspan", 1))
 
@@ -267,7 +268,7 @@ def extract_quali_table_data(table):
         else:
             # Single row header
             header_row = all_rows[0]
-            headers = [remove_superscripts(th) for th in header_row.find_all("th")]
+            headers = [remove_superscripts(th, False) for th in header_row.find_all("th")]
             data_start_index = 1  # Data starts from second row
 
         # Apply column mapping
@@ -286,7 +287,7 @@ def extract_quali_table_data(table):
             if len(cells) < 4:  # Need at least Pos, No, Driver, Team
                 continue
 
-            row_data = [remove_superscripts(cell) for cell in cells]
+            row_data = [remove_superscripts(cell, False) for cell in cells]
 
             if row_data:
                 # Apply column filtering for single row headers
@@ -342,7 +343,7 @@ def save_qualifying_data(qualifying_results, year, formula):
     if not qualifying_results:
         return
 
-    dir_path = os.path.join(f"../data/F{formula}", str(year), "qualifying")
+    dir_path = os.path.join(DATA_DIR, f"F{formula}", str(year), "qualifying")
     base_filename = f"f{formula}_{year}_qualifying"
     os.makedirs(dir_path, exist_ok=True)
 

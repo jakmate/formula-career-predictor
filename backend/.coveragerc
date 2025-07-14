@@ -8,8 +8,8 @@ omit =
     */models/*
     system_state.json
     */__init__.py
-    config.py
-    routes/router.py
+    */config.py
+    app/routes/router.py
 
 [report]
 fail_under = 0

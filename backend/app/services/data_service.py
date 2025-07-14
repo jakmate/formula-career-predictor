@@ -38,7 +38,7 @@ class DataService:
 
     async def initialize_system(self):
         """Initial data loading and processing"""
-        from model_service import ModelService
+        from app.services.model_service import ModelService
 
         LOGGER.info("Initializing system...")
 
@@ -62,6 +62,6 @@ class DataService:
             LOGGER.warning("No historical data available for training")
 
         # Generate current predictions
-        from prediction_service import PredictionService
+        from app.services.prediction_service import PredictionService
         prediction_service = PredictionService(self.app_state)
         await prediction_service.update_predictions(features_df)

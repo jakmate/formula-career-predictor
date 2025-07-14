@@ -1,5 +1,3 @@
-import json
-from pathlib import Path
 import numpy as np
 import os
 import pandas as pd
@@ -116,15 +114,15 @@ def calculate_teammate_performance(df):
     if 'Team' not in df.columns:
         return df
 
+    race_cols = get_race_columns(df)
+    if not race_cols:
+        return df
+
     team_performance = []
 
     # Group by year and team to find teammates
     for (year, team), team_df in df.groupby(['year', 'Team']):
         if len(team_df) < 2:  # Skip teams with only one driver
-            continue
-
-        race_cols = get_race_columns(team_df)
-        if not race_cols:
             continue
 
         # Pre-extract positions for all drivers in this team
@@ -204,66 +202,36 @@ def calculate_teammate_performance(df):
     return df
 
 
-def get_driver_filename(driver_name):
-    safe_name = re.sub(r'[^\w\s-]', '', driver_name)
-    safe_name = re.sub(r'[-\s]+', '_', safe_name)
-    return f"{safe_name.lower()}.json"
+def calculate_age(df):
+    if df.empty:
+        return df
 
-
-def calculate_age(dob_str, competition_year):
-    if not dob_str:
-        return None
     try:
-        if len(dob_str) == 10:
-            dob = datetime.strptime(dob_str, '%Y-%m-%d')
-            season_start = datetime(competition_year, 1, 1)
-            age = (season_start - dob).days / 365.25
-            return round(age, 1)
-    except BaseException:
-        return None
+        if 'dob' not in df.columns:
+            df['age'] = np.nan
+            return df
 
-
-def add_driver_features(features_df):
-    """Add features from cached JSON profiles."""
-    profiles_dir = Path(__file__).resolve().parent.parent.parent / "data/driver_profiles"
-    default_profile = {'dob': None, 'nationality': None}
-
-    # Load cached profiles
-    profiles = {}
-    if os.path.exists(profiles_dir):
-        for driver in features_df['driver'].unique():
-            profile_file = os.path.join(profiles_dir, get_driver_filename(driver))
+        ages = []
+        for _, row in df.iterrows():
             try:
-                if os.path.exists(profile_file):
-                    with open(profile_file, 'r', encoding='utf-8') as f:
-                        profile_data = json.load(f)
+                if len(str(row['dob'])) != 10:
+                    ages.append(np.nan)
+                    continue
 
-                        # Check if driver was successfully scraped
-                        if profile_data.get('scraped', True):
-                            profiles[driver] = profile_data
-                        else:
-                            # Driver exists but wasn't scraped - treat as no data
-                            profiles[driver] = default_profile
-                else:
-                    profiles[driver] = default_profile
-            except BaseException:
-                profiles[driver] = default_profile
+                dob = datetime.strptime(str(row['dob']), '%Y-%m-%d')
+                season_start = datetime(int(row['year']), 1, 1)
+                age = round((season_start - dob).days / 365.25, 1)
+                ages.append(age)
+            except (ValueError, TypeError):
+                ages.append(np.nan)
 
-    # Add features
-    feature_data = []
-    for _, row in features_df.iterrows():
-        profile = profiles.get(row['driver'], {})
-        feature_data.append({
-            'dob': profile.get('dob'),
-            'age': calculate_age(profile.get('dob'), row['year']),
-            'nationality': profile.get('nationality', 'Unknown')
-        })
+        df['age'] = ages
+        return df
 
-    for key in ['dob', 'age', 'nationality']:
-        features_df[key] = [item[key] for item in feature_data]
-
-    features_df['age'] = features_df['age'].fillna(features_df['age'].median())
-    return features_df
+    except Exception as e:
+        print(f"Error in calculate_age: {e}")
+        df['age'] = np.nan
+        return df
 
 
 def calculate_qualifying_features(df, qualifying_df):
@@ -331,15 +299,19 @@ def engineer_features(df):
         return pd.DataFrame()
 
     df = calculate_teammate_performance(df)
+    df = calculate_age(df)
     df = df.sort_values(by=['Driver', 'year'])
     df['experience'] = df.groupby('Driver').cumcount()
 
     features_df = pd.DataFrame({
         'year': df['year'],
         'driver': df['Driver'],
-        'final_pos': pd.to_numeric(df['Pos'].astype(str).str.extract(r'(\d+)')[0], errors='coerce'),
+        'dob': df['dob'],
+        'nationality': df['nationality'],
+        'pos': pd.to_numeric(df['Pos'], errors='coerce'),
         'points': pd.to_numeric(df['Points'], errors='coerce').fillna(0),
         'experience': df['experience'],
+        'age': df.get('age', np.nan),
         'series_type': df.get('series_type', 'Unknown'),
         'team': df.get('Team'),
         'team_pos': df.get('team_pos', np.nan),
@@ -423,7 +395,6 @@ def engineer_features(df):
 
     # Filter out drivers with no races
     features_df = features_df[features_df['races_completed'] > 0]
-    features_df = add_driver_features(features_df)
 
     features_df['win_rate'] = features_df['wins'] / features_df['races_completed']
     features_df['podium_rate'] = features_df['podiums'] / features_df['races_completed']
@@ -767,7 +738,7 @@ def predict_drivers(models, df, feature_cols, scaler=None):
             results = pd.DataFrame({
                 'Driver': current_df['driver'],
                 'Nat.': current_df['nationality'],
-                'Pos': current_df['final_pos'],
+                'Pos': current_df['pos'],
                 'Avg Pos': current_df['avg_finish_pos'],
                 'Std Pos': current_df['std_finish_pos'],
                 'Avg Quali': current_df['avg_quali_pos'],
@@ -794,9 +765,9 @@ def predict_drivers(models, df, feature_cols, scaler=None):
                 'Empirical_%': empirical_pct
             }).sort_values('Empirical_%', ascending=False)
 
-            # print(f"\n{name} Predictions:")
-            # print("-" * 50)
-            # print(results.head(10).to_string(index=False, float_format='%.3f'))
+            print(f"\n{name} Predictions:")
+            print("-" * 50)
+            print(results.head(10).to_string(index=False, float_format='%.3f'))
 
         except Exception as e:
             print(f"Error with {name} model: {e}")

@@ -14,7 +14,7 @@ async def root():
     return {
         "name": "F3/F2 Racing Predictions API",
         "status": "running",
-        "health": "/api/v1/health"
+        "health": "/api/health"
     }
 
 

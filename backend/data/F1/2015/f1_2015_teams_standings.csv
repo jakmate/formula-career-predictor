@@ -3,19 +3,19 @@ Pos,Team,AUS R1,MAL R1,CHN R1,BHR R1,ESP R1,MON R1,CAN R1,AUT R1,GBR R1,HUN R1,B
 1,Mercedes,2,3,2,3,2,3,2,2,2,8,2,17,Ret,2,Ret,2,2,2,2,703
 2,Ferrari,3,1,3,2,3,2,4,4,3,1,7,2,1,3,2,3,Ret,3,3,428
 2,Ferrari,Ret,4,4,5,5,6,5,Ret,8,Ret,12,5,3,4,8,Ret,Ret,4,4,428
-3,Williams-Mercedes,4,5,5,4,4,14,3,3,4,12,6,3,5,5,4,Ret,3,5,8,257
-3,Williams-Mercedes,DNS,6,6,10,6,15,6,5,5,13,9,4,Ret,17,12,Ret,6,DSQ,13,257
-4,Red Bull-Renault,6,9,9,6,7,4,9,10,6,2,4,8,2,13,5,10,4,7,6,187
-4,Red Bull-Renault,DNS,10,Ret,9,10,5,13,12,Ret,3,Ret,10,6,15,15,Ret,5,11,10,187
-5,Force India-Mercedes,7,13,11,8,13,7,8,6,7,Ret,5,6,7,6,3,5,7,6,5,136
-5,Force India-Mercedes,10,14,Ret,13,15,11,11,9,9,Ret,DNS,7,Ret,12,Ret,Ret,8,12,7,136
-6,Lotus-Mercedes,Ret,11,7,7,8,12,7,7,Ret,7,3,Ret,12,7,7,8,10,8,9,78
-6,Lotus-Mercedes,Ret,Ret,Ret,15,Ret,Ret,10,Ret,Ret,14,Ret,Ret,13,8,Ret,Ret,11,10,Ret,78
-7,Toro Rosso-Renault,9,7,13,Ret,9,10,12,8,Ret,4,8,11,8,9,10,4,9,9,11,67
-7,Toro Rosso-Renault,Ret,8,17,Ret,11,Ret,15,Ret,Ret,Ret,Ret,12,9,10,Ret,7,13,Ret,16,67
-8,Sauber-Ferrari,5,12,8,12,12,9,14,11,11,10,10,9,10,14,6,9,12,13,14,36
-8,Sauber-Ferrari,8,Ret,10,14,14,13,16,13,DNS,11,11,13,11,20,Ret,Ret,Ret,16,15,36
-9,McLaren-Honda,11,Ret,12,11,16,8,Ret,Ret,10,5,13,14,Ret,11,9,6,14,14,12,27
-9,McLaren-Honda,DNS,Ret,14,DNS,Ret,Ret,Ret,Ret,Ret,9,14,18,Ret,16,11,11,Ret,15,17,27
-10,Marussia-Ferrari,DNP,15,15,16,17,16,17,14,12,15,15,15,14,18,13,12,15,17,18,0
-10,Marussia-Ferrari,DNP,DNS,16,17,18,17,Ret,Ret,13,16,16,16,15,19,14,Ret,16,18,19,0
+3,Williams - Mercedes,4,5,5,4,4,14,3,3,4,12,6,3,5,5,4,Ret,3,5,8,257
+3,Williams - Mercedes,DNS,6,6,10,6,15,6,5,5,13,9,4,Ret,17,12,Ret,6,DSQ,13,257
+4,Red Bull - Renault,6,9,9,6,7,4,9,10,6,2,4,8,2,13,5,10,4,7,6,187
+4,Red Bull - Renault,DNS,10,Ret,9,10,5,13,12,Ret,3,Ret,10,6,15,15,Ret,5,11,10,187
+5,Force India - Mercedes,7,13,11,8,13,7,8,6,7,Ret,5,6,7,6,3,5,7,6,5,136
+5,Force India - Mercedes,10,14,Ret,13,15,11,11,9,9,Ret,DNS,7,Ret,12,Ret,Ret,8,12,7,136
+6,Lotus - Mercedes,Ret,11,7,7,8,12,7,7,Ret,7,3,Ret,12,7,7,8,10,8,9,78
+6,Lotus - Mercedes,Ret,Ret,Ret,15,Ret,Ret,10,Ret,Ret,14,Ret,Ret,13,8,Ret,Ret,11,10,Ret,78
+7,Toro Rosso - Renault,9,7,13,Ret,9,10,12,8,Ret,4,8,11,8,9,10,4,9,9,11,67
+7,Toro Rosso - Renault,Ret,8,17,Ret,11,Ret,15,Ret,Ret,Ret,Ret,12,9,10,Ret,7,13,Ret,16,67
+8,Sauber - Ferrari,5,12,8,12,12,9,14,11,11,10,10,9,10,14,6,9,12,13,14,36
+8,Sauber - Ferrari,8,Ret,10,14,14,13,16,13,DNS,11,11,13,11,20,Ret,Ret,Ret,16,15,36
+9,McLaren - Honda,11,Ret,12,11,16,8,Ret,Ret,10,5,13,14,Ret,11,9,6,14,14,12,27
+9,McLaren - Honda,DNS,Ret,14,DNS,Ret,Ret,Ret,Ret,Ret,9,14,18,Ret,16,11,11,Ret,15,17,27
+10,Marussia - Ferrari,DNP,15,15,16,17,16,17,14,12,15,15,15,14,18,13,12,15,17,18,0
+10,Marussia - Ferrari,DNP,DNS,16,17,18,17,Ret,Ret,13,16,16,16,15,19,14,Ret,16,18,19,0

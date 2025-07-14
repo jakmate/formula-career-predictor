@@ -6,12 +6,14 @@ import re
 import requests
 from datetime import datetime
 
+from app.config import PROFILES_DIR
+
 
 class DriverProfileScraper:
-    def __init__(self, profiles_dir="../data/driver_profiles"):
-        self.profiles_dir = profiles_dir
+    def __init__(self):
+        self.profiles_dir = PROFILES_DIR
         self.session = requests.Session()
-        os.makedirs(profiles_dir, exist_ok=True)
+        os.makedirs(self.profiles_dir, exist_ok=True)
 
         # Wikidata SPARQL endpoint
         self.sparql_endpoint = "https://query.wikidata.org/sparql"

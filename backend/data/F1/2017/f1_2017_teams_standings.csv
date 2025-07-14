@@ -3,19 +3,19 @@ Pos,Team,AUS R1,CHN R1,BHR R1,RUS R1,ESP R1,MON R1,CAN R1,AZE R1,AUT R1,GBR R1,H
 1,Mercedes,3,6,3,4,Ret,7,2,5,4,2,4,5,2,3,5,4,5,9,4,2,668
 2,Ferrari,1,2,1,2,2,1,4,4,2,3,1,2,3,Ret,4,5,2,3,1,3,522
 2,Ferrari,4,5,4,3,Ret,2,7,14†,5,7,2,4,5,Ret,DNS,Ret,3,4,3,4,522
-3,Red Bull Racing-TAG Heuer,5,3,5,5,3,3,3,1,3,4,5,3,4,2,1,2,4,1,5,5,368
-3,Red Bull Racing-TAG Heuer,Ret,4,Ret,Ret,Ret,5,Ret,Ret,Ret,5,Ret,Ret,10,Ret,3,3,Ret,Ret,6,Ret,368
-4,Force India-Mercedes,7,9,7,6,4,12,5,6,7,8,8,9,6,5,6,6,6,5,9,7,187
-4,Force India-Mercedes,10,10,10,7,5,13,6,Ret,8,9,9,17†,9,10,10,7,8,7,Ret,8,187
-5,Williams-Mercedes,6,14,6,9,13,9,9,3,9,10,14,8,7,8,8,10,9,6,7,10,83
-5,Williams-Mercedes,Ret,Ret,Ret,11,16,15†,Ret,Ret,10,16,Ret,11,8,11,9,Ret,11,11,16,18,83
+3,Red Bull Racing - TAG Heuer,5,3,5,5,3,3,3,1,3,4,5,3,4,2,1,2,4,1,5,5,368
+3,Red Bull Racing - TAG Heuer,Ret,4,Ret,Ret,Ret,5,Ret,Ret,Ret,5,Ret,Ret,10,Ret,3,3,Ret,Ret,6,Ret,368
+4,Force India - Mercedes,7,9,7,6,4,12,5,6,7,8,8,9,6,5,6,6,6,5,9,7,187
+4,Force India - Mercedes,10,10,10,7,5,13,6,Ret,8,9,9,17†,9,10,10,7,8,7,Ret,8,187
+5,Williams - Mercedes,6,14,6,9,13,9,9,3,9,10,14,8,7,8,8,10,9,6,7,10,83
+5,Williams - Mercedes,Ret,Ret,Ret,11,16,15†,Ret,Ret,10,16,Ret,11,8,11,9,Ret,11,11,16,18,83
 6,Renault,11,12,9,8,6,11,8,Ret,11,6,12,6,13,6,15,12,7,Ret,10,6,57
 6,Renault,Ret,13,13,Ret,15,Ret,11,Ret,13,DNS,17†,13,Ret,Ret,16,Ret,Ret,Ret,11,Ret,57
 7,Toro Rosso,8,7,12,10,7,6,Ret,8,16,15,7,10,12,4,14,13,10,13,12,15,53
 7,Toro Rosso,9,Ret,Ret,12,9,14†,Ret,Ret,Ret,Ret,11,12,14,Ret,Ret,Ret,13,Ret,Ret,16,53
-8,Haas-Ferrari,Ret,8,8,13,10,8,10,7,6,12,13,7,11,9,12,8,14,8,Ret,11,47
-8,Haas-Ferrari,Ret,11,Ret,Ret,14,10,12,13,Ret,13,Ret,15,15,Ret,13,9,16,15,15,13,47
-9,McLaren-Honda,13,Ret,14†,14,12,Ret,14,9,12,11,6,14,17†,7,7,11,12,10,8,9,30
-9,McLaren-Honda,Ret,Ret,DNS,DNS,Ret,Ret,16†,12,Ret,Ret,10,Ret,Ret,Ret,11,14,Ret,12,Ret,12,30
-10,Sauber-Ferrari,12,15,11,15,8,Ret,13,10,14,14,15,16,16,12,17,15,15,14,13,14,5
-10,Sauber-Ferrari,Ret,Ret,Ret,16,11,Ret,15,11,15,17,16,Ret,18†,Ret,18,Ret,Ret,Ret,14,17,5
+8,Haas - Ferrari,Ret,8,8,13,10,8,10,7,6,12,13,7,11,9,12,8,14,8,Ret,11,47
+8,Haas - Ferrari,Ret,11,Ret,Ret,14,10,12,13,Ret,13,Ret,15,15,Ret,13,9,16,15,15,13,47
+9,McLaren - Honda,13,Ret,14†,14,12,Ret,14,9,12,11,6,14,17†,7,7,11,12,10,8,9,30
+9,McLaren - Honda,Ret,Ret,DNS,DNS,Ret,Ret,16†,12,Ret,Ret,10,Ret,Ret,Ret,11,14,Ret,12,Ret,12,30
+10,Sauber - Ferrari,12,15,11,15,8,Ret,13,10,14,14,15,16,16,12,17,15,15,14,13,14,5
+10,Sauber - Ferrari,Ret,Ret,Ret,16,11,Ret,15,11,15,17,16,Ret,18†,Ret,18,Ret,Ret,Ret,14,17,5

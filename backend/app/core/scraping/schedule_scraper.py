@@ -9,9 +9,9 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 from urllib.parse import urljoin
 
+from app.config import CURRENT_YEAR, SCHEDULE_DIR
 
-CURRENT_YEAR = datetime.now().year
-SCHEDULE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'schedules', str(CURRENT_YEAR))
+
 os.makedirs(SCHEDULE_DIR, exist_ok=True)
 TRACK_TIMEZONES = {
     "Sakhir": "Asia/Bahrain",

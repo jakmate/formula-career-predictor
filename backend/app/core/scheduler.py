@@ -4,7 +4,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.core.state import AppState
 from app.config import CURRENT_YEAR, LOGGER, SEASON_END_MONTH
-from scraping.scrape import scrape_current_year
+from app.core.scraping.scrape import scrape_current_year
 
 
 class SchedulerService:

@@ -31,7 +31,6 @@ class PredictionResponse(BaseModel):
     team_pos: int
     team_points: float
     points_share: float
-    raw_probability: float
     empirical_percentage: float
 
 
