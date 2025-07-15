@@ -151,7 +151,6 @@ describe('NextRaceCard', () => {
 
   it('formats dates correctly', () => {
     render(<NextRaceCard nextRace={mockNextRace} />);
-    screen.debug();
 
     // Should format the race date
     expect(screen.getByText('Sunday, May 26, 2024')).toBeInTheDocument();
