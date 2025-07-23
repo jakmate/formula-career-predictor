@@ -7,21 +7,21 @@ import torch.optim as optim
 import torch.nn as nn
 import torch
 
-from datetime import datetime
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline as ImbPipeline
+from imblearn.pipeline import Pipeline
 from lightgbm import LGBMClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, average_precision_score
+from sklearn.model_selection import StratifiedKFold
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
 from sklearn.svm import SVC
 
+from app.config import CURRENT_YEAR, NOT_PARTICIPATED_CODES, RETIREMENT_CODES, SEED
 from app.core.loader import load_data, load_qualifying_data, load_standings_data
+from app.core.utils import calculate_age, extract_position, get_race_columns
 
-SEED = 69
 os.environ['PYTHONHASHSEED'] = str(SEED)
 random.seed(SEED)
 np.random.seed(SEED)
@@ -30,51 +30,6 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed_all(SEED)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-
-NOT_PARTICIPATED_CODES = ['nan', 'DNS', 'WD', 'DNQ', 'DNA', 'C', 'EX']
-RETIREMENT_CODES = ['Ret', 'NC', 'DSQ', 'DSQP']
-CURRENT_YEAR = datetime.now().year
-
-
-def get_race_columns(df):
-    """Identify race result columns based on track code patterns and data presence."""
-    # Only consider columns that have non-null data in this DataFrame subset
-    columns_with_data = []
-    for col in df.columns:
-        if df[col].notna().any():  # Column has at least one non-null value
-            columns_with_data.append(col)
-
-    track_codes = set()
-    for col in columns_with_data:
-        parts = col.split()
-        if parts:
-            if len(parts[0]) >= 3:
-                code_candidate = parts[0][:3]
-                if code_candidate.isalpha() and code_candidate.isupper():
-                    track_codes.add(code_candidate)
-
-    race_columns = []
-    for col in columns_with_data:
-        parts = col.split()
-        if parts:
-            if len(parts[0]) >= 3:
-                code_candidate = parts[0][:3]
-                if code_candidate in track_codes:
-                    race_columns.append(col)
-
-    return race_columns
-
-
-def extract_position(result_str):
-    """Extract numeric position from result string."""
-    if not result_str or result_str in NOT_PARTICIPATED_CODES:
-        return None
-
-    try:
-        clean_str = result_str.split()[0].replace('†', '')
-        return int(float(clean_str))
-    except (ValueError, IndexError):
-        return None
 
 
 def calculate_participation_stats(df, race_cols):
@@ -202,38 +157,6 @@ def calculate_teammate_performance(df):
     return df
 
 
-def calculate_age(df):
-    if df.empty:
-        return df
-
-    try:
-        if 'dob' not in df.columns:
-            df['age'] = np.nan
-            return df
-
-        ages = []
-        for _, row in df.iterrows():
-            try:
-                if len(str(row['dob'])) != 10:
-                    ages.append(np.nan)
-                    continue
-
-                dob = datetime.strptime(str(row['dob']), '%Y-%m-%d')
-                season_start = datetime(int(row['year']), 1, 1)
-                age = round((season_start - dob).days / 365.25, 1)
-                ages.append(age)
-            except (ValueError, TypeError):
-                ages.append(np.nan)
-
-        df['age'] = ages
-        return df
-
-    except Exception as e:
-        print(f"Error in calculate_age: {e}")
-        df['age'] = np.nan
-        return df
-
-
 def calculate_qualifying_features(df, qualifying_df):
     """Calculate qualifying-based features for drivers."""
     if qualifying_df.empty:
@@ -275,7 +198,7 @@ def calculate_qualifying_features(df, qualifying_df):
             'year': year,
             'avg_quali_pos': np.mean(positions) if positions else np.nan,
             'std_quali_pos': np.std(positions) if len(positions) > 1 else 0,
-            'pole_rate': sum(1 for p in positions if p == 1) / len(positions) if positions else np.nan,  # noqa: 501
+            'pole_rate': sum(1 for p in positions if p <= 1) / len(positions) if positions else np.nan,  # noqa: 501
             'top_10_starts_rate': sum(1 for p in positions if p <= 10) / len(positions) if positions else np.nan,  # noqa: 501
         })
 
@@ -323,8 +246,6 @@ def engineer_features(df):
         'pole_rate': df.get('pole_rate', np.nan),
         'top_10_starts_rate': df.get('top_10_starts_rate', np.nan),
     })
-
-    features_df['is_f3_european'] = (features_df['series_type'] == 'F3_European').astype(int)
 
     # Calculate race statistics for each driver
     race_stats = []
@@ -401,6 +322,30 @@ def engineer_features(df):
     features_df['top_10_rate'] = features_df['top_10s'] / features_df['races_completed']
     features_df['dnf_rate'] = features_df['dnfs'] / features_df['races_completed']
     features_df['points_share'] = features_df['points'] / (features_df['team_points'] + 1)
+
+    # Target encode nationality
+    if 'promoted' in df.columns:
+        global_mean = df['promoted'].mean()
+        nationality_stats = df.groupby('nationality').agg({
+            'promoted': ['sum', 'count']
+        }).droplevel(0, axis=1)
+
+        # Smoothing factor (higher = more conservative)
+        alpha = 10
+        nationality_stats['smoothed_rate'] = (
+            (nationality_stats['sum'] + alpha * global_mean) /
+            (nationality_stats['count'] + alpha)
+        )
+
+        features_df['nationality_encoded'] = features_df['nationality'].map(
+            nationality_stats['smoothed_rate']
+        ).fillna(global_mean)
+    else:
+        features_df['nationality_encoded'] = 0.2
+
+    features_df['era'] = np.where(df['year'] >= 2019, 1, 0)
+    features_df['consistency_score'] = features_df['participation_rate'] * \
+        (1 - features_df['dnf_rate'])
 
     return features_df
 
@@ -500,29 +445,26 @@ class RacingPredictor(nn.Module):
 
 
 def train_models(df):
-    """Training function with temporal split and stratification."""
+    """Training function."""
     if df.empty:
         print("No data available for training")
-        return {}, {}, None, None, None, None, None, None
+        return {}, None, None
 
     df_clean = df.dropna(subset=['promoted'])
     feature_cols = [
-        'avg_finish_pos', 'std_finish_pos',
-        'avg_quali_pos', 'std_quali_pos',
-        'win_rate', 'podium_rate', 'top_10_rate',
+        'avg_quali_pos',
+        'win_rate', 'top_10_rate',
         'participation_rate', 'dnf_rate',
         'experience', 'age',
-        'teammate_h2h_rate', 'points_share',
-        'pole_rate', 'top_10_starts_rate',
+        'teammate_h2h_rate',
+        'nationality_encoded',
+        'era',
+        'consistency_score'
     ]
 
     X = df_clean[feature_cols].fillna(0)
     y = df_clean['promoted']
     years = df_clean['year']
-
-    # print(f"Dataset size: {len(X)} drivers")
-    # print(f"F2 progressions: {y.sum()} ({y.mean():.2%})")
-    # print(f"Year range: {years.min()} - {years.max()}")
 
     # Use 80% of years for training, 20% for testing
     unique_years = sorted(years.unique())
@@ -539,35 +481,56 @@ def train_models(df):
     y_train = y[train_mask]
     y_test = y[test_mask]
 
-    # Check class distribution in both sets
-    # print(f"Training: {len(X_train)} samples, {y_train.sum()} promotions ({y_train.mean():.2%})")
-    # print(f"Test: {len(X_test)} samples, {y_test.sum()} promotions ({y_test.mean():.2%})")
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # Scale features
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
+    # For a single validation split, take first fold
+    train_idx, val_idx = next(skf.split(X_train, y_train))
+
+    X_train_sub = X_train.iloc[train_idx]
+    X_val = X_train.iloc[val_idx]
+    y_train_sub = y_train.iloc[train_idx]
+    y_val = y_train.iloc[val_idx]
+
+    print(f"Training subset: {len(X_train_sub)} samples, \
+          {y_train_sub.sum()} promotions ({y_train_sub.mean():.2%})")
+    print(f"Validation: {len(X_val)} samples, {y_val.sum()} promotions ({y_val.mean():.2%})")
+    print(f"Test: {len(X_test)} samples, {y_test.sum()} promotions ({y_test.mean():.2%})")
 
     # Traditional ML pipelines
     traditional_pipelines = {
-        'Random Forest': ImbPipeline([
-            ('smote', SMOTE(random_state=SEED)),
-            ('classifier', RandomForestClassifier(random_state=SEED))
+        'Random Forest': Pipeline([
+            ('classifier', RandomForestClassifier(
+                random_state=SEED,
+                class_weight='balanced_subsample'
+            ))
         ]),
-        'Logistic Regression': ImbPipeline([
-            ('smote', SMOTE(random_state=SEED)),
-            ('classifier', LogisticRegression(random_state=SEED, max_iter=1000))
+        'Logistic Regression': Pipeline([
+            ('classifier', LogisticRegression(
+                random_state=SEED,
+                class_weight='balanced',
+                max_iter=10000
+            ))
         ]),
-        'LightGBM': ImbPipeline([
-            ('classifier', LGBMClassifier(random_state=SEED, class_weight='balanced', verbosity=-1))
+        'LightGBM': Pipeline([
+            ('classifier', LGBMClassifier(
+                random_state=SEED,
+                class_weight='balanced',
+                verbosity=-1
+            ))
         ]),
-        'MLP': ImbPipeline([
-            ('smote', SMOTE(random_state=SEED)),
-            ('classifier', MLPClassifier(random_state=SEED, max_iter=1000, early_stopping=True))
+        'MLP': Pipeline([
+            ('scaler', RobustScaler()),
+            ('classifier', MLPClassifier(
+                random_state=SEED,
+                max_iter=10000
+            ))
         ]),
-        'SVM': ImbPipeline([
-            ('smote', SMOTE(random_state=SEED)),
-            ('classifier', SVC(random_state=SEED, probability=True))
+        'SVM': Pipeline([
+            ('classifier', SVC(
+                random_state=SEED,
+                class_weight='balanced',
+                probability=True
+            ))
         ]),
     }
 
@@ -582,58 +545,64 @@ def train_models(df):
         print(f"\nTraining {name}:")
         print("-" * 40)
 
-        # Fit and evaluate on test set
-        pipeline.fit(X_train, y_train)
+        # Fit on training subset
+        pipeline.fit(X_train_sub, y_train_sub)
+
+        # Evaluate on validation set
+        y_val_pred = pipeline.predict(X_val)
+        probas_val = pipeline.predict_proba(X_val)[:, 1]
+
+        print("Validation Set Results:")
+        print(classification_report(y_val, y_val_pred))
+        val_pr_auc = average_precision_score(y_val, probas_val)
+        print(f"Validation Precision-Recall AUC: {val_pr_auc:.4f}")
+
+        # Evaluate on test set
         y_pred = pipeline.predict(X_test)
         probas_test = pipeline.predict_proba(X_test)[:, 1]
 
-        # Calibration
+        # Calibration using validation set
         iso_reg = IsotonicRegression(out_of_bounds='clip')
-        iso_reg.fit(probas_test, y_test)
+        iso_reg.fit(probas_val, y_val)
         pipeline.calibrator = iso_reg
 
         print("\nTest Set Results:")
         print(classification_report(y_test, y_pred))
 
         pr_auc = average_precision_score(y_test, probas_test)
-        print(f"Precision-Recall AUC: {pr_auc:.4f}")
+        print(f"Test Precision-Recall AUC: {pr_auc:.4f}")
 
         results[name] = pipeline
 
-    # Train PyTorch Model models
+    # Train PyTorch Model
     print("\nTraining PyTorch Model...")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    # Scale features
+    scaler = RobustScaler()
+    X_train_sub_scaled = scaler.fit_transform(X_train_sub)
+    X_val_scaled = scaler.transform(X_val)
+    X_test_scaled = scaler.transform(X_test)
+
     # Convert to PyTorch tensors
-    X_train_torch = torch.FloatTensor(X_train_scaled).to(device)
-    y_train_torch = torch.FloatTensor(y_train.values).to(device)
+    X_train_torch = torch.FloatTensor(X_train_sub_scaled).to(device)
+    y_train_torch = torch.FloatTensor(y_train_sub.values).to(device)
+    X_val_torch = torch.FloatTensor(X_val_scaled).to(device)
+    y_val_torch = torch.FloatTensor(y_val.values).to(device)
     X_test_torch = torch.FloatTensor(X_test_scaled).to(device)
 
-    pytorch_model = RacingPredictor(X_train_scaled.shape[1]).to(device)
+    pytorch_model = RacingPredictor(X_train_sub_scaled.shape[1]).to(device)
 
     # Calculate class weights for PyTorch
-    n_neg = (y_train == 0).sum()
-    n_pos = (y_train == 1).sum()
+    n_neg = (y_train_sub == 0).sum()
+    n_pos = (y_train_sub == 1).sum()
     pos_weight = torch.tensor([n_neg / n_pos]).to(device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = optim.Adam(pytorch_model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='min', factor=0.5, patience=5)
 
-    # Validation split
-    n_train_samples = len(X_train_torch)
-    val_split_idx = int(n_train_samples * 0.8)
-
-    # Create sequential indices for tensor slicing
-    train_indices = list(range(val_split_idx))
-    val_indices = list(range(val_split_idx, n_train_samples))
-
-    X_train_sub = X_train_torch[train_indices]
-    y_train_sub = y_train_torch[train_indices]
-    X_val = X_train_torch[val_indices]
-    y_val = y_train_torch[val_indices]
-
-    # Training loop
+    # Training loop with proper validation
     best_val_loss = float('inf')
     patience_counter = 0
 
@@ -641,16 +610,16 @@ def train_models(df):
         pytorch_model.train()
         optimizer.zero_grad()
 
-        outputs = pytorch_model(X_train_sub).squeeze()
-        loss = criterion(outputs, y_train_sub)
+        outputs = pytorch_model(X_train_torch).squeeze()
+        loss = criterion(outputs, y_train_torch)
         loss.backward()
         optimizer.step()
 
         # Validation
         pytorch_model.eval()
         with torch.no_grad():
-            val_outputs = pytorch_model(X_val).squeeze()
-            val_loss = criterion(val_outputs, y_val)
+            val_outputs = pytorch_model(X_val_torch).squeeze()
+            val_loss = criterion(val_outputs, y_val_torch)
 
         scheduler.step(val_loss)
 
@@ -668,25 +637,33 @@ def train_models(df):
     pytorch_model.load_state_dict(best_state_dict)
     pytorch_model.eval()
 
+    # Validation evaluation
     with torch.no_grad():
-        logits = pytorch_model(X_test_torch)
-        raw_probas_torch = torch.sigmoid(logits).cpu().numpy().flatten()
+        val_logits = pytorch_model(X_val_torch)
+        val_probas_torch = torch.sigmoid(val_logits).cpu().numpy().flatten()
 
-    # Calibrate PyTorch model
+    val_pred_torch = (val_probas_torch > 0.5).astype(int)
+    print("PyTorch Validation Results:")
+    print(classification_report(y_val, val_pred_torch))
+    val_pr_auc_torch = average_precision_score(y_val, val_probas_torch)
+    print(f"PyTorch Validation Precision-Recall AUC: {val_pr_auc_torch:.4f}")
+
+    # Test evaluation
+    with torch.no_grad():
+        test_logits = pytorch_model(X_test_torch)
+        test_probas_torch = torch.sigmoid(test_logits).cpu().numpy().flatten()
+
+    # Calibrate PyTorch model using validation set
     iso_reg_torch = IsotonicRegression(out_of_bounds='clip')
-    iso_reg_torch.fit(raw_probas_torch, y_test)
+    iso_reg_torch.fit(val_probas_torch, y_val)
     pytorch_model.calibrator = iso_reg_torch
 
-    pytorch_pred = (raw_probas_torch > 0.5).astype(int)
-    print("PyTorch Classification Report:")
+    pytorch_pred = (test_probas_torch > 0.5).astype(int)
+    print("\nPyTorch Test Results:")
     print(classification_report(y_test, pytorch_pred))
-    pr_auc_torch = average_precision_score(y_test, raw_probas_torch)
-    print(f"PyTorch Precision-Recall AUC: {pr_auc_torch:.4f}")
+    pr_auc_torch = average_precision_score(y_test, test_probas_torch)
+    print(f"PyTorch Test Precision-Recall AUC: {pr_auc_torch:.4f}")
     results['PyTorch'] = pytorch_model
-
-    print("\n" + "=" * 70)
-    print("TRAINING COMPLETE")
-    print("=" * 70)
 
     return results, feature_cols, scaler
 
@@ -738,6 +715,7 @@ def predict_drivers(models, df, feature_cols, scaler=None):
             results = pd.DataFrame({
                 'Driver': current_df['driver'],
                 'Nat.': current_df['nationality'],
+                'nationality_encoded': current_df['nationality_encoded'],
                 'Pos': current_df['pos'],
                 'Avg Pos': current_df['avg_finish_pos'],
                 'Std Pos': current_df['std_finish_pos'],
@@ -767,7 +745,7 @@ def predict_drivers(models, df, feature_cols, scaler=None):
 
             print(f"\n{name} Predictions:")
             print("-" * 50)
-            print(results.head(10).to_string(index=False, float_format='%.3f'))
+            print(results.head(5).to_string(index=False, float_format='%.3f'))
 
         except Exception as e:
             print(f"Error with {name} model: {e}")

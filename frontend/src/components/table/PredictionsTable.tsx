@@ -9,8 +9,10 @@ import { ErrorDisplay } from '../ErrorDisplay';
 import { TableContent } from '../table/TableContent';
 import { usePredictions } from '../../hooks/usePredictions';
 import { Header } from '../Header';
+import { useState } from 'react';
 
 export const PredictionsTable = () => {
+  const [selectedSeries, setSelectedSeries] = useState('f3_to_f2');
   const {
     predictions,
     selectedModel,
@@ -21,23 +23,46 @@ export const PredictionsTable = () => {
     error,
     handleRefresh,
     currentPredictions,
-  } = usePredictions();
+  } = usePredictions(selectedSeries);
+
+  const seriesOptions = [
+    { value: 'f3_to_f2', label: 'F3 → F2 Promotions' },
+    { value: 'f2_to_f1', label: 'F2 → F1 Promotions' },
+  ];
 
   return (
     <div className="w-full">
       <Header
-        title="F3 to F2 Predictions"
-        description="AI-powered analysis of Formula 3 drivers likely to advance to Formula 2"
+        title={
+          selectedSeries === 'f3_to_f2'
+            ? 'F3 to F2 Predictions'
+            : 'F2 to F1 Predictions'
+        }
+        description={`AI-powered analysis of ${selectedSeries === 'f3_to_f2' ? 'Formula 3 drivers likely to advance to Formula 2' : 'Formula 2 drivers likely to advance to Formula 1'}`}
         rightContent={
           <div className="flex flex-col sm:flex-row gap-3">
+            <select
+              value={selectedSeries}
+              onChange={(e) => setSelectedSeries(e.target.value)}
+              className="px-4 py-2 bg-gray-800/60 border border-cyan-500/30 rounded-lg text-white backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-cyan-500 shadow-sm"
+            >
+              {seriesOptions.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  className="text-white bg-gray-900"
+                >
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               className="px-4 py-2 bg-gray-800/60 border border-cyan-500/30 rounded-lg text-white backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-cyan-500 shadow-sm"
             >
-              <option value="" className="text-gray-800 bg-gray-900">
-                Select Model
-              </option>
+              <option value="">Select Model</option>
               {models.map((model) => (
                 <option
                   key={model}

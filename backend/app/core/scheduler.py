@@ -43,8 +43,9 @@ class SchedulerService:
             else:
                 LOGGER.info("No new complete season available. Updating predictions only.")
                 from app.services.prediction_service import PredictionService
-                prediction_service = PredictionService(self.app_state)
-                await prediction_service.update_predictions()
+                for series in ['f3_to_f2', 'f2_to_f1']:
+                    prediction_service = PredictionService(self.app_state, series)
+                    await prediction_service.update_predictions()
         except Exception as e:
             LOGGER.error(f"Scrape and train task failed: {e}")
         finally:

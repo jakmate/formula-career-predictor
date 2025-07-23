@@ -24,7 +24,6 @@ export const TableRow = ({ driver }: TableRowProps) => (
     <td className="p-4 text-white">#{driver.position}</td>
     <td className="p-4 text-white">{driver.points.toFixed(1)}</td>
     <td className="p-4 text-white">{(driver.win_rate * 100).toFixed(1)}%</td>
-    <td className="p-4 text-white">{(driver.podium_rate * 100).toFixed(1)}%</td>
     <td className="p-4 text-white">{(driver.top_10_rate * 100).toFixed(1)}%</td>
     <td className="p-4 text-white">{(driver.dnf_rate * 100).toFixed(1)}%</td>
     <td className="p-4 text-white">

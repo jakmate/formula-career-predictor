@@ -5,6 +5,9 @@ from pathlib import Path
 
 CURRENT_YEAR = datetime.now().year
 SEASON_END_MONTH = 12
+SEED = 69
+NOT_PARTICIPATED_CODES = ['nan', 'DNS', 'WD', 'DNQ', 'DNA', 'C', 'EX']
+RETIREMENT_CODES = ['Ret', 'NC', 'DSQ', 'DSQP']
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 MODELS_DIR = BASE_DIR / 'models'

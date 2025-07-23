@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { SystemStatus } from '../types/SystemStatus';
 import type { ModelResults } from '../types/ModelResults';
 
-interface AllPredictionsResponse {
+interface PredictionsResponse {
   models: string[];
   predictions: Record<string, ModelResults>;
   system_status: SystemStatus;
 }
 
-export const usePredictions = () => {
-  const [allData, setAllData] = useState<AllPredictionsResponse | null>(null);
+export const usePredictions = (series: string = 'f3_to_f2') => {
+  const [allData, setAllData] = useState<PredictionsResponse | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,9 +18,9 @@ export const usePredictions = () => {
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   const fetchPredictions =
-    useCallback(async (): Promise<AllPredictionsResponse> => {
+    useCallback(async (): Promise<PredictionsResponse> => {
       try {
-        const response = await fetch(`${API_BASE}/api/predictions`);
+        const response = await fetch(`${API_BASE}/api/predictions/${series}`);
         if (!response.ok) {
           throw new Error('Server responded with an error');
         }
@@ -28,7 +28,7 @@ export const usePredictions = () => {
       } catch {
         throw new Error('Network connection issue');
       }
-    }, [API_BASE]);
+    }, [API_BASE, series]);
 
   const fetchAllPredictions = useCallback(async () => {
     try {

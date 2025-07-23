@@ -5,24 +5,17 @@ export interface Driver {
   wins: number;
   podiums: number;
   win_rate: number;
-  podium_rate: number;
   top_10_rate: number;
   experience: number;
   empirical_percentage: number;
   nationality: string;
   dob?: string;
   age?: number;
-  avg_finish_pos: number;
-  std_finish_pos: number;
   avg_quali_pos?: number;
-  std_quali_pos?: number;
   dnf_rate: number;
   participation_rate: number;
-  pole_rate: number;
-  top_10_starts_rate: number;
   teammate_h2h: number;
   team: string;
   team_pos: number;
   team_points: number;
-  points_share: number;
 }

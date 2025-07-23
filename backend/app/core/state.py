@@ -8,9 +8,18 @@ from app.config import LOGGER, STATE_FILE
 
 class AppState:
     def __init__(self):
-        self.models = {}
-        self.feature_cols = []
-        self.scaler = None
+        self.models = {
+            'f3_to_f2': {},
+            'f2_to_f1': {}
+        }
+        self.feature_cols = {
+            'f3_to_f2': [],
+            'f2_to_f1': []
+        }
+        self.scaler = {
+            'f3_to_f2': None,
+            'f2_to_f1': None,
+        }
         self.current_predictions = []
         self.system_status = {
             "last_scrape": None,

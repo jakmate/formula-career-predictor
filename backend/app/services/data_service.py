@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-
 from app.core.loader import load_data, load_qualifying_data, load_standings_data
 from app.core.state import AppState
 from app.config import CURRENT_YEAR, LOGGER
@@ -12,19 +11,22 @@ class DataService:
     def __init__(self, app_state: AppState):
         self.app_state = app_state
 
-    async def load_current_data(self):
+    async def load_current_data(self, series: str):
         """Load and process current racing data"""
-        f3_df = load_data('F3')
-        f2_df = load_standings_data('F2', 'drivers')
+        # Parse series to get feeder and parent series
+        feeder_series, parent_series = self._parse_series(series)
 
-        if f3_df.empty:
-            raise HTTPException(status_code=404, detail="No F3 data available")
+        feeder_df = load_data(feeder_series)
+        parent_df = load_standings_data(parent_series, 'drivers')
 
-        f3_qualifying_df = load_qualifying_data('F3')
-        f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
-        f3_df = create_target_variable(f3_df, f2_df)
-        features_df = engineer_features(f3_df)
-        features_df['promoted'] = f3_df['promoted']
+        if feeder_df.empty:
+            raise HTTPException(status_code=404, detail=f"No {feeder_series} data available")
+
+        feeder_quali_df = load_qualifying_data(feeder_series)
+        feeder_df = calculate_qualifying_features(feeder_df, feeder_quali_df)
+        feeder_df = create_target_variable(feeder_df, parent_df)
+        features_df = engineer_features(feeder_df)
+        features_df['promoted'] = feeder_df['promoted']
 
         current_df = features_df[features_df['year'] == CURRENT_YEAR].copy()
         if current_df.empty:
@@ -36,32 +38,48 @@ class DataService:
 
         return current_df
 
+    def _parse_series(self, series: str):
+        """Parse series string to get feeder and parent series"""
+        if series == 'f3_to_f2':
+            return 'F3', 'F2'
+        elif series == 'f2_to_f1':
+            return 'F2', 'F1'
+        else:
+            raise ValueError(f"Unknown series: {series}")
+
     async def initialize_system(self):
         """Initial data loading and processing"""
         from app.services.model_service import ModelService
 
-        LOGGER.info("Initializing system...")
+        for series in ['f3_to_f2', 'f2_to_f1']:
+            try:
+                LOGGER.info(f"Initializing system for {series}...")
 
-        f3_df = load_data('F3')
-        f2_df = load_standings_data('F2', 'drivers')
-        f3_qualifying_df = load_qualifying_data('F3')
+                feeder_series, parent_series = self._parse_series(series)
 
-        f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
-        f3_df = create_target_variable(f3_df, f2_df)
-        features_df = engineer_features(f3_df)
-        features_df['promoted'] = f3_df['promoted']
+                feeder_df = load_data(feeder_series)
+                parent_df = load_standings_data(parent_series, 'drivers')
+                feeder_quali_df = load_qualifying_data(feeder_series)
 
-        trainable_df = features_df[features_df['year'] < CURRENT_YEAR]
+                feeder_df = calculate_qualifying_features(feeder_df, feeder_quali_df)
+                feeder_df = create_target_variable(feeder_df, parent_df)
+                features_df = engineer_features(feeder_df)
+                features_df['promoted'] = feeder_df['promoted']
 
-        if not trainable_df.empty:
-            model_service = ModelService(self.app_state)
-            await model_service.train_models(trainable_df)
-            await model_service.save_models()
-            self.app_state.save_state()
-        else:
-            LOGGER.warning("No historical data available for training")
+                trainable_df = features_df[features_df['year'] < CURRENT_YEAR]
 
-        # Generate current predictions
-        from app.services.prediction_service import PredictionService
-        prediction_service = PredictionService(self.app_state)
-        await prediction_service.update_predictions(features_df)
+                if not trainable_df.empty:
+                    model_service = ModelService(self.app_state, series)
+                    await model_service.train_models(trainable_df)
+                    await model_service.save_models()
+                else:
+                    LOGGER.warning(f"No historical data available for training {series}")
+
+                # Generate current predictions
+                from app.services.prediction_service import PredictionService
+                prediction_service = PredictionService(self.app_state)
+                await prediction_service.update_predictions(features_df)
+            except Exception as e:
+                LOGGER.error(f"Failed to initialize {series}: {e}")
+
+        self.app_state.save_state()

@@ -14,7 +14,7 @@ class SystemStatus(BaseModel):
     last_scrape: Optional[datetime]
     last_training: Optional[datetime]
     models_available: List[str]
-    data_health: Dict[str, int]
+    data_health: Dict[str, Dict[str, int]]
 
 
 class RefreshResponse(BaseModel):
