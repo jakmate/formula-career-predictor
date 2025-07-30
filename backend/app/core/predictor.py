@@ -161,7 +161,6 @@ def calculate_qualifying_features(df, qualifying_df):
     """Calculate qualifying-based features for drivers."""
     if qualifying_df.empty:
         df['avg_quali_pos'] = np.nan
-        df['std_quali_pos'] = np.nan
         return df
 
     # Calculate qualifying statistics for each driver-year combination
@@ -197,9 +196,6 @@ def calculate_qualifying_features(df, qualifying_df):
             'Driver': driver,
             'year': year,
             'avg_quali_pos': np.mean(positions) if positions else np.nan,
-            'std_quali_pos': np.std(positions) if len(positions) > 1 else 0,
-            'pole_rate': sum(1 for p in positions if p <= 1) / len(positions) if positions else np.nan,  # noqa: 501
-            'top_10_starts_rate': sum(1 for p in positions if p <= 10) / len(positions) if positions else np.nan,  # noqa: 501
         })
 
     # Convert to DataFrame and merge with main data
@@ -238,13 +234,9 @@ def engineer_features(df):
         'series_type': df.get('series_type', 'Unknown'),
         'team': df.get('Team'),
         'team_pos': df.get('team_pos', np.nan),
-        'team_pos_per': df.get('team_pos_per', 0.5),
         'team_points': df.get('team_points', 0),
         'teammate_h2h_rate': df.get('teammate_h2h_rate', 0.5),
         'avg_quali_pos': df.get('avg_quali_pos', np.nan),
-        'std_quali_pos': df.get('std_quali_pos', np.nan),
-        'pole_rate': df.get('pole_rate', np.nan),
-        'top_10_starts_rate': df.get('top_10_starts_rate', np.nan),
     })
 
     # Calculate race statistics for each driver
@@ -310,18 +302,16 @@ def engineer_features(df):
         race_stats.append(stats)
 
     # Add race statistics to features
-    for stat_name in ['wins', 'podiums', 'top_10s', 'dnfs', 'races_completed',
-                      'participation_rate', 'avg_finish_pos', 'std_finish_pos']:
+    for stat_name in ['wins', 'podiums', 'top_10s', 'dnfs',
+                      'races_completed', 'participation_rate']:
         features_df[stat_name] = [stats[stat_name] for stats in race_stats]
 
     # Filter out drivers with no races
     features_df = features_df[features_df['races_completed'] > 0]
 
     features_df['win_rate'] = features_df['wins'] / features_df['races_completed']
-    features_df['podium_rate'] = features_df['podiums'] / features_df['races_completed']
     features_df['top_10_rate'] = features_df['top_10s'] / features_df['races_completed']
     features_df['dnf_rate'] = features_df['dnfs'] / features_df['races_completed']
-    features_df['points_share'] = features_df['points'] / (features_df['team_points'] + 1)
 
     # Target encode nationality
     if 'promoted' in df.columns:
@@ -350,22 +340,22 @@ def engineer_features(df):
     return features_df
 
 
-def create_target_variable(f3_df, f2_df):
-    """Create target variable for F2 participation after last F3 season."""
-    if f3_df.empty or f2_df.empty:
-        f3_df['promoted'] = np.nan
-        return f3_df
+def create_target_variable(feeder_df, parent_df, series):
+    """Create target variable for parent series participation."""
+    if feeder_df.empty or parent_df.empty:
+        feeder_df['promoted'] = np.nan
+        return feeder_df
 
     # Initialize target column
-    f3_df['promoted'] = 0
-    max_f2_year = f2_df['year'].max()
+    feeder_df['promoted'] = 0
+    max_parent_year = parent_df['year'].max()
 
-    # Get last F3 season for each driver
-    last_f3_seasons = f3_df.groupby('Driver')['year'].max().reset_index()
+    # Get last feeder season for each driver
+    last_feeder_seasons = feeder_df.groupby('Driver')['year'].max().reset_index()
 
-    # Process F2 data to determine participation
-    f2_participation = []
-    for year, year_df in f2_df.groupby('year'):
+    # Process parent data to determine participation
+    parent_participation = []
+    for year, year_df in parent_df.groupby('year'):
         race_cols = get_race_columns(year_df)
         if not race_cols:
             continue
@@ -374,51 +364,57 @@ def create_target_variable(f3_df, f2_df):
         threshold = 0 if year == CURRENT_YEAR else len(race_cols) * 0.4
 
         for stat in participation_stats:
-            f2_participation.append({
+            parent_participation.append({
                 'driver': stat['Driver'],
                 'year': year,
                 'participated': stat['participated_races'] > threshold
             })
 
-    f2_participation_df = pd.DataFrame(f2_participation)
+    parent_participation_df = pd.DataFrame(parent_participation)
 
     # Determine target values
     moved_drivers = {}
-    for _, row in last_f3_seasons.iterrows():
+    for _, row in last_feeder_seasons.iterrows():
         driver = row['Driver']
-        last_f3_year = row['year']
+        last_feeder_year = row['year']
 
-        # Skip if we can't observe future F2 seasons
-        if last_f3_year + 1 > max_f2_year:
-            moved_drivers[(driver, last_f3_year)] = np.nan
+        # Skip if we can't observe future seasons
+        if last_feeder_year + 1 > max_parent_year:
+            moved_drivers[(driver, last_feeder_year)] = np.nan
             continue
 
-        # Check next years for F2 participation
+        years = []
+        if series == 'F1':
+            years = [1, 2, 3, 4, 5]
+        else:
+            years = [1]
+
+        # Check next years for participation
         moved = 0
-        for offset in [1]:
-            target_year = last_f3_year + offset
-            if target_year > max_f2_year:
+        for offset in years:
+            target_year = last_feeder_year + offset
+            if target_year > max_parent_year:
                 break
 
-            participation = f2_participation_df[
-                (f2_participation_df['driver'] == driver) &
-                (f2_participation_df['year'] == target_year)
+            participation = parent_participation_df[
+                (parent_participation_df['driver'] == driver) &
+                (parent_participation_df['year'] == target_year)
             ]
 
             if not participation.empty and participation['participated'].iloc[0]:
                 moved = 1
                 break
 
-        moved_drivers[(driver, last_f3_year)] = moved
+        moved_drivers[(driver, last_feeder_year)] = moved
 
     # Apply target values
-    for idx, row in f3_df.iterrows():
+    for idx, row in feeder_df.iterrows():
         driver = row['Driver']
         year = row['year']
         if (driver, year) in moved_drivers:
-            f3_df.at[idx, 'promoted'] = moved_drivers[(driver, year)]
+            feeder_df.at[idx, 'promoted'] = moved_drivers[(driver, year)]
 
-    return f3_df
+    return feeder_df
 
 
 class RacingPredictor(nn.Module):
@@ -454,7 +450,6 @@ def train_models(df):
     feature_cols = [
         'avg_quali_pos',
         'win_rate', 'top_10_rate',
-        'participation_rate', 'dnf_rate',
         'experience', 'age',
         'teammate_h2h_rate',
         'nationality_encoded',
@@ -549,13 +544,7 @@ def train_models(df):
         pipeline.fit(X_train_sub, y_train_sub)
 
         # Evaluate on validation set
-        y_val_pred = pipeline.predict(X_val)
         probas_val = pipeline.predict_proba(X_val)[:, 1]
-
-        print("Validation Set Results:")
-        print(classification_report(y_val, y_val_pred))
-        val_pr_auc = average_precision_score(y_val, probas_val)
-        print(f"Validation Precision-Recall AUC: {val_pr_auc:.4f}")
 
         # Evaluate on test set
         y_pred = pipeline.predict(X_test)
@@ -568,7 +557,6 @@ def train_models(df):
 
         print("\nTest Set Results:")
         print(classification_report(y_test, y_pred))
-
         pr_auc = average_precision_score(y_test, probas_test)
         print(f"Test Precision-Recall AUC: {pr_auc:.4f}")
 
@@ -642,12 +630,6 @@ def train_models(df):
         val_logits = pytorch_model(X_val_torch)
         val_probas_torch = torch.sigmoid(val_logits).cpu().numpy().flatten()
 
-    val_pred_torch = (val_probas_torch > 0.5).astype(int)
-    print("PyTorch Validation Results:")
-    print(classification_report(y_val, val_pred_torch))
-    val_pr_auc_torch = average_precision_score(y_val, val_probas_torch)
-    print(f"PyTorch Validation Precision-Recall AUC: {val_pr_auc_torch:.4f}")
-
     # Test evaluation
     with torch.no_grad():
         test_logits = pytorch_model(X_test_torch)
@@ -669,7 +651,7 @@ def train_models(df):
 
 
 def predict_drivers(models, df, feature_cols, scaler=None):
-    """Make predictions for F3 2025 drivers"""
+    """Make predictions for current year drivers"""
     current_year = CURRENT_YEAR
     current_df = df[df['year'] == current_year].copy()
     if current_df.empty:
@@ -717,28 +699,22 @@ def predict_drivers(models, df, feature_cols, scaler=None):
                 'Nat.': current_df['nationality'],
                 'nationality_encoded': current_df['nationality_encoded'],
                 'Pos': current_df['pos'],
-                'Avg Pos': current_df['avg_finish_pos'],
-                'Std Pos': current_df['std_finish_pos'],
                 'Avg Quali': current_df['avg_quali_pos'],
-                'Std Quali': current_df['std_quali_pos'],
                 'Points': current_df['points'],
                 'Wins': current_df['wins'],
                 'Podiums': current_df['podiums'],
                 'Win %': current_df['win_rate'],
-                'Podium %': current_df['podium_rate'],
                 'Top 10 %': current_df['top_10_rate'],
                 'DNF %': current_df['dnf_rate'],
                 'Participation %': current_df['participation_rate'],
+                'Consistency': current_df['consistency_score'],
                 'Exp': current_df['experience'],
                 'DoB': current_df['dob'],
                 'Age': current_df['age'],
                 'teammate_h2h_rate': current_df['teammate_h2h_rate'],
-                'Pole %': current_df['pole_rate'],
-                'top_10_starts_rate': current_df['top_10_starts_rate'],
                 'team': current_df['team'],
                 'team_pos': current_df['team_pos'],
                 'team_points': current_df['team_points'],
-                'points_share': current_df['points_share'],
                 'Raw_Prob': raw_probas,
                 'Empirical_%': empirical_pct
             }).sort_values('Empirical_%', ascending=False)
@@ -771,27 +747,30 @@ def main():
     # Set up profiler
     profiler = cProfile.Profile()
     profiler.enable()
+    
+    series = ['F2', 'F1']
 
-    print("Loading F3 qualifying data...")
-    f3_qualifying_df = load_qualifying_data('F3')
+    print(f"Loading {series[0]} qualifying data...")
+    feeder_quali_data = load_qualifying_data(series[0])
 
-    f3_df = load_data('F3')
-    f2_df = load_standings_data('F2', 'drivers')
+    feeder_df = load_data(series[0])
+    parent_df = load_standings_data(series[1], 'drivers')
 
     print("Adding qualifying features...")
-    f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
+    feeder_df = calculate_qualifying_features(feeder_df, feeder_quali_data)
 
-    print("Creating target variable based on F2 participation...")
-    f3_df = create_target_variable(f3_df, f2_df)
+    print(f"Creating target variable based on {series[1]} participation...")
+    feeder_df = create_target_variable(feeder_df, parent_df, series[1])
 
     print("Engineering features...")
-    features_df = engineer_features(f3_df)
-    features_df['promoted'] = f3_df['promoted']
+    features_df = engineer_features(feeder_df)
+    features_df['promoted'] = feeder_df['promoted']
+    del feeder_df, parent_df, feeder_quali_data
 
     print("Training all models...")
     models, feature_cols, scaler = train_models(features_df)
 
-    print("Making predictions for F3 2025 drivers...")
+    print(f"Making predictions for {series[0]} {CURRENT_YEAR} drivers...")
     predict_drivers(models, features_df, feature_cols, scaler)
 
     # Stop profiling
