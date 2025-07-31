@@ -17,13 +17,15 @@ describe('Navbar', () => {
       </MemoryRouter>
     );
 
-    const coffeeButton = screen.getByRole('button', { name: /coffee/i });
-    await user.click(coffeeButton);
+    const coffeeLink = screen.getByRole('link', { name: /coffee/i });
+    await user.click(coffeeLink);
 
-    expect(window.open).toHaveBeenCalledWith(
-      'https://www.buymeacoffee.com/jakmate',
-      '_blank'
+    expect(coffeeLink).toHaveAttribute(
+      'href',
+      'https://www.buymeacoffee.com/jakmate'
     );
+    expect(coffeeLink).toHaveAttribute('target', '_blank');
+    expect(coffeeLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   test('renders purple decorative element behind logo', () => {
@@ -50,14 +52,15 @@ describe('Navbar', () => {
         </MemoryRouter>
       );
 
-      const predictionsLink = screen.getByRole('link', {
-        name: /predictions/i,
+      const promotionsLink = screen.getByRole('link', {
+        name: /promotions/i,
       });
 
-      expect(predictionsLink).toHaveClass('bg-gradient-to-r');
-      expect(predictionsLink).toHaveClass('from-cyan-600/60');
-      expect(predictionsLink).toHaveClass('to-purple-600/60');
-      expect(predictionsLink).toHaveClass('text-white');
+      expect(promotionsLink).toHaveClass('bg-gradient-to-r');
+      expect(promotionsLink).toHaveClass('from-cyan-600');
+      expect(promotionsLink).toHaveClass('to-purple-600');
+      expect(promotionsLink).toHaveClass('text-white');
+      expect(promotionsLink).toHaveClass('shadow-lg');
     });
 
     test('applies inactive styles to predictions link when not active', () => {
@@ -67,13 +70,13 @@ describe('Navbar', () => {
         </MemoryRouter>
       );
 
-      const predictionsLink = screen.getByRole('link', {
-        name: /predictions/i,
+      const promotionsLink = screen.getByRole('link', {
+        name: /promotions/i,
       });
 
-      expect(predictionsLink).not.toHaveClass('bg-gradient-to-r');
-      expect(predictionsLink).toHaveClass('text-gray-300');
-      expect(predictionsLink).toHaveClass('hover:text-white');
+      expect(promotionsLink).not.toHaveClass('bg-gradient-to-r');
+      expect(promotionsLink).toHaveClass('text-cyan-300');
+      expect(promotionsLink).toHaveClass('hover:text-white');
     });
   });
 });

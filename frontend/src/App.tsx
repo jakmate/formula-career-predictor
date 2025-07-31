@@ -15,6 +15,7 @@ function App() {
           <Route path="/" element={<Navigate to="/predictions" replace />} />
           <Route path="/predictions" element={<Dashboard />} />
           <Route path="/schedule" element={<Dashboard />} />
+          <Route path="/regressions" element={<Dashboard />} />
         </Routes>
       </div>
     </Router>

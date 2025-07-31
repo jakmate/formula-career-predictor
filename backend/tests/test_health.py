@@ -13,7 +13,7 @@ def test_root_endpoint():
 
     assert response.status_code == 200
     assert response.json() == {
-        "name": "F3/F2 Racing Predictions API",
+        "name": "Formula Predictions API",
         "status": "running",
         "health": "/api/health"
     }

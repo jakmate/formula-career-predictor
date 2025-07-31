@@ -12,7 +12,7 @@ router = APIRouter(tags=["Health"])
 async def root():
     """Health check endpoint"""
     return {
-        "name": "F3/F2 Racing Predictions API",
+        "name": "Formula Predictions API",
         "status": "running",
         "health": "/api/health"
     }

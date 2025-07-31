@@ -6,32 +6,38 @@ interface TableRowProps {
   driver: Driver;
 }
 
-export const TableRow = ({ driver }: TableRowProps) => (
-  <tr
-    className={`border-t border-cyan-500/10 hover:bg-cyan-900/10 transition-colors ${
-      driver.empirical_percentage > 50
-        ? 'bg-gradient-to-r from-green-900/20 to-cyan-900/20'
-        : ''
-    }`}
-  >
-    <td className="p-4 text-white font-medium">
-      <DriverHoverCard driver={driver}>
-        <span className="cursor-pointer hover:text-cyan-300 transition-colors">
-          {driver.driver}
-        </span>
-      </DriverHoverCard>
-    </td>
-    <td className="p-4 text-white">#{driver.position}</td>
-    <td className="p-4 text-white">{driver.points.toFixed(1)}</td>
-    <td className="p-4 text-white">{(driver.win_rate * 100).toFixed(1)}%</td>
-    <td className="p-4 text-white">{(driver.top_10_rate * 100).toFixed(1)}%</td>
-    <td className="p-4 text-white">{(driver.dnf_rate * 100).toFixed(1)}%</td>
-    <td className="p-4 text-white">
-      {(driver.participation_rate * 100).toFixed(1)}%
-    </td>
-    <td className="p-4 text-white">{driver.experience} years</td>
-    <td className="p-4">
-      <ProbabilityBar percentage={driver.empirical_percentage} />
-    </td>
-  </tr>
-);
+export const TableRow = ({ driver }: TableRowProps) => {
+  const empiricalPercentage = driver.empirical_percentage ?? 0;
+
+  return (
+    <tr
+      className={`border-t border-cyan-500/10 hover:bg-cyan-900/10 transition-colors ${
+        empiricalPercentage >= 50
+          ? 'bg-gradient-to-r from-green-900/20 to-cyan-900/20'
+          : ''
+      }`}
+    >
+      <td className="p-4 text-white font-medium">
+        <DriverHoverCard driver={driver}>
+          <span className="cursor-pointer hover:text-cyan-300 transition-colors">
+            {driver.driver}
+          </span>
+        </DriverHoverCard>
+      </td>
+      <td className="p-4 text-white">#{driver.position}</td>
+      <td className="p-4 text-white">{driver.points.toFixed(1)}</td>
+      <td className="p-4 text-white">{(driver.win_rate * 100).toFixed(1)}%</td>
+      <td className="p-4 text-white">
+        {(driver.top_10_rate * 100).toFixed(1)}%
+      </td>
+      <td className="p-4 text-white">{(driver.dnf_rate * 100).toFixed(1)}%</td>
+      <td className="p-4 text-white">
+        {(driver.participation_rate * 100).toFixed(1)}%
+      </td>
+      <td className="p-4 text-white">{driver.experience} years</td>
+      <td className="p-4">
+        <ProbabilityBar percentage={empiricalPercentage} />
+      </td>
+    </tr>
+  );
+};

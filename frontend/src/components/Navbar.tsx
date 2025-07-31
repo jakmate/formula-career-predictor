@@ -1,28 +1,28 @@
-import { BarChart3, Calendar, Icon, Coffee } from 'lucide-react';
+import { BarChart3, Calendar, Icon, Coffee, TrendingUp } from 'lucide-react';
 import { motorRacingHelmet } from '@lucide/lab';
 import { Link } from 'react-router-dom';
 
 interface NavbarProps {
-  activeView: string;
+  activeView: 'predictions' | 'regressions' | 'schedule';
 }
 
 const BuyMeCoffee = () => {
-  const handleCoffeeClick = () => {
-    window.open('https://www.buymeacoffee.com/jakmate', '_blank');
-  };
-
   return (
-    <button
-      onClick={handleCoffeeClick}
-      className="px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200 text-gray-300 hover:text-white hover:bg-gray-800/50"
+    <a
+      href="https://www.buymeacoffee.com/jakmate"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 text-cyan-300 hover:text-white hover:bg-gray-800/50"
     >
       <Coffee className="w-4 h-4" />
-      <span className="hidden sm:inline">Coffee</span>
-    </button>
+      <span>Coffee</span>
+    </a>
   );
 };
 
 export const Navbar = ({ activeView }: NavbarProps) => {
+  const isActive = (view: string) => activeView === view;
+
   return (
     <nav className="bg-gray-900/80 backdrop-blur-xl border-b border-cyan-500/30 shadow-lg shadow-cyan-500/10">
       <div className="max-w-7xl mx-auto px-4">
@@ -36,36 +36,48 @@ export const Navbar = ({ activeView }: NavbarProps) => {
               <div className="absolute inset-0 bg-purple-400 rounded-full blur-sm opacity-40"></div>
             </div>
             <h1 className="text-xl font-bold text-white">
-              Formula Promotion Predictions
+              Formula Predictions
             </h1>
           </div>
 
           <div className="flex space-x-1">
             <Link
               to="/predictions"
-              className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200 ${
-                activeView === 'predictions'
-                  ? 'bg-gradient-to-r from-cyan-600/60 to-purple-600/60 text-white shadow-lg shadow-cyan-500/20'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
+              className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+                isActive('predictions')
+                  ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white shadow-lg shadow-cyan-500/20'
+                  : 'text-cyan-300 hover:text-white hover:bg-gray-800/50'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4" />
+              Promotions
+            </Link>
+
+            <Link
+              to="/regressions"
+              className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+                isActive('regressions')
+                  ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white shadow-lg shadow-cyan-500/20'
+                  : 'text-cyan-300 hover:text-white hover:bg-gray-800/50'
               }`}
             >
               <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">Predictions</span>
+              Positions
             </Link>
 
             <Link
               to="/schedule"
-              className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200 ${
-                activeView === 'schedule'
-                  ? 'bg-gradient-to-r from-cyan-600/60 to-purple-600/60 text-white shadow-lg shadow-cyan-500/20'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
+              className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+                isActive('schedule')
+                  ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white shadow-lg shadow-cyan-500/20'
+                  : 'text-cyan-300 hover:text-white hover:bg-gray-800/50'
               }`}
             >
               <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Schedule</span>
+              Schedule
             </Link>
 
-            <BuyMeCoffee />
+            <BuyMeCoffee></BuyMeCoffee>
           </div>
         </div>
       </div>

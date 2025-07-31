@@ -7,19 +7,16 @@ import torch.optim as optim
 import torch.nn as nn
 import torch
 
-from imblearn.pipeline import Pipeline
-from lightgbm import LGBMClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.isotonic import IsotonicRegression
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, average_precision_score
-from sklearn.model_selection import StratifiedKFold
-from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import RobustScaler
-from sklearn.svm import SVC
+from lightgbm import LGBMRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR
 
+from app.core.loader import load_data, load_qualifying_data
 from app.config import CURRENT_YEAR, NOT_PARTICIPATED_CODES, RETIREMENT_CODES, SEED
-from app.core.loader import load_data, load_qualifying_data, load_standings_data
 from app.core.utils import calculate_age, extract_position, get_race_columns
 
 os.environ['PYTHONHASHSEED'] = str(SEED)
@@ -161,6 +158,7 @@ def calculate_qualifying_features(df, qualifying_df):
     """Calculate qualifying-based features for drivers."""
     if qualifying_df.empty:
         df['avg_quali_pos'] = np.nan
+        df['std_quali_pos'] = np.nan
         return df
 
     # Calculate qualifying statistics for each driver-year combination
@@ -196,6 +194,9 @@ def calculate_qualifying_features(df, qualifying_df):
             'Driver': driver,
             'year': year,
             'avg_quali_pos': np.mean(positions) if positions else np.nan,
+            'std_quali_pos': np.std(positions) if len(positions) > 1 else 0,
+            'pole_rate': sum(1 for p in positions if p == 1) / len(positions) if positions else np.nan,  # noqa: 501
+            'top_10_starts_rate': sum(1 for p in positions if p <= 10) / len(positions) if positions else np.nan,  # noqa: 501
         })
 
     # Convert to DataFrame and merge with main data
@@ -234,10 +235,16 @@ def engineer_features(df):
         'series_type': df.get('series_type', 'Unknown'),
         'team': df.get('Team'),
         'team_pos': df.get('team_pos', np.nan),
+        'team_pos_per': df.get('team_pos_per', 0.5),
         'team_points': df.get('team_points', 0),
         'teammate_h2h_rate': df.get('teammate_h2h_rate', 0.5),
         'avg_quali_pos': df.get('avg_quali_pos', np.nan),
+        'std_quali_pos': df.get('std_quali_pos', np.nan),
+        'pole_rate': df.get('pole_rate', np.nan),
+        'top_10_starts_rate': df.get('top_10_starts_rate', np.nan),
     })
+
+    features_df['is_f3_european'] = (features_df['series_type'] == 'F3_European').astype(int)
 
     # Calculate race statistics for each driver
     race_stats = []
@@ -302,119 +309,20 @@ def engineer_features(df):
         race_stats.append(stats)
 
     # Add race statistics to features
-    for stat_name in ['wins', 'podiums', 'top_10s', 'dnfs',
-                      'races_completed', 'participation_rate']:
+    for stat_name in ['wins', 'podiums', 'top_10s', 'dnfs', 'races_completed',
+                      'participation_rate', 'avg_finish_pos', 'std_finish_pos']:
         features_df[stat_name] = [stats[stat_name] for stats in race_stats]
 
     # Filter out drivers with no races
     features_df = features_df[features_df['races_completed'] > 0]
 
     features_df['win_rate'] = features_df['wins'] / features_df['races_completed']
+    features_df['podium_rate'] = features_df['podiums'] / features_df['races_completed']
     features_df['top_10_rate'] = features_df['top_10s'] / features_df['races_completed']
     features_df['dnf_rate'] = features_df['dnfs'] / features_df['races_completed']
-
-    # Target encode nationality
-    if 'promoted' in df.columns:
-        global_mean = df['promoted'].mean()
-        nationality_stats = df.groupby('nationality').agg({
-            'promoted': ['sum', 'count']
-        }).droplevel(0, axis=1)
-
-        # Smoothing factor (higher = more conservative)
-        alpha = 10
-        nationality_stats['smoothed_rate'] = (
-            (nationality_stats['sum'] + alpha * global_mean) /
-            (nationality_stats['count'] + alpha)
-        )
-
-        features_df['nationality_encoded'] = features_df['nationality'].map(
-            nationality_stats['smoothed_rate']
-        ).fillna(global_mean)
-    else:
-        features_df['nationality_encoded'] = 0.2
-
-    features_df['era'] = np.where(df['year'] >= 2019, 1, 0)
-    features_df['consistency_score'] = features_df['participation_rate'] * \
-        (1 - features_df['dnf_rate'])
+    features_df['points_share'] = features_df['points'] / (features_df['team_points'] + 1)
 
     return features_df
-
-
-def create_target_variable(feeder_df, parent_df, series):
-    """Create target variable for parent series participation."""
-    if feeder_df.empty or parent_df.empty:
-        feeder_df['promoted'] = np.nan
-        return feeder_df
-
-    # Initialize target column
-    feeder_df['promoted'] = 0
-    max_parent_year = parent_df['year'].max()
-
-    # Get last feeder season for each driver
-    last_feeder_seasons = feeder_df.groupby('Driver')['year'].max().reset_index()
-
-    # Process parent data to determine participation
-    parent_participation = []
-    for year, year_df in parent_df.groupby('year'):
-        race_cols = get_race_columns(year_df)
-        if not race_cols:
-            continue
-
-        participation_stats = calculate_participation_stats(year_df, race_cols)
-        threshold = 0 if year == CURRENT_YEAR else len(race_cols) * 0.4
-
-        for stat in participation_stats:
-            parent_participation.append({
-                'driver': stat['Driver'],
-                'year': year,
-                'participated': stat['participated_races'] > threshold
-            })
-
-    parent_participation_df = pd.DataFrame(parent_participation)
-
-    # Determine target values
-    moved_drivers = {}
-    for _, row in last_feeder_seasons.iterrows():
-        driver = row['Driver']
-        last_feeder_year = row['year']
-
-        # Skip if we can't observe future seasons
-        if last_feeder_year + 1 > max_parent_year:
-            moved_drivers[(driver, last_feeder_year)] = np.nan
-            continue
-
-        years = []
-        if series == 'F1':
-            years = [1, 2, 3, 4, 5]
-        else:
-            years = [1]
-
-        # Check next years for participation
-        moved = 0
-        for offset in years:
-            target_year = last_feeder_year + offset
-            if target_year > max_parent_year:
-                break
-
-            participation = parent_participation_df[
-                (parent_participation_df['driver'] == driver) &
-                (parent_participation_df['year'] == target_year)
-            ]
-
-            if not participation.empty and participation['participated'].iloc[0]:
-                moved = 1
-                break
-
-        moved_drivers[(driver, last_feeder_year)] = moved
-
-    # Apply target values
-    for idx, row in feeder_df.iterrows():
-        driver = row['Driver']
-        year = row['year']
-        if (driver, year) in moved_drivers:
-            feeder_df.at[idx, 'promoted'] = moved_drivers[(driver, year)]
-
-    return feeder_df
 
 
 class RacingPredictor(nn.Module):
@@ -440,26 +348,57 @@ class RacingPredictor(nn.Module):
         return self.network(x)
 
 
+def create_target_variable(df):
+    """Create target variable for final championship position prediction."""
+    df['target_position'] = pd.to_numeric(df['Pos'], errors='coerce')
+    return df
+
+
+def get_races_remaining(df, current_year):
+    """Calculate races remaining in the current season."""
+    # Get race columns for current year
+    current_df = df[df['year'] == current_year]
+    if current_df.empty:
+        return 0, 0
+
+    race_cols = get_race_columns(current_df)
+    total_races = len(race_cols)
+
+    # Count completed races (any driver has a result)
+    completed_races = 0
+    for col in race_cols:
+        if current_df[col].notna().any():
+            completed_races += 1
+
+    races_remaining = total_races - completed_races
+    return races_remaining, total_races
+
+
 def train_models(df):
-    """Training function."""
+    """Training function with temporal split for position prediction."""
     if df.empty:
         print("No data available for training")
-        return {}, None, None
+        return {}, {}, None, None, None, None, None, None
 
-    df_clean = df.dropna(subset=['promoted'])
+    df_clean = df.dropna(subset=['target_position', 'pos'])
     feature_cols = [
-        'avg_quali_pos',
-        'win_rate', 'top_10_rate',
+        'avg_finish_pos', 'std_finish_pos',
+        'avg_quali_pos', 'std_quali_pos',
+        'win_rate', 'podium_rate', 'top_10_rate',
+        'participation_rate', 'dnf_rate',
         'experience', 'age',
-        'teammate_h2h_rate',
-        'nationality_encoded',
-        'era',
-        'consistency_score'
+        'teammate_h2h_rate', 'points_share',
+        'pole_rate', 'top_10_starts_rate',
+        'races_completed'
     ]
 
     X = df_clean[feature_cols].fillna(0)
-    y = df_clean['promoted']
+    y = df_clean['target_position']
     years = df_clean['year']
+
+    print(f"Dataset size: {len(X)} drivers")
+    print(f"Position range: {y.min():.0f} - {y.max():.0f}")
+    print(f"Year range: {years.min()} - {years.max()}")
 
     # Use 80% of years for training, 20% for testing
     unique_years = sorted(years.unique())
@@ -476,121 +415,81 @@ def train_models(df):
     y_train = y[train_mask]
     y_test = y[test_mask]
 
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
+    print(f"Training: {len(X_train)} samples")
+    print(f"Test: {len(X_test)} samples")
 
-    # For a single validation split, take first fold
-    train_idx, val_idx = next(skf.split(X_train, y_train))
+    # Scale features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
-    X_train_sub = X_train.iloc[train_idx]
-    X_val = X_train.iloc[val_idx]
-    y_train_sub = y_train.iloc[train_idx]
-    y_val = y_train.iloc[val_idx]
-
-    print(f"Training subset: {len(X_train_sub)} samples, \
-          {y_train_sub.sum()} promotions ({y_train_sub.mean():.2%})")
-    print(f"Validation: {len(X_val)} samples, {y_val.sum()} promotions ({y_val.mean():.2%})")
-    print(f"Test: {len(X_test)} samples, {y_test.sum()} promotions ({y_test.mean():.2%})")
-
-    # Traditional ML pipelines
-    traditional_pipelines = {
-        'Random Forest': Pipeline([
-            ('classifier', RandomForestClassifier(
-                random_state=SEED,
-                class_weight='balanced_subsample'
-            ))
-        ]),
-        'Logistic Regression': Pipeline([
-            ('classifier', LogisticRegression(
-                random_state=SEED,
-                class_weight='balanced',
-                max_iter=10000
-            ))
-        ]),
-        'LightGBM': Pipeline([
-            ('classifier', LGBMClassifier(
-                random_state=SEED,
-                class_weight='balanced',
-                verbosity=-1
-            ))
-        ]),
-        'MLP': Pipeline([
-            ('scaler', RobustScaler()),
-            ('classifier', MLPClassifier(
-                random_state=SEED,
-                max_iter=10000
-            ))
-        ]),
-        'SVM': Pipeline([
-            ('classifier', SVC(
-                random_state=SEED,
-                class_weight='balanced',
-                probability=True
-            ))
-        ]),
+    # Regression models optimized for position prediction
+    regression_models = {
+        'Random Forest': RandomForestRegressor(random_state=SEED, n_estimators=200, max_depth=15),
+        'Linear Regression': LinearRegression(),
+        'LightGBM': LGBMRegressor(random_state=SEED, verbosity=-1, objective='regression'),
+        'MLP': MLPRegressor(random_state=SEED, max_iter=1000, early_stopping=True),
+        'SVR': SVR(kernel='rbf', C=100, gamma='scale'),
     }
 
     results = {}
 
     print("\n" + "=" * 50)
-    print("TRAINING MODELS")
+    print("TRAINING POSITION PREDICTION MODELS")
     print("=" * 50)
 
-    # Train traditional models
-    for name, pipeline in traditional_pipelines.items():
+    # Train regression models
+    for name, model in regression_models.items():
         print(f"\nTraining {name}:")
         print("-" * 40)
 
-        # Fit on training subset
-        pipeline.fit(X_train_sub, y_train_sub)
+        # Use scaled features for models that need it
+        if name in ['Linear Regression', 'SVR', 'MLP']:
+            model.fit(X_train_scaled, y_train)
+            y_pred = model.predict(X_test_scaled)
+        else:
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
 
-        # Evaluate on validation set
-        probas_val = pipeline.predict_proba(X_val)[:, 1]
+        # Evaluation metrics
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
 
-        # Evaluate on test set
-        y_pred = pipeline.predict(X_test)
-        probas_test = pipeline.predict_proba(X_test)[:, 1]
+        print(f"MSE: {mse:.2f}")
+        print(f"MAE: {mae:.2f}")
+        print(f"R²: {r2:.4f}")
 
-        # Calibration using validation set
-        iso_reg = IsotonicRegression(out_of_bounds='clip')
-        iso_reg.fit(probas_val, y_val)
-        pipeline.calibrator = iso_reg
-
-        print("\nTest Set Results:")
-        print(classification_report(y_test, y_pred))
-        pr_auc = average_precision_score(y_test, probas_test)
-        print(f"Test Precision-Recall AUC: {pr_auc:.4f}")
-
-        results[name] = pipeline
+        results[name] = model
 
     # Train PyTorch Model
     print("\nTraining PyTorch Model...")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # Scale features
-    scaler = RobustScaler()
-    X_train_sub_scaled = scaler.fit_transform(X_train_sub)
-    X_val_scaled = scaler.transform(X_val)
-    X_test_scaled = scaler.transform(X_test)
-
     # Convert to PyTorch tensors
-    X_train_torch = torch.FloatTensor(X_train_sub_scaled).to(device)
-    y_train_torch = torch.FloatTensor(y_train_sub.values).to(device)
-    X_val_torch = torch.FloatTensor(X_val_scaled).to(device)
-    y_val_torch = torch.FloatTensor(y_val.values).to(device)
+    X_train_torch = torch.FloatTensor(X_train_scaled).to(device)
+    y_train_torch = torch.FloatTensor(y_train.values).to(device)
     X_test_torch = torch.FloatTensor(X_test_scaled).to(device)
 
-    pytorch_model = RacingPredictor(X_train_sub_scaled.shape[1]).to(device)
-
-    # Calculate class weights for PyTorch
-    n_neg = (y_train_sub == 0).sum()
-    n_pos = (y_train_sub == 1).sum()
-    pos_weight = torch.tensor([n_neg / n_pos]).to(device)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    pytorch_model = RacingPredictor(X_train_scaled.shape[1]).to(device)
+    criterion = nn.MSELoss()
     optimizer = optim.Adam(pytorch_model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='min', factor=0.5, patience=5)
 
-    # Training loop with proper validation
+    # Validation split
+    n_train_samples = len(X_train_torch)
+    val_split_idx = int(n_train_samples * 0.8)
+
+    train_indices = list(range(val_split_idx))
+    val_indices = list(range(val_split_idx, n_train_samples))
+
+    X_train_sub = X_train_torch[train_indices]
+    y_train_sub = y_train_torch[train_indices]
+    X_val = X_train_torch[val_indices]
+    y_val = y_train_torch[val_indices]
+
+    # Training loop
     best_val_loss = float('inf')
     patience_counter = 0
 
@@ -598,16 +497,16 @@ def train_models(df):
         pytorch_model.train()
         optimizer.zero_grad()
 
-        outputs = pytorch_model(X_train_torch).squeeze()
-        loss = criterion(outputs, y_train_torch)
+        outputs = pytorch_model(X_train_sub).squeeze()
+        loss = criterion(outputs, y_train_sub)
         loss.backward()
         optimizer.step()
 
         # Validation
         pytorch_model.eval()
         with torch.no_grad():
-            val_outputs = pytorch_model(X_val_torch).squeeze()
-            val_loss = criterion(val_outputs, y_val_torch)
+            val_outputs = pytorch_model(X_val).squeeze()
+            val_loss = criterion(val_outputs, y_val)
 
         scheduler.step(val_loss)
 
@@ -625,33 +524,28 @@ def train_models(df):
     pytorch_model.load_state_dict(best_state_dict)
     pytorch_model.eval()
 
-    # Validation evaluation
     with torch.no_grad():
-        val_logits = pytorch_model(X_val_torch)
-        val_probas_torch = torch.sigmoid(val_logits).cpu().numpy().flatten()
+        predictions_torch = pytorch_model(X_test_torch).cpu().numpy().flatten()
 
-    # Test evaluation
-    with torch.no_grad():
-        test_logits = pytorch_model(X_test_torch)
-        test_probas_torch = torch.sigmoid(test_logits).cpu().numpy().flatten()
+    mse_torch = mean_squared_error(y_test, predictions_torch)
+    mae_torch = mean_absolute_error(y_test, predictions_torch)
+    r2_torch = r2_score(y_test, predictions_torch)
 
-    # Calibrate PyTorch model using validation set
-    iso_reg_torch = IsotonicRegression(out_of_bounds='clip')
-    iso_reg_torch.fit(val_probas_torch, y_val)
-    pytorch_model.calibrator = iso_reg_torch
+    print(f"PyTorch MSE: {mse_torch:.2f}")
+    print(f"PyTorch MAE: {mae_torch:.2f}")
+    print(f"PyTorch R²: {r2_torch:.4f}")
 
-    pytorch_pred = (test_probas_torch > 0.5).astype(int)
-    print("\nPyTorch Test Results:")
-    print(classification_report(y_test, pytorch_pred))
-    pr_auc_torch = average_precision_score(y_test, test_probas_torch)
-    print(f"PyTorch Test Precision-Recall AUC: {pr_auc_torch:.4f}")
     results['PyTorch'] = pytorch_model
+
+    print("\n" + "=" * 70)
+    print("TRAINING COMPLETE")
+    print("=" * 70)
 
     return results, feature_cols, scaler
 
 
-def predict_drivers(models, df, feature_cols, scaler=None):
-    """Make predictions for current year drivers"""
+def predict_final_championship_standings(models, df, feature_cols, scaler=None):
+    """Predict final championship positions"""
     current_year = CURRENT_YEAR
     current_df = df[df['year'] == current_year].copy()
     if current_df.empty:
@@ -661,75 +555,84 @@ def predict_drivers(models, df, feature_cols, scaler=None):
         print("No current data found for predictions")
         return pd.DataFrame()
 
+    # Get season progress information
+    races_remaining, total_races = get_races_remaining(df, current_year)
+    season_progress = (total_races - races_remaining) / total_races if total_races > 0 else 0
+    confidence_factor = max(0.3, season_progress)
+
+    print(f"\nSeason Progress: {season_progress:.1%}")
+    print(f"Races completed: {total_races - races_remaining}/{total_races}")
+    print(f"Races remaining: {races_remaining}")
+
     X_current = current_df[feature_cols].fillna(0)
-    results = None
+    all_predictions = {}
 
+    # Make predictions with each model
     for name, model in models.items():
-        print(f"\n{name} Predictions:")
-        print("=" * 70)
-
         try:
-            # Get raw probabilities based on model type
             if name == 'PyTorch':
-                if scaler is not None:
-                    X_processed = scaler.transform(X_current)
-                else:
-                    X_processed = X_current
+                X_processed = scaler.transform(X_current) if scaler else X_current
                 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
                 model.eval()
                 with torch.no_grad():
                     X_torch = torch.FloatTensor(X_processed).to(device)
-                    logits = model(X_torch)
-                    raw_probas = torch.sigmoid(logits).cpu().numpy().flatten()
-            else:  # Traditional models
-                X_processed = X_current
-                raw_probas = model.predict_proba(X_processed)[:, 1]
-
-            # Apply calibration if available
-            if hasattr(model, 'calibrator') and model.calibrator is not None:
-                calibrated_probas = model.calibrator.transform(raw_probas)
+                    predictions = model(X_torch).cpu().numpy().flatten()
             else:
-                calibrated_probas = raw_probas
+                if name in ['Linear Regression', 'SVR', 'MLP']:
+                    X_processed = scaler.transform(X_current) if scaler else X_current
+                else:
+                    X_processed = X_current
+                predictions = model.predict(X_processed)
 
-            empirical_pct = calibrated_probas * 100.0
-
-            # Create results DataFrame
-            results = pd.DataFrame({
-                'Driver': current_df['driver'],
-                'Nat.': current_df['nationality'],
-                'nationality_encoded': current_df['nationality_encoded'],
-                'Pos': current_df['pos'],
-                'Avg Quali': current_df['avg_quali_pos'],
-                'Points': current_df['points'],
-                'Wins': current_df['wins'],
-                'Podiums': current_df['podiums'],
-                'Win %': current_df['win_rate'],
-                'Top 10 %': current_df['top_10_rate'],
-                'DNF %': current_df['dnf_rate'],
-                'Participation %': current_df['participation_rate'],
-                'Consistency': current_df['consistency_score'],
-                'Exp': current_df['experience'],
-                'DoB': current_df['dob'],
-                'Age': current_df['age'],
-                'teammate_h2h_rate': current_df['teammate_h2h_rate'],
-                'team': current_df['team'],
-                'team_pos': current_df['team_pos'],
-                'team_points': current_df['team_points'],
-                'Raw_Prob': raw_probas,
-                'Empirical_%': empirical_pct
-            }).sort_values('Empirical_%', ascending=False)
-
-            print(f"\n{name} Predictions:")
-            print("-" * 50)
-            print(results.head(5).to_string(index=False, float_format='%.3f'))
+            # Constrain and adjust predictions
+            n_drivers = len(current_df)
+            predictions = np.clip(predictions, 1, n_drivers)
+            adjusted_preds = (
+                predictions * (1 - confidence_factor) +
+                current_df['pos'].values * confidence_factor
+            )
+            all_predictions[name] = adjusted_preds
 
         except Exception as e:
             print(f"Error with {name} model: {e}")
             continue
 
-    if results is not None:
-        return results
-    return pd.DataFrame()
+    if not all_predictions:
+        return pd.DataFrame()
+
+    # Create results container
+    results = pd.DataFrame({
+        'Driver': current_df['driver'],
+        'Current_Pos': current_df['pos'],
+        'Current_Points': current_df['points'],
+        'Team': current_df['team']
+    })
+
+    # Add predictions from each model
+    for name, preds in all_predictions.items():
+        results[f'{name}_Pred'] = preds
+
+    # Print top 5 for each model separately
+    print("\n" + "=" * 70)
+    print(f"{current_year} FINAL STANDINGS PREDICTIONS PER MODEL")
+    print("=" * 70)
+
+    for model_name in all_predictions.keys():
+        model_results = results.copy()
+        model_results['Predicted_Pos'] = model_results[f'{model_name}_Pred']
+        model_results = model_results.sort_values('Predicted_Pos', ascending=True)
+        model_results['Model_Rank'] = range(1, len(model_results) + 1)
+
+        top5 = model_results.head(5)
+
+        print(f"\n{model_name} Model Top 5:")
+        print("-" * 50)
+        print(f"{'Pos':<5}{'Driver':<20}{'Team':<15}{'Current':<10}{'Predicted':<10}")
+        for i, row in top5.iterrows():
+            print(f"{i+1:<5}{row['Driver']:<20}{row['Team']:<15}"
+                  f"{row['Current_Pos']:<10}{row['Predicted_Pos']:.1f}")
+
+    return results
 
 
 import cProfile  # noqa: 402
@@ -748,30 +651,26 @@ def main():
     profiler = cProfile.Profile()
     profiler.enable()
 
-    series = ['F2', 'F1']
+    print("Loading F3 qualifying data...")
+    f3_qualifying_df = load_qualifying_data('F3')
 
-    print(f"Loading {series[0]} qualifying data...")
-    feeder_quali_data = load_qualifying_data(series[0])
-
-    feeder_df = load_data(series[0])
-    parent_df = load_standings_data(series[1], 'drivers')
+    f3_df = load_data('F3')
 
     print("Adding qualifying features...")
-    feeder_df = calculate_qualifying_features(feeder_df, feeder_quali_data)
+    f3_df = calculate_qualifying_features(f3_df, f3_qualifying_df)
 
-    print(f"Creating target variable based on {series[1]} participation...")
-    feeder_df = create_target_variable(feeder_df, parent_df, series[1])
+    print("Creating target variable for position prediction...")
+    f3_df = create_target_variable(f3_df)
 
     print("Engineering features...")
-    features_df = engineer_features(feeder_df)
-    features_df['promoted'] = feeder_df['promoted']
-    del feeder_df, parent_df, feeder_quali_data
+    features_df = engineer_features(f3_df)
+    features_df['target_position'] = f3_df['target_position']
 
-    print("Training all models...")
+    print("Training position prediction models...")
     models, feature_cols, scaler = train_models(features_df)
 
-    print(f"Making predictions for {series[0]} {CURRENT_YEAR} drivers...")
-    predict_drivers(models, features_df, feature_cols, scaler)
+    print("Predicting final championship standings...")
+    predict_final_championship_standings(models, features_df, feature_cols, scaler)
 
     # Stop profiling
     profiler.disable()

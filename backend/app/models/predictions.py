@@ -26,7 +26,8 @@ class PredictionResponse(BaseModel):
     nationality_encoded: Optional[float] = None
     era: int
     consistency_score: float
-    empirical_percentage: float
+    empirical_percentage: Optional[float] = None
+    predicted_position: Optional[float] = None
 
 
 class ModelResults(BaseModel):

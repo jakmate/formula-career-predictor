@@ -6,7 +6,6 @@ backend/models
 backend/system_state.json
 backend/system_state.json.backup
 backend/htmlcov
-backend/app/core/regressor.py
 
 frontend/node_modules
 frontend/coverage
