@@ -27,9 +27,9 @@ class TestCreateApp:
     def test_app_configuration(self):
         app = create_app()
 
-        assert app.title == "F3/F2 Career Predictions API"
+        assert app.title == "Formula Predictions API"
         assert app.version == "1.0.0"
-        assert app.description == "API for predicting F3 to F2 driver transitions"
+        assert app.description == "API for predicting Formula 1, 2, 3 and career promotions"
 
     def test_api_router_included(self):
         app = create_app()

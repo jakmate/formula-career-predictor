@@ -28,9 +28,9 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """Create FastAPI application with all configurations"""
     app = FastAPI(
-        title="F3/F2 Career Predictions API",
+        title="Formula Predictions API",
         version="1.0.0",
-        description="API for predicting F3 to F2 driver transitions",
+        description="API for predicting Formula 1, 2, 3 and career promotions",
         lifespan=lifespan
     )
 
