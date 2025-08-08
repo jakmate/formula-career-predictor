@@ -84,5 +84,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Official Formula 1, Formula 2, and Formula 3 championships for race data
+- Official Formula 1, Formula 2, and Formula 3 championships for schedule data
 - Wikipedia contributors for driver and team information

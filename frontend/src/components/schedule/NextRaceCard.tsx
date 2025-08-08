@@ -85,30 +85,23 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
 
   // Format date - times are already converted by backend
   const formatDate = (dateString: string) => {
+    let date: Date;
+
     if (dateString.length === 10) {
       const [year, month, day] = dateString.split('-');
-      return new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day)
-      ).toLocaleDateString(undefined, {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      });
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    } else {
+      date = new Date(dateString);
     }
 
-    try {
-      return new Date(dateString).toLocaleDateString(undefined, {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    } catch {
-      return 'Date TBC';
-    }
+    if (isNaN(date.getTime())) return 'Date TBC';
+
+    const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' });
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-GB', { month: 'long' });
+    const year = date.getFullYear();
+
+    return `${weekday}, ${day} ${month}, ${year}`;
   };
 
   // Format time - backend already converted to local timezone
@@ -125,28 +118,22 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
 
   // Format short date
   const formatShortDate = (dateString: string) => {
+    let date: Date;
+
     if (dateString.length === 10) {
       const [year, month, day] = dateString.split('-');
-      return new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day)
-      ).toLocaleDateString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      });
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    } else {
+      date = new Date(dateString);
     }
 
-    try {
-      return new Date(dateString).toLocaleDateString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      });
-    } catch {
-      return 'TBC';
-    }
+    if (isNaN(date.getTime())) return 'TBC';
+
+    const weekday = date.toLocaleDateString('en-GB', { weekday: 'short' });
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-GB', { month: 'short' });
+
+    return `${weekday}, ${day} ${month}`;
   };
 
   // Determine session status

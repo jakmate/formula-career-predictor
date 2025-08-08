@@ -1,14 +1,33 @@
 import type { Driver } from '../../types/Driver';
 import { TableHeader } from './TableHeader';
-import { TableRow } from './TableRow';
 import { useSorting } from '../../hooks/useSorting';
+import { BaseTableRow } from './TableRow';
 
-interface TableContentProps {
+interface BaseTableContentProps {
   predictions: Driver[];
+  variant?: 'default' | 'regression';
 }
 
-export const TableContent = ({ predictions }: TableContentProps) => {
+export const BaseTableContent = ({
+  predictions,
+  variant = 'default',
+}: BaseTableContentProps) => {
   const { sortedData, sortConfig, handleSort } = useSorting(predictions);
+
+  const getLastColumnHeader = () => {
+    if (variant === 'regression') return 'Predicted Position';
+    return 'F2 Probability';
+  };
+
+  const getLastColumnField = () => {
+    if (variant === 'regression') return 'predicted_position';
+    return 'empirical_percentage';
+  };
+
+  const getPositionHeader = () => {
+    if (variant === 'regression') return 'Current Position';
+    return 'Position';
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -27,7 +46,7 @@ export const TableContent = ({ predictions }: TableContentProps) => {
               sortConfig={sortConfig}
               onSort={handleSort}
             >
-              Position
+              {getPositionHeader()}
             </TableHeader>
             <TableHeader
               field="points"
@@ -72,17 +91,21 @@ export const TableContent = ({ predictions }: TableContentProps) => {
               Experience
             </TableHeader>
             <TableHeader
-              field="empirical_percentage"
+              field={getLastColumnField()}
               sortConfig={sortConfig}
               onSort={handleSort}
             >
-              F2 Probability
+              {getLastColumnHeader()}
             </TableHeader>
           </tr>
         </thead>
         <tbody>
           {sortedData.map((driver: Driver) => (
-            <TableRow key={driver.driver} driver={driver} />
+            <BaseTableRow
+              key={driver.driver}
+              driver={driver}
+              variant={variant}
+            />
           ))}
         </tbody>
       </table>

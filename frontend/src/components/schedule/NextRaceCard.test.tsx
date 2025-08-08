@@ -152,8 +152,7 @@ describe('NextRaceCard', () => {
   it('formats dates correctly', () => {
     render(<NextRaceCard nextRace={mockNextRace} />);
 
-    // Should format the race date
-    expect(screen.getByText('Sunday, May 26, 2024')).toBeInTheDocument();
+    expect(screen.getByText('Sunday, 26 May, 2024')).toBeInTheDocument();
   });
 
   it('displays user timezone when provided', () => {
@@ -267,8 +266,7 @@ describe('NextRaceCard', () => {
     };
 
     render(<NextRaceCard nextRace={raceWithSimpleDate} />);
-    // Change expected format to match component output
-    expect(screen.getByText('Sunday, May 26, 2024')).toBeInTheDocument();
+    expect(screen.getByText('Sunday, 26 May, 2024')).toBeInTheDocument();
   });
 
   it('handles invalid time strings', () => {
@@ -312,7 +310,7 @@ describe('NextRaceCard', () => {
     const practice1Session = screen
       .getByText('PRACTICE 1')
       .closest('.rounded-xl') as HTMLElement;
-    const dateElement = within(practice1Session).getByText('Fri, May 24');
+    const dateElement = within(practice1Session).getByText('Fri, 24 May');
     expect(dateElement).toBeInTheDocument();
   });
 
@@ -340,9 +338,9 @@ describe('NextRaceCard', () => {
       expect(withinSession.queryByText('LIVE NOW')).not.toBeInTheDocument();
       expect(withinSession.getByText('COMPLETED')).toBeInTheDocument();
 
-      // Verify time is shown as Invalid Date in both places
-      const invalidDates = withinSession.getAllByText('Invalid Date');
-      expect(invalidDates).toHaveLength(2);
+      // Verify time is shown as TBC in both places
+      const invalidDates = withinSession.getAllByText('TBC');
+      expect(invalidDates).toHaveLength(1);
     });
 
     it('returns "upcoming" for future sessions', () => {
