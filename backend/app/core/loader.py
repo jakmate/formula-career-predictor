@@ -375,5 +375,5 @@ def load_data(series):
     return df
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     load_data('F3')

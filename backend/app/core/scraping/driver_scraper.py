@@ -8,191 +8,172 @@ from datetime import datetime
 
 from app.config import PROFILES_DIR
 
+SPARQL_ENDPOINT = "https://query.wikidata.org/sparql"
+DRIVER_ALIASES = {
+    "Peter Li": "Zhi Cong Li",
+    "Richard Goddard": "Spike Goddard",
+    "Lucas di Grassi": "Lucas Di Grassi",
+    "Andy Chang": "Andy Chang Wing Chung",
+    "Alfonso Celis Jr.": "Alfonso Celis",
+    "Guanyu Zhou": "Zhou Guanyu",
+    "Rodolfo González": "Rodolfo Gonzalez",
+    "Keyvan Andres": "Keyvan Andres Soori",
+    "Gabriel Bortoleto": "Gabriel Lourenzo Bortoleto Oliveira",
+    "Mitch Gilbert": "Mitchell Gilbert",
+    "Gabriel Chaves": "Gabby Chaves",
+    "Gabriele Minì": "Gabriele Mini",
+    "Robert Kubica": "Robert Jozef Kubica",
+    "Yifei Ye": "Ye Yifei"
+}
 
-class DriverProfileScraper:
-    def __init__(self):
-        self.profiles_dir = PROFILES_DIR
-        self.session = requests.Session()
-        os.makedirs(self.profiles_dir, exist_ok=True)
 
-        # Wikidata SPARQL endpoint
-        self.sparql_endpoint = "https://query.wikidata.org/sparql"
+def get_driver_filename(driver_name):
+    """Create safe filename from driver name."""
+    safe_name = re.sub(r'[^\w\s-]', '', driver_name)
+    safe_name = re.sub(r'[-\s]+', '_', safe_name)
+    return f"{safe_name.lower()}.json"
 
-        # Known driver aliases
-        self.driver_aliases = {
-            "Peter Li": "Zhi Cong Li",
-            "Richard Goddard": "Spike Goddard",
-            "Lucas di Grassi": "Lucas Di Grassi",
-            "Andy Chang": "Andy Chang Wing Chung",
-            "Alfonso Celis Jr.": "Alfonso Celis",
-            "Guanyu Zhou": "Zhou Guanyu",
-            "Rodolfo González": "Rodolfo Gonzalez",
-            "Keyvan Andres": "Keyvan Andres Soori",
-            "Gabriel Bortoleto": "Gabriel Lourenzo Bortoleto Oliveira",
-            "Mitch Gilbert": "Mitchell Gilbert",
-            "Gabriel Chaves": "Gabby Chaves",
-            "Gabriele Minì": "Gabriele Mini",
-            "Robert Kubica": "Robert Jozef Kubica",
-            "Yifei Ye": "Ye Yifei"
-        }
 
-    def get_driver_filename(self, driver_name):
-        """Create safe filename from driver name."""
-        safe_name = re.sub(r'[^\w\s-]', '', driver_name)
-        safe_name = re.sub(r'[-\s]+', '_', safe_name)
-        return f"{safe_name.lower()}.json"
+def search_wikidata_driver(driver_name, session):
+    """Search for racing driver in Wikidata using SPARQL."""
+    # Check for known aliases first
+    if driver_name in DRIVER_ALIASES:
+        alias = DRIVER_ALIASES[driver_name]
+        if alias is None:  # Explicitly marked as invalid
+            return None
+        driver_name = alias
 
-    def search_wikidata_driver(self, driver_name):
-        """Search for racing driver in Wikidata using SPARQL."""
-        # Check for known aliases first
-        if driver_name in self.driver_aliases:
-            alias = self.driver_aliases[driver_name]
-            if alias is None:  # Explicitly marked as invalid
-                return None
-            driver_name = alias
+    # SPARQL query to find racing drivers by name
+    query = f"""
+    SELECT ?person ?personLabel ?dob ?nationality ?nationalityLabel
+        ?citizenship ?citizenshipLabel WHERE {{
+      {{
+        ?person rdfs:label "{driver_name}"@en .
+      }} UNION {{
+        ?person skos:altLabel "{driver_name}"@en .
+      }}
+      ?person wdt:P106 ?occupation .
+      # racing automobile driver or racing driver or Formula One driver
+      FILTER(?occupation = wd:Q10349745 ||
+        ?occupation = wd:Q378622 || ?occupation = wd:Q10841764)
 
-        # SPARQL query to find racing drivers by name
-        query = f"""
-        SELECT ?person ?personLabel ?dob ?nationality ?nationalityLabel
-            ?citizenship ?citizenshipLabel WHERE {{
-          {{
-            ?person rdfs:label "{driver_name}"@en .
-          }} UNION {{
-            ?person skos:altLabel "{driver_name}"@en .
-          }}
-          ?person wdt:P106 ?occupation .
-          # racing automobile driver or racing driver or Formula One driver
-          FILTER(?occupation = wd:Q10349745 ||
-            ?occupation = wd:Q378622 || ?occupation = wd:Q10841764)
+      OPTIONAL {{ ?person wdt:P569 ?dob }}
+      OPTIONAL {{ ?person wdt:P1532 ?nationality }}  # country for sport
+      OPTIONAL {{ ?person wdt:P27 ?citizenship }}    # country of citizenship
 
-          OPTIONAL {{ ?person wdt:P569 ?dob }}
-          OPTIONAL {{ ?person wdt:P1532 ?nationality }}  # country for sport
-          OPTIONAL {{ ?person wdt:P27 ?citizenship }}    # country of citizenship
+      SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
+    }}
+    """
 
-          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
-        }}
-        """
-
-        try:
-            response = self.session.get(
-                self.sparql_endpoint,
-                params={'query': query, 'format': 'json'},
-                headers={'User-Agent': 'DriverProfileScraper/1.0'},
-                timeout=10
-            )
-
-            if response.status_code == 200:
-                data = response.json()
-                if data['results']['bindings']:
-                    return data['results']['bindings'][0]  # Return first match
-
-        except Exception as e:
-            print(f"Wikidata query error for {driver_name}: {e}")
-
-        return None
-
-    def extract_nationality_from_result(self, result):
-        """Extract nationality from Wikidata result, preferring country for sport."""
-        # Prefer country for sport over citizenship
-        if 'nationalityLabel' in result and result['nationalityLabel']['value']:
-            return result['nationalityLabel']['value']
-        elif 'citizenshipLabel' in result and result['citizenshipLabel']['value']:
-            return result['citizenshipLabel']['value']
-        return None
-
-    def extract_dob_from_result(self, result):
-        """Extract date of birth from Wikidata result."""
-        if 'dob' in result and result['dob']['value']:
-            # Wikidata returns dates in ISO format, extract just the date part
-            return result['dob']['value'].split('T')[0]
-        return None
-
-    def scrape_driver_profile(self, driver_name):
-        """Scrape individual driver profile from Wikidata."""
-        profile_file = os.path.join(
-            self.profiles_dir,
-            self.get_driver_filename(driver_name)
+    try:
+        response = session.get(
+            SPARQL_ENDPOINT,
+            params={'query': query, 'format': 'json'},
+            headers={'User-Agent': 'DriverProfileScraper/1.0'},
+            timeout=10
         )
 
-        # Check if already scraped
-        if os.path.exists(profile_file):
-            with open(profile_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+        if response.status_code == 200:
+            data = response.json()
+            if data['results']['bindings']:
+                return data['results']['bindings'][0]  # Return first match
 
-        print(f"Scraping profile for {driver_name}...")
+    except Exception as e:
+        print(f"Wikidata query error for {driver_name}: {e}")
 
-        # Check for known invalid drivers
-        if driver_name in self.driver_aliases and self.driver_aliases[driver_name] is None:
-            print(f"Skipping known invalid driver: {driver_name}")
-            profile = {
-                "name": driver_name,
-                "dob": None,
-                "nationality": None,
-                "scraped": False,
-            }
-            self.save_profile(profile_file, profile)
-            return profile
+    return None
 
-        # Search Wikidata
-        result = self.search_wikidata_driver(driver_name)
-        if not result:
-            print(f"No Wikidata entry found for {driver_name}")
-            profile = {
-                "name": driver_name,
-                "dob": None,
-                "nationality": None,
-                "scraped": False
-            }
-            self.save_profile(profile_file, profile)
-            return profile
 
-        try:
-            # Extract data
-            dob = self.extract_dob_from_result(result)
-            nationality = self.extract_nationality_from_result(result)
-            wikidata_id = result['person']['value'].split('/')[-1]
+def extract_nationality_from_result(result):
+    """Extract nationality from Wikidata result, preferring country for sport."""
+    # Prefer country for sport over citizenship
+    if 'nationalityLabel' in result and result['nationalityLabel']['value']:
+        return result['nationalityLabel']['value']
+    elif 'citizenshipLabel' in result and result['citizenshipLabel']['value']:
+        return result['citizenshipLabel']['value']
+    return None
 
-            profile = {
-                "name": driver_name,
-                "dob": dob,
-                "nationality": nationality,
-                "wikidata_id": wikidata_id,
-                "wikidata_url": result['person']['value'],
-                "scraped": True,
-                "scraped_date": datetime.now().isoformat()
-            }
 
-            self.save_profile(profile_file, profile)
-            return profile
+def extract_dob_from_result(result):
+    """Extract date of birth from Wikidata result."""
+    if 'dob' in result and result['dob']['value']:
+        # Wikidata returns dates in ISO format, extract just the date part
+        return result['dob']['value'].split('T')[0]
+    return None
 
-        except Exception as e:
-            print(f"Error processing {driver_name}: {e}")
-            profile = {
-                "name": driver_name,
-                "dob": None,
-                "nationality": None,
-                "scraped": False,
-                "error": str(e)
-            }
-            self.save_profile(profile_file, profile)
-            return profile
 
-    def save_profile(self, filename, profile):
-        """Save profile to JSON file."""
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(profile, f, indent=2, ensure_ascii=False)
+def save_profile(filename, profile):
+    """Save profile to JSON file."""
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(profile, f, indent=2, ensure_ascii=False)
 
-    def batch_scrape_drivers(self, driver_list):
-        """Scrape profiles for list of drivers."""
-        profiles = {}
-        unique_drivers = list(set(driver_list))
 
-        print(f"Scraping profiles for {len(unique_drivers)} unique drivers...")
+def scrape_driver_profile(driver_name, session):
+    """Scrape individual driver profile from Wikidata."""
+    profile_file = os.path.join(PROFILES_DIR, get_driver_filename(driver_name))
 
-        for i, driver in enumerate(unique_drivers, 1):
-            profiles[driver] = self.scrape_driver_profile(driver)
+    # Check if already scraped
+    if os.path.exists(profile_file):
+        with open(profile_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
 
-        return profiles
+    print(f"Scraping profile for {driver_name}...")
+
+    # Check for known invalid drivers
+    if driver_name in DRIVER_ALIASES and DRIVER_ALIASES[driver_name] is None:
+        print(f"Skipping known invalid driver: {driver_name}")
+        profile = {
+            "name": driver_name,
+            "dob": None,
+            "nationality": None,
+            "scraped": False,
+        }
+        save_profile(profile_file, profile)
+        return profile
+
+    # Search Wikidata
+    result = search_wikidata_driver(driver_name, session)
+    if not result:
+        print(f"No Wikidata entry found for {driver_name}")
+        profile = {
+            "name": driver_name,
+            "dob": None,
+            "nationality": None,
+            "scraped": False
+        }
+        save_profile(profile_file, profile)
+        return profile
+
+    try:
+        # Extract data
+        dob = extract_dob_from_result(result)
+        nationality = extract_nationality_from_result(result)
+        wikidata_id = result['person']['value'].split('/')[-1]
+
+        profile = {
+            "name": driver_name,
+            "dob": dob,
+            "nationality": nationality,
+            "wikidata_id": wikidata_id,
+            "wikidata_url": result['person']['value'],
+            "scraped": True,
+            "scraped_date": datetime.now().isoformat()
+        }
+
+        save_profile(profile_file, profile)
+        return profile
+
+    except Exception as e:
+        print(f"Error processing {driver_name}: {e}")
+        profile = {
+            "name": driver_name,
+            "dob": None,
+            "nationality": None,
+            "scraped": False,
+            "error": str(e)
+        }
+        save_profile(profile_file, profile)
+        return profile
 
 
 def get_all_drivers_from_data():
@@ -237,6 +218,7 @@ def get_all_drivers_from_data():
 
 
 def scrape_drivers():
+    """Main function to scrape all driver profiles."""
     print("Scanning data files for driver names...")
     all_drivers = get_all_drivers_from_data()
 
@@ -246,16 +228,26 @@ def scrape_drivers():
 
     print(f"Found {len(all_drivers)} unique drivers")
 
-    scraper = DriverProfileScraper()
+    # Ensure profiles directory exists
+    os.makedirs(PROFILES_DIR, exist_ok=True)
 
-    print("Starting driver profile scraping...")
-    profiles = scraper.batch_scrape_drivers(all_drivers)
+    # Create session once for all requests
+    session = requests.Session()
 
-    scraped_count = sum(1 for p in profiles.values() if p.get('scraped', False))
-    del profiles
+    try:
+        print("Starting driver profile scraping...")
+        unique_drivers = list(set(all_drivers))
+        profiles = {}
 
-    print(f"Scraping complete: {scraped_count}/{len(all_drivers)}")
+        for i, driver in enumerate(unique_drivers, 1):
+            profiles[driver] = scrape_driver_profile(driver, session)
+
+        scraped_count = sum(1 for p in profiles.values() if p.get('scraped', False))
+        print(f"Scraping complete: {scraped_count}/{len(all_drivers)}")
+
+    finally:
+        session.close()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     scrape_drivers()

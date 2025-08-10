@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/jakmate/formula-career-predictor/branch/main/graph/badge.svg)](https://codecov.io/gh/jakmate/formula-career-predictor)
 [![CI/CD](https://github.com/jakmate/formula-career-predictor/workflows/CI%2FCD/badge.svg)](https://github.com/jakmate/formula-career-predictor/actions)
 
-A machine learning application that predicts Formula 3 drivers' likelihood of advancing to Formula 2, using historical performance data and advanced ML models.
+A machine learning application that predicts drivers' likelihood of advancing to parent series using historical performance data. Additionally has predictions for each season.
 
 ## Tech Stack
 
@@ -29,16 +29,6 @@ cd frontend
 npm install
 npm run dev
 ```
-
-## API Endpoints
-
-### Endpoints
-- `GET /api/predictions` - Get all model predictions
-- `GET /api/predictions/{model_name}` - Get specific model predictions
-- `GET /api/health` - Health check with system status
-- `POST /api/refresh` - Trigger data refresh
-- `GET /api/races/{series}` - Get F1/F2/F3 race schedules
-- `GET /api/races/{series}/next` - Get next upcoming race
 
 ## Development
 
@@ -68,7 +58,7 @@ npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,md}"
 The application is containerized and deployed on:
 - **Backend**: FastAPI on Render
 - **Frontend**: Vite on Render
-- **CI/CD**: GitHub Actions for testing and deployment
+- **CI/CD**: GitHub Actions for testing
 
 ## Contributing
 

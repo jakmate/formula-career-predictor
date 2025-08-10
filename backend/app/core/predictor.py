@@ -21,6 +21,7 @@ from sklearn.svm import SVC
 from app.config import CURRENT_YEAR, NOT_PARTICIPATED_CODES, RETIREMENT_CODES, SEED
 from app.core.loader import load_data, load_qualifying_data, load_standings_data
 from app.core.utils import calculate_age, extract_position, get_race_columns
+from app.core.pytorch_model import RacingPredictor
 
 os.environ['PYTHONHASHSEED'] = str(SEED)
 random.seed(SEED)
@@ -417,29 +418,6 @@ def create_target_variable(feeder_df, parent_df, series):
     return feeder_df
 
 
-class RacingPredictor(nn.Module):
-    def __init__(self, input_dim, hidden_dims=[64, 32], dropout_rate=0.2):
-        super(RacingPredictor, self).__init__()
-
-        layers = []
-        prev_dim = input_dim
-
-        for hidden_dim in hidden_dims:
-            layers.extend([
-                nn.Linear(prev_dim, hidden_dim),
-                nn.BatchNorm1d(hidden_dim),
-                nn.ReLU(inplace=True),
-                nn.Dropout(dropout_rate)
-            ])
-            prev_dim = hidden_dim
-
-        layers.append(nn.Linear(prev_dim, 1))
-        self.network = nn.Sequential(*layers)
-
-    def forward(self, x):
-        return self.network(x)
-
-
 def train_models(df):
     """Training function."""
     if df.empty:
@@ -789,5 +767,5 @@ def main():
     stats.print_stats(20)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

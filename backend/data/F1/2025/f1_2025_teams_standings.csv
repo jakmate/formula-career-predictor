@@ -1,21 +1,21 @@
 Pos,Team,AUS R1,CHN R1,JPN R1,BHR R1,SAU R1,MIA R1,EMI R1,MON R1,ESP R1,CAN R1,AUT R1,GBR R1,BEL R1,HUN R1,NED R1,ITA R1,AZE R1,SIN R1,USA R1,MXC R1,SAP R1,LVG R1,QAT R1,ABU R1,Points
-1,McLaren - Mercedes,1,1,2,1,1,1,2,1,1,4,1,1,,,,,,,,,,,,,460
-1,McLaren - Mercedes,9,2,3,3,4,2,3,3,2,18†,2,2,,,,,,,,,,,,,460
-2,Ferrari,8,DSQ,4,4,3,7,4,2,3,5,3,4,,,,,,,,,,,,,222
-2,Ferrari,10,DSQ,7,5,7,8,6,5,6,6,4,14,,,,,,,,,,,,,222
-3,Mercedes,3,3,5,2,5,3,7,11,4,1,5,10,,,,,,,,,,,,,210
-3,Mercedes,4,6,6,11,6,6,Ret,18,Ret,3,Ret,Ret,,,,,,,,,,,,,210
-4,Red Bull Racing - Honda RBPT,2,4,1,6,2,4,1,4,10,2,16,5,,,,,,,,,,,,,172
-4,Red Bull Racing - Honda RBPT,Ret,12,12,9,Ret,10,10,17,13,12,Ret,15,,,,,,,,,,,,,172
-5,Williams - Mercedes,5,7,9,12,8,5,5,9,14,10,Ret,8,,,,,,,,,,,,,59
-5,Williams - Mercedes,Ret,10,14,Ret,9,9,8,10,Ret,Ret,DNS,12,,,,,,,,,,,,,59
-6,Kick Sauber - Ferrari,7,14,16,18,15,14,12,14,5,8,8,3,,,,,,,,,,,,,41
-6,Kick Sauber - Ferrari,Ret,15,19,DSQ,18,Ret,18,16,12,14,9,Ret,,,,,,,,,,,,,41
-7,Racing Bulls - Honda RBPT,12,11,8,13,10,11,9,6,7,16,6,Ret,,,,,,,,,,,,,36
-7,Racing Bulls - Honda RBPT,DNS,16,17,16,12,Ret,14,8,11,Ret,12,Ret,,,,,,,,,,,,,36
-8,Aston Martin Aramco - Mercedes,6,9,11,15,11,15,11,15,9,7,7,7,,,,,,,,,,,,,36
-8,Aston Martin Aramco - Mercedes,Ret,Ret,20,17,16,16,15,Ret,WD,17,14,9,,,,,,,,,,,,,36
-9,Haas - Ferrari,13,5,10,8,13,12,17,7,16,9,10,11,,,,,,,,,,,,,29
-9,Haas - Ferrari,14,8,18,10,14,Ret,Ret,12,17,11,11,13,,,,,,,,,,,,,29
-10,Alpine - Renault,11,13,13,7,17,13,13,13,8,13,13,6,,,,,,,,,,,,,19
-10,Alpine - Renault,Ret,DSQ,15,14,Ret,Ret,16,Ret,15,15,15,DNS,,,,,,,,,,,,,19
+1,McLaren - Mercedes,1,1,2,1,1,1,2,1,1,4,1,1,1,1,,,,,,,,,,,559
+1,McLaren - Mercedes,9,2,3,3,4,2,3,3,2,18†,2,2,2,2,,,,,,,,,,,559
+2,Ferrari,8,DSQ,4,4,3,7,4,2,3,5,3,4,3,4,,,,,,,,,,,260
+2,Ferrari,10,DSQ,7,5,7,8,6,5,6,6,4,14,7,12,,,,,,,,,,,260
+3,Mercedes,3,3,5,2,5,3,7,11,4,1,5,10,5,3,,,,,,,,,,,236
+3,Mercedes,4,6,6,11,6,6,Ret,18,Ret,3,Ret,Ret,16,10,,,,,,,,,,,236
+4,Red Bull Racing - Honda RBPT,2,4,1,6,2,4,1,4,10,2,16,5,4,9,,,,,,,,,,,194
+4,Red Bull Racing - Honda RBPT,Ret,12,12,9,Ret,10,10,17,13,12,Ret,15,13,17,,,,,,,,,,,194
+5,Williams - Mercedes,5,7,9,12,8,5,5,9,14,10,Ret,8,6,14,,,,,,,,,,,70
+5,Williams - Mercedes,Ret,10,14,Ret,9,9,8,10,Ret,Ret,DNS,12,18,15,,,,,,,,,,,70
+6,Aston Martin Aramco - Mercedes,6,9,11,15,11,15,11,15,9,7,7,7,14,5,,,,,,,,,,,52
+6,Aston Martin Aramco - Mercedes,Ret,Ret,20,17,16,16,15,Ret,WD,17,14,9,17,7,,,,,,,,,,,52
+7,Kick Sauber - Ferrari,7,14,16,18,15,14,12,14,5,8,8,3,9,6,,,,,,,,,,,51
+7,Kick Sauber - Ferrari,Ret,15,19,DSQ,18,Ret,18,16,12,14,9,Ret,12,13,,,,,,,,,,,51
+8,Racing Bulls - Honda RBPT,12,11,8,13,10,11,9,6,7,16,6,Ret,8,8,,,,,,,,,,,45
+8,Racing Bulls - Honda RBPT,DNS,16,17,16,12,Ret,14,8,11,Ret,12,Ret,20,11,,,,,,,,,,,45
+9,Haas - Ferrari,13,5,10,8,13,12,17,7,16,9,10,11,11,16,,,,,,,,,,,35
+9,Haas - Ferrari,14,8,18,10,14,Ret,Ret,12,17,11,11,13,15,Ret,,,,,,,,,,,35
+10,Alpine - Renault,11,13,13,7,17,13,13,13,8,13,13,6,10,18,,,,,,,,,,,20
+10,Alpine - Renault,Ret,DSQ,15,14,Ret,Ret,16,Ret,15,15,15,DNS,19,19,,,,,,,,,,,20

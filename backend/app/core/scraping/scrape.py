@@ -113,5 +113,5 @@ def scrape_current_year():
     save_schedules()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     scrape()

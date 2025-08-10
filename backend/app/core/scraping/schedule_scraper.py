@@ -525,5 +525,5 @@ def save_schedules():
             print(f"Error saving {name} schedule: {e}")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     save_schedules()
