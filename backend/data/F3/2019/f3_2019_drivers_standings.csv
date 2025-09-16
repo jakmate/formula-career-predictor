@@ -12,11 +12,11 @@ Pos,Driver,CAT R1,CAT R2,LEC R1,LEC R2,RBR R1,RBR R2,SIL R1,SIL R2,HUN R1,HUN R2
 11,Liam Lawson,NC,17,9,5,14,25,8,3,16,9,12,19,7,2,18,8,41
 12,Niko Kari,8,3,18,24†,11,8,18,19,14,12,19,Ret,Ret,15,3,5,36
 13,Richard Verschoor,19,19,14,4,10,12,17,21,27†,17,17,11,4,4,10,7,34
-14,David Beckmann,4,7,10,Ret,15,10,11,6,28†,19,10,12,Ret,28†,WD,WD,20
+14,David Beckmann,4,7,10,Ret,15,10,11,6,28†,19,10,12,Ret,28†,,,20
 15,Bent Viscaal,13,13,5,20,13,Ret,22,20,19,10,20,14,17,27†,Ret,17,10
 16,Felipe Drugovich,11,10,19,10,12,14,13,10,6,Ret,18,9,16,12,25,15,8
 17,Fabio Scherer,27,Ret,15,Ret,Ret,23,16,8,15,13,27,18,8,7,Ret,Ret,7
-18,Lirim Zendeli,14,11,Ret,16,8,7,15,9,Ret,20,22,22†,Ret,18,WD,WD,6
+18,Lirim Zendeli,14,11,Ret,16,8,7,15,9,Ret,20,22,22†,Ret,18,DNS,DNS,6
 19,Logan Sargeant,15,14,12,8,22,26,26,13,10,8,13,Ret,9,10,15,10,5
 20,Alex Peroni,12,24,8,14,21,Ret,10,Ret,26,16,Ret,15,Ret,DNS,,,5
 21,Yifei Ye,22,Ret,13,22,20,Ret,12,11,18,22,15,10,Ret,19,13,6,4

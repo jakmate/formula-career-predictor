@@ -114,7 +114,7 @@ def process_entries(soup, year, formula, series_type="main"):
 
         # Remove footer row
         if len(data_rows) > 0:
-            if not (formula == 2 and year < 2018) and not (
+            if not (formula == 2 and year == 2017) and not (
                 formula == 3 and year < 2017) and not (
                     year == 2017 and series_type == 'f3_euro') and not (
                         formula == 1 and year <= 2013
