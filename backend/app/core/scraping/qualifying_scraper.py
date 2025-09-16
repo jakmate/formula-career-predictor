@@ -1,9 +1,10 @@
 import csv
 import os
-import requests
+import random
+import time
 from bs4 import BeautifulSoup
 from app.config import DATA_DIR
-from app.core.scraping.scraping_utils import remove_superscripts
+from app.core.scraping.scraping_utils import create_session, remove_superscripts, safe_request
 
 COLUMN_MAPPING = {
     'Name': 'Driver',
@@ -84,8 +85,11 @@ def extract_race_report_links(soup):
 def process_qualifying_data(race_url, round_info, session):
     """Process qualifying data from a race report page"""
     try:
-        response = session.get(race_url, timeout=10)
-        response.raise_for_status()
+        response = safe_request(session, race_url)
+        if response is None:
+            print(f"Failed to fetch {race_url}")
+            return None
+            
         soup = BeautifulSoup(response.text, "lxml")
         response.close()
         del response
@@ -96,6 +100,7 @@ def process_qualifying_data(race_url, round_info, session):
                               soup.find("h2", {"id": "Qualifying"}))
         if not qualifying_heading:
             print(f"No qualifying section found for {race_url}")
+            soup.decompose()
             return None
 
         # Check if this is Monte Carlo with Group A and Group B
@@ -118,10 +123,10 @@ def process_qualifying_data(race_url, round_info, session):
 def parse_time_to_seconds(t):
     """Convert a time string to total seconds."""
     t = t.strip()
-    # Case 1: “M:SS.mmm”
+    # Case 1: "M:SS.mmm"
     if ':' in t:
         minutes, sec_ms = t.split(':', 1)
-    # Case 2: “M.SS.mmm”
+    # Case 2: "M.SS.mmm"
     elif t.count('.') >= 2:
         minutes, sec_ms = t.split('.', 1)
     else:
@@ -363,7 +368,7 @@ def save_qualifying_data(qualifying_results, year, formula):
 
 def scrape_quali(soup, year, num, session=None):
     if session is None:
-        session = requests.Session()
+        session = create_session()
 
     race_links = extract_race_report_links(soup)
     if not race_links:
@@ -372,8 +377,13 @@ def scrape_quali(soup, year, num, session=None):
 
     quali_results = []
     for i, link in enumerate(race_links, 1):
+        print(f"Processing qualifying for round {i}: {link}")
         result = process_qualifying_data(link, f"Round {i}", session)
         quali_results.append(result)
+        
+        # Add delay between requests
+        time.sleep(random.uniform(1, 3))
 
     save_qualifying_data(quali_results, year, num)
-    print(f"Saved {len([r for r in quali_results if r])} qualifying sessions")
+    successful_results = len([r for r in quali_results if r])
+    print(f"Saved {successful_results} qualifying sessions for F{num} {year}")

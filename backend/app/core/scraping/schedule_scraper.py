@@ -244,11 +244,11 @@ def scrape_f1_schedule():
                         race_response.close()
                         del race_response
 
-                        session_container = race_soup.select_one('.flex.flex-col.px-px-8.lg\\:px-px-16.py-px-8.lg\\:py-px-16.bg-surface-neutral-1.rounded-m') # noqa: 501
-                        if session_container:
-                            session_elements = session_container.select('ul.contents > li')
-                        else:
-                            session_elements = race_soup.select('.schedule-item, .session-item, .event-schedule-item') # noqa: 501
+                        session_elements = race_soup.select('ul > li[role="listitem"]')
+
+                        if not session_elements:
+                            # Fallback try the grid container if the above fails
+                            session_elements = race_soup.select('ul.grid > li.relative')
 
                         session_mapping = {
                             'practice 1': 'fp1',
@@ -261,29 +261,35 @@ def scrape_f1_schedule():
                         }
 
                         for session_el in session_elements:
+                            # Extract date
                             date_container = session_el.select_one('.min-w-\\[44px\\]')
                             if date_container:
-                                day = date_container.select_one('.typography-module_technical-l-bold__AKrZb').text.strip() # noqa: 501
-                                month = date_container.select_one('.typography-module_technical-s-regular__6LvKq').text.strip() # noqa: 501
-                                session_date = datetime.strptime(f"{day} {month} {CURRENT_YEAR}", "%d %b %Y") # noqa: 501
+                                day = date_container.select_one('.typography-module_technical-l-bold__AKrZb').text.strip()
+                                month = date_container.select_one('.typography-module_technical-s-regular__6LvKq').text.strip()
+                                session_date = datetime.strptime(f"{day} {month} {CURRENT_YEAR}", "%d %b %Y")
                             else:
+                                # Fallback to the race's main date if session date isn't found
                                 session_date = date_obj
 
-                            session_name = session_el.select_one('.typography-module_display-m-bold__qgZFB') # noqa: 501
-                            session_name = session_name.text.strip().lower() if session_name else ""
+                            # Extract session name
+                            session_name_el = session_el.select_one('.typography-module_display-m-bold__qgZFB')
+                            session_name = session_name_el.text.strip().lower() if session_name_el else ""
 
-                            time_span = session_el.select_one('.typography-module_technical-s-regular__6LvKq.text-text-5') # noqa: 501
+                            # Extract time
+                            time_span = session_el.select_one('.typography-module_technical-s-regular__6LvKq.text-text-5')
+                            time_str = ""
                             if time_span:
-                                time_str = time_span.get_text(strip=True)
-                                time_str = re.sub(r'<time>|</time>', '', time_str)
-                            else:
-                                time_str = ""
+                                # Get the raw text and clean it
+                                time_text = time_span.get_text(strip=True)
+                                # Remove any <time> tags if they are still present as text
+                                time_str = re.sub(r'<time[^>]*>|</time>', '', time_text).strip()
 
                             session_info = None
-                            if time_str:
-                                if '-' in time_str:
-                                    start_str, end_str = time_str.split('-', 1)
-                                    start_time = datetime.strptime(start_str.strip(), "%H:%M").time() # noqa: 501
+                            if time_str and '-' in time_str:
+                                # Handle time range (e.g., "09:30 - 10:30")
+                                start_str, end_str = time_str.split('-', 1)
+                                try:
+                                    start_time = datetime.strptime(start_str.strip(), "%H:%M").time()
                                     end_time = datetime.strptime(end_str.strip(), "%H:%M").time()
 
                                     start_dt = datetime.combine(session_date.date(), start_time)
@@ -293,22 +299,32 @@ def scrape_f1_schedule():
                                         "start": start_dt.isoformat(),
                                         "end": end_dt.isoformat()
                                     }
-                                else:
+                                except ValueError:
+                                    # If parsing fails, mark as TBC
+                                    session_info = {"start": session_date.isoformat(), "time": "TBC"}
+                            elif time_str:
+                                # Handle single time (e.g., Race start time "12:00")
+                                try:
                                     start_time = datetime.strptime(time_str.strip(), "%H:%M").time()
                                     start_dt = datetime.combine(session_date.date(), start_time)
+                                    
+                                    # Estimate end time based on session type
                                     if 'race' in session_name:
-                                        session_info = {
-                                            "start": start_dt.isoformat(),
-                                            "end": (start_dt + timedelta(hours=2)).isoformat()
-                                        }
+                                        end_dt = start_dt + timedelta(hours=2)
                                     else:
-                                        session_info = {
-                                            "start": start_dt.isoformat(),
-                                            "end": (start_dt + timedelta(hours=1)).isoformat()
-                                        }
+                                        end_dt = start_dt + timedelta(hours=1)
+
+                                    session_info = {
+                                        "start": start_dt.isoformat(),
+                                        "end": end_dt.isoformat()
+                                    }
+                                except ValueError:
+                                    session_info = {"start": session_date.isoformat(), "time": "TBC"}
                             else:
+                                # No time found
                                 session_info = {"start": session_date.isoformat(), "time": "TBC"}
 
+                            # Map session name to key
                             session_key = None
                             for name_pattern, key in session_mapping.items():
                                 if name_pattern in session_name:

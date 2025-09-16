@@ -160,7 +160,7 @@ def process_championship(soup, championship_type, year,
 
         # Remove footer rows (sources/notes)
         if ((series_type == "f3_euro" and championship_type == "Drivers'") or
-                year == 2025 or (series_type == "main" and year < 2013 and formula == 3)
+                (series_type == "main" and year < 2013 and formula == 3)
                 or formula == 1):
             if len(data_rows) > 2:
                 data_rows = data_rows[:-2]

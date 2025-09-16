@@ -1,5 +1,4 @@
 import gc
-import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from app.core.scraping.schedule_scraper import save_schedules
@@ -7,6 +6,7 @@ from app.core.scraping.championship_scraper import process_championship
 from app.core.scraping.entries_scraper import process_entries
 from app.core.scraping.qualifying_scraper import scrape_quali
 from app.core.scraping.driver_scraper import scrape_drivers
+from app.core.scraping.scraping_utils import create_session, safe_request
 
 BASE_URL = "https://en.wikipedia.org/wiki/"
 
@@ -24,16 +24,23 @@ def map_url(num, year):
 
 
 def scrape():
-    session = requests.Session()
+    session = create_session()
+
     try:
         # F1, F2/GP2 and F3/GP3 processing
         for num in [1, 2, 3]:
+            print(f"\nProcessing Formula {num} series...")
+
             for year in range(2010, 2026):
                 url = map_url(num, year)
+                print(f"Processing F{num} {year}...")
+
+                response = safe_request(session, url)
+                if response is None:
+                    print(f"Skipping F{num} {year} due to request failure")
+                    continue
 
                 try:
-                    response = session.get(url, timeout=10)
-                    response.raise_for_status()
                     soup = BeautifulSoup(response.text, "lxml")
                     response.close()
                     del response
@@ -47,15 +54,21 @@ def scrape():
                     gc.collect()
 
                 except Exception as e:
-                    print(f"Error processing {year}: {str(e)}")
+                    print(f"Error processing data for F{num} {year}: {str(e)}")
 
         # F3 European Championship processing (2012-2018)
+        print("\nProcessing F3 European Championship...")
+
         for year in range(2012, 2019):
             url = f"{BASE_URL}{year}_FIA_Formula_3_European_Championship"
+            print(f"Processing F3 European {year}...")
+
+            response = safe_request(session, url)
+            if response is None:
+                print(f"Skipping F3 European {year} due to request failure")
+                continue
 
             try:
-                response = session.get(url, timeout=10)
-                response.raise_for_status()
                 soup = BeautifulSoup(response.text, "lxml")
                 response.close()
                 del response
@@ -68,17 +81,19 @@ def scrape():
                 gc.collect()
 
             except Exception as e:
-                print(f"Error processing F3 European {year}: {str(e)}")
+                print(f"Error processing data for F3 European {year}: {str(e)}")
+
     finally:
         session.close()
 
     scrape_drivers()
     save_schedules()
+    print("Scraping completed!")
 
 
 def scrape_current_year():
     current_year = datetime.now().year
-    session = requests.Session()
+    session = create_session()
 
     try:
         for num in [1, 2, 3]:
@@ -89,9 +104,13 @@ def scrape_current_year():
             else:
                 url = f"{BASE_URL}{current_year}_FIA_Formula_{num}_Championship"
 
+            print(f"Processing current year F{num}...")
+            response = safe_request(session, url)
+            if response is None:
+                print(f"Skipping current year F{num} due to request failure")
+                continue
+
             try:
-                response = session.get(url, timeout=10)
-                response.raise_for_status()
                 soup = BeautifulSoup(response.text, "lxml")
                 response.close()
                 del response
@@ -106,6 +125,7 @@ def scrape_current_year():
 
             except Exception as e:
                 print(f"Error processing current year F{num}: {str(e)}")
+
     finally:
         session.close()
 
