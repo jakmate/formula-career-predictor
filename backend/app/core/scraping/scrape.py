@@ -48,7 +48,7 @@ def scrape():
                     process_entries(soup, year, num)
                     process_championship(soup, "Teams'", year, "teams_standings", num)
                     process_championship(soup, "Drivers'", year, "drivers_standings", num)
-                    #scrape_quali(soup, year, num)
+                    scrape_quali(soup, year, num)
 
                     soup.decompose()
                     gc.collect()
@@ -86,8 +86,8 @@ def scrape():
     finally:
         session.close()
 
-    #scrape_drivers()
-    #save_schedules()
+    scrape_drivers()
+    save_schedules()
     print("Scraping completed!")
 
 

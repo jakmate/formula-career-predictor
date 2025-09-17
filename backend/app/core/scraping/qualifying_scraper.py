@@ -1,7 +1,5 @@
 import csv
 import os
-import random
-import time
 from bs4 import BeautifulSoup
 from app.config import DATA_DIR
 from app.core.scraping.scraping_utils import create_session, remove_superscripts, safe_request
@@ -89,7 +87,7 @@ def process_qualifying_data(race_url, round_info, session):
         if response is None:
             print(f"Failed to fetch {race_url}")
             return None
-            
+
         soup = BeautifulSoup(response.text, "lxml")
         response.close()
         del response
@@ -380,9 +378,6 @@ def scrape_quali(soup, year, num, session=None):
         print(f"Processing qualifying for round {i}: {link}")
         result = process_qualifying_data(link, f"Round {i}", session)
         quali_results.append(result)
-        
-        # Add delay between requests
-        time.sleep(random.uniform(1, 3))
 
     save_qualifying_data(quali_results, year, num)
     successful_results = len([r for r in quali_results if r])

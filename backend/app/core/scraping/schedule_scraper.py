@@ -264,19 +264,19 @@ def scrape_f1_schedule():
                             # Extract date
                             date_container = session_el.select_one('.min-w-\\[44px\\]')
                             if date_container:
-                                day = date_container.select_one('.typography-module_technical-l-bold__AKrZb').text.strip()
-                                month = date_container.select_one('.typography-module_technical-s-regular__6LvKq').text.strip()
-                                session_date = datetime.strptime(f"{day} {month} {CURRENT_YEAR}", "%d %b %Y")
+                                day = date_container.select_one('.typography-module_technical-l-bold__AKrZb').text.strip() # noqa: 501
+                                month = date_container.select_one('.typography-module_technical-s-regular__6LvKq').text.strip() # noqa: 501
+                                session_date = datetime.strptime(f"{day} {month} {CURRENT_YEAR}", "%d %b %Y") # noqa: 501
                             else:
                                 # Fallback to the race's main date if session date isn't found
                                 session_date = date_obj
 
                             # Extract session name
-                            session_name_el = session_el.select_one('.typography-module_display-m-bold__qgZFB')
-                            session_name = session_name_el.text.strip().lower() if session_name_el else ""
+                            session_name_el = session_el.select_one('.typography-module_display-m-bold__qgZFB') # noqa: 501
+                            session_name = session_name_el.text.strip().lower() if session_name_el else "" # noqa: 501
 
                             # Extract time
-                            time_span = session_el.select_one('.typography-module_technical-s-regular__6LvKq.text-text-5')
+                            time_span = session_el.select_one('.typography-module_technical-s-regular__6LvKq.text-text-5') # noqa: 501
                             time_str = ""
                             if time_span:
                                 # Get the raw text and clean it
@@ -289,7 +289,7 @@ def scrape_f1_schedule():
                                 # Handle time range (e.g., "09:30 - 10:30")
                                 start_str, end_str = time_str.split('-', 1)
                                 try:
-                                    start_time = datetime.strptime(start_str.strip(), "%H:%M").time()
+                                    start_time = datetime.strptime(start_str.strip(), "%H:%M").time() # noqa: 501
                                     end_time = datetime.strptime(end_str.strip(), "%H:%M").time()
 
                                     start_dt = datetime.combine(session_date.date(), start_time)
@@ -301,13 +301,13 @@ def scrape_f1_schedule():
                                     }
                                 except ValueError:
                                     # If parsing fails, mark as TBC
-                                    session_info = {"start": session_date.isoformat(), "time": "TBC"}
+                                    session_info = {"start": session_date.isoformat(), "time": "TBC"} # noqa: 501
                             elif time_str:
                                 # Handle single time (e.g., Race start time "12:00")
                                 try:
                                     start_time = datetime.strptime(time_str.strip(), "%H:%M").time()
                                     start_dt = datetime.combine(session_date.date(), start_time)
-                                    
+
                                     # Estimate end time based on session type
                                     if 'race' in session_name:
                                         end_dt = start_dt + timedelta(hours=2)
@@ -319,7 +319,7 @@ def scrape_f1_schedule():
                                         "end": end_dt.isoformat()
                                     }
                                 except ValueError:
-                                    session_info = {"start": session_date.isoformat(), "time": "TBC"}
+                                    session_info = {"start": session_date.isoformat(), "time": "TBC"} # noqa: 501
                             else:
                                 # No time found
                                 session_info = {"start": session_date.isoformat(), "time": "TBC"}
