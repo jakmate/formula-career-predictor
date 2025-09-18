@@ -30,7 +30,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Formula Predictions API",
         version="1.0.0",
-        description="API for predicting Formula 1, 2, 3 and career promotions",
+        description="API for predicting Formula 2 and 3 career promotions",
         lifespan=lifespan
     )
 

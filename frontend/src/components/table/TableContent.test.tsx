@@ -42,7 +42,6 @@ const mockDrivers: Driver[] = [
     participation_rate: 1.0,
     experience: 9,
     empirical_percentage: 0.85,
-    predicted_position: 1.2,
     wins: 0,
     podiums: 0,
     nationality: '',
@@ -61,7 +60,6 @@ const mockDrivers: Driver[] = [
     participation_rate: 0.98,
     experience: 17,
     empirical_percentage: 0.72,
-    predicted_position: 2.1,
     wins: 0,
     podiums: 0,
     nationality: '',
@@ -81,15 +79,6 @@ describe('BaseTableContent', () => {
     expect(screen.getByText('F2 Probability')).toBeInTheDocument();
     expect(screen.queryByText('Current Position')).not.toBeInTheDocument();
     expect(screen.queryByText('Predicted Position')).not.toBeInTheDocument();
-  });
-
-  it('renders with regression variant', () => {
-    render(<BaseTableContent predictions={mockDrivers} variant="regression" />);
-
-    expect(screen.getByText('Current Position')).toBeInTheDocument();
-    expect(screen.getByText('Predicted Position')).toBeInTheDocument();
-    expect(screen.queryByText('Position')).not.toBeInTheDocument();
-    expect(screen.queryByText('F2 Probability')).not.toBeInTheDocument();
   });
 
   it('renders all standard headers', () => {
@@ -124,22 +113,6 @@ describe('BaseTableContent', () => {
 
     const tbody = table.querySelector('tbody');
     expect(tbody).toBeInTheDocument();
-  });
-
-  it('renders driver rows with correct variant', () => {
-    render(<BaseTableContent predictions={mockDrivers} variant="regression" />);
-
-    // Check that drivers are rendered by looking for their names
-    expect(screen.getByText('Max Verstappen')).toBeInTheDocument();
-    expect(screen.getByText('Lewis Hamilton')).toBeInTheDocument();
-  });
-
-  it('renders driver rows with default variant when not specified', () => {
-    render(<BaseTableContent predictions={mockDrivers} />);
-
-    // Check that drivers are rendered
-    expect(screen.getByText('Max Verstappen')).toBeInTheDocument();
-    expect(screen.getByText('Lewis Hamilton')).toBeInTheDocument();
   });
 
   it('handles empty predictions array', () => {
@@ -178,28 +151,6 @@ describe('BaseTableContent', () => {
       'Participation %',
       'Experience',
       'F2 Probability',
-    ];
-
-    expect(headers).toHaveLength(expectedHeaders.length);
-    expectedHeaders.forEach((headerText, index) => {
-      expect(headers[index]).toHaveTextContent(headerText);
-    });
-  });
-
-  it('renders all header columns for regression variant in correct order', () => {
-    render(<BaseTableContent predictions={mockDrivers} variant="regression" />);
-
-    const headers = screen.getAllByRole('columnheader');
-    const expectedHeaders = [
-      'Driver',
-      'Current Position',
-      'Points',
-      'Win %',
-      'Top 10 %',
-      'DNF %',
-      'Participation %',
-      'Experience',
-      'Predicted Position',
     ];
 
     expect(headers).toHaveLength(expectedHeaders.length);

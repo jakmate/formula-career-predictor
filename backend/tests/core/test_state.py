@@ -18,9 +18,7 @@ def sample_state_data():
         "last_scrape": "2024-01-01T12:00:00",
         "last_training": "2024-01-01T13:00:00",
         "last_trained_season": "2024",
-        "models_available": ["f3_to_f2_model1", "f2_to_f1_model2",
-                             "f1_regression_model3", "f2_regression_model4",
-                             "f3_regression_model5"]
+        "models_available": ["f3_to_f2_model1", "f2_to_f1_model2"]
     }
 
 
@@ -31,24 +29,15 @@ class TestAppStateInit:
         # Test series-specific structures
         assert state.models == {
             'f3_to_f2': {},
-            'f2_to_f1': {},
-            'f3_regression': {},
-            'f2_regression': {},
-            'f1_regression': {}
+            'f2_to_f1': {}
         }
         assert state.feature_cols == {
             'f3_to_f2': [],
-            'f2_to_f1': [],
-            'f3_regression': [],
-            'f2_regression': [],
-            'f1_regression': []
+            'f2_to_f1': []
         }
         assert state.scaler == {
             'f3_to_f2': None,
-            'f2_to_f1': None,
-            'f3_regression': None,
-            'f2_regression': None,
-            'f1_regression': None
+            'f2_to_f1': None
         }
 
         # Test other default values
@@ -116,8 +105,7 @@ class TestLoadState:
             assert state.system_status["last_training"] == datetime(2024, 1, 1, 13, 0, 0)
             assert state.system_status["last_trained_season"] == "2024"
             assert state.system_status["models_available"] == [
-                "f3_to_f2_model1", "f2_to_f1_model2", "f1_regression_model3",
-                "f2_regression_model4", "f3_regression_model5"
+                "f3_to_f2_model1", "f2_to_f1_model2"
             ]
 
     def test_load_state_file_not_exists(self):
@@ -131,10 +119,7 @@ class TestLoadState:
             assert state.system_status["last_scrape"] is None
             assert state.models == {
                 'f3_to_f2': {},
-                'f2_to_f1': {},
-                'f1_regression': {},
-                'f2_regression': {},
-                'f3_regression': {}
+                'f2_to_f1': {}
             }
 
     def test_load_state_none_datetime_values(self):
@@ -274,24 +259,15 @@ class TestStateIntegration:
             # Verify series structures are preserved
             assert state2.models == {
                 'f3_to_f2': {},
-                'f2_to_f1': {},
-                'f3_regression': {},
-                'f2_regression': {},
-                'f1_regression': {}
+                'f2_to_f1': {}
             }
             assert state2.feature_cols == {
                 'f3_to_f2': [],
-                'f2_to_f1': [],
-                'f3_regression': [],
-                'f2_regression': [],
-                'f1_regression': []
+                'f2_to_f1': []
             }
             assert state2.scaler == {
                 'f3_to_f2': None,
-                'f2_to_f1': None,
-                'f3_regression': None,
-                'f2_regression': None,
-                'f1_regression': None
+                'f2_to_f1': None
             }
 
     def test_save_load_with_series_data(self):
@@ -329,8 +305,5 @@ class TestStateIntegration:
             # Series structures reset to defaults (models/scalers not persisted)
             assert state2.models == {
                 'f3_to_f2': {},
-                'f2_to_f1': {},
-                'f3_regression': {},
-                'f2_regression': {},
-                'f1_regression': {}
+                'f2_to_f1': {}
             }

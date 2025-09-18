@@ -17,7 +17,6 @@ interface SeriesOption {
 }
 
 interface BasePredictionsTableProps {
-  variant: 'promotions' | 'positions';
   defaultSeries: string;
   seriesOptions: SeriesOption[];
   getTitle: (selectedSeries: string) => string;
@@ -25,7 +24,6 @@ interface BasePredictionsTableProps {
 }
 
 export const BasePredictionsTable = ({
-  variant,
   defaultSeries,
   seriesOptions,
   getTitle,
@@ -43,8 +41,6 @@ export const BasePredictionsTable = ({
     handleRefresh,
     currentPredictions,
   } = usePredictions(selectedSeries);
-
-  const tableVariant = variant === 'positions' ? 'regression' : 'default';
 
   return (
     <div className="w-full">
@@ -140,10 +136,7 @@ export const BasePredictionsTable = ({
             <p>No predictions available. Select a model and refresh data.</p>
           </div>
         ) : (
-          <BaseTableContent
-            predictions={currentPredictions}
-            variant={tableVariant}
-          />
+          <BaseTableContent predictions={currentPredictions} />
         )}
       </div>
     </div>

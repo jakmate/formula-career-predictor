@@ -27,7 +27,6 @@ class PredictionResponse(BaseModel):
     era: int
     consistency_score: float
     empirical_percentage: Optional[float] = None
-    predicted_position: Optional[float] = None
 
 
 class ModelResults(BaseModel):

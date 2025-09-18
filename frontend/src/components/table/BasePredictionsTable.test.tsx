@@ -12,14 +12,12 @@ vi.mock('../ErrorDisplay', () => ({
 vi.mock('./TableContent', () => ({
   BaseTableContent: ({
     predictions,
-    variant,
   }: {
     predictions: unknown[];
     variant: string;
   }) => (
     <div data-testid="table-content">
       <div data-testid="predictions-count">{predictions.length}</div>
-      <div data-testid="table-variant">{variant}</div>
     </div>
   ),
 }));
@@ -94,16 +92,6 @@ describe('BasePredictionsTable', () => {
     expect(screen.getByTestId('description')).toHaveTextContent(
       'Description for f3_to_f2'
     );
-  });
-
-  it('maps variant correctly to table variant', () => {
-    const { rerender } = render(
-      <BasePredictionsTable {...defaultProps} variant="positions" />
-    );
-    expect(screen.getByTestId('table-variant')).toHaveTextContent('regression');
-
-    rerender(<BasePredictionsTable {...defaultProps} variant="promotions" />);
-    expect(screen.getByTestId('table-variant')).toHaveTextContent('default');
   });
 
   it('shows loading state when loading with no current predictions', () => {

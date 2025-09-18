@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/jakmate/formula-career-predictor/branch/main/graph/badge.svg)](https://codecov.io/gh/jakmate/formula-career-predictor)
 [![CI/CD](https://github.com/jakmate/formula-career-predictor/workflows/CI%2FCD/badge.svg)](https://github.com/jakmate/formula-career-predictor/actions)
 
-A machine learning application that predicts drivers' likelihood of advancing to parent series using historical performance data. Additionally has predictions for each season.
+A machine learning application that predicts drivers' likelihood of advancing to parent series using historical performance data.
 
 ## Tech Stack
 

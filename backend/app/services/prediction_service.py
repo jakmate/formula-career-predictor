@@ -14,17 +14,13 @@ class PredictionService:
         self.app_state = app_state
         self.series = series
         self.data_service = DataService(app_state)
-        self.is_regression = 'regression' in series
 
     async def get_predictions(self) -> PredictionsResponse:
         """Get predictions from all models"""
         if not self.app_state.models[self.series]:
             raise ValueError(f"No models available for series {self.series}")
 
-        if self.is_regression:
-            current_df = await self.data_service.load_regression_data(self.series)
-        else:
-            current_df = await self.data_service.load_current_data(self.series)
+        current_df = await self.data_service.load_current_data(self.series)
 
         feature_cols = self.app_state.feature_cols[self.series]
         if not feature_cols:
@@ -73,15 +69,9 @@ class PredictionService:
                 if torch.cuda.is_available():
                     X_torch = X_torch.cuda()
                 logits = model(X_torch)
-                if self.is_regression:
-                    raw_predictions = logits.cpu().numpy().flatten()
-                else:
-                    raw_predictions = torch.sigmoid(logits).cpu().numpy().flatten()
+                raw_predictions = torch.sigmoid(logits).cpu().numpy().flatten()
         else:
-            if self.is_regression:
-                raw_predictions = model.predict(X_current)
-            else:
-                raw_predictions = model.predict_proba(X_current)[:, 1]
+            raw_predictions = model.predict_proba(X_current)[:, 1]
 
         if hasattr(model, 'calibrator') and model.calibrator is not None:
             return model.calibrator.transform(raw_predictions)
@@ -94,10 +84,7 @@ class PredictionService:
         calibrated_probas
     ) -> List[PredictionResponse]:
         """Create standardized prediction response objects"""
-        if self.is_regression:
-            prediction_values = calibrated_probas  # Position predictions
-        else:
-            prediction_values = calibrated_probas * 100.0  # Percentage for classification
+        prediction_values = calibrated_probas * 100.0  # Percentage for classification
 
         predictions = []
         for idx, (_, row) in enumerate(current_df.iterrows()):
@@ -123,24 +110,17 @@ class PredictionService:
                 nationality_encoded=float(row.get('nationality_encoded', 0)),
                 era=int(row.get('era', 0)),
                 consistency_score=float(row.get('consistency_score', 0)),
-                empirical_percentage=float(prediction_values[idx]) if not self.is_regression else None,  # noqa: 501
-                predicted_position=float(prediction_values[idx]) if self.is_regression else None
+                empirical_percentage=float(prediction_values[idx])
             ))
 
-        if self.is_regression:
-            predictions.sort(key=lambda x: x.predicted_position)
-        else:
-            predictions.sort(key=lambda x: x.empirical_percentage, reverse=True)
+        predictions.sort(key=lambda x: x.empirical_percentage, reverse=True)
         return predictions
 
     async def update_predictions(self, features_df=None):
         """Generate predictions for current season"""
         try:
             if features_df is None:
-                if self.is_regression:
-                    current_df = await self.data_service.load_regression_data(self.series)
-                else:
-                    current_df = await self.data_service.load_current_data(self.series)
+                current_df = await self.data_service.load_current_data(self.series)
             else:
                 current_df = features_df[features_df['year'] >= self.app_state.system_status.get('current_year', 2024)].copy()  # noqa: 501
 

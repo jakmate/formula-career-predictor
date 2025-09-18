@@ -10,24 +10,15 @@ class AppState:
     def __init__(self):
         self.models = {
             'f3_to_f2': {},
-            'f2_to_f1': {},
-            'f3_regression': {},
-            'f2_regression': {},
-            'f1_regression': {}
+            'f2_to_f1': {}
         }
         self.feature_cols = {
             'f3_to_f2': [],
-            'f2_to_f1': [],
-            'f3_regression': [],
-            'f2_regression': [],
-            'f1_regression': []
+            'f2_to_f1': []
         }
         self.scaler = {
             'f3_to_f2': None,
-            'f2_to_f1': None,
-            'f3_regression': None,
-            'f2_regression': None,
-            'f1_regression': None
+            'f2_to_f1': None
         }
         self.current_predictions = {}
         self.system_status = {

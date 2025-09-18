@@ -1,9 +1,9 @@
-import { BarChart3, Calendar, Icon, Coffee, TrendingUp } from 'lucide-react';
+import { Calendar, Icon, Coffee, TrendingUp } from 'lucide-react';
 import { motorRacingHelmet } from '@lucide/lab';
 import { Link } from 'react-router-dom';
 
 interface NavbarProps {
-  activeView: 'predictions' | 'regressions' | 'schedule';
+  activeView: 'predictions' | 'schedule';
 }
 
 const BuyMeCoffee = () => {
@@ -51,18 +51,6 @@ export const Navbar = ({ activeView }: NavbarProps) => {
             >
               <TrendingUp className="w-4 h-4" />
               Promotions
-            </Link>
-
-            <Link
-              to="/regressions"
-              className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
-                isActive('regressions')
-                  ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white shadow-lg shadow-cyan-500/20'
-                  : 'text-cyan-300 hover:text-white hover:bg-gray-800/50'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              Positions
             </Link>
 
             <Link

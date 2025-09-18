@@ -8,7 +8,6 @@ export interface Driver {
   top_10_rate: number;
   experience: number;
   empirical_percentage?: number | null;
-  predicted_position?: number;
   nationality: string;
   dob?: string;
   age?: number;

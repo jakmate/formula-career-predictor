@@ -26,7 +26,6 @@ const mockDriver: Driver = {
   participation_rate: 0.9,
   experience: 2,
   empirical_percentage: 65,
-  predicted_position: 3,
   wins: 0,
   podiums: 0,
   nationality: '',
@@ -41,7 +40,7 @@ describe('BaseTableRow', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={mockDriver} variant="default" />
+          <BaseTableRow driver={mockDriver} />
         </tbody>
       </table>
     );
@@ -57,28 +56,11 @@ describe('BaseTableRow', () => {
     expect(screen.getByTestId('probability-bar')).toBeInTheDocument();
   });
 
-  it('renders driver data correctly in regression variant', () => {
+  it('applies correct CSS classes', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={mockDriver} variant="regression" />
-        </tbody>
-      </table>
-    );
-
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('#5')).toBeInTheDocument();
-    expect(screen.getByText('85.5')).toBeInTheDocument(); // No .toFixed() in regression
-    expect(screen.getByText('2')).toBeInTheDocument(); // No "years" suffix
-    expect(screen.getByText('3')).toBeInTheDocument(); // Predicted position
-    expect(screen.queryByTestId('probability-bar')).not.toBeInTheDocument();
-  });
-
-  it('applies correct CSS classes for default variant', () => {
-    render(
-      <table>
-        <tbody>
-          <BaseTableRow driver={mockDriver} variant="default" />
+          <BaseTableRow driver={mockDriver} />
         </tbody>
       </table>
     );
@@ -91,30 +73,13 @@ describe('BaseTableRow', () => {
     );
   });
 
-  it('applies correct CSS classes for regression variant', () => {
-    render(
-      <table>
-        <tbody>
-          <BaseTableRow driver={mockDriver} variant="regression" />
-        </tbody>
-      </table>
-    );
-
-    const row = screen.getByRole('row');
-    expect(row).toHaveClass(
-      'border-b',
-      'border-gray-700/30',
-      'hover:bg-gray-800/20'
-    );
-  });
-
   it('applies gradient background when empirical_percentage >= 50', () => {
     const highPercentageDriver = { ...mockDriver, empirical_percentage: 75 };
 
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={highPercentageDriver} variant="default" />
+          <BaseTableRow driver={highPercentageDriver} />
         </tbody>
       </table>
     );
@@ -133,7 +98,7 @@ describe('BaseTableRow', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={lowPercentageDriver} variant="default" />
+          <BaseTableRow driver={lowPercentageDriver} />
         </tbody>
       </table>
     );
@@ -148,79 +113,12 @@ describe('BaseTableRow', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={nullPercentageDriver} variant="default" />
+          <BaseTableRow driver={nullPercentageDriver} />
         </tbody>
       </table>
     );
 
     expect(screen.getByTestId('probability-bar')).toHaveTextContent('0%');
-  });
-
-  it('handles zero predicted_position', () => {
-    const zeroPredictionDriver = { ...mockDriver, predicted_position: 0 };
-
-    render(
-      <table>
-        <tbody>
-          <BaseTableRow driver={zeroPredictionDriver} variant="regression" />
-        </tbody>
-      </table>
-    );
-
-    expect(screen.getByText('0')).toBeInTheDocument();
-  });
-
-  it('shows correct position change color for improvement', () => {
-    const improvedDriver = {
-      ...mockDriver,
-      position: 2,
-      predicted_position: 5,
-    }; // 2 - 5 = -3 (improved)
-
-    render(
-      <table>
-        <tbody>
-          <BaseTableRow driver={improvedDriver} variant="regression" />
-        </tbody>
-      </table>
-    );
-
-    const changeSpan = screen.getByText(/↓ 3\.0/);
-    expect(changeSpan).toHaveClass('text-red-400');
-  });
-
-  it('shows correct position change color for decline', () => {
-    const declinedDriver = {
-      ...mockDriver,
-      position: 8,
-      predicted_position: 3,
-    }; // 8 - 3 = 5 (declined)
-
-    render(
-      <table>
-        <tbody>
-          <BaseTableRow driver={declinedDriver} variant="regression" />
-        </tbody>
-      </table>
-    );
-
-    const changeSpan = screen.getByText(/↑ 5\.0/);
-    expect(changeSpan).toHaveClass('text-green-400');
-  });
-
-  it('shows correct position change color for no change', () => {
-    const sameDriver = { ...mockDriver, position: 3, predicted_position: 3 };
-
-    render(
-      <table>
-        <tbody>
-          <BaseTableRow driver={sameDriver} variant="regression" />
-        </tbody>
-      </table>
-    );
-
-    const changeSpan = screen.getByText(/= 0\.0/);
-    expect(changeSpan).toHaveClass('text-gray-400');
   });
 
   it('applies custom className when provided', () => {
@@ -234,29 +132,5 @@ describe('BaseTableRow', () => {
 
     const row = screen.getByRole('row');
     expect(row).toHaveClass('custom-class');
-  });
-
-  it('uses correct cell padding for variants', () => {
-    const { rerender } = render(
-      <table>
-        <tbody>
-          <BaseTableRow driver={mockDriver} variant="default" />
-        </tbody>
-      </table>
-    );
-
-    let cells = screen.getAllByRole('cell');
-    expect(cells[0]).toHaveClass('p-4');
-
-    rerender(
-      <table>
-        <tbody>
-          <BaseTableRow driver={mockDriver} variant="regression" />
-        </tbody>
-      </table>
-    );
-
-    cells = screen.getAllByRole('cell');
-    expect(cells[0]).toHaveClass('px-6', 'py-4');
   });
 });

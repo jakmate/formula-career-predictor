@@ -53,21 +53,6 @@ describe('Dashboard', () => {
     expect(screen.getByTestId('navbar')).toHaveTextContent('schedule');
   });
 
-  test('renders regressions view', () => {
-    render(
-      <MemoryRouter initialEntries={['/regressions']}>
-        <Dashboard />
-      </MemoryRouter>
-    );
-
-    vi.mock('./table/RegressionsTable', () => ({
-      RegressionTable: () => <div data-testid="regressions">Regressions</div>,
-    }));
-
-    expect(screen.getByTestId('regressions')).toBeInTheDocument();
-    expect(screen.getByTestId('navbar')).toHaveTextContent('regressions');
-  });
-
   test('redirects from root path to predictions', () => {
     render(
       <MemoryRouter initialEntries={['/']}>

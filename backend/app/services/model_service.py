@@ -12,7 +12,6 @@ class ModelService:
     def __init__(self, app_state: AppState, series: str = None):
         self.app_state = app_state
         self.series = series
-        self.is_regression = 'regression' in series if series else False
 
     async def save_models(self):
         """Save models to disk"""
@@ -51,7 +50,7 @@ class ModelService:
             models_loaded = False
 
             # Load for specific series or all series
-            series_to_load = [self.series] if self.series else ['f3_to_f2', 'f2_to_f1', 'f3_regression', 'f2_regression', 'f1_regression']  # noqa: 501
+            series_to_load = [self.series] if self.series else ['f3_to_f2', 'f2_to_f1']
 
             for series in series_to_load:
                 series_dir = os.path.join(MODELS_DIR, series)
@@ -91,7 +90,7 @@ class ModelService:
             if models_loaded:
                 # Update available models list
                 all_models = []
-                for series in ['f3_to_f2', 'f2_to_f1', 'f3_regression', 'f2_regression', 'f1_regression']:  # noqa: 501
+                for series in ['f3_to_f2', 'f2_to_f1']:
                     all_models.extend([f"{series}_{model}" for model in self.app_state.models[series].keys()])  # noqa: 501
                 self.app_state.system_status["models_available"] = all_models
                 LOGGER.info(f"Loaded models for series: {list(self.app_state.models.keys())}")
@@ -104,14 +103,9 @@ class ModelService:
 
     async def train_models(self, trainable_df):
         """Train models on provided data"""
-        if self.is_regression:
-            LOGGER.info(f"Training regression models for {self.series} on {len(trainable_df)} records")  # noqa: 501
-            from app.core.regressor import train_models
-            (models, feature_cols, scaler) = train_models(trainable_df)
-        else:
-            LOGGER.info(f"Training classification models for {self.series} on {len(trainable_df)} records")  # noqa: 501
-            from app.core.predictor import train_models
-            (models, feature_cols, scaler) = train_models(trainable_df)
+        LOGGER.info(f"Training classification models for {self.series} on {len(trainable_df)} records")  # noqa: 501
+        from app.core.predictor import train_models
+        (models, feature_cols, scaler) = train_models(trainable_df)
 
         # Store in series-specific slots
         self.app_state.models[self.series] = models
@@ -123,7 +117,7 @@ class ModelService:
 
         # Update available models
         all_models = []
-        for series in ['f3_to_f2', 'f2_to_f1', 'f3_regression', 'f2_regression', 'f1_regression']:
+        for series in ['f3_to_f2', 'f2_to_f1']:
             if series in self.app_state.models:
                 all_models.extend([f"{series}_{model}" for model in self.app_state.models[series].keys()])  # noqa: 501
         self.app_state.system_status["models_available"] = all_models

@@ -7,8 +7,7 @@ export type SortField =
   | 'dnf_rate'
   | 'participation_rate'
   | 'experience'
-  | 'empirical_percentage'
-  | 'predicted_position';
+  | 'empirical_percentage';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortConfig {

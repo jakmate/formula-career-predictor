@@ -78,38 +78,5 @@ describe('Navbar', () => {
       expect(promotionsLink).toHaveClass('text-cyan-300');
       expect(promotionsLink).toHaveClass('hover:text-white');
     });
-    test('applies active styles to positions link when active', () => {
-      render(
-        <MemoryRouter>
-          <Navbar activeView="regressions" />
-        </MemoryRouter>
-      );
-
-      const positionsLink = screen.getByRole('link', {
-        name: /positions/i,
-      });
-
-      expect(positionsLink).toHaveClass('bg-gradient-to-r');
-      expect(positionsLink).toHaveClass('from-cyan-600');
-      expect(positionsLink).toHaveClass('to-purple-600');
-      expect(positionsLink).toHaveClass('text-white');
-      expect(positionsLink).toHaveClass('shadow-lg');
-    });
-
-    test('applies inactive styles to positions link when not active', () => {
-      render(
-        <MemoryRouter>
-          <Navbar activeView="predictions" />
-        </MemoryRouter>
-      );
-
-      const positionsLink = screen.getByRole('link', {
-        name: /positions/i,
-      });
-
-      expect(positionsLink).not.toHaveClass('bg-gradient-to-r');
-      expect(positionsLink).toHaveClass('text-cyan-300');
-      expect(positionsLink).toHaveClass('hover:text-white');
-    });
   });
 });

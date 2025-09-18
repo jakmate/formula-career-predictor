@@ -5,29 +5,10 @@ import { BaseTableRow } from './TableRow';
 
 interface BaseTableContentProps {
   predictions: Driver[];
-  variant?: 'default' | 'regression';
 }
 
-export const BaseTableContent = ({
-  predictions,
-  variant = 'default',
-}: BaseTableContentProps) => {
+export const BaseTableContent = ({ predictions }: BaseTableContentProps) => {
   const { sortedData, sortConfig, handleSort } = useSorting(predictions);
-
-  const getLastColumnHeader = () => {
-    if (variant === 'regression') return 'Predicted Position';
-    return 'F2 Probability';
-  };
-
-  const getLastColumnField = () => {
-    if (variant === 'regression') return 'predicted_position';
-    return 'empirical_percentage';
-  };
-
-  const getPositionHeader = () => {
-    if (variant === 'regression') return 'Current Position';
-    return 'Position';
-  };
 
   return (
     <div className="overflow-x-auto">
@@ -46,7 +27,7 @@ export const BaseTableContent = ({
               sortConfig={sortConfig}
               onSort={handleSort}
             >
-              {getPositionHeader()}
+              Position
             </TableHeader>
             <TableHeader
               field="points"
@@ -91,21 +72,17 @@ export const BaseTableContent = ({
               Experience
             </TableHeader>
             <TableHeader
-              field={getLastColumnField()}
+              field="empirical_percentage"
               sortConfig={sortConfig}
               onSort={handleSort}
             >
-              {getLastColumnHeader()}
+              F2 Probability
             </TableHeader>
           </tr>
         </thead>
         <tbody>
           {sortedData.map((driver: Driver) => (
-            <BaseTableRow
-              key={driver.driver}
-              driver={driver}
-              variant={variant}
-            />
+            <BaseTableRow key={driver.driver} driver={driver} />
           ))}
         </tbody>
       </table>

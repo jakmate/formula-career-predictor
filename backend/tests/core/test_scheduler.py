@@ -116,8 +116,8 @@ class TestSchedulerService:
             await scheduler_service.scrape_and_train_task()
 
         # Verify prediction service was called for each series
-        assert mock_prediction_service_class.call_count == 5
-        assert mock_prediction_service.update_predictions.call_count == 5
+        assert mock_prediction_service_class.call_count == 2
+        assert mock_prediction_service.update_predictions.call_count == 2
 
     @pytest.mark.asyncio
     @patch('app.core.scheduler.scrape_current_year')

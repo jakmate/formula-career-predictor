@@ -51,7 +51,7 @@ class TestGetPredictions:
 
                 with patch('app.routes.predictions.LOGGER'):
                     with pytest.raises(HTTPException) as exc_info:
-                        await get_predictions("f2", mock_app_state)
+                        await get_predictions("f2_to_f1", mock_app_state)
 
                     assert exc_info.value.status_code == 500
                     assert exc_info.value.detail == str(exception)

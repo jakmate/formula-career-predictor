@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Schedule } from './schedule/Schedule';
 import { PredictionsTable } from './table/PredictionsTable';
-import { RegressionTable } from './table/RegressionsTable';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -12,9 +11,7 @@ const Dashboard = () => {
   const activeView =
     location.pathname === '/schedule'
       ? ('schedule' as const)
-      : location.pathname === '/regressions'
-        ? ('regressions' as const)
-        : ('predictions' as const);
+      : ('predictions' as const);
 
   useEffect(() => {
     if (location.pathname === '/') {
@@ -30,7 +27,6 @@ const Dashboard = () => {
 
       <div className="max-w-7xl mx-auto p-4 relative z-10">
         {activeView === 'predictions' && <PredictionsTable />}
-        {activeView === 'regressions' && <RegressionTable />}
         {activeView === 'schedule' && <Schedule />}
       </div>
     </div>
