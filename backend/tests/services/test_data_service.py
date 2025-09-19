@@ -7,9 +7,6 @@ from app.services.data_service import DataService
 from app.core.state import AppState
 from app.config import CURRENT_YEAR
 
-# Configure pytest-asyncio
-pytestmark = pytest.mark.asyncio
-
 
 @pytest.fixture
 def mock_app_state():
@@ -22,13 +19,13 @@ def data_service(mock_app_state):
 
 
 class TestDataService:
-
     @patch('app.services.data_service.load_data')
     @patch('app.services.data_service.load_standings_data')
     @patch('app.services.data_service.load_qualifying_data')
     @patch('app.core.predictor.calculate_qualifying_features')
     @patch('app.core.predictor.create_target_variable')
     @patch('app.core.predictor.engineer_features')
+    @pytest.mark.asyncio
     async def test_load_current_data_empty_feeder_df(self, mock_engineer, mock_target,
                                                      mock_quali_features, mock_load_quali,
                                                      mock_load_standings, mock_load_data,
@@ -48,6 +45,7 @@ class TestDataService:
     @patch('app.core.predictor.calculate_qualifying_features')
     @patch('app.core.predictor.create_target_variable')
     @patch('app.core.predictor.engineer_features')
+    @pytest.mark.asyncio
     async def test_load_current_data_fallback_to_max_year(self, mock_engineer, mock_target,
                                                           mock_quali_features, mock_load_quali,
                                                           mock_load_standings, mock_load_data,
@@ -80,6 +78,7 @@ class TestDataService:
     @patch('app.core.predictor.calculate_qualifying_features')
     @patch('app.core.predictor.create_target_variable')
     @patch('app.core.predictor.engineer_features')
+    @pytest.mark.asyncio
     async def test_load_current_data_no_drivers_available(self, mock_engineer, mock_target,
                                                           mock_quali_features, mock_load_quali,
                                                           mock_load_standings, mock_load_data,
@@ -118,6 +117,7 @@ class TestDataService:
     @patch('app.services.model_service.ModelService')
     @patch('app.services.prediction_service.PredictionService')
     @patch('app.services.data_service.LOGGER')
+    @pytest.mark.asyncio
     async def test_initialize_system_full_flow(self, mock_logger, mock_pred_service_class,
                                                mock_model_service_class, mock_engineer,
                                                mock_target, mock_quali_features, mock_load_quali,
@@ -177,6 +177,7 @@ class TestDataService:
     @patch('app.services.model_service.ModelService')
     @patch('app.services.prediction_service.PredictionService')
     @patch('app.services.data_service.LOGGER')
+    @pytest.mark.asyncio
     async def test_initialize_system_no_historical_data(self, mock_logger, mock_pred_service_class,
                                                         mock_model_service_class, mock_engineer,
                                                         mock_target, mock_quali_features,
@@ -217,6 +218,7 @@ class TestDataService:
 
     @patch('app.services.data_service.load_data')
     @patch('app.services.data_service.LOGGER')
+    @pytest.mark.asyncio
     async def test_initialize_system_exception_handling(self, mock_logger, mock_load_data,
                                                         data_service):
         """Test exception handling in initialize_system"""
