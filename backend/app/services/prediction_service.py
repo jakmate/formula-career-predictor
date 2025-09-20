@@ -45,7 +45,7 @@ class PredictionService:
                 all_predictions[model_name] = ModelResults(
                     model_name=model_name,
                     predictions=[],
-                    accuracy_metrics={"error": str(e)}
+                    accuracy_metrics={"total_predictions": 0, "error_count": 1}
                 )
 
         return PredictionsResponse(
