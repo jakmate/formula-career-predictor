@@ -22,7 +22,6 @@ export const PredictionsTable = () => {
 
   return (
     <BasePredictionsTable
-      variant="promotions"
       defaultSeries="f3_to_f2"
       seriesOptions={seriesOptions}
       getTitle={getTitle}

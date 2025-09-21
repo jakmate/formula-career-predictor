@@ -370,4 +370,22 @@ describe('NextRaceCard', () => {
     expect(screen.getByText('SESSION TIMETABLE')).toBeInTheDocument();
     expect(screen.getByText('All times in Local Time')).toBeInTheDocument();
   });
+
+  it('handles null nextRace by returning null', () => {
+    const { container } = render(<NextRaceCard nextRace={null} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('handles timezone with multiple underscores correctly', () => {
+    render(
+      <NextRaceCard
+        nextRace={mockNextRace}
+        userTimezone="America/New_York_EST"
+      />
+    );
+
+    expect(
+      screen.getByText('All times in America/New York EST')
+    ).toBeInTheDocument();
+  });
 });

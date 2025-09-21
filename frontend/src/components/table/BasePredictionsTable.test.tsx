@@ -10,12 +10,7 @@ vi.mock('../ErrorDisplay', () => ({
 }));
 
 vi.mock('./TableContent', () => ({
-  BaseTableContent: ({
-    predictions,
-  }: {
-    predictions: unknown[];
-    variant: string;
-  }) => (
+  BaseTableContent: ({ predictions }: { predictions: unknown[] }) => (
     <div data-testid="table-content">
       <div data-testid="predictions-count">{predictions.length}</div>
     </div>
@@ -54,7 +49,6 @@ vi.mock('../../hooks/usePredictions', () => ({
 
 describe('BasePredictionsTable', () => {
   const defaultProps = {
-    variant: 'promotions' as const,
     defaultSeries: 'f3_to_f2',
     seriesOptions: [
       { value: 'f3_to_f2', label: 'F3 → F2' },

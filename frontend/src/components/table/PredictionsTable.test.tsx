@@ -4,7 +4,6 @@ import { PredictionsTable } from './PredictionsTable';
 
 // Mock the BasePredictionsTable component
 interface MockProps {
-  variant: string;
   defaultSeries: string;
   seriesOptions: Array<{ value: string; label: string }>;
   getTitle: (selectedSeries: string) => string;
@@ -13,14 +12,12 @@ interface MockProps {
 
 vi.mock('./BasePredictionsTable', () => ({
   BasePredictionsTable: ({
-    variant,
     defaultSeries,
     seriesOptions,
     getTitle,
     getDescription,
   }: MockProps) => (
     <div data-testid="base-predictions-table">
-      <div data-testid="variant">{variant}</div>
       <div data-testid="default-series">{defaultSeries}</div>
       <div data-testid="series-options">{JSON.stringify(seriesOptions)}</div>
       <div data-testid="title-f3-to-f2">{getTitle('f3_to_f2')}</div>
@@ -36,7 +33,6 @@ describe('PredictionsTable', () => {
     const { getByTestId } = render(<PredictionsTable />);
 
     expect(getByTestId('base-predictions-table')).toBeInTheDocument();
-    expect(getByTestId('variant')).toHaveTextContent('promotions');
     expect(getByTestId('default-series')).toHaveTextContent('f3_to_f2');
   });
 

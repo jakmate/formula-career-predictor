@@ -152,7 +152,7 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
     }
   };
 
-  const displayTimezone = userTimezone?.replace('_', ' ') || 'Local Time';
+  const displayTimezone = userTimezone?.replace(/_/g, ' ') || 'Local Time';
 
   return (
     <div className="bg-gradient-to-r from-cyan-900/20 via-purple-900/20 to-cyan-900/20 border border-cyan-500/30 rounded-2xl p-6 mb-8 shadow-xl shadow-cyan-500/10 relative overflow-hidden">
