@@ -4,22 +4,14 @@ from app.config import DATA_DIR
 from app.core.scraping.scraping_utils import remove_superscripts
 
 
-def map_url(championship_type, formula, year, series_type="main"):
+def map_url(championship_type, series, year):
     # Determine heading ID based on year and championship type
-    if formula == 1:
+    if series == 1:
         if championship_type == 'Drivers\'':
             return "World_Drivers\'_Championship_standings"
         elif championship_type == 'Teams\'':
             return "World_Constructors\'_Championship_standings"
-    elif series_type == "f3_euro":
-        if year == 2012:
-            if championship_type == 'Teams\'':
-                return ""
-            return "Championship_standings"
-        elif year == 2013 and championship_type == 'Teams\'':
-            return "Ravenol_Team_Trophy"
-        return f"{championship_type}_championship"
-    elif year == 2013 and formula == 2 and championship_type == 'Drivers\'':
+    elif year == 2013 and series == 2 and championship_type == 'Drivers\'':
         return f"{championship_type}_championship"
     elif year < 2013:
         return f"{championship_type}_Championship"
@@ -28,77 +20,42 @@ def map_url(championship_type, formula, year, series_type="main"):
     return f"{championship_type}_Championship_standings"
 
 
-def process_championship(soup, championship_type, year,
-                         file_suffix, formula, series_type="main"):
-    heading_id = map_url(championship_type, formula, year, series_type)
-
-    if series_type == "f3_euro" and year == 2012:
-        heading = soup.find("h2", {"id": heading_id})
-    else:
-        heading = soup.find("h3", {"id": heading_id.replace(" ", "_")})
+def process_championship(soup, championship_type, year, file_suffix, series):
+    heading_id = map_url(championship_type, series, year)
+    heading = soup.find("h3", {"id": heading_id.replace(" ", "_")})
 
     if not heading:
-        print(f"No {championship_type} heading found for {year} {series_type}")
+        print(f"No {championship_type} heading found for {year} {series}")
         return
 
     table = heading.find_next("table", {"class": "wikitable"})
-    if year == 2013 and formula == 2 and championship_type == 'Drivers\'':
+    if year == 2013 and series == 2 and championship_type == 'Drivers\'':
         table = heading
         for _ in range(3):
             table = table.find_next("table", {"class": "wikitable"})
     if not table:
-        print(f"No {championship_type} table found for {year} {series_type}")
+        print(f"No {championship_type} table found for {year} {series}")
         return
 
     all_rows = table.find_all("tr")
     if len(all_rows) < 3:
-        print(f"Not enough rows in {championship_type} {year} {series_type}")
+        print(f"Not enough rows in {championship_type} {year} {series}")
         return
 
-    # Use different folder for F3 European
-    if series_type == "f3_euro":
-        dir_path = os.path.join(DATA_DIR, "F3_European", str(year))
-        filename = f"f3_euro_{year}_{file_suffix}.csv"
-    else:
-        dir_path = os.path.join(DATA_DIR, f"F{formula}", str(year))
-        filename = f"f{formula}_{year}_{file_suffix}.csv"
-
+    dir_path = os.path.join(DATA_DIR, f"F{series}", str(year))
+    filename = f"f{series}_{year}_{file_suffix}.csv"
     os.makedirs(dir_path, exist_ok=True)
     full_path = os.path.join(dir_path, filename)
 
     with open(full_path, "w", newline='', encoding="utf-8") as f:
         writer = csv.writer(f)
-
-        # Handle F3 European simple format (Pos, Team/Driver, Points only)
-        if series_type == "f3_euro" and championship_type == "Teams'":
-            # Simple 3-column format for F3 European teams
-            writer.writerow(["Pos", "Team", "Points"])
-
-            # Skip header row and footer rows
-            data_rows = all_rows[1:]
-
-            for row in data_rows:
-                cells = row.find_all(["th", "td"])
-                if len(cells) >= 3:
-                    pos = remove_superscripts(cells[0])
-                    team = remove_superscripts(cells[1])
-                    points = remove_superscripts(cells[2])
-
-                    # Skip rows that aren't actual standings (like "Guest team
-                    # ineligible")
-                    if pos and not pos.startswith('Guest'):
-                        writer.writerow([pos, team, points])
-            return
-
         race_header_row = all_rows[0]
 
         # Get all header cells from both rows
         race_headers = race_header_row.find_all("th")
 
-        # F3 European uses different header structure
-        if series_type == "f3_euro" or (
-                year > 2012 and formula == 3) or (
-                year > 2016 and formula == 2):
+        # Header structure
+        if (year > 2012 and series == 3) or (year > 2016 and series == 2):
             round_header_row = all_rows[1]
             round_headers = round_header_row.find_all("th")
 
@@ -124,9 +81,7 @@ def process_championship(soup, championship_type, year,
             colspan = int(th.get('colspan', 1))
 
             # Get corresponding round headers for this race
-            if series_type == "f3_euro" or (
-                year > 2012 and formula == 3) or (
-                    year > 2016 and formula == 2):
+            if (year > 2012 and series == 3) or (year > 2016 and series == 2):
                 race_rounds = []
                 round_start_idx = col_index + i - col_index - 2
                 for j in range(colspan):
@@ -153,19 +108,16 @@ def process_championship(soup, championship_type, year,
         writer.writerow(combined_headers)
 
         # Data processing - skip header rows and footer rows
-        data_rows = all_rows[2:] if (
-                            series_type == "f3_euro" or
-                            (year > 2012 and formula == 3) or
-                            (year > 2016 and formula == 2)) else all_rows[1:]
+        if (year > 2012 and series == 3) or (year > 2016 and series == 2):
+            data_rows = all_rows[2:]
+        else:
+            data_rows = all_rows[1:]
 
         # Remove footer rows (sources/notes)
-        if ((series_type == "f3_euro" and championship_type == "Drivers'") or
-                (series_type == "main" and year < 2013 and formula == 3) or
-                (formula == 2 and year < 2017)
-                or formula == 1):
+        if ((year < 2013 and series == 3) or (series == 2 and year < 2017) or series == 1):
             if len(data_rows) > 2:
                 data_rows = data_rows[:-2]
-        elif championship_type == "Drivers'" and year == 2020 and formula == 3:
+        elif championship_type == "Drivers'" and year == 2020 and series == 3:
             if len(data_rows) > 4:
                 data_rows = data_rows[:-4]
         else:

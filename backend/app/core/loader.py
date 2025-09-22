@@ -7,33 +7,17 @@ import pandas as pd
 from app.config import DATA_DIR, PROFILES_DIR
 
 
-SERIES_CONFIG = {
-    'F3': {'patterns': ['F3'], 'main_type': 'F3_Main'},  # w/o 'F3_European',
-    'F2': {'patterns': ['F2'], 'main_type': 'F2_Main'},
-    'F1': {'patterns': ['F1'], 'main_type': 'F1_Main'}
-}
-
 FILE_PATTERNS = {
-    # 'F3_European': {
-    #    'drivers': 'f3_euro_{year}_drivers_standings.csv',
-    #    'entries': 'f3_euro_{year}_entries.csv',
-    #    'teams': 'f3_euro_{year}_teams_standings.csv'
-    # },
-    'default': {
-        'drivers': '{series}_{year}_drivers_standings.csv',
-        'entries': '{series}_{year}_entries.csv',
-        'teams': '{series}_{year}_teams_standings.csv',
-        'qualifying': '{series}_{year}_qualifying_round_{round}.csv'
-    }
+    'drivers': '{series}_{year}_drivers_standings.csv',
+    'entries': '{series}_{year}_entries.csv',
+    'teams': '{series}_{year}_teams_standings.csv',
+    'qualifying': '{series}_{year}_qualifying_round_{round}.csv'
 }
 
 
-def get_file_pattern(series_type, file_type, series, year, round_num=None):
+def get_file_pattern(file_type, series, year, round_num=None):
     """Get file pattern based on series type."""
-    if series_type == 'F3_European':
-        return FILE_PATTERNS['F3_European'][file_type].format(year=year)
-
-    pattern = FILE_PATTERNS['default'][file_type]
+    pattern = FILE_PATTERNS[file_type]
     if round_num:
         return pattern.format(series=series.lower(), year=year, round=round_num)
     return pattern.format(series=series.lower(), year=year)
@@ -41,23 +25,14 @@ def get_file_pattern(series_type, file_type, series, year, round_num=None):
 
 def get_series_directories(series):
     """Get all directories for a series and their patterns."""
-    config = SERIES_CONFIG[series]
     directories = []
 
-    for series_pattern in config['patterns']:
-        pattern = os.path.join(DATA_DIR, series_pattern, "*")
-        series_dirs = glob.glob(pattern)
-        for year_dir in series_dirs:
-            directories.append((year_dir, series_pattern))
+    series = os.path.join(DATA_DIR, series, "*")
+    series_dirs = glob.glob(series)
+    for year_dir in series_dirs:
+        directories.append(year_dir)
 
     return directories
-
-
-def determine_series_type(series_pattern, series):
-    """Determine the series type based on pattern."""
-    if series_pattern == 'F3_European':
-        return 'F3_European'
-    return SERIES_CONFIG[series]['main_type']
 
 
 def load_all_entries_data(series):
@@ -65,15 +40,13 @@ def load_all_entries_data(series):
     all_entries = []
     directories = get_series_directories(series)
 
-    for year_dir, series_pattern in directories:
+    for year_dir in directories:
         year = os.path.basename(year_dir)
         try:
             year_int = int(year)
-            series_type = determine_series_type(series_pattern, series)
-
             entries_file = os.path.join(
                 year_dir,
-                get_file_pattern(series_type, 'entries', series, year)
+                get_file_pattern('entries', series, year)
             )
 
             if not os.path.exists(entries_file):
@@ -83,7 +56,6 @@ def load_all_entries_data(series):
             if entries_df is not None:
                 entries_df['year'] = year_int
                 entries_df['series'] = series
-                entries_df['series_type'] = series_type
                 all_entries.append(entries_df)
 
         except Exception as e:
@@ -92,18 +64,17 @@ def load_all_entries_data(series):
     return pd.concat(all_entries, ignore_index=True) if all_entries else pd.DataFrame()
 
 
-def load_year_data(year_dir, series_pattern, series, data_type):
+def load_year_data(year_dir, series, data_type):
     """Load data for a specific year and series."""
     year = os.path.basename(year_dir)
 
     try:
         year_int = int(year)
-        series_type = determine_series_type(series_pattern, series)
 
         # Get file paths
         data_file = os.path.join(
             year_dir,
-            get_file_pattern(series_type, data_type, series, year)
+            get_file_pattern(data_type, series, year)
         )
 
         if not os.path.exists(data_file):
@@ -116,7 +87,6 @@ def load_year_data(year_dir, series_pattern, series, data_type):
 
         df['year'] = year_int
         df['series'] = series
-        df['series_type'] = series_type
 
         return df
 
@@ -130,8 +100,8 @@ def load_standings_data(series, data_type):
     all_data = []
     directories = get_series_directories(series)
 
-    for year_dir, series_pattern in directories:
-        df = load_year_data(year_dir, series_pattern, series, data_type)
+    for year_dir in directories:
+        df = load_year_data(year_dir, series, data_type)
         if df is not None:
             all_data.append(df)
 
@@ -143,11 +113,7 @@ def load_qualifying_data(series):
     all_qualifying_data = []
     directories = get_series_directories(series)
 
-    for year_dir, series_pattern in directories:
-        # Skip F3_European as it doesn't have qualifying data
-        if series_pattern == 'F3_European':
-            continue
-
+    for year_dir in directories:
         year = os.path.basename(year_dir)
         try:
             year_int = int(year)
@@ -237,12 +203,11 @@ def merge_entries(driver_df, entries_df):
     # Process entries data to create team assignments
     all_team_data = []
 
-    for (year, series, series_type), year_entries in entries_df.groupby(['year', 'series', 'series_type']):  # noqa: 501
+    for (year, series), year_entries in entries_df.groupby(['year', 'series']):
         team_data = process_year_entries(year_entries)
         if not team_data.empty:
             team_data['year'] = year
             team_data['series'] = series
-            team_data['series_type'] = series_type
             all_team_data.append(team_data)
 
     if not all_team_data:
@@ -251,8 +216,8 @@ def merge_entries(driver_df, entries_df):
     all_team_df = pd.concat(all_team_data, ignore_index=True)
 
     return driver_df.merge(
-        all_team_df[['Driver', 'Team', 'team_count', 'year', 'series', 'series_type']],
-        on=['Driver', 'year', 'series', 'series_type'],
+        all_team_df[['Driver', 'Team', 'team_count', 'year', 'series']],
+        on=['Driver', 'year', 'series'],
         how='left'
     )
 
@@ -310,7 +275,7 @@ def process_year_entries(entries_df):
 def calculate_position_percentile(team_df):
     """Calculate team position percentile."""
     team_metrics = []
-    for (year, series_type), year_data in team_df.groupby(['year', 'series_type']):
+    for year, year_data in team_df.groupby('year'):
         # Get unique teams and their positions
         team_positions = year_data.groupby('Team').agg({
             'Pos': 'first',
@@ -325,8 +290,6 @@ def calculate_position_percentile(team_df):
 
         # Add year and series info
         team_positions['year'] = year
-        team_positions['series_type'] = series_type
-
         team_metrics.append(team_positions)
 
     return pd.concat(team_metrics, ignore_index=True) if team_metrics else pd.DataFrame()
@@ -344,8 +307,8 @@ def merge_team_data(driver_df, team_df):
 
     # Merge with driver data
     enhanced_df = driver_df.merge(
-        team_df[['Team', 'year', 'series_type', 'Pos', 'team_pos_per', 'Points']],
-        on=['Team', 'year', 'series_type'],
+        team_df[['Team', 'year', 'Pos', 'team_pos_per', 'Points']],
+        on=['Team', 'year'],
         how='left',
         suffixes=('', '_team')
     ).rename(columns={'Points_team': 'team_points', 'Pos_team': 'team_pos'})

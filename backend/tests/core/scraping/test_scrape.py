@@ -1,4 +1,4 @@
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import Mock, patch
 from app.core.scraping.scrape import map_url, scrape, scrape_current_year
 
 
@@ -116,51 +116,6 @@ class TestScrape:
         mock_session.close.assert_called_once()
         mock_scrape_drivers.assert_called()
         mock_save_schedules.assert_called()
-
-    @patch('app.core.scraping.scrape.save_schedules')
-    @patch('app.core.scraping.scrape.scrape_drivers')
-    @patch('app.core.scraping.scrape.process_championship')
-    @patch('app.core.scraping.scrape.process_entries')
-    @patch('app.core.scraping.scrape.safe_request')
-    @patch('app.core.scraping.scrape.create_session')
-    def test_scrape_f3_european(self, mock_create_session, mock_safe_request,
-                                mock_process_entries, mock_process_championship,
-                                mock_scrape_drivers, mock_save_schedules):
-        """Test F3 European Championship scraping section."""
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
-
-        mock_response = Mock()
-        mock_response.text = "<html><body>F3 European content</body></html>"
-        mock_safe_request.return_value = mock_response
-
-        # Mock range calls separately - main loop returns empty, F3 Euro returns one year
-        with patch('app.core.scraping.scrape.range') as mock_range:
-            mock_range.return_value = []  # First call returns empty for main loop
-            scrape()
-
-        # Now test with F3 European year
-        with patch('app.core.scraping.scrape.range') as mock_range:
-            def range_side_effect(start, end):
-                if start == 2010 and end == 2026:
-                    return []  # Main loop - empty
-                elif start == 2012 and end == 2019:
-                    return [2012]  # F3 European loop - one year
-                return []
-
-            mock_range.side_effect = range_side_effect
-            scrape()
-
-        # Verify F3 European specific calls
-        mock_process_entries.assert_called_with(
-            ANY, 2012, 3, "f3_euro"
-        )
-        mock_process_championship.assert_any_call(
-            ANY, "Teams'", 2012, "teams_standings", 3, "f3_euro"
-        )
-        mock_process_championship.assert_any_call(
-            ANY, "Drivers'", 2012, "drivers_standings", 3, "f3_euro"
-        )
 
 
 class TestScrapeCurrentYear:

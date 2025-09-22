@@ -232,7 +232,6 @@ def engineer_features(df):
         'points': pd.to_numeric(df['Points'], errors='coerce').fillna(0),
         'experience': df['experience'],
         'age': df.get('age', np.nan),
-        'series_type': df.get('series_type', 'Unknown'),
         'team': df.get('Team'),
         'team_pos': df.get('team_pos', np.nan),
         'team_points': df.get('team_points', 0),
@@ -246,13 +245,13 @@ def engineer_features(df):
 
     for _, row in df.iterrows():
         # Create cache key for this year/series combination
-        cache_key = (row['year'], row.get('series_type', 'F3_Main'))
+        cache_key = (row['year'], row.get('series', 'F3'))
 
         # Cache race data
         if cache_key not in cache_key_to_data:
             year_series_data = df[
                 (df['year'] == row['year']) &
-                (df.get('series_type', 'F3_Main') == row.get('series_type', 'F3_Main'))
+                (df.get('series', 'F3') == row.get('series', 'F3'))
             ]
             race_cols = get_race_columns(year_series_data)
             cache_key_to_data[cache_key] = (race_cols)
@@ -643,9 +642,6 @@ def predict_drivers(models, df, feature_cols, scaler=None):
     results = None
 
     for name, model in models.items():
-        print(f"\n{name} Predictions:")
-        print("=" * 70)
-
         try:
             # Get raw probabilities based on model type
             if name == 'PyTorch':
@@ -698,7 +694,7 @@ def predict_drivers(models, df, feature_cols, scaler=None):
             }).sort_values('Empirical_%', ascending=False)
 
             print(f"\n{name} Predictions:")
-            print("-" * 50)
+            print("=" * 70)
             print(results.head(5).to_string(index=False, float_format='%.3f'))
 
         except Exception as e:
@@ -726,7 +722,7 @@ def main():
     profiler = cProfile.Profile()
     profiler.enable()
 
-    series = ['F2', 'F1']
+    series = ['F3', 'F2']
 
     print(f"Loading {series[0]} qualifying data...")
     feeder_quali_data = load_qualifying_data(series[0])

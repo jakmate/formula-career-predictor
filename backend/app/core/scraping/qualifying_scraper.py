@@ -341,13 +341,13 @@ def extract_quali_table_data(table):
         return None
 
 
-def save_qualifying_data(qualifying_results, year, formula):
+def save_qualifying_data(qualifying_results, year, series):
     """Save all qualifying data to CSV files"""
     if not qualifying_results:
         return
 
-    dir_path = os.path.join(DATA_DIR, f"F{formula}", str(year), "qualifying")
-    base_filename = f"f{formula}_{year}_qualifying"
+    dir_path = os.path.join(DATA_DIR, f"F{series}", str(year), "qualifying")
+    base_filename = f"f{series}_{year}_qualifying"
     os.makedirs(dir_path, exist_ok=True)
 
     # Save each race's qualifying data separately

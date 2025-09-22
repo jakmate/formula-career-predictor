@@ -55,34 +55,6 @@ def scrape():
 
                 except Exception as e:
                     print(f"Error processing data for F{num} {year}: {str(e)}")
-
-        # F3 European Championship processing (2012-2018)
-        print("\nProcessing F3 European Championship...")
-
-        for year in range(2012, 2019):
-            url = f"{BASE_URL}{year}_FIA_Formula_3_European_Championship"
-            print(f"Processing F3 European {year}...")
-
-            response = safe_request(session, url)
-            if response is None:
-                print(f"Skipping F3 European {year} due to request failure")
-                continue
-
-            try:
-                soup = BeautifulSoup(response.text, "lxml")
-                response.close()
-                del response
-
-                process_entries(soup, year, 3, "f3_euro")
-                process_championship(soup, "Teams'", year, "teams_standings", 3, "f3_euro")
-                process_championship(soup, "Drivers'", year, "drivers_standings", 3, "f3_euro")
-
-                soup.decompose()
-                gc.collect()
-
-            except Exception as e:
-                print(f"Error processing data for F3 European {year}: {str(e)}")
-
     finally:
         session.close()
 

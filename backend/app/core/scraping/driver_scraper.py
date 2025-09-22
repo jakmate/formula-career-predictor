@@ -10,10 +10,7 @@ from app.config import PROFILES_DIR
 
 SPARQL_ENDPOINT = "https://query.wikidata.org/sparql"
 DRIVER_ALIASES = {
-    "Peter Li": "Zhi Cong Li",
-    "Richard Goddard": "Spike Goddard",
     "Lucas di Grassi": "Lucas Di Grassi",
-    "Andy Chang": "Andy Chang Wing Chung",
     "Alfonso Celis Jr.": "Alfonso Celis",
     "Guanyu Zhou": "Zhou Guanyu",
     "Rodolfo González": "Rodolfo Gonzalez",
@@ -188,9 +185,6 @@ def get_all_drivers_from_data():
         },
         'F3': {
             'entries_pattern': 'f3_{year}_entries.csv'
-        },
-        'F3_European': {
-            'entries_pattern': 'f3_euro_{year}_entries.csv'
         }
     }
 

@@ -15,49 +15,38 @@ HEADER_MAPPING = {
 UNWANTED_COLUMNS = {'Chassis', 'Engine', 'Status', 'Constructor', 'Power unit'}
 
 
-def map_url(soup, year, formula, series_type="main"):
-    if formula == 1:
+def map_url(soup, year, series):
+    if series == 1:
         if year >= 2018 or year == 2016:
             return soup.find("h2", {"id": "Entries"})
         return soup.find("h2", {"id": "Teams_and_drivers"})
-    if series_type == "f3_euro":
-        if year == 2018:
-            return soup.find("h2", {"id": "Entries"})
-        if year < 2016:
-            return soup.find("h2", {"id": "Drivers_and_teams"})
-        return soup.find("h2", {"id": "Teams_and_drivers"})
-    if year == 2018 and formula == 2:
+    if year == 2018 and series == 2:
         return soup.find("h2", {"id": "Entries"})
-    if year <= 2018 or (formula == 3 and year == 2019):
+    if year <= 2018 or (series == 3 and year == 2019):
         return soup.find("h2", {"id": "Teams_and_drivers"})
     return soup.find("h2", {"id": "Entries"})
 
 
-def process_entries(soup, year, formula, series_type="main"):
+def process_entries(soup, year, series):
     # Determine heading based on series type and year
-    heading = map_url(soup, year, formula, series_type)
+    heading = map_url(soup, year, series)
     if not heading:
-        print(f"No entries heading found for F{formula} {year} {series_type}")
+        print(f"No entries heading found for F{series} {year}")
         return
 
     table = heading.find_next("table", {"class": "wikitable"})
     if not table:
-        print(f"No table found for F{formula} {year} {series_type}")
+        print(f"No table found for F{series} {year}")
         return
 
     all_rows = table.find_all("tr")
     if len(all_rows) < 3:
-        print(f"Not enough rows in table for F{formula} {year} {series_type}")
+        print(f"Not enough rows in table for F{series} {year}")
         return
 
     # Create directories
-    if series_type == "f3_euro":
-        dir_path = os.path.join(DATA_DIR, "F3_European", str(year))
-        filename = f"f3_euro_{year}_entries.csv"
-    else:
-        dir_path = os.path.join(DATA_DIR, f"F{formula}", str(year))
-        filename = f"f{formula}_{year}_entries.csv"
-
+    dir_path = os.path.join(DATA_DIR, f"F{series}", str(year))
+    filename = f"f{series}_{year}_entries.csv"
     os.makedirs(dir_path, exist_ok=True)
     full_path = os.path.join(dir_path, filename)
 
@@ -65,7 +54,7 @@ def process_entries(soup, year, formula, series_type="main"):
         writer = csv.writer(f)
 
         # Process headers
-        if formula == 1 and year > 2015:
+        if series == 1 and year > 2015:
             # Two-row header structure for F1 2016+
             headers_row1 = all_rows[0].find_all("th")
             combined_headers = []
@@ -114,19 +103,16 @@ def process_entries(soup, year, formula, series_type="main"):
 
         # Remove footer row
         if len(data_rows) > 0:
-            if not (formula == 2 and year == 2017) and not (
-                formula == 3 and year < 2017) and not (
-                    year == 2017 and series_type == 'f3_euro') and not (
-                        formula == 1 and year <= 2013
+            if not (series == 2 and year == 2017) and not (
+                series == 3 and year < 2017) and not (
+                        series == 1 and year <= 2013
                     ):
                 last_row = data_rows[-1]
                 if len(last_row.find_all(["td", "th"])) < num_columns:
                     data_rows = data_rows[:-1]
 
         # Determine rowspan columns based on series and year
-        if series_type == "f3_euro":
-            rowspan_columns = 4  # Team, Chassis, Engine, No.
-        elif formula == 1:
+        if series == 1:
             if year <= 2013:
                 rowspan_columns = 6  # Team, Constructor, Chassis, Engine, No.
             else:
@@ -172,7 +158,7 @@ def process_entries(soup, year, formula, series_type="main"):
 
             # Process remaining columns (no rowspan)
             remaining_cells = cells[cell_index:]
-            if formula == 1 and year >= 2014:
+            if series == 1 and year >= 2014:
                 # F1 2014+ structure with multiple drivers in one row
                 for cell in remaining_cells:
                     # Remove superscripts
@@ -221,13 +207,9 @@ def process_entries(soup, year, formula, series_type="main"):
                     else:
                         row_data.append('')
 
-                if formula == 3:
-                    if series_type == 'f3_euro':
-                        if any("ineligible" in cell for cell in row_data):
-                            continue
-                    if series_type == 'main':
-                        if driver_idx is not None and row_data[driver_idx] == "Robert Visoiu":
-                            row_data[driver_idx] = "Robert Vișoiu"
+                if series == 3:
+                    if driver_idx is not None and row_data[driver_idx] == "Robert Visoiu":
+                        row_data[driver_idx] = "Robert Vișoiu"
 
                 # Remove unwanted columns
                 for idx in sorted(unwanted_indices, reverse=True):
