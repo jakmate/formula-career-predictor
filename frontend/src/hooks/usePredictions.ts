@@ -49,7 +49,7 @@ export const usePredictions = (series: string = 'f3_to_f2') => {
 
   // Set initial model when data loads
   useEffect(() => {
-    if (allData?.models.length && !selectedModel) {
+    if (allData?.models?.length && !selectedModel) {
       setSelectedModel(allData.models[0]);
     }
   }, [allData?.models, selectedModel]);
@@ -58,7 +58,6 @@ export const usePredictions = (series: string = 'f3_to_f2') => {
     try {
       setLoading(true);
       setError(null);
-      // Capture current status before refresh
       refreshStatusRef.current = allData?.system_status || null;
 
       const refreshResponse = await fetch(`${API_BASE}/api/system/refresh`, {
@@ -73,18 +72,15 @@ export const usePredictions = (series: string = 'f3_to_f2') => {
 
       const checkForUpdates = async () => {
         try {
-          // Fetch data
           const newData = await fetchPredictions();
           setAllData(newData);
 
-          // Compare with original status (using ref)
           const hasNewData =
-            newData.system_status.last_scrape !==
+            newData.system_status?.last_scrape !==
               refreshStatusRef.current?.last_scrape ||
-            newData.system_status.last_training !==
+            newData.system_status?.last_training !==
               refreshStatusRef.current?.last_training;
 
-          // Success - stop checking
           if (hasNewData) {
             setLoading(false);
             return;
@@ -96,17 +92,17 @@ export const usePredictions = (series: string = 'f3_to_f2') => {
             return;
           }
 
-          // Continue polling
           setTimeout(checkForUpdates, 3000);
         } catch (err) {
           setLoading(false);
           setError(
             `Update failed: ${err instanceof Error ? err.message : 'Unknown error'}`
           );
+          return; // Stop recursion on error
         }
       };
 
-      checkForUpdates();
+      await checkForUpdates(); // Make this awaited
     } catch (err) {
       setLoading(false);
       setError('Could not refresh data. Please try again later.');
@@ -128,6 +124,7 @@ export const usePredictions = (series: string = 'f3_to_f2') => {
     status: allData?.system_status || null,
     error,
     handleRefresh,
-    currentPredictions: allData?.predictions[selectedModel]?.predictions || [],
+    currentPredictions:
+      allData?.predictions?.[selectedModel]?.predictions || [],
   };
 };

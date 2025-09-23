@@ -149,4 +149,114 @@ describe('usePredictions', () => {
 
     import.meta.env.VITE_API_URL = originalEnv;
   });
+
+  it('handles successful refresh with updated data', async () => {
+    // Mock environment variable
+    const originalEnv = import.meta.env.VITE_API_URL;
+    import.meta.env.VITE_API_URL = 'http://localhost:8000';
+    // Initial load
+    const initialResponse = {
+      models: ['model1'],
+      predictions: { model1: { predictions: [{ id: 1 }] } },
+      system_status: {
+        last_scrape: '2023-01-01T00:00:00Z',
+        last_training: '2023-01-02T00:00:00Z',
+      },
+    };
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(initialResponse),
+    });
+
+    const { result } = renderHook(() => usePredictions());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Mock refresh POST request
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({}),
+    });
+
+    // Mock updated data response
+    const updatedResponse = {
+      ...initialResponse,
+      system_status: {
+        last_scrape: '2023-01-01T01:00:00Z', // Updated timestamp
+        last_training: '2023-01-02T00:00:00Z',
+      },
+    };
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(updatedResponse),
+    });
+
+    await act(async () => {
+      result.current.handleRefresh();
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.status?.last_scrape).toBe('2023-01-01T01:00:00Z');
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:8000/api/system/refresh',
+      { method: 'POST' }
+    );
+
+    // Restore environment
+    import.meta.env.VITE_API_URL = originalEnv;
+  });
+
+  it('handles refresh timeout after max attempts', async () => {
+    // Mock environment variable
+    const originalEnv = import.meta.env.VITE_API_URL;
+    import.meta.env.VITE_API_URL = 'http://localhost:8000';
+
+    // Initial load
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockApiResponse),
+    });
+
+    const { result } = renderHook(() => usePredictions());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Mock refresh POST request
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({}),
+    });
+
+    // Mock 11 polling responses that never change (triggers timeout)
+    for (let i = 0; i < 11; i++) {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockApiResponse), // Same timestamps
+      });
+    }
+
+    await act(async () => {
+      result.current.handleRefresh();
+    });
+
+    await waitFor(
+      () => {
+        expect(result.current.error).toBe('Update check timeout');
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 35000 } // Allow time for all polling attempts
+    );
+
+    // Restore environment
+    import.meta.env.VITE_API_URL = originalEnv;
+  }, 40000);
 });
