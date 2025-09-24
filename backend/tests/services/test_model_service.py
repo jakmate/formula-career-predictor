@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
@@ -53,7 +54,8 @@ class TestModelServiceInit:
 
 
 class TestSaveModels:
-    @patch('app.services.model_service.MODELS_DIR', '/test/models')
+    test_models_dir = os.path.join(os.sep, 'test', 'models')
+    @patch('app.services.model_service.MODELS_DIR', test_models_dir)
     @patch('os.makedirs')
     @patch('torch.save')
     @patch('joblib.dump')
@@ -79,9 +81,10 @@ class TestSaveModels:
         assert call_args.endswith('f3_to_f2')  # Verify it ends with the series name
 
         # Verify PyTorch model save
+        expected_path = os.path.join(os.sep, 'test', 'models', 'f3_to_f2', 'PyTorch.pt')
         mock_torch_save.assert_called_once_with(
             {'state': 'dict'},
-            '/test/models/f3_to_f2/PyTorch.pt',
+            expected_path,
             _use_new_zipfile_serialization=True
         )
 

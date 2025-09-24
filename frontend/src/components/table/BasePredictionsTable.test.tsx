@@ -168,4 +168,33 @@ describe('BasePredictionsTable', () => {
     render(<BasePredictionsTable {...defaultProps} />);
     expect(screen.getByText('Updating...')).toBeInTheDocument();
   });
+
+  it('shows 0 models when models_available is null', () => {
+    mockUsePredictions.mockReturnValue({
+      ...mockHookReturn,
+      status: {
+        last_scrape: '2023-01-01T00:00:00Z',
+        last_training: '2023-01-02T00:00:00Z',
+        models_available: null,
+      },
+      currentPredictions: [{ id: 1 }],
+    });
+
+    render(<BasePredictionsTable {...defaultProps} />);
+    expect(screen.getByText(/Models: 0/)).toBeInTheDocument();
+  });
+
+  it('shows 0 drivers when no model is selected', () => {
+    mockUsePredictions.mockReturnValue({
+      ...mockHookReturn,
+      selectedModel: '',
+      predictions: {
+        model1: { predictions: [{ id: 1 }] },
+      },
+      currentPredictions: [],
+    });
+
+    render(<BasePredictionsTable {...defaultProps} />);
+    expect(screen.getByText(/Drivers: 0/)).toBeInTheDocument();
+  });
 });
