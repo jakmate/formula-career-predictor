@@ -12,7 +12,6 @@ SPARQL_ENDPOINT = "https://query.wikidata.org/sparql"
 DRIVER_ALIASES = {
     "Lucas di Grassi": "Lucas Di Grassi",
     "Alfonso Celis Jr.": "Alfonso Celis",
-    "Guanyu Zhou": "Zhou Guanyu",
     "Rodolfo González": "Rodolfo Gonzalez",
     "Keyvan Andres": "Keyvan Andres Soori",
     "Gabriel Bortoleto": "Gabriel Lourenzo Bortoleto Oliveira",

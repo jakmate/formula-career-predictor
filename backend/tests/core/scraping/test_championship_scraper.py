@@ -61,10 +61,9 @@ def test_find_championship_table_not_found():
 
 
 def test_find_championship_table_2013_series2_drivers():
-    # Simulate 4 tables after heading
+    # Simulate 3 tables after heading
     html = """
     <h3 id="Drivers'_championship"></h3>
-    <table class="wikitable"></table>
     <table class="wikitable"></table>
     <table class="wikitable"></table>
     <table class="wikitable" id="target"></table>

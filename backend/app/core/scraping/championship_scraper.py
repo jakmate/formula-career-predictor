@@ -28,9 +28,9 @@ def find_championship_table(soup, championship_type, series, year):
 
     # Special case for 2013 series 2 drivers
     if year == 2013 and series == 2 and championship_type == 'Drivers\'':
-        # Find the 4th wikitable after the heading
+        # Find the 3rd wikitable after the heading
         current = heading
-        for _ in range(4):
+        for _ in range(3):
             current = current.find_next("table", {"class": "wikitable"})
             if not current:
                 break
@@ -117,6 +117,8 @@ def get_data_rows(all_rows, year, series, championship_type):
 
 def get_footer_rows_count(year, series, championship_type):
     """Determine how many footer rows to remove."""
+    if championship_type == "Drivers'" and year == 2013 and series == 1:
+        return 3
     if ((year < 2013 and series == 3) or (series == 2 and year < 2017) or series == 1):
         return 2
     elif championship_type == "Drivers'" and year == 2020 and series == 3:
@@ -144,7 +146,15 @@ def process_table_row(cells, combined_headers, has_no_col, rowspan_tracker):
     # Handle team/driver with rowspan
     if rowspan_tracker['team_rowspan'] <= 0:
         team_cell = cells[cell_index]
-        rowspan_tracker['current_team'] = remove_superscripts(team_cell)
+        driver_name = remove_superscripts(team_cell)
+
+        # Edge cases
+        if driver_name == "Guanyu Zhou":
+            driver_name = "Zhou Guanyu"
+        if driver_name == "Andrea Kimi Antonelli":
+            driver_name = "Kimi Antonelli"
+
+        rowspan_tracker['current_team'] = driver_name
         rowspan_tracker['team_rowspan'] = int(team_cell.get('rowspan', 1))
         cell_index += 1
     rowspan_tracker['team_rowspan'] -= 1

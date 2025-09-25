@@ -209,10 +209,12 @@ def process_standard_row(cells, cell_index, row_data, num_columns,
             row_data.append('')
 
     # Handle special cases
-    if (series == 3 and driver_idx is not None and
-            driver_idx < len(row_data) and
-            row_data[driver_idx] == "Robert Visoiu"):
+    if series == 3 and row_data[driver_idx] == "Robert Visoiu":
         row_data[driver_idx] = "Robert Vișoiu"
+    if series == 2 and row_data[driver_idx] == "Andrea Kimi Antonelli":
+        row_data[driver_idx] = "Kimi Antonelli"
+    if (series == 2 or series == 3) and row_data[driver_idx] == "Guanyu Zhou":
+        row_data[driver_idx] = "Zhou Guanyu"
 
     # Remove unwanted columns
     final_row = row_data.copy()
