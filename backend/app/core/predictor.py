@@ -238,6 +238,7 @@ def engineer_features(df):
         'teammate_h2h_rate': df.get('teammate_h2h_rate', 0.5),
         'avg_quali_pos': df.get('avg_quali_pos', np.nan),
     })
+    features_df['pos'] = features_df['pos'].fillna(-1).astype(int)
 
     # Calculate race statistics for each driver
     race_stats = []

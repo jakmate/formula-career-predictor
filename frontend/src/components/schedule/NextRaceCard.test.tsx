@@ -23,6 +23,9 @@ vi.mock('lucide-react', () => ({
   Trophy: ({ className }: { className?: string }) => (
     <div data-testid="trophy-icon" className={className} />
   ),
+  CheckCircle: ({ className }: { className?: string }) => (
+    <div data-testid="checkcircle-icon" className={className} />
+  ),
 }));
 
 const mockNextRace = {
@@ -56,6 +59,15 @@ const mockNextRace = {
     name: 'practice 1',
     date: '2024-05-24T13:30:00Z',
   },
+};
+
+const mockCompletedSeasonRace = {
+  ...mockNextRace,
+  name: 'Abu Dhabi',
+  round: 24,
+  location: 'Abu Dhabi',
+  seasonCompleted: true,
+  nextSession: undefined,
 };
 
 describe('NextRaceCard', () => {
@@ -107,7 +119,8 @@ describe('NextRaceCard', () => {
     };
 
     render(<NextRaceCard nextRace={raceWithTBC} />);
-    expect(screen.getByText('TBC')).toBeInTheDocument();
+    const tbcElements = screen.getAllByText('TBC');
+    expect(tbcElements.length).toBe(2); // Time and status
   });
 
   it('updates countdown timer', () => {
@@ -314,6 +327,108 @@ describe('NextRaceCard', () => {
     expect(dateElement).toBeInTheDocument();
   });
 
+  // NEW TESTS FOR SEASON COMPLETION FUNCTIONALITY
+
+  it('displays "LAST RACE" when season is completed', () => {
+    render(<NextRaceCard nextRace={mockCompletedSeasonRace} />);
+
+    expect(screen.getByText('LAST RACE: Abu Dhabi GP')).toBeInTheDocument();
+    expect(
+      screen.queryByText('NEXT RACE: Abu Dhabi GP')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows CheckCircle icon when season is completed', () => {
+    render(<NextRaceCard nextRace={mockCompletedSeasonRace} />);
+
+    expect(screen.getByTestId('checkcircle-icon')).toBeInTheDocument();
+    expect(screen.queryByTestId('trophy-icon')).not.toBeInTheDocument();
+  });
+
+  it('displays "SEASON COMPLETED" status when season is completed', () => {
+    render(<NextRaceCard nextRace={mockCompletedSeasonRace} />);
+
+    expect(screen.getByText('SEASON COMPLETED')).toBeInTheDocument();
+    expect(screen.getByText('Status')).toBeInTheDocument();
+    expect(screen.queryByText('Next Session')).not.toBeInTheDocument();
+  });
+
+  it('shows "SEASON COMPLETED" countdown when season is completed', () => {
+    render(<NextRaceCard nextRace={mockCompletedSeasonRace} />);
+
+    // The countdown should show "SEASON COMPLETED"
+    const statusElements = screen.getAllByText('SEASON COMPLETED');
+    expect(statusElements.length).toBeGreaterThan(0);
+  });
+
+  it('marks all sessions as completed when season is completed', () => {
+    render(<NextRaceCard nextRace={mockCompletedSeasonRace} />);
+
+    // All sessions should show as completed
+    const completedTexts = screen.getAllByText('COMPLETED');
+    expect(completedTexts).toHaveLength(5); // fp1, fp2, fp3, qualifying, race
+  });
+
+  it('applies green styling for completed season', () => {
+    render(<NextRaceCard nextRace={mockCompletedSeasonRace} />);
+
+    // Check for green styling classes
+    const seasonCompletedText = screen.getByText('SEASON COMPLETED');
+    expect(seasonCompletedText).toHaveClass('text-green-300');
+  });
+
+  it('handles TBC sessions with nextSession.isTBC flag', () => {
+    const raceWithTBCNext = {
+      ...mockNextRace,
+      nextSession: {
+        name: 'practice 1',
+        date: '2024-05-24T13:30:00Z',
+        isTBC: true,
+      },
+    };
+
+    render(<NextRaceCard nextRace={raceWithTBCNext} />);
+
+    expect(screen.getByText('PRACTICE 1')).toBeInTheDocument();
+    // Should still show countdown since date is provided
+    expect(screen.getByText(/3h 30m/)).toBeInTheDocument();
+  });
+
+  it('handles invalid date in nextSession', () => {
+    const raceWithInvalidNextSession = {
+      ...mockNextRace,
+      nextSession: {
+        name: 'practice 1',
+        date: 'invalid-date',
+      },
+    };
+
+    render(<NextRaceCard nextRace={raceWithInvalidNextSession} />);
+
+    expect(screen.getByText('PRACTICE 1')).toBeInTheDocument();
+    // Component shows NaN when date calculation fails
+    expect(screen.getByText('NaNm NaNs')).toBeInTheDocument();
+  });
+
+  it('handles date-only format in nextSession countdown', () => {
+    const raceWithDateOnly = {
+      ...mockNextRace,
+      nextSession: {
+        name: 'practice 1',
+        date: '2024-05-24',
+      },
+    };
+
+    // Set current time to earlier in the day
+    vi.setSystemTime(new Date('2024-05-23T10:00:00Z'));
+
+    render(<NextRaceCard nextRace={raceWithDateOnly} />);
+
+    expect(screen.getByText('PRACTICE 1')).toBeInTheDocument();
+    // Component shows hours and minutes for date-only format
+    expect(screen.getByText('14h 0m')).toBeInTheDocument();
+  });
+
   describe('session status detection', () => {
     it('returns "tbc" for invalid session times', () => {
       const raceWithInvalidTime = {
@@ -353,6 +468,11 @@ describe('NextRaceCard', () => {
       vi.setSystemTime(new Date('2024-05-24T13:45:00Z'));
       render(<NextRaceCard nextRace={mockNextRace} />);
       expect(screen.getAllByText('LIVE NOW').length).toBe(2);
+    });
+
+    it('returns "completed" for all sessions when season is completed', () => {
+      render(<NextRaceCard nextRace={mockCompletedSeasonRace} />);
+      expect(screen.getAllByText('COMPLETED').length).toBe(5);
     });
   });
 

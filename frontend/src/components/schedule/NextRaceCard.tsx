@@ -1,4 +1,4 @@
-import { Clock, MapPin, Calendar, Trophy } from 'lucide-react';
+import { Clock, MapPin, Calendar, Trophy, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getFlagComponent } from '../../utils/flags';
 
@@ -22,6 +22,7 @@ interface SessionInfo {
 interface NextSession {
   name: string;
   date: string;
+  isTBC?: boolean;
 }
 
 interface NextRace {
@@ -31,6 +32,7 @@ interface NextRace {
   location: string;
   sessions: Record<string, SessionInfo>;
   nextSession?: NextSession;
+  seasonCompleted?: boolean;
 }
 
 interface NextRaceCardProps {
@@ -51,9 +53,25 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
   }, []);
 
   useEffect(() => {
-    if (nextRace?.nextSession) {
+    if (nextRace?.nextSession && !nextRace.seasonCompleted) {
       const updateCountdown = () => {
-        const sessionTime = new Date(nextRace.nextSession!.date);
+        let sessionTime: Date;
+        const sessionDateStr = nextRace.nextSession!.date;
+
+        // Handle both date-only strings (TBC) and full datetime strings
+        if (sessionDateStr.length === 10) {
+          // Date-only format (YYYY-MM-DD) - create date at start of day
+          const [year, month, day] = sessionDateStr.split('-');
+          sessionTime = new Date(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day)
+          );
+        } else {
+          // Full datetime string
+          sessionTime = new Date(sessionDateStr);
+        }
+
         const diff = sessionTime.getTime() - currentTime.getTime();
 
         if (diff <= 0) {
@@ -78,10 +96,14 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
       };
 
       updateCountdown();
+    } else if (nextRace?.seasonCompleted) {
+      setCountdown('SEASON COMPLETED');
     }
   }, [currentTime, nextRace]);
 
   if (!nextRace) return null;
+
+  const isSeasonCompleted = nextRace.seasonCompleted || false;
 
   // Format date - times are already converted by backend
   const formatDate = (dateString: string) => {
@@ -155,25 +177,56 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
   const displayTimezone = userTimezone?.replace(/_/g, ' ') || 'Local Time';
 
   return (
-    <div className="bg-gradient-to-r from-cyan-900/20 via-purple-900/20 to-cyan-900/20 border border-cyan-500/30 rounded-2xl p-6 mb-8 shadow-xl shadow-cyan-500/10 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-purple-500"></div>
+    <div
+      className={`bg-gradient-to-r from-cyan-900/20 via-purple-900/20 to-cyan-900/20 border rounded-2xl p-6 mb-8 shadow-xl relative overflow-hidden ${
+        isSeasonCompleted
+          ? 'border-green-500/30 shadow-green-500/10'
+          : 'border-cyan-500/30 shadow-cyan-500/10'
+      }`}
+    >
+      <div
+        className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${
+          isSeasonCompleted
+            ? 'from-green-400 to-green-500'
+            : 'from-cyan-400 to-purple-500'
+        }`}
+      ></div>
       <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400/10 rounded-full blur-xl"></div>
       <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-400/10 rounded-full blur-xl"></div>
 
       <div className="flex flex-col items-center text-center mb-8 relative z-10">
         <div className="flex items-center mb-3">
           <div className="relative mr-3">
-            <Trophy className="w-8 h-8 text-amber-300 z-10 relative" />
-            <div className="absolute inset-0 bg-amber-400 rounded-full blur-sm opacity-40"></div>
+            {isSeasonCompleted ? (
+              <>
+                <CheckCircle className="w-8 h-8 text-green-300 z-10 relative" />
+                <div className="absolute inset-0 bg-green-400 rounded-full blur-sm opacity-40"></div>
+              </>
+            ) : (
+              <>
+                <Trophy className="w-8 h-8 text-amber-300 z-10 relative" />
+                <div className="absolute inset-0 bg-amber-400 rounded-full blur-sm opacity-40"></div>
+              </>
+            )}
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-white">
-            NEXT RACE: {nextRace.name} GP
+            {isSeasonCompleted ? 'LAST RACE' : 'NEXT RACE'}: {nextRace.name} GP
           </h2>
           <div className="ml-2 mt-1">{getFlagComponent(nextRace.location)}</div>
         </div>
 
-        <div className="bg-cyan-900/40 px-4 py-1.5 rounded-full flex items-center border border-cyan-500/30">
-          <span className="text-cyan-300 text-sm font-medium">
+        <div
+          className={`px-4 py-1.5 rounded-full flex items-center border ${
+            isSeasonCompleted
+              ? 'bg-green-900/40 border-green-500/30'
+              : 'bg-cyan-900/40 border-cyan-500/30'
+          }`}
+        >
+          <span
+            className={`text-sm font-medium ${
+              isSeasonCompleted ? 'text-green-300' : 'text-cyan-300'
+            }`}
+          >
             Round {nextRace.round} of {nextRace.totalRounds || '?'}
           </span>
         </div>
@@ -200,30 +253,39 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
           </p>
         </div>
 
-        {nextRace.nextSession && (
+        {(nextRace.nextSession || isSeasonCompleted) && (
           <div className="flex flex-col items-center max-w-xs text-center">
             <div className="flex items-center mb-2">
               <Clock className="w-6 h-6 mr-2 text-cyan-400" />
               <h3 className="text-white/80 text-sm font-medium">
-                Next Session
+                {isSeasonCompleted ? 'Status' : 'Next Session'}
               </h3>
             </div>
             <p className="text-white text-xl font-semibold">
-              {nextRace.nextSession.name.toUpperCase()} -
-              {countdown ? (
-                <span
-                  className={`inline-block ml-1 font-bold ${
-                    countdown === 'LIVE NOW'
-                      ? 'text-red-400 animate-pulse'
-                      : 'text-cyan-300'
-                  }`}
-                >
-                  {countdown}
+              {isSeasonCompleted ? (
+                <span className="text-green-300 font-bold">
+                  SEASON COMPLETED
                 </span>
               ) : (
-                <span className="inline-block text-cyan-300 ml-1 font-bold">
-                  Loading...
-                </span>
+                <>
+                  {nextRace.nextSession!.name.toUpperCase()}
+                  {nextRace.nextSession!.isTBC} -
+                  {countdown ? (
+                    <span
+                      className={`inline-block ml-1 font-bold ${
+                        countdown === 'LIVE NOW'
+                          ? 'text-red-400 animate-pulse'
+                          : 'text-cyan-300'
+                      }`}
+                    >
+                      {countdown}
+                    </span>
+                  ) : (
+                    <span className="inline-block text-cyan-300 ml-1 font-bold">
+                      Loading...
+                    </span>
+                  )}
+                </>
               )}
             </p>
           </div>
@@ -247,7 +309,9 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
                 const sessionName =
                   sessionDisplayNames[sessionKey] || sessionKey.toUpperCase();
                 const isTBC = sessionInfo.time === 'TBC';
-                const status = getSessionStatus(sessionInfo);
+                const status = isSeasonCompleted
+                  ? 'completed'
+                  : getSessionStatus(sessionInfo);
 
                 let sessionStyle =
                   'bg-gradient-to-b from-white/10 to-white/5 border-white/10';
@@ -264,6 +328,10 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
                 } else if (status === 'completed') {
                   sessionStyle =
                     'bg-gradient-to-b from-gray-900/30 to-gray-800/20 border-gray-700 opacity-70';
+                } else if (status === 'tbc') {
+                  sessionStyle =
+                    'bg-gradient-to-b from-yellow-900/30 to-yellow-800/20 border-yellow-500';
+                  glowStyle = 'shadow-lg shadow-yellow-500/30';
                 }
 
                 return (
@@ -276,9 +344,19 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
                     </div>
 
                     {isTBC ? (
-                      <div className="text-white text-xl font-bold mb-1">
-                        TBC
-                      </div>
+                      <>
+                        <div className="text-white text-xl font-bold mb-1">
+                          TBC
+                        </div>
+                        <div className="mt-2 text-center">
+                          <div className="text-white/70 text-sm">
+                            {formatShortDate(sessionInfo.start)}
+                          </div>
+                          <div className="mt-1 text-xs font-bold text-yellow-400">
+                            TBC
+                          </div>
+                        </div>
+                      </>
                     ) : (
                       <>
                         <div className="flex flex-col items-center">

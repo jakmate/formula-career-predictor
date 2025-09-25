@@ -29,7 +29,9 @@ export const BaseTableRow = ({ driver, className = '' }: BaseTableRowProps) => {
         </DriverHoverCard>
       </td>
       <td className="p-4">
-        <span className="text-white font-medium">#{driver.position}</span>
+        <span className="text-white font-medium">
+          {driver.position === -1 ? '-' : `#${driver.position}`}
+        </span>
       </td>
       <td className="p-4">
         <span className="text-white">{driver.points.toFixed(1)}</span>

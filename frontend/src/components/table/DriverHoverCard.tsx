@@ -133,7 +133,9 @@ export const DriverHoverCard = ({ driver, children }: DriverHoverCardProps) => {
                 <div className="text-xs text-white/60">Current Season</div>
                 <div className="flex justify-between text-sm mt-1">
                   <span className="text-white/70">Position:</span>
-                  <span className="text-white">#{driver.position}</span>
+                  <span className="text-white">
+                    {driver.position === -1 ? '-' : `#${driver.position}`}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-white/70">Points:</span>
