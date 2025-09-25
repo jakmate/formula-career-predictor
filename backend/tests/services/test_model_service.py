@@ -55,6 +55,7 @@ class TestModelServiceInit:
 
 class TestSaveModels:
     test_models_dir = os.path.join(os.sep, 'test', 'models')
+
     @patch('app.services.model_service.MODELS_DIR', test_models_dir)
     @patch('os.makedirs')
     @patch('torch.save')

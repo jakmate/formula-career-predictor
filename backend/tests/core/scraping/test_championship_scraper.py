@@ -141,7 +141,7 @@ def test_build_headers_with_round_headers():
     round_headers = [
         make_soup("<th>R2</th>").find("th"),  # non-sequential to test sorting
     ]
-    combined, _ = build_headers(race_headers, round_headers, 2020, 3, "drivers")  # series=3, year>2012
+    combined, _ = build_headers(race_headers, round_headers, 2020, 3, "drivers")
     assert "Race1 R2" in combined
 
 
@@ -185,7 +185,8 @@ def test_get_footer_rows_count_2020_series3_drivers():
 def test_process_table_row_too_few_cells():
     cells = [make_soup("<td>only</td>").find("td"), make_soup("<td>two</td>").find("td")]
     headers = ["Pos", "Driver", "Points"]
-    tracker = {'pos_rowspan': 0, 'team_rowspan': 0, 'points_rowspan': 0, 'current_pos': '', 'current_team': '', 'current_points': ''}
+    tracker = {'pos_rowspan': 0, 'team_rowspan': 0, 'points_rowspan': 0,
+               'current_pos': '', 'current_team': '', 'current_points': ''}
     assert process_table_row(cells, headers, False, tracker) is None
 
 
@@ -196,9 +197,9 @@ def test_process_table_row_basic():
         make_soup("<td>25</td>").find("td"),
     ]
     headers = ["Pos", "Driver", "Points"]
-    tracker = {'pos_rowspan': 0, 'team_rowspan': 0, 'points_rowspan': 0, 'current_pos': '', 'current_team': '', 'current_points': ''}
+    tracker = {'pos_rowspan': 0, 'team_rowspan': 0, 'points_rowspan': 0,
+               'current_pos': '', 'current_team': '', 'current_points': ''}
     result = process_table_row(cells, headers, False, tracker)
-    # Note: CSV expects strings
     assert result == ["1", "Max", "25"]
 
 
@@ -211,9 +212,10 @@ def test_process_table_row_rowspan_and_missing_points():
     # only three cells in this row; points missing -> should go into missing-points branch
     cells = [r1, r2, race_cell]
     headers = ["Pos", "Team", "Race1", "Points"]  # combined headers length used by padding logic
-    tracker = {'pos_rowspan': 0, 'team_rowspan': 0, 'points_rowspan': 0, 'current_pos': '', 'current_team': '', 'current_points': ''}
+    tracker = {'pos_rowspan': 0, 'team_rowspan': 0, 'points_rowspan': 0,
+               'current_pos': '', 'current_team': '', 'current_points': ''}
     result = process_table_row(cells, headers, False, tracker)
-    # Expect position and team to be taken, race cell value, and empty string for points (since missing)
+    # Expect position and team to be taken, race cell value, and empty string for points
     assert result[0] == "1"
     assert result[1] == "Team A"
     assert "R" in result  # race value included
@@ -230,7 +232,8 @@ def test_process_table_row_with_no_col_skips_column():
         make_soup("<td>30</td>").find("td"),
     ]
     headers = ["Pos", "Driver", "R1", "Points"]
-    tracker = {'pos_rowspan': 0, 'team_rowspan': 0, 'points_rowspan': 0, 'current_pos': '', 'current_team': '', 'current_points': ''}
+    tracker = {'pos_rowspan': 0, 'team_rowspan': 0, 'points_rowspan': 0,
+               'current_pos': '', 'current_team': '', 'current_points': ''}
     result = process_table_row(cells, headers, True, tracker)
     # Should pick up Pos, Driver, then race R1, then Points
     assert result[0] == "1"
@@ -268,10 +271,10 @@ def test_write_championship_csv_rowspan_across_rows(mock_file):
 
     mock_file.assert_called_once_with("dummy.csv", "w", newline='', encoding="utf-8")
     handle = mock_file()
-    # csv.writer writes lines — ensure header + two data rows exist
+    # csv.writer writes lines - ensure header + two data rows exist
     handle.write.assert_any_call("Pos,Driver,Race1,Points\r\n")
     # Check first data row written
-    # We assert at least one line contains Driver A (the specifics of commas/spaces are from csv.writer)
+    # We assert at least one line contains Driver A
     written = "".join(call.args[0] for call in handle.write.mock_calls if call.args)
     assert "Driver A" in written
     assert "50" in written
@@ -303,7 +306,7 @@ def test_process_championship_full(mock_write):
 
 @patch("builtins.print")
 def test_process_championship_missing_heading_prints_error(mock_print):
-    # no heading -> find_championship_table will return (None, error) and process_championship should print it
+    # no heading find_championship_table will return (None, error)
     soup = make_soup("<div></div>")
     process_championship(soup, "Drivers'", 2020, "drivers", 1)
     # error message contains this substring

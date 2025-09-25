@@ -1,5 +1,8 @@
+import os
 import requests
 import time
+
+from app.config import DATA_DIR
 
 
 def create_session():
@@ -16,17 +19,6 @@ def create_session():
     })
 
     return session
-
-
-def remove_superscripts(cell, preserve_spaces=True):
-    """Clean cell text by removing sup elements and extracting clean text"""
-    # Remove all sup elements (citations, footnotes, etc.)
-    for sup in cell.find_all("sup"):
-        sup.decompose()
-
-    # Get clean text with or without spaces between elements
-    separator = ' ' if preserve_spaces else ''
-    return cell.get_text(separator=separator, strip=True)
 
 
 def safe_request(session, url, max_retries=3, base_delay=1):
@@ -57,3 +49,21 @@ def safe_request(session, url, max_retries=3, base_delay=1):
                 return None
 
     return None
+
+
+def remove_superscripts(cell, preserve_spaces=True):
+    """Clean cell text by removing sup elements and extracting clean text"""
+    # Remove all sup elements (citations, footnotes, etc.)
+    for sup in cell.find_all("sup"):
+        sup.decompose()
+
+    # Get clean text with or without spaces between elements
+    separator = ' ' if preserve_spaces else ''
+    return cell.get_text(separator=separator, strip=True)
+
+
+def create_output_file(series, year, filename):
+    """Create output directory and file path."""
+    dir_path = os.path.join(DATA_DIR, f"F{series}", str(year))
+    os.makedirs(dir_path, exist_ok=True)
+    return os.path.join(dir_path, filename)
