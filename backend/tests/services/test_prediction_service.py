@@ -43,6 +43,12 @@ def mock_app_state():
 
 
 @pytest.fixture
+def mock_data_service():
+    """Create a mock DataService"""
+    return Mock(spec=DataService)
+
+
+@pytest.fixture
 def sample_dataframe():
     """Create sample current data DataFrame"""
     return pd.DataFrame({
@@ -72,24 +78,24 @@ def sample_dataframe():
 
 
 @pytest.fixture
-def prediction_service(mock_app_state):
-    """Create PredictionService instance"""
-    return PredictionService(mock_app_state, 'f1')
+def prediction_service(mock_app_state, mock_data_service):
+    """Create PredictionService instance with proper dependencies"""
+    return PredictionService(mock_app_state, 'f1', mock_data_service)
 
 
 class TestPredictionServiceInitialization:
-    def test_init_stores_app_state_and_series(self, mock_app_state):
-        service = PredictionService(mock_app_state, 'f1')
+    def test_init_stores_app_state_and_series(self, mock_app_state, mock_data_service):
+        service = PredictionService(mock_app_state, 'f1', mock_data_service)
         assert service.app_state == mock_app_state
         assert service.series == 'f1'
-        assert isinstance(service.data_service, DataService)
+        assert service.data_service == mock_data_service
 
 
 class TestGetPredictions:
     @pytest.mark.asyncio
-    async def test_get_predictions_no_models_raises_error(self, mock_app_state):
+    async def test_get_predictions_no_models_raises_error(self, mock_app_state, mock_data_service):
         mock_app_state.models = {'f1': {}}
-        service = PredictionService(mock_app_state, 'f1')
+        service = PredictionService(mock_app_state, 'f1', mock_data_service)
 
         with pytest.raises(ValueError, match="No models available for series f1"):
             await service.get_predictions()
@@ -98,18 +104,20 @@ class TestGetPredictions:
     async def test_get_predictions_no_feature_cols_raises_error(
         self,
         mock_app_state,
+        mock_data_service,
         sample_dataframe
     ):
         mock_app_state.feature_cols = {'f1': []}
-        service = PredictionService(mock_app_state, 'f1')
+        service = PredictionService(mock_app_state, 'f1', mock_data_service)
 
         with patch.object(service.data_service, 'load_current_data', return_value=sample_dataframe):
             with pytest.raises(ValueError, match="No feature columns available for series f1"):
                 await service.get_predictions()
 
     @pytest.mark.asyncio
-    async def test_get_predictions_model_error_handling(self, mock_app_state, sample_dataframe):
-        service = PredictionService(mock_app_state, 'f1')
+    async def test_get_predictions_model_error_handling(self, mock_app_state,
+                                                        mock_data_service, sample_dataframe):
+        service = PredictionService(mock_app_state, 'f1', mock_data_service)
 
         # Mock the data service
         with patch.object(service.data_service, 'load_current_data', return_value=sample_dataframe):
@@ -420,3 +428,101 @@ class TestUpdatePredictions:
             # Should not create predictions when there's a general error
             if hasattr(prediction_service.app_state, 'current_predictions'):
                 assert 'f1' not in getattr(prediction_service.app_state, 'current_predictions', {})
+
+    @pytest.mark.asyncio
+    @patch('app.services.prediction_service.PredictionService._create_prediction_responses')
+    @patch('app.services.prediction_service.PredictionService._get_model_predictions')
+    async def test_get_predictions_cache_hit_scenario(self,
+                                                      mock_get_predictions,
+                                                      mock_create_responses,
+                                                      prediction_service,
+                                                      sample_dataframe):
+        """Test cache hit scenario in get_predictions - covers cache functionality"""
+        # Setup cache with existing data
+        cache_key = "f1_processed_features"
+        X_current = sample_dataframe[['points', 'wins', 'podiums', 'age', 'experience']].fillna(0)
+
+        prediction_service.prediction_cache[cache_key] = {
+            'current_df': sample_dataframe,
+            'X_current': X_current,
+            'timestamp': datetime.now()
+        }
+
+        # patch instance data_service.load_current_data at runtime
+        with patch.object(prediction_service.data_service, 'load_current_data') as mock_load_data:
+            # Configure mocks (these should not be called for cache hit, but set returns to be safe)
+            mock_load_data.return_value = None
+            mock_get_predictions.return_value = np.array([0.8, 0.6, 0.4])
+            mock_create_responses.return_value = [
+                PredictionResponse(
+                    driver="Hamilton", nationality="British", position=1,
+                    points=387.0, avg_quali_pos=2.1, wins=2, win_rate=0.09,
+                    podiums=9, top_10_rate=0.91, dnf_rate=0.05, experience=16,
+                    dob="1985-01-07", age=39.0, participation_rate=1.0,
+                    teammate_h2h=0.6, team="Mercedes", team_pos=3,
+                    team_points=409.0, nationality_encoded=1.0, era=2,
+                    consistency_score=0.85, empirical_percentage=80.0
+                )
+            ]
+
+            result = await prediction_service.get_predictions()
+
+            # Verify cache was used (data_service.load_current_data should not be called)
+            mock_load_data.assert_not_called()
+
+            # Verify result structure
+            assert isinstance(result, PredictionsResponse)
+            assert len(result.predictions) == 3
+
+    @patch('app.services.prediction_service.LOGGER')
+    def test_clear_prediction_cache(self, mock_logger, prediction_service):
+        """Test clear_prediction_cache method - covers line 179-180"""
+        # Add some data to cache
+        prediction_service.prediction_cache = {
+            'f1_processed_features': {'data': 'test'},
+            'f2_processed_features': {'data': 'test2'}
+        }
+
+        prediction_service.clear_prediction_cache()
+
+        # Verify cache is cleared
+        assert prediction_service.prediction_cache == {}
+
+        # Verify logging
+        mock_logger.info.assert_called_once_with("Cleared prediction cache for f1")
+
+    @pytest.mark.asyncio
+    @patch('app.services.prediction_service.LOGGER')
+    async def test_update_predictions_exception_in_try_block(self, mock_logger, prediction_service):
+        """Test exception handling in update_predictions"""
+        # patch the instance method to raise
+        with patch.object(prediction_service.data_service, 'load_current_data',
+                          side_effect=Exception("Test error in update_predictions")):
+            # This should not raise because update_predictions catches exceptions
+            await prediction_service.update_predictions()
+
+        # Verify error was logged
+        mock_logger.error.assert_called_once_with(
+            "Prediction update failed for f1: Test error in update_predictions"
+        )
+
+    @pytest.mark.asyncio
+    @patch('app.services.prediction_service.PredictionService._get_model_predictions')
+    async def test_update_predictions_with_empty_current_predictions(self,
+                                                                     mock_get_predictions,
+                                                                     prediction_service,
+                                                                     sample_dataframe):
+        """Test update_predictions when current_predictions attribute doesn't exist"""
+        # Ensure current_predictions attribute doesn't exist
+        if hasattr(prediction_service.app_state, 'current_predictions'):
+            delattr(prediction_service.app_state, 'current_predictions')
+
+        mock_get_predictions.return_value = np.array([0.8, 0.6, 0.4])
+
+        # patch instance load_current_data to return the sample dataframe
+        with patch.object(prediction_service.data_service, 'load_current_data', return_value=sample_dataframe): # noqa: 501
+            await prediction_service.update_predictions()
+
+        # Verify current_predictions was created
+        assert hasattr(prediction_service.app_state, 'current_predictions')
+        assert 'f1' in prediction_service.app_state.current_predictions

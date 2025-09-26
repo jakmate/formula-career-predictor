@@ -5,6 +5,14 @@
 
 A machine learning application that predicts drivers' likelihood of advancing to parent series using historical performance data.
 
+## Deployment
+
+The application is containerized and deployed on:
+- **Backend**: FastAPI on Render
+- **Frontend**: Vite on Render
+- **CI/CD**: GitHub Actions for testing
+- **cron-job.org** - Keep instance alive due to Render's spindown with the free tier
+
 ## Tech Stack
 
 - **FastAPI** - REST API framework
@@ -52,13 +60,6 @@ flake8 --max-line-length=100 .
 npx eslint . --ext .js,.jsx,.ts,.tsx
 npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,md}"
 ```
-
-## Deployment
-
-The application is containerized and deployed on:
-- **Backend**: FastAPI on Render
-- **Frontend**: Vite on Render
-- **CI/CD**: GitHub Actions for testing
 
 ## Contributing
 
