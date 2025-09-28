@@ -1,6 +1,6 @@
 import csv
 import os
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 from app.config import DATA_DIR
 from app.core.scraping.scraping_utils import create_session, remove_superscripts, safe_request
 
@@ -34,8 +34,7 @@ def add_time_gap(base_time, gap):
             seconds = float(base_time)
 
         # Add gap
-        gap_seconds = float(gap)
-        total_seconds = seconds + gap_seconds
+        total_seconds = seconds + float(gap)
 
         # Minute overflow
         if total_seconds >= 60:
@@ -88,9 +87,9 @@ def process_qualifying_data(race_url, round_info, session):
             print(f"Failed to fetch {race_url}")
             return None
 
-        soup = BeautifulSoup(response.text, "lxml")
+        parse_only = SoupStrainer(["h2", "h3", "h4", "dt", "table"])
+        soup = BeautifulSoup(response.text, "lxml", parse_only=parse_only)
         response.close()
-        del response
 
         # Find Qualifying heading
         qualifying_heading = (soup.find("h3", {"id": "Qualifying"}) or
@@ -98,7 +97,6 @@ def process_qualifying_data(race_url, round_info, session):
                               soup.find("h2", {"id": "Qualifying"}))
         if not qualifying_heading:
             print(f"No qualifying section found for {race_url}")
-            soup.decompose()
             return None
 
         # Check if this is Monte Carlo with Group A and Group B
@@ -110,7 +108,6 @@ def process_qualifying_data(race_url, round_info, session):
         else:
             result = process_single_qualifying_table(qualifying_heading, round_info, race_url)
 
-        soup.decompose()
         return result
 
     except Exception as e:
@@ -238,8 +235,8 @@ def extract_quali_table_data(table):
 
         # Check if second row contains th elements
         has_two_row_header = (second_row and
-                              len(second_row.find_all("th")) > 0 and
-                              len(second_row.find_all("td")) == 0)
+                              second_row.find_all("th") and
+                              not second_row.find_all("td"))
 
         if has_two_row_header:
             # Process two-row header structure
@@ -270,8 +267,7 @@ def extract_quali_table_data(table):
             data_start_index = 2  # Data starts from third row
         else:
             # Single row header
-            header_row = all_rows[0]
-            headers = [remove_superscripts(th, False) for th in header_row.find_all("th")]
+            headers = [remove_superscripts(th, False) for th in first_row.find_all("th")]
             data_start_index = 1  # Data starts from second row
 
         # Apply column mapping
@@ -302,37 +298,29 @@ def extract_quali_table_data(table):
                     row_data[-1] = row_data[-1][:2]  # Truncate to first two digits
                 data_rows.append(row_data)
 
-        # Convert Time/Gap column to actual times
-        time_gap_col_index = None
+        # Convert Time/Gap column to actual times and normalise all times
+        time_col_index = None
         for idx, header in enumerate(headers):
             if header.lower() == "time/gap":
                 headers[idx] = "Time"  # Rename column
-                time_gap_col_index = idx
+                time_col_index = idx
+                break
+            elif header == "Time":
+                time_col_index = idx
                 break
 
-        if time_gap_col_index is not None and data_rows:
+        if time_col_index is not None and data_rows:
             # Get pole position time (first row)
-            pole_time = data_rows[0][time_gap_col_index]
+            pole_time = data_rows[0][time_col_index] if data_rows else None
 
             # Convert gaps to actual times
             for row in data_rows:
-                if time_gap_col_index < len(row):
-                    gap_value = row[time_gap_col_index]
-                    if gap_value.startswith('+'):
-                        # Convert gap to actual time
-                        actual_time = add_time_gap(pole_time, gap_value[1:])
-                        row[time_gap_col_index] = actual_time
+                if time_col_index < len(row):
+                    time_value = row[time_col_index]
+                    if time_value.startswith('+') and pole_time:
+                        time_value = add_time_gap(pole_time, time_value[1:])
 
-        time_idx = None
-        if "Time" in headers:
-            time_idx = headers.index("Time")
-
-        # Walk every row and normalize time
-        if time_idx is not None:
-            for row in data_rows:
-                # guard against short rows
-                if time_idx < len(row):
-                    row[time_idx] = normalize_time_str(row[time_idx])
+                    row[time_col_index] = normalize_time_str(time_value)
 
         return {'headers': headers, 'data': data_rows}
 

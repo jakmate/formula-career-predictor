@@ -3,7 +3,7 @@ import json
 import pytz
 import re
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 from datetime import datetime, timedelta, timezone
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
@@ -11,6 +11,11 @@ from urllib.parse import urljoin
 
 from app.config import CURRENT_YEAR, SCHEDULE_DIR
 
+F1_MAIN_STRAINER = SoupStrainer(["a"], class_="group")
+FIA_MAIN_STRAINER = SoupStrainer(
+    ["div"],
+    class_=re.compile(r"col-12.*col-sm-6.*col-lg-4.*col-xl-3")
+)
 
 os.makedirs(SCHEDULE_DIR, exist_ok=True)
 TRACK_TIMEZONES = {
@@ -123,12 +128,11 @@ def parse_time_to_datetime(time_str, base_date, day_name=None, location=None):
     if not time_str:
         return None
 
+    day_mapping = {'friday': 4, 'saturday': 5, 'sunday': 6}
+
     if time_str.upper() == 'TBC':
         result_date = base_date.date()
         if day_name:
-            day_mapping = {
-                'friday': 4, 'saturday': 5, 'sunday': 6
-            }
             target_weekday = day_mapping.get(day_name.lower())
             if target_weekday is not None:
                 base_weekday = base_date.weekday()
@@ -153,9 +157,6 @@ def parse_time_to_datetime(time_str, base_date, day_name=None, location=None):
 
         # Adjust date based on day name
         if day_name:
-            day_mapping = {
-                'friday': 4, 'saturday': 5, 'sunday': 6,
-            }
             target_weekday = day_mapping.get(day_name.lower())
             if target_weekday is not None:
                 base_weekday = base_date.weekday()
@@ -194,12 +195,10 @@ def scrape_f1_schedule():
     try:
         url = f"https://www.formula1.com/en/racing/{CURRENT_YEAR}.html"
         response = session.get(url, timeout=10)
-        soup = BeautifulSoup(response.content, 'lxml')
-        response.close()
-        del response
+        soup = BeautifulSoup(response.content, 'lxml', parse_only=F1_MAIN_STRAINER)
 
         races = []
-        race_cards = soup.select('a.group')
+        race_cards = soup.find_all('a', class_='group')
 
         for card in race_cards:
             try:
@@ -241,13 +240,9 @@ def scrape_f1_schedule():
                         full_url = urljoin("https://www.formula1.com", race_url)
                         race_response = session.get(full_url, timeout=10)
                         race_soup = BeautifulSoup(race_response.content, 'lxml')
-                        race_response.close()
-                        del race_response
 
                         session_elements = race_soup.select('ul > li[role="listitem"]')
-
                         if not session_elements:
-                            # Fallback try the grid container if the above fails
                             session_elements = race_soup.select('ul.grid > li.relative')
 
                         session_mapping = {
@@ -334,7 +329,6 @@ def scrape_f1_schedule():
                             if session_key and session_info:
                                 sessions[session_key] = session_info
 
-                        race_soup.decompose()
                     except Exception as e:
                         print(f"Error scraping F1 race details for round {round_num}: {e}")
 
@@ -353,7 +347,6 @@ def scrape_f1_schedule():
             except Exception as e:
                 print(f"Error processing F1 race card: {e}")
 
-        soup.decompose()
         return races
     except Exception as e:
         print(f"Error scraping F1 schedule: {e}")
@@ -374,12 +367,13 @@ def scrape_fia_formula_schedule(series_name):
     try:
         url = f"{config['base_url']}/Calendar"
         response = session.get(url, timeout=10)
-        soup = BeautifulSoup(response.content, 'lxml')
-        response.close()
-        del response
+        soup = BeautifulSoup(response.content, 'lxml', parse_only=FIA_MAIN_STRAINER)
 
         races = []
-        race_containers = soup.select('.col-12.col-sm-6.col-lg-4.col-xl-3')
+        race_containers = soup.find_all(
+            'div',
+            class_=re.compile(r'col-12.*col-sm-6.*col-lg-4.*col-xl-3')
+        )
 
         for container in race_containers:
             try:
@@ -414,8 +408,6 @@ def scrape_fia_formula_schedule(series_name):
 
                         detail_response = session.get(detail_url, timeout=10)
                         detail_soup = BeautifulSoup(detail_response.content, 'lxml')
-                        detail_response.close()
-                        del detail_response
 
                         # Look for session schedule
                         session_pins = detail_soup.select('.pin')
@@ -462,7 +454,6 @@ def scrape_fia_formula_schedule(series_name):
                                     elif 'feature' in session_name:
                                         sessions['race'] = session_dt
 
-                        detail_soup.decompose()
                     except Exception as e:
                         print(f"Error scraping {series_name.upper()} race details for round {round_num}: {e}") # noqa: 501
 
@@ -479,7 +470,6 @@ def scrape_fia_formula_schedule(series_name):
             except Exception as e:
                 print(f"Error processing {series_name.upper()} race container: {e}")
 
-        soup.decompose()
         return races
     except Exception as e:
         print(f"Error scraping {series_name.upper()} schedule: {e}")

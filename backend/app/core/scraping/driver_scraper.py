@@ -176,18 +176,12 @@ def get_all_drivers_from_data():
     """Extract all driver names from data files."""
     all_drivers = set()
     series_map = {
-        'F1': {
-            'entries_pattern': 'f1_{year}_entries.csv'
-        },
-        'F2': {
-            'entries_pattern': 'f2_{year}_entries.csv'
-        },
-        'F3': {
-            'entries_pattern': 'f3_{year}_entries.csv'
-        }
+        'F1': 'f1_{year}_entries.csv',
+        'F2': 'f2_{year}_entries.csv',
+        'F3': 'f3_{year}_entries.csv'
     }
 
-    for series, patterns in series_map.items():
+    for series, pattern in series_map.items():
         series_dirs = glob.glob(f"data/{series}/*")
 
         for year_dir in series_dirs:
@@ -195,8 +189,7 @@ def get_all_drivers_from_data():
             if not year.isdigit():
                 continue
 
-            entries_pattern = patterns['entries_pattern'].format(year=year)
-            entries_file = os.path.join(year_dir, entries_pattern)
+            entries_file = os.path.join(year_dir, pattern.format(year=year))
 
             if os.path.exists(entries_file):
                 try:
