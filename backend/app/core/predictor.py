@@ -82,14 +82,13 @@ def calculate_teammate_performance(df):
             continue
 
         # Pre-extract positions for all drivers in this team
-        driver_positions = {}
-        for _, row in team_df.iterrows():
-            driver = row['Driver']
-            positions = []
-            for race_col in race_cols:
-                pos = extract_position(str(row[race_col]).strip())
-                positions.append(pos)
-            driver_positions[driver] = positions
+        def extract_positions_vectorized(row, race_cols):
+            return [extract_position(str(row[col]).strip()) for col in race_cols]
+
+        driver_positions = {
+            row['Driver']: extract_positions_vectorized(row, race_cols)
+            for _, row in team_df.iterrows()
+        }
 
         # Calculate h2h for each driver pair once
         drivers = list(driver_positions.keys())
@@ -228,7 +227,7 @@ def engineer_features(df):
         'driver': df['Driver'],
         'dob': df['dob'],
         'nationality': df['nationality'],
-        'pos': pd.to_numeric(df['Pos'], errors='coerce'),
+        'pos': pd.to_numeric(df['Pos'], errors='coerce').fillna(-1).astype(int),
         'points': pd.to_numeric(df['Points'], errors='coerce').fillna(0),
         'experience': df['experience'],
         'age': df.get('age', np.nan),
@@ -238,7 +237,6 @@ def engineer_features(df):
         'teammate_h2h_rate': df.get('teammate_h2h_rate', 0.5),
         'avg_quali_pos': df.get('avg_quali_pos', np.nan),
     })
-    features_df['pos'] = features_df['pos'].fillna(-1).astype(int)
 
     # Calculate race statistics for each driver
     race_stats = []

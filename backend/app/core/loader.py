@@ -25,14 +25,7 @@ def get_file_pattern(file_type, series, year, round_num=None):
 
 def get_series_directories(series):
     """Get all directories for a series and their patterns."""
-    directories = []
-
-    series = os.path.join(DATA_DIR, series, "*")
-    series_dirs = glob.glob(series)
-    for year_dir in series_dirs:
-        directories.append(year_dir)
-
-    return directories
+    return glob.glob(os.path.join(DATA_DIR, series, "*"))
 
 
 def load_all_entries_data(series):
@@ -178,20 +171,11 @@ def load_driver_data(df):
                             profiles[driver] = default_profile
                 else:
                     profiles[driver] = default_profile
-            except BaseException:
+            except Exception:
                 profiles[driver] = default_profile
 
-    # Add features
-    feature_data = []
-    for _, row in df.iterrows():
-        profile = profiles.get(row['Driver'], {})
-        feature_data.append({
-            'dob': profile.get('dob'),
-            'nationality': profile.get('nationality', 'Unknown')
-        })
-
-    for key in ['dob', 'nationality']:
-        df[key] = [item[key] for item in feature_data]
+    df['dob'] = df['Driver'].map(lambda d: profiles.get(d, default_profile).get('dob'))
+    df['nationality'] = df['Driver'].map(lambda d: profiles.get(d, default_profile).get('nationality', 'Unknown')) # noqa: 501
     return df
 
 
@@ -222,84 +206,69 @@ def merge_entries(driver_df, entries_df):
     )
 
 
+def parse_round_count(rounds_str):
+    """Parse rounds string to count."""
+    if pd.isna(rounds_str) or rounds_str == 'All':
+        return 999
+
+    rounds_str = str(rounds_str).replace('–', '-')
+    count = 0
+    for part in rounds_str.split(','):
+        part = part.strip()
+        if '-' in part:
+            start, end = map(int, part.split('-'))
+            count += end - start + 1
+        else:
+            count += 1
+    return count
+
+
 def process_year_entries(entries_df):
     """Process entries for a single year to determine team assignments."""
     if not all(col in entries_df.columns for col in ['Driver', 'Team']):
         return pd.DataFrame()
 
-    multi_team_data = []
+    # Add team count per driver
+    entries_df['team_count'] = entries_df.groupby('Driver')['Team'].transform('count')
 
-    for driver in entries_df['Driver'].unique():
-        driver_entries = entries_df[entries_df['Driver'] == driver]
+    # Handle single-team drivers
+    single_team = entries_df[entries_df['team_count'] == 1][['Driver', 'Team', 'team_count']].copy()
 
-        if len(driver_entries) == 1:
-            multi_team_data.append({
-                'Driver': driver,
-                'Team': driver_entries.iloc[0]['Team'],
-                'team_count': 1
-            })
-        else:
-            # Multi-team logic
-            team_rounds = []
-            for _, entry in driver_entries.iterrows():
-                team = entry['Team']
-                rounds_str = entry.get('Rounds', 'All')
+    # Handle multi-team drivers
+    multi_team_df = entries_df[entries_df['team_count'] > 1].copy()
 
-                if rounds_str == 'All':
-                    team_rounds.append((team, 999))
-                else:
-                    round_count = 0
-                    if '–' in rounds_str or '-' in rounds_str:
-                        parts = rounds_str.replace('–', '-').split(',')
-                        for part in parts:
-                            part = part.strip()
-                            if '-' in part:
-                                start, end = map(int, part.split('-'))
-                                round_count += (end - start + 1)
-                            else:
-                                round_count += 1
-                    else:
-                        round_count = len(rounds_str.split(','))
-                    team_rounds.append((team, round_count))
+    if not multi_team_df.empty:
+        # Parse round counts
+        multi_team_df['round_count'] = multi_team_df['Rounds'].fillna('All').apply(parse_round_count) # noqa: 501
 
-            primary_team = max(team_rounds, key=lambda x: x[1])[0]
-            multi_team_data.append({
-                'Driver': driver,
-                'Team': primary_team,
-                'team_count': len(driver_entries)
-            })
+        # Get primary team (max rounds per driver)
+        idx = multi_team_df.groupby('Driver')['round_count'].idxmax()
+        multi_team = multi_team_df.loc[idx, ['Driver', 'Team', 'team_count']]
 
-    return pd.DataFrame(multi_team_data)
+        return pd.concat([single_team, multi_team], ignore_index=True)
+
+    return single_team
 
 
 def calculate_position_percentile(team_df):
-    """Calculate team position percentile."""
-    team_metrics = []
-    for year, year_data in team_df.groupby('year'):
-        # Get unique teams and their positions
-        team_positions = year_data.groupby('Team').agg({
-            'Pos': 'first',
-            'Points': 'first'
-        }).reset_index()
+    team_metrics = team_df.groupby(['year', 'Team']).agg({
+        'Pos': 'first',
+        'Points': 'first'
+    }).reset_index()
 
-        # Calculate relative performance metrics
-        total_teams = len(team_positions)
-        team_positions['team_pos_per'] = \
-            (total_teams - team_positions['Pos'].astype(str).str.extract(
-                r'(\d+)').astype(float) + 1) / total_teams
+    # Vectorized percentile calculation
+    team_metrics['team_pos_per'] = team_metrics.groupby('year')['Pos'].transform(
+        lambda x: (len(x) - pd.to_numeric(x.astype(str).str.extract(r'(\d+)')[0], errors='coerce') + 1) / len(x) # noqa: 501
+    )
 
-        # Add year and series info
-        team_positions['year'] = year
-        team_metrics.append(team_positions)
-
-    return pd.concat(team_metrics, ignore_index=True) if team_metrics else pd.DataFrame()
+    return team_metrics
 
 
 def merge_team_data(driver_df, team_df):
     team_df = calculate_position_percentile(team_df)
 
     # For multi-team drivers, adjust team strength impact
-    if 'team_count' in team_df.columns:
+    if 'team_count' in driver_df.columns:
         multi_team_mask = driver_df['team_count'] > 1
         # Moderate the team performance impact for multi-team drivers
         team_df.loc[multi_team_mask, 'team_pos_per'] = \
