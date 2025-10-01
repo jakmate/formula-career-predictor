@@ -29,8 +29,6 @@ def scrape():
     try:
         # F1, F2/GP2 and F3/GP3 processing
         for num in [1, 2, 3]:
-            print(f"\nProcessing Formula {num} series...")
-
             for year in range(2010, 2026):
                 url = map_url(num, year)
                 print(f"Processing F{num} {year}...")
@@ -60,7 +58,6 @@ def scrape():
 
     scrape_drivers()
     save_schedules()
-    print("Scraping completed!")
 
 
 def scrape_current_year():

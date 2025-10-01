@@ -89,7 +89,6 @@ def process_qualifying_data(race_url, round_info, session):
 
         parse_only = SoupStrainer(["h2", "h3", "h4", "dt", "table"])
         soup = BeautifulSoup(response.text, "lxml", parse_only=parse_only)
-        response.close()
 
         # Find Qualifying heading
         qualifying_heading = (soup.find("h3", {"id": "Qualifying"}) or
@@ -156,12 +155,8 @@ def process_two_table_qualifying(group_a_head, group_b_head, round_info, race_ur
         # Get headers from the first available table
         headers = group_a_data['headers'] if group_a_data else group_b_data['headers']
 
-        # Separate the data by group and sort each group by their original position
-        def sort_key(x):
-            return int(x[0]) if x[0].isdigit() else float('inf')
-
-        group_a_rows = sorted(group_a_data['data'], key=sort_key) if group_a_data else []
-        group_b_rows = sorted(group_b_data['data'], key=sort_key) if group_b_data else []
+        group_a_rows = group_a_data['data'] if group_a_data else []
+        group_b_rows = group_b_data['data'] if group_b_data else []
 
         # Get faster group
         time_idx = headers.index("Time")
@@ -181,7 +176,7 @@ def process_two_table_qualifying(group_a_head, group_b_head, round_info, race_ur
             for grp in order:
                 rows = group_a_rows if grp == 'A' else group_b_rows
                 if i < len(rows):
-                    row = rows[i][:]
+                    row = rows[i]
                     row[0] = str(pos)  # update Pos.
                     combined_data.append(row)
                     pos += 1
@@ -244,27 +239,24 @@ def extract_quali_table_data(table):
             first_row_headers = first_row.find_all("th")
             second_row_headers = second_row.find_all("th")
 
-            # First, collect all rowspan=2 headers in order
-            for th in first_row_headers:
-                text = remove_superscripts(th, False)
+            # Collect rowspan=2 headers except the last one
+            rowspan2_headers = []
+            for i, th in enumerate(first_row_headers):
                 rowspan = int(th.get("rowspan", 1))
-
                 if rowspan == 2:
-                    headers.append(text)
+                    text = remove_superscripts(th, False)
+                    if i < len(first_row_headers) - 1:
+                        headers.append(text)
+                    else:
+                        rowspan2_headers.append(text)  # Save last one for end
 
             # Add the second row headers (Q1, Q2, Q3)
             headers.extend(remove_superscripts(th, False) for th in second_row_headers)
 
             # Add the last rowspan=2 header (Grid)
-            for th in first_row_headers:
-                text = remove_superscripts(th, False)
-                rowspan = int(th.get("rowspan", 1))
-                colspan = int(th.get("colspan", 1))
+            headers.extend(rowspan2_headers)
 
-                if rowspan == 2 and colspan == 1 and th == first_row_headers[-1]:
-                    headers.append(text)
-
-            data_start_index = 2  # Data starts from third row
+            data_start_index = 2
         else:
             # Single row header
             headers = [remove_superscripts(th, False) for th in first_row.find_all("th")]
@@ -311,7 +303,7 @@ def extract_quali_table_data(table):
 
         if time_col_index is not None and data_rows:
             # Get pole position time (first row)
-            pole_time = data_rows[0][time_col_index] if data_rows else None
+            pole_time = data_rows[0][time_col_index]
 
             # Convert gaps to actual times
             for row in data_rows:
@@ -320,7 +312,9 @@ def extract_quali_table_data(table):
                     if time_value.startswith('+') and pole_time:
                         time_value = add_time_gap(pole_time, time_value[1:])
 
-                    row[time_col_index] = normalize_time_str(time_value)
+                    if time_value.count('.') >= 2:
+                        time_value = normalize_time_str(time_value)
+                    row[time_col_index] = time_value
 
         return {'headers': headers, 'data': data_rows}
 
@@ -363,10 +357,7 @@ def scrape_quali(soup, year, num, session=None):
 
     quali_results = []
     for i, link in enumerate(race_links, 1):
-        print(f"Processing qualifying for round {i}: {link}")
         result = process_qualifying_data(link, f"Round {i}", session)
         quali_results.append(result)
 
     save_qualifying_data(quali_results, year, num)
-    successful_results = len([r for r in quali_results if r])
-    print(f"Saved {successful_results} qualifying sessions for F{num} {year}")
