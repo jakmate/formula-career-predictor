@@ -11,11 +11,13 @@ from urllib.parse import urljoin
 
 from app.config import CURRENT_YEAR, SCHEDULE_DIR
 
-F1_MAIN_STRAINER = SoupStrainer(["a"], class_="group")
+F1_MAIN_STRAINER = SoupStrainer("a", class_="group", href=re.compile(r'/en/racing/\d{4}/')) # noqa: 501
+F1_SESSION_STRAINER = SoupStrainer("ul", class_=re.compile(r"grid"))
 FIA_MAIN_STRAINER = SoupStrainer(
     ["div"],
     class_=re.compile(r"col-12.*col-sm-6.*col-lg-4.*col-xl-3")
 )
+FIA_SESSION_STRAINER = SoupStrainer("div", class_="pin")
 
 os.makedirs(SCHEDULE_DIR, exist_ok=True)
 TRACK_TIMEZONES = {
@@ -239,7 +241,7 @@ def scrape_f1_schedule():
                     try:
                         full_url = urljoin("https://www.formula1.com", race_url)
                         race_response = session.get(full_url, timeout=10)
-                        race_soup = BeautifulSoup(race_response.content, 'lxml')
+                        race_soup = BeautifulSoup(race_response.content, 'lxml', parse_only=F1_SESSION_STRAINER) # noqa: 501
 
                         session_elements = race_soup.select('ul > li[role="listitem"]')
                         if not session_elements:
@@ -407,10 +409,10 @@ def scrape_fia_formula_schedule(series_name):
                         detail_url = urljoin(config['base_url'], race_link.get('href'))
 
                         detail_response = session.get(detail_url, timeout=10)
-                        detail_soup = BeautifulSoup(detail_response.content, 'lxml')
+                        detail_soup = BeautifulSoup(detail_response.content, 'lxml', parse_only=FIA_SESSION_STRAINER) # noqa: 501
 
                         # Look for session schedule
-                        session_pins = detail_soup.select('.pin')
+                        session_pins = detail_soup.find_all('div')
 
                         for pin in session_pins:
                             session_divs = pin.select('div')
