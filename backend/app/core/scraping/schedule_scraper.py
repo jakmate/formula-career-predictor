@@ -200,13 +200,11 @@ def scrape_f1_schedule():
         soup = BeautifulSoup(response.content, 'lxml', parse_only=F1_MAIN_STRAINER)
 
         races = []
-        race_cards = soup.find_all('a', class_='group')
-
-        for card in race_cards:
+        for card in soup.find_all('a'):
             try:
                 # Extract round number
                 round_tag = card.select_one('.typography-module_body-2-xs-bold__M03Ei')
-                if not round_tag or "ROUND" not in round_tag.text:
+                if "ROUND" not in round_tag.text:
                     continue
                 round_num = int(round_tag.text.split()[-1])
 
