@@ -12,7 +12,7 @@ from lightgbm import LGBMClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, average_precision_score
+from sklearn.metrics import classification_report, average_precision_score, f1_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import RobustScaler
@@ -562,15 +562,19 @@ def train_models(df):
     n_pos = (y_train_sub == 1).sum()
     pos_weight = torch.tensor([n_neg / n_pos]).to(device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    optimizer = optim.Adam(pytorch_model.parameters(), lr=0.001)
+    optimizer = torch.optim.AdamW(
+        pytorch_model.parameters(),
+        lr=0.01,
+        weight_decay=1e-2
+    )
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=0.5, patience=5)
+        optimizer, factor=0.5, patience=2)
 
     # Training loop with proper validation
     best_val_loss = float('inf')
     patience_counter = 0
 
-    for epoch in range(100):
+    for epoch in range(30):
         pytorch_model.train()
         optimizer.zero_grad()
 
@@ -591,20 +595,28 @@ def train_models(df):
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             patience_counter = 0
-            best_state_dict = pytorch_model.state_dict().copy()
+            best_state = {k: v.cpu() for k, v in pytorch_model.state_dict().items()}
         else:
             patience_counter += 1
-            if patience_counter >= 10:
+            if patience_counter >= 3:
                 break
 
     # Load best model and evaluate
-    pytorch_model.load_state_dict(best_state_dict)
+    pytorch_model.load_state_dict(best_state)
     pytorch_model.eval()
 
     # Validation evaluation
     with torch.no_grad():
         val_logits = pytorch_model(X_val_torch)
         val_probas_torch = torch.sigmoid(val_logits).cpu().numpy().flatten()
+
+    best_thresh = 0.5
+    best_f1 = 0.0
+    for thresh in np.arange(0.01, 0.99, 0.01):
+        f1 = f1_score(y_val, val_probas_torch > thresh)
+        if f1 > best_f1:
+            best_f1 = f1
+            best_thresh = thresh
 
     # Test evaluation
     with torch.no_grad():
@@ -616,7 +628,7 @@ def train_models(df):
     iso_reg_torch.fit(val_probas_torch, y_val)
     pytorch_model.calibrator = iso_reg_torch
 
-    pytorch_pred = (test_probas_torch > 0.5).astype(int)
+    pytorch_pred = (test_probas_torch > best_thresh).astype(int)
     print("\nPyTorch Test Results:")
     print(classification_report(y_test, pytorch_pred))
     pr_auc_torch = average_precision_score(y_test, test_probas_torch)
@@ -694,7 +706,7 @@ def predict_drivers(models, df, feature_cols, scaler=None):
 
             print(f"\n{name} Predictions:")
             print("=" * 70)
-            print(results.head(5).to_string(index=False, float_format='%.3f'))
+            print(results.head(3).to_string(index=False, float_format='%.3f'))
 
         except Exception as e:
             print(f"Error with {name} model: {e}")
@@ -759,7 +771,7 @@ def main():
 
     # Print top 20 functions by cumulative time
     stats = pstats.Stats(profiler).sort_stats('cumtime')
-    stats.print_stats(20)
+    stats.print_stats(5)
 
 
 if __name__ == "__main__":  # pragma: no cover

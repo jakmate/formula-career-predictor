@@ -12,4 +12,4 @@ def test_forward_pass():
     model = RacingPredictor(input_dim=5)
     x = torch.randn(32, 5)
     output = model(x)
-    assert output.shape == (32, 1)
+    assert output.shape == (32,)

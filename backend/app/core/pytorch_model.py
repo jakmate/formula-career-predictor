@@ -2,23 +2,23 @@ import torch.nn as nn
 
 
 class RacingPredictor(nn.Module):
-    def __init__(self, input_dim, hidden_dims=[64, 32], dropout_rate=0.2):
-        super(RacingPredictor, self).__init__()
+    def __init__(self, input_dim, hidden_dim=16, dropout_rate=0.3):
+        super().__init__()
+        # Single hidden layer
+        self.network = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.LeakyReLU(0.1),
+            nn.Dropout(dropout_rate),
+            nn.Linear(hidden_dim, 1)
+        )
+        # Initialize weights for stability
+        self._initialize_weights()
 
-        layers = []
-        prev_dim = input_dim
-
-        for hidden_dim in hidden_dims:
-            layers.extend([
-                nn.Linear(prev_dim, hidden_dim),
-                nn.BatchNorm1d(hidden_dim),
-                nn.ReLU(inplace=True),
-                nn.Dropout(dropout_rate)
-            ])
-            prev_dim = hidden_dim
-
-        layers.append(nn.Linear(prev_dim, 1))
-        self.network = nn.Sequential(*layers)
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.kaiming_normal_(m.weight, nonlinearity='leaky_relu')
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        return self.network(x)
+        return self.network(x).squeeze(-1)
