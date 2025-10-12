@@ -5,7 +5,6 @@ export interface Driver {
   wins: number;
   podiums: number;
   win_rate: number;
-  top_10_rate: number;
   experience: number;
   empirical_percentage?: number | null;
   nationality: string;

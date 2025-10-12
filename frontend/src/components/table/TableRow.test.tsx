@@ -21,7 +21,6 @@ const mockDriver: Driver = {
   position: 5,
   points: 85.5,
   win_rate: 0.25,
-  top_10_rate: 0.75,
   dnf_rate: 0.15,
   participation_rate: 0.9,
   experience: 2,
@@ -49,7 +48,6 @@ describe('BaseTableRow', () => {
     expect(screen.getByText('#5')).toBeInTheDocument();
     expect(screen.getByText('85.5')).toBeInTheDocument();
     expect(screen.getByText('25.0%')).toBeInTheDocument();
-    expect(screen.getByText('75.0%')).toBeInTheDocument();
     expect(screen.getByText('15.0%')).toBeInTheDocument();
     expect(screen.getByText('90.0%')).toBeInTheDocument();
     expect(screen.getByText('2 years')).toBeInTheDocument();

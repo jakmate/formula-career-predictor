@@ -3,7 +3,6 @@ export type SortField =
   | 'position'
   | 'points'
   | 'win_rate'
-  | 'top_10_rate'
   | 'dnf_rate'
   | 'participation_rate'
   | 'experience'

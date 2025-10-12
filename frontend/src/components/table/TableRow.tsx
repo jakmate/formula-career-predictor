@@ -40,11 +40,6 @@ export const BaseTableRow = ({ driver, className = '' }: BaseTableRowProps) => {
         <span className="text-white">{formatPercentage(driver.win_rate)}</span>
       </td>
       <td className="p-4">
-        <span className="text-white">
-          {formatPercentage(driver.top_10_rate)}
-        </span>
-      </td>
-      <td className="p-4">
         <span className="text-white">{formatPercentage(driver.dnf_rate)}</span>
       </td>
       <td className="p-4">

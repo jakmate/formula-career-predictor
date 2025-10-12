@@ -112,7 +112,7 @@ class PredictionService:
 
         for idx, (_, row) in enumerate(current_df.iterrows()):
             predictions.append(PredictionResponse(
-                driver=row['driver'],
+                driver=row['Driver'],
                 nationality=row.get('nationality'),
                 position=int(row['pos']),
                 points=float(row['points']),
@@ -120,7 +120,6 @@ class PredictionService:
                 wins=int(row['wins']),
                 win_rate=float(row['win_rate']),
                 podiums=int(row['podiums']),
-                top_10_rate=float(row['top_10_rate']),
                 dnf_rate=float(row['dnf_rate']),
                 experience=int(row['experience']),
                 dob=row.get('dob'),
@@ -130,9 +129,6 @@ class PredictionService:
                 team=str(row['team']),
                 team_pos=int(row['team_pos']),
                 team_points=float(row['team_points']),
-                nationality_encoded=float(row.get('nationality_encoded', 0)),
-                era=int(row.get('era', 0)),
-                consistency_score=float(row.get('consistency_score', 0)),
                 empirical_percentage=float(prediction_values[idx])
             ))
 

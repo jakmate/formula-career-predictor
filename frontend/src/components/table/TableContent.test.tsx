@@ -37,7 +37,6 @@ const mockDrivers: Driver[] = [
     position: 1,
     points: 575,
     win_rate: 0.65,
-    top_10_rate: 0.95,
     dnf_rate: 0.05,
     participation_rate: 1.0,
     experience: 9,
@@ -55,7 +54,6 @@ const mockDrivers: Driver[] = [
     position: 2,
     points: 450,
     win_rate: 0.45,
-    top_10_rate: 0.88,
     dnf_rate: 0.08,
     participation_rate: 0.98,
     experience: 17,
@@ -87,7 +85,6 @@ describe('BaseTableContent', () => {
     expect(screen.getByText('Driver')).toBeInTheDocument();
     expect(screen.getByText('Points')).toBeInTheDocument();
     expect(screen.getByText('Win %')).toBeInTheDocument();
-    expect(screen.getByText('Top 10 %')).toBeInTheDocument();
     expect(screen.getByText('DNF %')).toBeInTheDocument();
     expect(screen.getByText('Participation %')).toBeInTheDocument();
     expect(screen.getByText('Experience')).toBeInTheDocument();
@@ -97,7 +94,7 @@ describe('BaseTableContent', () => {
     render(<BaseTableContent predictions={mockDrivers} />);
 
     const headers = screen.getAllByRole('columnheader');
-    expect(headers).toHaveLength(9); // 9 columns total
+    expect(headers).toHaveLength(8); // 8 columns total
   });
 
   it('renders table structure correctly', () => {
@@ -146,7 +143,6 @@ describe('BaseTableContent', () => {
       'Position',
       'Points',
       'Win %',
-      'Top 10 %',
       'DNF %',
       'Participation %',
       'Experience',

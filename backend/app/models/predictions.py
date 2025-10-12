@@ -13,7 +13,6 @@ class PredictionResponse(BaseModel):
     wins: int
     podiums: int
     win_rate: float
-    top_10_rate: float
     dnf_rate: float
     experience: int
     age: Optional[float]
@@ -23,9 +22,6 @@ class PredictionResponse(BaseModel):
     team: str
     team_pos: int
     team_points: float
-    nationality_encoded: Optional[float] = None
-    era: int
-    consistency_score: float
     empirical_percentage: Optional[float] = None
 
 

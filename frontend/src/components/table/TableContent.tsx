@@ -44,13 +44,6 @@ export const BaseTableContent = ({ predictions }: BaseTableContentProps) => {
               Win %
             </TableHeader>
             <TableHeader
-              field="top_10_rate"
-              sortConfig={sortConfig}
-              onSort={handleSort}
-            >
-              Top 10 %
-            </TableHeader>
-            <TableHeader
               field="dnf_rate"
               sortConfig={sortConfig}
               onSort={handleSort}

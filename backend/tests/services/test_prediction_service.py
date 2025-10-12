@@ -52,7 +52,7 @@ def mock_data_service():
 def sample_dataframe():
     """Create sample current data DataFrame"""
     return pd.DataFrame({
-        'driver': ['Hamilton', 'Verstappen', 'Leclerc'],
+        'Driver': ['Hamilton', 'Verstappen', 'Leclerc'],
         'nationality': ['British', 'Dutch', 'Monegasque'],
         'pos': [1, 2, 3],
         'points': [387.0, 365.0, 308.0],
@@ -60,7 +60,6 @@ def sample_dataframe():
         'wins': [2, 7, 2],
         'win_rate': [0.09, 0.32, 0.09],
         'podiums': [9, 10, 5],
-        'top_10_rate': [0.91, 0.95, 0.77],
         'dnf_rate': [0.05, 0.05, 0.14],
         'experience': [16, 9, 6],
         'dob': ['1985-01-07', '1997-09-30', '1997-10-16'],
@@ -70,9 +69,6 @@ def sample_dataframe():
         'team': ['Mercedes', 'Red Bull', 'Ferrari'],
         'team_pos': [3, 1, 2],
         'team_points': [409.0, 860.0, 406.0],
-        'nationality_encoded': [1.0, 2.0, 3.0],
-        'era': [2, 2, 2],
-        'consistency_score': [0.85, 0.92, 0.78],
         'year': [2024, 2024, 2024]
     })
 
@@ -134,11 +130,10 @@ class TestGetPredictions:
                         PredictionResponse(
                             driver="Hamilton", nationality="British", position=1,
                             points=387.0, avg_quali_pos=2.1, wins=2, win_rate=0.09,
-                            podiums=9, top_10_rate=0.91, dnf_rate=0.05, experience=16,
+                            podiums=9, dnf_rate=0.05, experience=16,
                             dob="1985-01-07", age=39.0, participation_rate=1.0,
                             teammate_h2h=0.6, team="Mercedes", team_pos=3,
-                            team_points=409.0, nationality_encoded=1.0, era=2,
-                            consistency_score=0.85, empirical_percentage=80.0
+                            team_points=409.0, empirical_percentage=80.0
                         )
                     ]
 
@@ -306,13 +301,12 @@ class TestCreatePredictionResponses:
     def test_create_prediction_responses_missing_optional_fields(self, prediction_service):
         # DataFrame with missing optional fields
         df_minimal = pd.DataFrame({
-            'driver': ['TestDriver'],
+            'Driver': ['TestDriver'],
             'pos': [1],
             'points': [100.0],
             'wins': [1],
             'win_rate': [0.1],
             'podiums': [2],
-            'top_10_rate': [0.5],
             'dnf_rate': [0.1],
             'experience': [5],
             'participation_rate': [1.0],
@@ -334,9 +328,6 @@ class TestCreatePredictionResponses:
         assert pred.nationality is None
         assert pred.dob is None
         assert pred.age is None
-        assert pred.nationality_encoded == 0.0
-        assert pred.era == 0
-        assert pred.consistency_score == 0.0
 
 
 class TestUpdatePredictions:
@@ -398,7 +389,7 @@ class TestUpdatePredictions:
     async def test_update_predictions_filters_by_current_year(self, prediction_service):
         # DataFrame with mixed years
         mixed_year_df = pd.DataFrame({
-            'driver': ['Hamilton', 'Verstappen', 'OldDriver'],
+            'Driver': ['Hamilton', 'Verstappen', 'OldDriver'],
             'year': [2024, 2024, 2020],  # One old entry
             'points': [100, 200, 50],
             'wins': [1, 2, 0],
@@ -457,11 +448,10 @@ class TestUpdatePredictions:
                 PredictionResponse(
                     driver="Hamilton", nationality="British", position=1,
                     points=387.0, avg_quali_pos=2.1, wins=2, win_rate=0.09,
-                    podiums=9, top_10_rate=0.91, dnf_rate=0.05, experience=16,
+                    podiums=9, dnf_rate=0.05, experience=16,
                     dob="1985-01-07", age=39.0, participation_rate=1.0,
                     teammate_h2h=0.6, team="Mercedes", team_pos=3,
-                    team_points=409.0, nationality_encoded=1.0, era=2,
-                    consistency_score=0.85, empirical_percentage=80.0
+                    team_points=409.0, empirical_percentage=80.0
                 )
             ]
 
@@ -476,7 +466,7 @@ class TestUpdatePredictions:
 
     @patch('app.services.prediction_service.LOGGER')
     def test_clear_prediction_cache(self, mock_logger, prediction_service):
-        """Test clear_prediction_cache method - covers line 179-180"""
+        """Test clear_prediction_cache method"""
         # Add some data to cache
         prediction_service.prediction_cache = {
             'f1_processed_features': {'data': 'test'},
