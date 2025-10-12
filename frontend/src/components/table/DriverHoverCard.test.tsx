@@ -30,7 +30,6 @@ const mockDriver: Driver = {
   points: 214.5,
   experience: 16,
   win_rate: 0,
-  top_10_rate: 0,
   dnf_rate: 0,
   participation_rate: 0,
   teammate_h2h: 0,
