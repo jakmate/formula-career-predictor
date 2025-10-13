@@ -54,7 +54,6 @@ class PredictionService:
         models = list(self.app_state.models[self.series].keys())
 
         for model_name in models:
-            model_start = time.time()
             try:
                 raw_probas = self._get_model_predictions(model_name, X_current)
                 predictions = self._create_prediction_responses(current_df, raw_probas)
@@ -63,7 +62,6 @@ class PredictionService:
                     predictions=predictions,
                     accuracy_metrics={"total_predictions": len(predictions)}
                 )
-                LOGGER.info(f"Model {model_name} prediction took {time.time() - model_start:.2f}s")
             except Exception as e:
                 LOGGER.error(f"Error getting predictions for {model_name}: {e}")
                 all_predictions[model_name] = ModelResults(
@@ -71,7 +69,7 @@ class PredictionService:
                     predictions=[],
                     accuracy_metrics={"total_predictions": 0, "error_count": 1}
                 )
-        LOGGER.info(f"All model predictions took {time.time() - prediction_start:.2f}s")
+        LOGGER.info(f"Model predictions took {time.time() - prediction_start:.2f}s")
         LOGGER.info(f"Total request time: {time.time() - start_time:.2f}s")
 
         return PredictionsResponse(

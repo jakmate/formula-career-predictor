@@ -14,8 +14,9 @@ from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, average_precision_score
 from sklearn.model_selection import StratifiedKFold
-from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import RobustScaler
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import RobustScaler, StandardScaler
 from sklearn.svm import SVC
 
 from app.config import CURRENT_YEAR, NOT_PARTICIPATED_CODES, RETIREMENT_CODES, SEED
@@ -27,6 +28,7 @@ os.environ['PYTHONHASHSEED'] = str(SEED)
 random.seed(SEED)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
+torch._dynamo.disable()
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(SEED)
     torch.backends.cudnn.deterministic = True
@@ -124,78 +126,88 @@ def calculate_teammate_performance(df):
     if not race_cols:
         return df
 
-    # Pre-extract all positions once
-    def extract_all_positions(row):
-        return [extract_position(str(row[col]).strip()) for col in race_cols]
+    # Extract positions for all drivers at once (vectorized)
+    position_matrix = np.full((len(df), len(race_cols)), np.nan)
+    for i, col in enumerate(race_cols):
+        position_matrix[:, i] = df[col].apply(
+            lambda x: extract_position(str(x).strip()) if pd.notna(x) else np.nan
+        ).values
 
-    df['_positions_temp'] = df.apply(extract_all_positions, axis=1)
+    # Add positions to df temporarily
+    df['_positions_matrix'] = [row for row in position_matrix]
 
     team_performance = []
 
-    # Group by year and team to find teammates
-    for (year, team), team_df in df.groupby(['year', 'Team']):
+    # Group once
+    grouped = df.groupby(['year', 'Team'])
+
+    for (year, team), team_df in grouped:
         if len(team_df) < 2:
             continue
 
-        # Get pre-computed positions
-        driver_positions = dict(zip(team_df['Driver'], team_df['_positions_temp']))
-        drivers = list(driver_positions.keys())
+        driver_indices = team_df.index.tolist()
+        driver_names = team_df['Driver'].tolist()
+        positions_list = team_df['_positions_matrix'].tolist()
 
-        # Calculate h2h for each driver pair once
-        h2h_results = {}
+        # Convert to numpy array for vectorized operations
+        team_positions = np.array(positions_list)  # shape: (n_drivers, n_races)
 
-        for i in range(len(drivers)):
-            for j in range(i + 1, len(drivers)):
-                driver1, driver2 = drivers[i], drivers[j]
-                pos1_list = driver_positions[driver1]
-                pos2_list = driver_positions[driver2]
+        # Calculate pairwise comparisons
+        n_drivers = len(driver_names)
+        h2h_rates = np.full((n_drivers, n_drivers), np.nan)
 
-                # Vectorized comparison using numpy
-                pos1_arr = np.array([p if p else np.nan for p in pos1_list])
-                pos2_arr = np.array([p if p else np.nan for p in pos2_list])
+        for i in range(n_drivers):
+            for j in range(i + 1, n_drivers):
+                pos_i = team_positions[i]
+                pos_j = team_positions[j]
 
-                valid_mask = ~(np.isnan(pos1_arr) | np.isnan(pos2_arr))
+                # Valid races where both participated
+                valid_mask = ~(np.isnan(pos_i) | np.isnan(pos_j))
+                valid_count = valid_mask.sum()
 
-                if valid_mask.sum() > 0:
-                    wins1 = (pos1_arr[valid_mask] < pos2_arr[valid_mask]).sum()
-                    wins2 = (pos2_arr[valid_mask] < pos1_arr[valid_mask]).sum()
-                    total = valid_mask.sum()
+                if valid_count > 0:
+                    wins_i = (pos_i[valid_mask] < pos_j[valid_mask]).sum()
+                    wins_j = (pos_j[valid_mask] < pos_i[valid_mask]).sum()
+                    h2h_rates[i, j] = wins_i / valid_count
+                    h2h_rates[j, i] = wins_j / valid_count
 
-                    h2h_results[(driver1, driver2)] = wins1 / total
-                    h2h_results[(driver2, driver1)] = wins2 / total
+        # Calculate overall H2H rate for each driver
+        for idx, (driver_idx, driver_name) in enumerate(zip(driver_indices, driver_names)):
+            # Get all valid comparisons for this driver
+            other_rates = h2h_rates[idx]
+            valid_others = ~np.isnan(other_rates)
 
-        # Build results for each driver
-        for _, driver_row in team_df.iterrows():
-            driver = driver_row['Driver']
+            if valid_others.any():
+                # Weight by number of valid races against each teammate
+                total_wins = 0
+                total_races = 0
 
-            # Calculate overall h2h rate against all teammates
-            total_wins = total_races = 0
-            for other_driver in drivers:
-                if other_driver != driver:
-                    key = (driver, other_driver)
-                    if key in h2h_results:
-                        # Get valid comparison count
-                        pos1_arr = np.array([p if p else np.nan for p in driver_positions[driver]])
-                        pos2_arr = np.array([p if p else np.nan for p in driver_positions[other_driver]]) # noqa: 501
-                        valid_mask = ~(np.isnan(pos1_arr) | np.isnan(pos2_arr))
-                        teammate_total = valid_mask.sum()
+                for j, is_valid in enumerate(valid_others):
+                    if is_valid and j != idx:
+                        # Count valid races against teammate j
+                        pos_self = team_positions[idx]
+                        pos_other = team_positions[j]
+                        valid_races = (~(np.isnan(pos_self) | np.isnan(pos_other))).sum()
 
-                        total_races += teammate_total
-                        total_wins += h2h_results[key] * teammate_total
+                        total_races += valid_races
+                        total_wins += other_rates[j] * valid_races
 
-            h2h_win_rate = total_wins / total_races if total_races > 0 else 0.5
-            is_multi_team = driver_row.get('team_count', 1) > 1
+                h2h_rate = total_wins / total_races if total_races > 0 else 0.5
+            else:
+                h2h_rate = 0.5
+
+            is_multi_team = df.loc[driver_idx].get('team_count', 1) > 1
 
             team_performance.append({
-                'Driver': driver,
+                'Driver': driver_name,
                 'year': year,
                 'Team': team,
-                'teammate_h2h_rate': h2h_win_rate,
+                'teammate_h2h_rate': h2h_rate,
                 'is_multi_team': is_multi_team
             })
 
-    # Clean up temporary column
-    df = df.drop('_positions_temp', axis=1)
+    # Clean up
+    df = df.drop('_positions_matrix', axis=1)
 
     # Convert to DataFrame and merge with original
     if team_performance:
@@ -206,12 +218,8 @@ def calculate_teammate_performance(df):
         )
 
     # Fill defaults
-    defaults = {'teammate_h2h_rate': 0.5, 'is_multi_team': False}
-    for col, default in defaults.items():
-        if col not in df.columns:
-            df[col] = default
-        else:
-            df[col] = df[col].fillna(default)
+    df['teammate_h2h_rate'] = df['teammate_h2h_rate'].fillna(0.5)
+    df['is_multi_team'] = df['is_multi_team'].fillna(False)
 
     return df
 
@@ -542,39 +550,41 @@ def train_models(df):
 
     # Traditional ML pipelines
     traditional_pipelines = {
-        'Random Forest': Pipeline([
-            ('classifier', RandomForestClassifier(
-                random_state=SEED,
-                class_weight='balanced_subsample'
-            ))
-        ]),
-        'Logistic Regression': Pipeline([
-            ('classifier', LogisticRegression(
-                random_state=SEED,
-                class_weight='balanced',
-                max_iter=10000
-            ))
+        'KNN': Pipeline([
+            ('scaler', StandardScaler()),
+            ('classifier', KNeighborsClassifier(n_jobs=-1))
         ]),
         'LightGBM': Pipeline([
             ('classifier', LGBMClassifier(
                 random_state=SEED,
                 class_weight='balanced',
                 verbosity=-1,
-                n_jobs=1
+                n_jobs=-1
             ))
         ]),
-        'MLP': Pipeline([
-            ('scaler', RobustScaler()),
-            ('classifier', MLPClassifier(
+        'Logistic Regression': Pipeline([
+            ('scaler', StandardScaler()),
+            ('classifier', LogisticRegression(
                 random_state=SEED,
+                class_weight='balanced',
                 max_iter=10000
             ))
         ]),
+        'Naive Bayes': Pipeline([
+            ('classifier', GaussianNB())
+        ]),
         'SVM': Pipeline([
+            ('scaler', StandardScaler()),
             ('classifier', SVC(
                 random_state=SEED,
                 class_weight='balanced',
                 probability=True
+            ))
+        ]),
+        'Random Forest': Pipeline([
+            ('classifier', RandomForestClassifier(
+                random_state=SEED,
+                class_weight='balanced_subsample'
             ))
         ]),
     }
@@ -739,7 +749,7 @@ def predict_drivers(models, df, feature_cols, scaler=None):
             results = pd.DataFrame({
                 'Driver': current_df['Driver'],
                 'Nat.': current_df['nationality'],
-                'nationality_encoded': current_df['nationality_encoded'],
+                'Nat_encoded': current_df['nationality_encoded'],
                 'Pos': current_df['pos'],
                 'Points': current_df['points'],
                 'Wins': current_df['wins'],
@@ -750,17 +760,17 @@ def predict_drivers(models, df, feature_cols, scaler=None):
                 'Exp': current_df['experience'],
                 'DoB': current_df['dob'],
                 'Age': current_df['age'],
-                'teammate_h2h_rate': current_df['teammate_h2h_rate'],
-                'team': current_df['team'],
-                'team_pos': current_df['team_pos'],
-                'team_points': current_df['team_points'],
+                'Teammate_h2h': current_df['teammate_h2h_rate'],
+                'Team': current_df['team'],
+                'Team Pos': current_df['team_pos'],
+                'Team Points': current_df['team_points'],
                 'Raw_Prob': raw_probas,
                 'Empirical_%': empirical_pct
             }).sort_values('Empirical_%', ascending=False)
 
-            # print(f"\n{name} Predictions:")
-            # print("=" * 70)
-            # print(results.head(3).to_string(index=False, float_format='%.3f'))
+            print(f"\n{name} Predictions:")
+            print("=" * 70)
+            print(results.head(3).to_string(index=False, float_format='%.3f'))
 
         except Exception as e:
             print(f"Error with {name} model: {e}")
@@ -823,9 +833,9 @@ def main():
     print(f"Memory (RSS) after: {mem_end   / (1024**2):.2f} MiB")
     print(f"Memory delta: {(mem_end - mem_start) / (1024**2):.2f} MiB\n")
 
-    # Print top 20 functions by cumulative time
+    # Print top 5 functions by cumulative time
     stats = pstats.Stats(profiler).sort_stats('cumtime')
-    stats.print_stats(10)
+    stats.print_stats(5)
 
 
 if __name__ == "__main__":  # pragma: no cover

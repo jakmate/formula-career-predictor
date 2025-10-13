@@ -15,20 +15,18 @@ def get_race_columns(df):
     track_codes = set()
     for col in columns_with_data:
         parts = col.split()
-        if parts:
-            if len(parts[0]) >= 3:
-                code_candidate = parts[0][:3]
-                if code_candidate.isalpha() and code_candidate.isupper():
-                    track_codes.add(code_candidate)
+        if parts and len(parts[0]) >= 3:
+            code_candidate = parts[0][:3]
+            if code_candidate.isalpha() and code_candidate.isupper():
+                track_codes.add(code_candidate)
 
     race_columns = []
     for col in columns_with_data:
         parts = col.split()
-        if parts:
-            if len(parts[0]) >= 3:
-                code_candidate = parts[0][:3]
-                if code_candidate in track_codes:
-                    race_columns.append(col)
+        if parts and len(parts[0]) >= 3:
+            code_candidate = parts[0][:3]
+            if code_candidate in track_codes:
+                race_columns.append(col)
 
     return race_columns
 
