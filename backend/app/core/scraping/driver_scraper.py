@@ -3,10 +3,10 @@ import json
 import os
 import pandas as pd
 import re
-import requests
 from datetime import datetime
 
 from app.config import PROFILES_DIR
+from app.core.scraping.scraping_utils import create_session
 
 SPARQL_ENDPOINT = "https://query.wikidata.org/sparql"
 DRIVER_ALIASES = {
@@ -203,8 +203,11 @@ def get_all_drivers_from_data():
     return sorted(list(all_drivers))
 
 
-def scrape_drivers():
+def scrape_drivers(session):
     """Main function to scrape all driver profiles."""
+    if not session:
+        session = create_session()
+
     print("Scanning data files for driver names...")
     all_drivers = get_all_drivers_from_data()
 
@@ -216,9 +219,6 @@ def scrape_drivers():
 
     # Ensure profiles directory exists
     os.makedirs(PROFILES_DIR, exist_ok=True)
-
-    # Create session once for all requests
-    session = requests.Session()
 
     try:
         print("Starting driver profile scraping...")

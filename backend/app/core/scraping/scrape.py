@@ -53,11 +53,11 @@ def scrape():
 
                 except Exception as e:
                     print(f"Error processing data for F{num} {year}: {str(e)}")
+
+        scrape_drivers(session)
+        save_schedules(session)
     finally:
         session.close()
-
-    scrape_drivers()
-    save_schedules()
 
 
 def scrape_current_year():
@@ -95,11 +95,10 @@ def scrape_current_year():
             except Exception as e:
                 print(f"Error processing current year F{num}: {str(e)}")
 
+        scrape_drivers(session)
+        save_schedules(session)
     finally:
         session.close()
-
-    scrape_drivers()
-    save_schedules()
 
 
 if __name__ == "__main__":  # pragma: no cover

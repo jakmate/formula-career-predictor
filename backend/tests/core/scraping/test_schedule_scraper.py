@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime, timezone, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, mock_open
 
 from app.core.scraping.schedule_scraper import (
     get_country_for_location,
@@ -14,7 +14,7 @@ from app.core.scraping.schedule_scraper import (
 )
 
 
-# Tests for get_country_for_location (lines 67-70)
+# Tests for get_country_for_location
 class TestGetCountryForLocation:
     def test_known_location(self):
         assert get_country_for_location("Sakhir") == "Bahrain"
@@ -25,7 +25,7 @@ class TestGetCountryForLocation:
         assert get_country_for_location("Unknown City") == "Unknown City"
 
 
-# Tests for get_timezone_for_location (lines 74-90)
+# Tests for get_timezone_for_location
 class TestGetTimezoneForLocation:
     def test_known_timezone(self):
         assert get_timezone_for_location("Sakhir") == "Asia/Bahrain"
@@ -58,7 +58,7 @@ class TestGetTimezoneForLocation:
         assert result == "UTC"
 
 
-# Tests for format_utc_datetime (lines 95)
+# Tests for format_utc_datetime
 class TestFormatUtcDatetime:
     def test_with_timezone_info(self):
         dt = datetime(2025, 3, 15, 14, 30, 0, tzinfo=timezone.utc)
@@ -71,7 +71,7 @@ class TestFormatUtcDatetime:
         assert result == "2025-03-15T14:30:00"
 
 
-# Tests for is_race_completed_or_ongoing (lines 100-125)
+# Tests for is_race_completed_or_ongoing
 class TestIsRaceCompletedOrOngoing:
     def test_race_with_no_sessions(self):
         race = {"round": 1, "sessions": {}}
@@ -96,13 +96,15 @@ class TestIsRaceCompletedOrOngoing:
         assert is_race_completed_or_ongoing(race) is False
 
     def test_race_with_date_only(self):
+        # Date-only format no longer triggers completion check
         past_date = (datetime.now(timezone.utc) - timedelta(days=2)).date()
         race = {
             "sessions": {
                 "race": {"start": past_date.strftime("%Y-%m-%d")}
             }
         }
-        assert is_race_completed_or_ongoing(race) is True
+        # Should return False since no 'T' in start time
+        assert is_race_completed_or_ongoing(race) is False
 
     def test_race_with_invalid_date(self):
         race = {
@@ -113,7 +115,7 @@ class TestIsRaceCompletedOrOngoing:
         assert is_race_completed_or_ongoing(race) is False
 
 
-# Tests for parse_time_to_datetime (lines 130-193)
+# Tests for parse_time_to_datetime
 class TestParseTimeToDatetime:
     def test_tbc_time_no_day(self):
         base_date = datetime(2025, 3, 15)
@@ -161,11 +163,10 @@ class TestParseTimeToDatetime:
         assert result is None
 
 
-# Tests for scrape_f1_schedule (lines 197-353)
+# Tests for scrape_f1_schedule
 class TestScrapeF1Schedule:
-    @patch('app.core.scraping.schedule_scraper.session')
-    def test_successful_scrape(self, mock_session):
-        # Mock HTML response
+    def test_successful_scrape(self):
+        mock_session = Mock()
         mock_response = Mock()
         mock_response.content = b'''
         <a class="group" href="/en/racing/2025/bahrain">
@@ -179,19 +180,19 @@ class TestScrapeF1Schedule:
         mock_session.get.return_value = mock_response
 
         with patch('app.core.scraping.schedule_scraper.CURRENT_YEAR', 2025):
-            races = scrape_f1_schedule()
+            races = scrape_f1_schedule(mock_session)
             assert isinstance(races, list)
 
-    @patch('app.core.scraping.schedule_scraper.session')
-    def test_scrape_with_network_error(self, mock_session):
+    def test_scrape_with_network_error(self):
+        mock_session = Mock()
         mock_session.get.side_effect = Exception("Network error")
 
-        races = scrape_f1_schedule()
+        races = scrape_f1_schedule(mock_session)
         assert races == []
 
-    @patch('app.core.scraping.schedule_scraper.session')
     @patch('app.core.scraping.schedule_scraper.BeautifulSoup')
-    def test_scrape_with_session_details(self, mock_bs, mock_session):
+    def test_scrape_with_session_details(self, mock_bs):
+        mock_session = Mock()
         mock_soup = Mock()
         mock_card = Mock()
 
@@ -212,18 +213,19 @@ class TestScrapeF1Schedule:
         mock_session.get.return_value = Mock(content=b'')
 
         with patch('app.core.scraping.schedule_scraper.CURRENT_YEAR', 2025):
-            races = scrape_f1_schedule()
+            races = scrape_f1_schedule(mock_session)
             assert isinstance(races, list)
 
 
-# Tests for scrape_fia_formula_schedule (lines 358-476)
+# Tests for scrape_fia_formula_schedule
 class TestScrapeFiaFormulaSchedule:
     def test_unsupported_series(self):
+        mock_session = Mock()
         with pytest.raises(ValueError, match="Unsupported series"):
-            scrape_fia_formula_schedule('f4')
+            scrape_fia_formula_schedule(mock_session, 'f4')
 
-    @patch('app.core.scraping.schedule_scraper.session')
-    def test_f2_scrape(self, mock_session):
+    def test_f2_scrape(self):
+        mock_session = Mock()
         mock_response = Mock()
         mock_response.content = b'''
         <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
@@ -239,36 +241,37 @@ class TestScrapeFiaFormulaSchedule:
         mock_session.get.return_value = mock_response
 
         with patch('app.core.scraping.schedule_scraper.CURRENT_YEAR', 2025):
-            races = scrape_fia_formula_schedule('f2')
+            races = scrape_fia_formula_schedule(mock_session, 'f2')
             assert isinstance(races, list)
 
-    @patch('app.core.scraping.schedule_scraper.session')
-    def test_f3_scrape(self, mock_session):
+    def test_f3_scrape(self):
+        mock_session = Mock()
         mock_response = Mock()
         mock_response.content = b'<div></div>'
         mock_session.get.return_value = mock_response
 
-        races = scrape_fia_formula_schedule('f3')
+        races = scrape_fia_formula_schedule(mock_session, 'f3')
         assert isinstance(races, list)
 
-    @patch('app.core.scraping.schedule_scraper.session')
-    def test_network_error(self, mock_session):
+    def test_network_error(self):
+        mock_session = Mock()
         mock_session.get.side_effect = Exception("Connection error")
 
-        races = scrape_fia_formula_schedule('f2')
+        races = scrape_fia_formula_schedule(mock_session, 'f2')
         assert races == []
 
 
-# Tests for save_schedules (lines 480-531)
+# Tests for save_schedules
 class TestSaveSchedules:
     @patch('app.core.scraping.schedule_scraper.scrape_f1_schedule')
     @patch('app.core.scraping.schedule_scraper.scrape_fia_formula_schedule')
     @patch('app.core.scraping.schedule_scraper.os.path.exists')
-    @patch('builtins.open', create=True)
+    @patch('builtins.open', new_callable=mock_open)
     @patch('app.core.scraping.schedule_scraper.json.dump')
     @patch('app.core.scraping.schedule_scraper.json.load')
     def test_save_new_schedules(self, mock_json_load, mock_json_dump,
-                                mock_open, mock_exists, mock_f2_scraper, mock_f1_scraper):
+                                mock_file, mock_exists, mock_f2_scraper, mock_f1_scraper):
+        mock_session = Mock()
         mock_exists.return_value = False
         mock_f1_scraper.return_value = [
             {"round": 1, "name": "Bahrain", "location": "Bahrain",
@@ -279,7 +282,7 @@ class TestSaveSchedules:
              "sessions": {"race": {"start": "2025-03-02T14:00:00"}}}
         ]
 
-        save_schedules()
+        save_schedules(mock_session)
 
         # Verify scrapers were called
         assert mock_f1_scraper.called
@@ -288,13 +291,14 @@ class TestSaveSchedules:
     @patch('app.core.scraping.schedule_scraper.scrape_f1_schedule')
     @patch('app.core.scraping.schedule_scraper.scrape_fia_formula_schedule')
     @patch('app.core.scraping.schedule_scraper.os.path.exists')
-    @patch('builtins.open', create=True)
+    @patch('builtins.open', new_callable=mock_open)
     @patch('app.core.scraping.schedule_scraper.json.load')
     @patch('app.core.scraping.schedule_scraper.json.dump')
     @patch('app.core.scraping.schedule_scraper.is_race_completed_or_ongoing')
     def test_preserve_completed_races(self, mock_is_completed, mock_json_dump,
-                                      mock_json_load, mock_open, mock_exists,
+                                      mock_json_load, mock_file, mock_exists,
                                       mock_f2_scraper, mock_f1_scraper):
+        mock_session = Mock()
         mock_exists.return_value = True
 
         existing_race = {
@@ -312,31 +316,36 @@ class TestSaveSchedules:
         ]
         mock_f2_scraper.return_value = []
 
-        save_schedules()
+        save_schedules(mock_session)
+
+        expected_existing = {1: existing_race}
+        mock_f1_scraper.assert_called_once_with(mock_session, expected_existing)
 
         # Verify completed race was preserved
-        assert mock_is_completed.called
+        assert mock_json_dump.called
 
     @patch('app.core.scraping.schedule_scraper.scrape_f1_schedule')
     @patch('app.core.scraping.schedule_scraper.scrape_fia_formula_schedule')
     def test_scraper_exception_handling(self, mock_f2_scraper, mock_f1_scraper):
+        mock_session = Mock()
         mock_f1_scraper.side_effect = Exception("Scraper error")
         mock_f2_scraper.return_value = []
 
         # Should not raise exception
-        save_schedules()
+        save_schedules(mock_session)
 
     @patch('app.core.scraping.schedule_scraper.scrape_f1_schedule')
     @patch('app.core.scraping.schedule_scraper.scrape_fia_formula_schedule')
     @patch('app.core.scraping.schedule_scraper.os.path.exists')
-    @patch('builtins.open', create=True)
+    @patch('builtins.open', new_callable=mock_open)
     @patch('app.core.scraping.schedule_scraper.json.load')
-    def test_invalid_json_handling(self, mock_json_load, mock_open,
+    def test_invalid_json_handling(self, mock_json_load, mock_file,
                                    mock_exists, mock_f2_scraper, mock_f1_scraper):
+        mock_session = Mock()
         mock_exists.return_value = True
         mock_json_load.side_effect = Exception("Invalid JSON")
         mock_f1_scraper.return_value = []
         mock_f2_scraper.return_value = []
 
         # Should not raise exception
-        save_schedules()
+        save_schedules(mock_session)

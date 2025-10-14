@@ -281,45 +281,65 @@ class TestGetAllDriversFromData:
 
 
 class TestScrapeDrivers:
+    @patch('app.core.scraping.driver_scraper.create_session')
     @patch('app.core.scraping.driver_scraper.get_all_drivers_from_data')
-    def test_handles_no_drivers(self, mock_get_drivers):
+    def test_handles_no_drivers(self, mock_get_drivers, mock_create_session):
+        # No drivers found
         mock_get_drivers.return_value = []
+        mock_session = Mock()
+        mock_create_session.return_value = mock_session
 
-        scrape_drivers()  # Should not raise exception
+        # Call with None so function will call create_session()
+        scrape_drivers(None)  # Should not raise
 
         mock_get_drivers.assert_called_once()
+        # Because function returns before try/finally, session.close is NOT called here.
+        # If you want to assert session was created:
+        mock_create_session.assert_called_once()
 
-    @patch('app.core.scraping.driver_scraper.get_all_drivers_from_data')
-    @patch('app.core.scraping.driver_scraper.scrape_driver_profile')
+    @patch('app.core.scraping.driver_scraper.create_session')
     @patch('app.core.scraping.driver_scraper.os.makedirs')
-    @patch('app.core.scraping.driver_scraper.requests.Session')
-    def test_scrapes_all_drivers(self, mock_session_class, mock_makedirs,
-                                 mock_scrape_profile, mock_get_drivers):
+    @patch('app.core.scraping.driver_scraper.scrape_driver_profile')
+    @patch('app.core.scraping.driver_scraper.get_all_drivers_from_data')
+    def test_scrapes_all_drivers(self, mock_get_drivers, mock_scrape_profile,
+                                 mock_makedirs, mock_create_session):
         mock_get_drivers.return_value = ['Lewis Hamilton', 'Max Verstappen']
+
+        # scrape_driver_profile returns a dict per driver
         mock_scrape_profile.side_effect = [
             {'name': 'Lewis Hamilton', 'scraped': True},
             {'name': 'Max Verstappen', 'scraped': True}
         ]
+
         mock_session = Mock()
-        mock_session_class.return_value = mock_session
+        mock_create_session.return_value = mock_session
 
-        scrape_drivers()
+        scrape_drivers(None)
 
+        # We don't rely on order (set() used); just ensure both were called
         assert mock_scrape_profile.call_count == 2
+
+        # session.close should be called once in the finally block
         mock_session.close.assert_called_once()
 
-    @patch('app.core.scraping.driver_scraper.get_all_drivers_from_data')
-    @patch('app.core.scraping.driver_scraper.scrape_driver_profile')
+        # ensure profiles dir was ensured
+        mock_makedirs.assert_called_once()
+
+    @patch('app.core.scraping.driver_scraper.create_session')
     @patch('app.core.scraping.driver_scraper.os.makedirs')
-    @patch('app.core.scraping.driver_scraper.requests.Session')
-    def test_closes_session_on_error(self, mock_session_class, mock_makedirs,
-                                     mock_scrape_profile, mock_get_drivers):
+    @patch('app.core.scraping.driver_scraper.scrape_driver_profile')
+    @patch('app.core.scraping.driver_scraper.get_all_drivers_from_data')
+    def test_closes_session_on_error(self, mock_get_drivers, mock_scrape_profile,
+                                     mock_makedirs, mock_create_session):
         mock_get_drivers.return_value = ['Lewis Hamilton']
+
+        # Make the per-driver scraper raise to simulate an error
         mock_scrape_profile.side_effect = Exception("Scraping error")
         mock_session = Mock()
-        mock_session_class.return_value = mock_session
+        mock_create_session.return_value = mock_session
 
         with pytest.raises(Exception):
-            scrape_drivers()
+            scrape_drivers(None)
 
+        # Even on error, session.close() must be called from finally
         mock_session.close.assert_called_once()

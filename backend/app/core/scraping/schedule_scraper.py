@@ -2,7 +2,6 @@ import os
 import json
 import pytz
 import re
-import requests
 from bs4 import BeautifulSoup, SoupStrainer
 from datetime import datetime, timedelta, timezone
 from geopy.geocoders import Nominatim
@@ -10,6 +9,7 @@ from timezonefinder import TimezoneFinder
 from urllib.parse import urljoin
 
 from app.config import CURRENT_YEAR, SCHEDULE_DIR
+from app.core.scraping.scraping_utils import create_session
 
 F1_MAIN_STRAINER = SoupStrainer("a", class_="group", href=re.compile(r'/en/racing/\d{4}/')) # noqa: 501
 F1_SESSION_STRAINER = SoupStrainer("ul", class_=re.compile(r"grid"))
@@ -58,9 +58,15 @@ TRACK_COUNTRIES = {
     "Emilia-Romagna": 'Italy',
     "Abu Dhabi": "United Arab Emirates"
 }
-
-
-session = requests.Session()
+SESSION_MAPPING = {
+    'practice 1': 'fp1',
+    'practice 2': 'fp2',
+    'practice 3': 'fp3',
+    'sprint qualifying': 'sprint_qualifying',
+    'qualifying': 'qualifying',
+    'sprint': 'sprint',
+    'race': 'race'
+}
 
 
 def get_country_for_location(location_str):
@@ -96,33 +102,29 @@ def format_utc_datetime(dt):
 
 
 def is_race_completed_or_ongoing(race):
-    """Check if a race is completed or currently ongoing"""
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(timezone.utc)
     sessions = race.get('sessions', {})
     if not sessions:
         return False
 
-    first_session = next(iter(sessions.values()))
-    start_str = first_session.get('start')
-    if not start_str:
+    # Get the earliest session start
+    start_times = []
+    for s in sessions.values():
+        start = s.get('start')
+        if start and 'T' in start:
+            try:
+                dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                start_times.append(dt)
+            except ValueError:
+                continue
+
+    if not start_times:
         return False
 
-    try:
-        if 'T' in start_str:
-            session_dt = datetime.fromisoformat(start_str)
-            # Convert to naive datetime if it has timezone info
-            if session_dt.tzinfo is not None:
-                session_dt = session_dt.replace(tzinfo=None)
-        else:
-            # Date only
-            date_val = datetime.strptime(start_str, "%Y-%m-%d").date()
-            session_dt = datetime.combine(date_val, datetime.min.time())
-    except Exception as e:
-        print(e)
-        return False
-
-    # Race is completed/ongoing if its weekend has started
-    return now >= session_dt
+    first_session = min(start_times)
+    return now >= first_session
 
 
 def parse_time_to_datetime(time_str, base_date, day_name=None, location=None):
@@ -193,7 +195,10 @@ def parse_time_to_datetime(time_str, base_date, day_name=None, location=None):
         return None
 
 
-def scrape_f1_schedule():
+def scrape_f1_schedule(session, existing_races_by_round=None):
+    if existing_races_by_round is None:
+        existing_races_by_round = {}
+
     try:
         url = f"https://www.formula1.com/en/racing/{CURRENT_YEAR}.html"
         response = session.get(url, timeout=10)
@@ -207,6 +212,12 @@ def scrape_f1_schedule():
                 if "ROUND" not in round_tag.text:
                     continue
                 round_num = int(round_tag.text.split()[-1])
+
+                # Check if we should skip scraping details
+                existing_race = existing_races_by_round.get(round_num)
+                if existing_race and is_race_completed_or_ongoing(existing_race):
+                    races.append(existing_race)
+                    continue
 
                 # Extract race name and location
                 name_tag = card.select_one('.typography-module_display-xl-bold__Gyl5W')
@@ -244,16 +255,6 @@ def scrape_f1_schedule():
                         session_elements = race_soup.select('ul > li[role="listitem"]')
                         if not session_elements:
                             session_elements = race_soup.select('ul.grid > li.relative')
-
-                        session_mapping = {
-                            'practice 1': 'fp1',
-                            'practice 2': 'fp2',
-                            'practice 3': 'fp3',
-                            'sprint qualifying': 'sprint_qualifying',
-                            'qualifying': 'qualifying',
-                            'sprint': 'sprint',
-                            'race': 'race'
-                        }
 
                         for session_el in session_elements:
                             # Extract date
@@ -321,7 +322,7 @@ def scrape_f1_schedule():
 
                             # Map session name to key
                             session_key = None
-                            for name_pattern, key in session_mapping.items():
+                            for name_pattern, key in SESSION_MAPPING.items():
                                 if name_pattern in session_name:
                                     session_key = key
                                     break
@@ -353,8 +354,11 @@ def scrape_f1_schedule():
         return []
 
 
-def scrape_fia_formula_schedule(series_name):
+def scrape_fia_formula_schedule(session, series_name, existing_races_by_round=None):
     """Generic scraper for F2 and F3 schedules"""
+    if existing_races_by_round is None:
+        existing_races_by_round = {}
+
     series_config = {
         'f2': {'base_url': 'https://www.fiaformula2.com'},
         'f3': {'base_url': 'https://www.fiaformula3.com'}
@@ -383,6 +387,12 @@ def scrape_fia_formula_schedule(series_name):
                     continue
                 round_num = int(round_tag.text.split()[-1])
 
+                # Skip if race is completed/ongoing
+                existing_race = existing_races_by_round.get(round_num)
+                if existing_race and is_race_completed_or_ongoing(existing_race):
+                    races.append(existing_race)
+                    continue
+
                 # Extract location
                 location_span = container.select_one('.event-place .ellipsis')
                 location = location_span.text.strip() if location_span else "Unknown"
@@ -410,7 +420,7 @@ def scrape_fia_formula_schedule(series_name):
                         detail_soup = BeautifulSoup(detail_response.content, 'lxml', parse_only=FIA_SESSION_STRAINER) # noqa: 501
 
                         # Look for session schedule
-                        session_pins = detail_soup.find_all('div')
+                        session_pins = detail_soup.find_all('div', class_='pin')
 
                         for pin in session_pins:
                             session_divs = pin.select('div')
@@ -476,11 +486,14 @@ def scrape_fia_formula_schedule(series_name):
         return []
 
 
-def save_schedules():
+def save_schedules(session):
+    if not session:
+        session = create_session()
+
     series_scrapers = {
-        'f1': scrape_f1_schedule,
-        'f2': lambda: scrape_fia_formula_schedule('f2'),
-        'f3': lambda: scrape_fia_formula_schedule('f3')
+        'f1': lambda existing, session: scrape_f1_schedule(session, existing),
+        'f2': lambda existing, session: scrape_fia_formula_schedule(session, 'f2', existing),
+        'f3': lambda existing, session: scrape_fia_formula_schedule(session, 'f3', existing),
     }
 
     for name, scraper in series_scrapers.items():
@@ -496,34 +509,22 @@ def save_schedules():
                         print(f"Warning: Could not parse existing {name} schedule")
                         existing_schedule = []
 
+            # Create a map of existing races by round number
+            existing_races = {race['round']: race for race in existing_schedule}
+
             # Scrape new schedule
-            new_schedule = scraper()
+            new_schedule = scraper(existing_races, session)
             if not new_schedule:
                 print(f"Warning: No races scraped for {name}")
                 continue
 
-            # Create a map of existing races by round number
-            existing_races = {race['round']: race for race in existing_schedule}
-
-            # Merge schedules - preserve races that are completed or ongoing
-            merged_schedule = []
-            for new_race in new_schedule:
-                round_num = new_race['round']
-
-                # Check if this race is completed or ongoing
-                existing_race = existing_races.get(round_num)
-                if existing_race and is_race_completed_or_ongoing(existing_race):
-                    merged_schedule.append(existing_race)
-                else:
-                    merged_schedule.append(new_race)
-
-            merged_schedule.sort(key=lambda x: x['round'])
+            new_schedule.sort(key=lambda x: x['round'])
 
             # Save only if there are changes
-            if merged_schedule != existing_schedule:
+            if new_schedule != existing_schedule:
                 with open(file_path, "w") as f:
-                    json.dump(merged_schedule, f, indent=2)
-                print(f"Updated {name.upper()} schedule: {len(merged_schedule)} races")
+                    json.dump(new_schedule, f, indent=2)
+                print(f"Updated {name.upper()} schedule: {len(new_schedule)} races")
             else:
                 print(f"No changes detected for {name.upper()} schedule")
 
