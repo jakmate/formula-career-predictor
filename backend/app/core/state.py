@@ -25,7 +25,10 @@ class AppState:
             "last_scrape": None,
             "last_training": None,
             "last_trained_season": None,
-            "models_available": [],
+            "models_available": {
+                "f3_to_f2": [],
+                "f2_to_f1": []
+            },
             "data_health": {}
         }
         self.scheduler = AsyncIOScheduler()
@@ -59,7 +62,17 @@ class AppState:
                     if state["last_training"] else None
                 )
                 self.system_status["last_trained_season"] = state["last_trained_season"]
-                self.system_status["models_available"] = state["models_available"]
+                loaded_models_avail = state.get("models_available", {})
+                if not isinstance(loaded_models_avail, dict):
+                    LOGGER.warning("models_available is not a dict. Resetting to default.")
+                    loaded_models_avail = {"f3_to_f2": [], "f2_to_f1": []}
+                else:
+                    # Ensure both keys exist
+                    for key in ["f3_to_f2", "f2_to_f1"]:
+                        if key not in loaded_models_avail:
+                            loaded_models_avail[key] = []
+
+                self.system_status["models_available"] = loaded_models_avail
 
                 return True
 

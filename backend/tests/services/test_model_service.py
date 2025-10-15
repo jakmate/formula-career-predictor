@@ -16,7 +16,10 @@ def mock_app_state():
     app_state.scaler = {'f3_to_f2': Mock(), 'f2_to_f1': Mock()}
     app_state.feature_cols = {'f3_to_f2': ['col1', 'col2'], 'f2_to_f1': ['col1', 'col2']}
     app_state.system_status = {
-        "models_available": [],
+        "models_available": {
+            "f3_to_f2": [],
+            "f2_to_f1": []
+        },
         "last_training": None,
         "last_trained_season": None,
         "data_health": {}
@@ -271,7 +274,7 @@ class TestTrainModels:
         # Verify system status updates
         assert isinstance(model_service.app_state.system_status["last_training"], datetime)
         assert model_service.app_state.system_status["last_trained_season"] == 2023
-        assert len(model_service.app_state.system_status["models_available"]) > 0
+        assert len(model_service.app_state.system_status["models_available"]["f3_to_f2"]) > 0
 
         # Verify data health update
         expected_health = {
@@ -291,15 +294,17 @@ class TestTrainModels:
         """Test training when other series already exist"""
         # Pre-populate f2_to_f1 models
         model_service.app_state.models['f2_to_f1'] = {'ExistingModel': Mock()}
+        model_service.app_state.system_status["models_available"]["f2_to_f1"] = ["ExistingModel"]
 
         mock_train_models.return_value = ({'NewModel': Mock()}, ['col1'], Mock())
 
         await model_service.train_models(mock_trainable_df)
 
         # Verify both series are included in available models
-        available_models = model_service.app_state.system_status["models_available"]
-        assert any('f2_to_f1_ExistingModel' in model for model in available_models)
-        assert any('f3_to_f2_NewModel' in model for model in available_models)
+        f3_models = model_service.app_state.system_status["models_available"]["f3_to_f2"]
+        f2_models = model_service.app_state.system_status["models_available"]["f2_to_f1"]
+        assert "NewModel" in f3_models
+        assert "ExistingModel" in f2_models
 
 
 class TestEdgeCases:
@@ -351,3 +356,4 @@ class TestEdgeCases:
         # Verify it still processes even with 0 records
         health = model_service.app_state.system_status["data_health"]['f3_to_f2']
         assert health["historical_records"] == 0
+        assert model_service.app_state.system_status["models_available"]["f3_to_f2"] == []

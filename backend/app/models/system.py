@@ -6,14 +6,14 @@ from pydantic import BaseModel
 class HealthResponse(BaseModel):
     status: str
     timestamp: datetime
-    models_loaded: int
+    models_loaded: Dict[str, int]
     last_training: Optional[datetime]
 
 
 class SystemStatus(BaseModel):
     last_scrape: Optional[datetime]
     last_training: Optional[datetime]
-    models_available: List[str]
+    models_available: Dict[str, List[str]]
     data_health: Dict[str, Dict[str, int]]
 
 

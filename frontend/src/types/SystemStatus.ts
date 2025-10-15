@@ -1,6 +1,9 @@
 export interface SystemStatus {
   last_scrape?: string;
   last_training?: string;
-  models_available?: string[];
+  models_available?: {
+    f3_to_f2?: string[];
+    f2_to_f1?: string[];
+  };
   data_health?: Record<string, Record<string, number>>;
 }

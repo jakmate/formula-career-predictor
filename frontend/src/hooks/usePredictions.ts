@@ -2,13 +2,15 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { SystemStatus } from '../types/SystemStatus';
 import type { ModelResults } from '../types/ModelResults';
 
+export type SeriesType = 'f3_to_f2' | 'f2_to_f1';
+
 interface PredictionsResponse {
   models: string[];
   predictions: Record<string, ModelResults>;
   system_status: SystemStatus;
 }
 
-export const usePredictions = (series: string = 'f3_to_f2') => {
+export const usePredictions = (series: SeriesType = 'f3_to_f2') => {
   const [allData, setAllData] = useState<PredictionsResponse | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -98,11 +100,11 @@ export const usePredictions = (series: string = 'f3_to_f2') => {
           setError(
             `Update failed: ${err instanceof Error ? err.message : 'Unknown error'}`
           );
-          return; // Stop recursion on error
+          return;
         }
       };
 
-      await checkForUpdates(); // Make this awaited
+      await checkForUpdates();
     } catch (err) {
       setLoading(false);
       setError('Could not refresh data. Please try again later.');

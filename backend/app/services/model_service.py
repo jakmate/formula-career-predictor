@@ -87,12 +87,13 @@ class ModelService:
                         self.app_state.models[series][name] = model
                         models_loaded = True
 
+                # Update models_available for this series
+                if self.app_state.models[series]:
+                    self.app_state.system_status["models_available"][series] = list(
+                        self.app_state.models[series].keys()
+                    )
+
             if models_loaded:
-                # Update available models list
-                all_models = []
-                for series in ['f3_to_f2', 'f2_to_f1']:
-                    all_models.extend([f"{series}_{model}" for model in self.app_state.models[series].keys()])  # noqa: 501
-                self.app_state.system_status["models_available"] = all_models
                 LOGGER.info(f"Loaded models for series: {list(self.app_state.models.keys())}")
 
             return models_loaded
@@ -115,12 +116,8 @@ class ModelService:
         self.app_state.system_status["last_training"] = datetime.now()
         self.app_state.system_status["last_trained_season"] = trainable_df['year'].max()
 
-        # Update available models
-        all_models = []
-        for series in ['f3_to_f2', 'f2_to_f1']:
-            if series in self.app_state.models:
-                all_models.extend([f"{series}_{model}" for model in self.app_state.models[series].keys()])  # noqa: 501
-        self.app_state.system_status["models_available"] = all_models
+        # Update available models for this series
+        self.app_state.system_status["models_available"][self.series] = list(models.keys())
 
         self.app_state.system_status["data_health"][self.series] = {
             "historical_records": len(trainable_df),

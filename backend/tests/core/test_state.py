@@ -18,7 +18,10 @@ def sample_state_data():
         "last_scrape": "2024-01-01T12:00:00",
         "last_training": "2024-01-01T13:00:00",
         "last_trained_season": "2024",
-        "models_available": ["f3_to_f2_model1", "f2_to_f1_model2"]
+        "models_available": {
+            "f3_to_f2": ["f3_to_f2_model1"],
+            "f2_to_f1": ["f2_to_f1_model2"]
+        }
     }
 
 
@@ -45,7 +48,10 @@ class TestAppStateInit:
         assert state.system_status["last_scrape"] is None
         assert state.system_status["last_training"] is None
         assert state.system_status["last_trained_season"] is None
-        assert state.system_status["models_available"] == []
+        assert state.system_status["models_available"] == {
+            "f3_to_f2": [],
+            "f2_to_f1": []
+        }
         assert state.system_status["data_health"] == {}
         assert state.scheduler is not None
 
@@ -58,7 +64,10 @@ class TestSaveState:
         state.system_status["last_scrape"] = test_time
         state.system_status["last_training"] = test_time
         state.system_status["last_trained_season"] = "2024"
-        state.system_status["models_available"] = ["f3_to_f2_model1"]
+        state.system_status["models_available"] = {
+            "f3_to_f2": ["f3_to_f2_model1"],
+            "f2_to_f1": []
+        }
 
         with patch('builtins.open', mock_open()) as mock_file:
             state.save_state()
@@ -73,7 +82,10 @@ class TestSaveState:
             assert saved_data["last_scrape"] == "2024-01-01T12:00:00"
             assert saved_data["last_training"] == "2024-01-01T12:00:00"
             assert saved_data["last_trained_season"] == "2024"
-            assert saved_data["models_available"] == ["f3_to_f2_model1"]
+            assert saved_data["models_available"] == {
+                "f3_to_f2": ["f3_to_f2_model1"],
+                "f2_to_f1": []
+            }
 
     def test_save_state_with_none_values(self):
         state = AppState()
@@ -88,7 +100,10 @@ class TestSaveState:
             assert saved_data["last_scrape"] is None
             assert saved_data["last_training"] is None
             assert saved_data["last_trained_season"] is None
-            assert saved_data["models_available"] == []
+            assert saved_data["models_available"] == {
+                "f3_to_f2": [],
+                "f2_to_f1": []
+            }
 
 
 class TestLoadState:
@@ -104,9 +119,10 @@ class TestLoadState:
             assert state.system_status["last_scrape"] == datetime(2024, 1, 1, 12, 0, 0)
             assert state.system_status["last_training"] == datetime(2024, 1, 1, 13, 0, 0)
             assert state.system_status["last_trained_season"] == "2024"
-            assert state.system_status["models_available"] == [
-                "f3_to_f2_model1", "f2_to_f1_model2"
-            ]
+            assert state.system_status["models_available"] == {
+                "f3_to_f2": ["f3_to_f2_model1"],
+                "f2_to_f1": ["f2_to_f1_model2"]
+            }
 
     def test_load_state_file_not_exists(self):
         state = AppState()
@@ -231,7 +247,10 @@ class TestStateIntegration:
         state1.system_status["last_scrape"] = test_time
         state1.system_status["last_training"] = test_time
         state1.system_status["last_trained_season"] = "2024"
-        state1.system_status["models_available"] = ["f3_to_f2_model1", "f2_to_f1_model2"]
+        state1.system_status["models_available"] = {
+            "f3_to_f2": ["f3_to_f2_model1"],
+            "f2_to_f1": ["f2_to_f1_model2"]
+        }
 
         # Save state
         saved_data = None
@@ -251,10 +270,10 @@ class TestStateIntegration:
             assert state2.system_status["last_scrape"] == test_time
             assert state2.system_status["last_training"] == test_time
             assert state2.system_status["last_trained_season"] == "2024"
-            assert state2.system_status["models_available"] == [
-                "f3_to_f2_model1",
-                "f2_to_f1_model2"
-            ]
+            assert state2.system_status["models_available"] == {
+                "f3_to_f2": ["f3_to_f2_model1"],
+                "f2_to_f1": ["f2_to_f1_model2"]
+            }
 
             # Verify series structures are preserved
             assert state2.models == {
@@ -281,7 +300,10 @@ class TestStateIntegration:
         state1.feature_cols['f2_to_f1'] = ['experience', 'age']
 
         # Only system_status persists
-        state1.system_status["models_available"] = ["f3_to_f2_RandomForest", "f2_to_f1_LightGBM"]
+        state1.system_status["models_available"] = {
+            "f3_to_f2": ["RandomForest"],
+            "f2_to_f1": ["LightGBM"]
+        }
 
         # Save state
         saved_data = None
@@ -298,12 +320,20 @@ class TestStateIntegration:
             result = state2.load_state()
 
             assert result is True
-            assert state2.system_status["models_available"] == [
-                "f3_to_f2_RandomForest",
-                "f2_to_f1_LightGBM"
-            ]
+            assert state2.system_status["models_available"] == {
+                "f3_to_f2": ["RandomForest"],
+                "f2_to_f1": ["LightGBM"]
+            }
             # Series structures reset to defaults (models/scalers not persisted)
             assert state2.models == {
                 'f3_to_f2': {},
                 'f2_to_f1': {}
+            }
+            assert state2.feature_cols == {
+                'f3_to_f2': [],
+                'f2_to_f1': []
+            }
+            assert state2.scaler == {
+                'f3_to_f2': None,
+                'f2_to_f1': None
             }

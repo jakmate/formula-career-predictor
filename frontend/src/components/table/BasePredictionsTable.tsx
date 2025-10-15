@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { ErrorDisplay } from '../ErrorDisplay';
 import { BaseTableContent } from './TableContent';
-import { usePredictions } from '../../hooks/usePredictions';
+import { usePredictions, type SeriesType } from '../../hooks/usePredictions';
 import { Header } from '../Header';
 import { useState } from 'react';
 
@@ -17,10 +17,10 @@ interface SeriesOption {
 }
 
 interface BasePredictionsTableProps {
-  defaultSeries: string;
+  defaultSeries: SeriesType;
   seriesOptions: SeriesOption[];
-  getTitle: (selectedSeries: string) => string;
-  getDescription: (selectedSeries: string) => string;
+  getTitle: (selectedSeries: SeriesType) => string;
+  getDescription: (selectedSeries: SeriesType) => string;
 }
 
 export const BasePredictionsTable = ({
@@ -29,7 +29,9 @@ export const BasePredictionsTable = ({
   getTitle,
   getDescription,
 }: BasePredictionsTableProps) => {
-  const [selectedSeries, setSelectedSeries] = useState(defaultSeries);
+  const [selectedSeries, setSelectedSeries] = useState<SeriesType>(
+    defaultSeries as SeriesType
+  );
   const {
     predictions,
     selectedModel,
@@ -51,7 +53,7 @@ export const BasePredictionsTable = ({
           <div className="flex flex-col sm:flex-row gap-3">
             <select
               value={selectedSeries}
-              onChange={(e) => setSelectedSeries(e.target.value)}
+              onChange={(e) => setSelectedSeries(e.target.value as SeriesType)}
               className="px-4 py-2 bg-gray-800/60 border border-cyan-500/30 rounded-lg text-white backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-cyan-500 shadow-sm"
             >
               {seriesOptions.map((option) => (
@@ -112,7 +114,7 @@ export const BasePredictionsTable = ({
               )}
               <div className="flex items-center gap-1">
                 <Target className="w-4 h-4" />
-                Models: {status.models_available?.length || 0}
+                Models: {status.models_available?.[selectedSeries]?.length || 0}
               </div>
               <div className="flex items-center gap-1">
                 <UserRound className="w-4 h-4" />
