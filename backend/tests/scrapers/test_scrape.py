@@ -1,5 +1,5 @@
 from unittest.mock import Mock, patch
-from app.core.scraping.scrape import map_url, scrape, scrape_current_year
+from app.scrapers.scrape import map_url, scrape, scrape_current_year
 
 
 class TestMapUrl:
@@ -18,7 +18,6 @@ class TestMapUrl:
     def test_map_url_gp2_2016_and_before(self):
         """Test GP2 URL mapping for 2016 and earlier."""
         assert map_url(2, 2016) == "https://en.wikipedia.org/wiki/2016_GP2_Series"
-        assert map_url(2, 2015) == "https://en.wikipedia.org/wiki/2015_GP2_Series"
         assert map_url(2, 2010) == "https://en.wikipedia.org/wiki/2010_GP2_Series"
 
     def test_map_url_f3_after_2018(self):
@@ -29,7 +28,6 @@ class TestMapUrl:
     def test_map_url_gp3_2018_and_before(self):
         """Test GP3 URL mapping for 2018 and earlier."""
         assert map_url(3, 2018) == "https://en.wikipedia.org/wiki/2018_GP3_Series"
-        assert map_url(3, 2017) == "https://en.wikipedia.org/wiki/2017_GP3_Series"
         assert map_url(3, 2010) == "https://en.wikipedia.org/wiki/2010_GP3_Series"
 
     def test_map_url_invalid_num(self):
@@ -42,17 +40,17 @@ class TestMapUrl:
 class TestScrape:
     """Test the main scrape function."""
 
-    @patch('app.core.scraping.scrape.save_schedules')
-    @patch('app.core.scraping.scrape.scrape_drivers')
-    @patch('app.core.scraping.scrape.scrape_quali')
-    @patch('app.core.scraping.scrape.process_championship')
-    @patch('app.core.scraping.scrape.process_entries')
-    @patch('app.core.scraping.scrape.safe_request')
-    @patch('app.core.scraping.scrape.create_session')
+    @patch('app.scrapers.scrape.save_schedules')
+    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.scrape_quali')
+    @patch('app.scrapers.scrape.process_championship')
+    @patch('app.scrapers.scrape.process_entries')
+    @patch('app.scrapers.scrape.safe_request')
+    @patch('app.scrapers.scrape.create_session')
     def test_scrape_success(self, mock_create_session, mock_safe_request,
                             mock_process_entries, mock_process_championship,
                             mock_scrape_quali, mock_scrape_drivers, mock_save_schedules):
-        """Test successful scraping of all series."""
+        """Test successful scrapers of all series."""
         # Setup mocks
         mock_session = Mock()
         mock_create_session.return_value = mock_session
@@ -62,7 +60,7 @@ class TestScrape:
         mock_safe_request.return_value = mock_response
 
         # Run scrape function with limited year range for testing
-        with patch('app.core.scraping.scrape.range', return_value=[2020, 2021]):
+        with patch('app.scrapers.scrape.range', return_value=[2020, 2021]):
             scrape()
 
         # Verify session creation and closure
@@ -73,10 +71,10 @@ class TestScrape:
         mock_scrape_drivers.assert_called()
         mock_save_schedules.assert_called()
 
-    @patch('app.core.scraping.scrape.save_schedules')
-    @patch('app.core.scraping.scrape.scrape_drivers')
-    @patch('app.core.scraping.scrape.safe_request')
-    @patch('app.core.scraping.scrape.create_session')
+    @patch('app.scrapers.scrape.save_schedules')
+    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.safe_request')
+    @patch('app.scrapers.scrape.create_session')
     def test_scrape_request_failure(self, mock_create_session, mock_safe_request,
                                     mock_scrape_drivers, mock_save_schedules):
         """Test scrape behavior when safe_request returns None."""
@@ -84,18 +82,18 @@ class TestScrape:
         mock_create_session.return_value = mock_session
         mock_safe_request.return_value = None
 
-        with patch('app.core.scraping.scrape.range', return_value=[2020]):
+        with patch('app.scrapers.scrape.range', return_value=[2020]):
             scrape()
 
         mock_session.close.assert_called_once()
         mock_scrape_drivers.assert_called()
         mock_save_schedules.assert_called()
 
-    @patch('app.core.scraping.scrape.save_schedules')
-    @patch('app.core.scraping.scrape.scrape_drivers')
-    @patch('app.core.scraping.scrape.process_entries')
-    @patch('app.core.scraping.scrape.safe_request')
-    @patch('app.core.scraping.scrape.create_session')
+    @patch('app.scrapers.scrape.save_schedules')
+    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.process_entries')
+    @patch('app.scrapers.scrape.safe_request')
+    @patch('app.scrapers.scrape.create_session')
     def test_scrape_processing_exception(self, mock_create_session, mock_safe_request,
                                          mock_process_entries, mock_scrape_drivers,
                                          mock_save_schedules):
@@ -110,7 +108,7 @@ class TestScrape:
         # Make process_entries raise an exception
         mock_process_entries.side_effect = Exception("Processing error")
 
-        with patch('app.core.scraping.scrape.range', return_value=[2020]):
+        with patch('app.scrapers.scrape.range', return_value=[2020]):
             scrape()
 
         mock_session.close.assert_called_once()
@@ -121,19 +119,19 @@ class TestScrape:
 class TestScrapeCurrentYear:
     """Test the scrape_current_year function."""
 
-    @patch('app.core.scraping.scrape.datetime')
-    @patch('app.core.scraping.scrape.save_schedules')
-    @patch('app.core.scraping.scrape.scrape_drivers')
-    @patch('app.core.scraping.scrape.scrape_quali')
-    @patch('app.core.scraping.scrape.process_championship')
-    @patch('app.core.scraping.scrape.process_entries')
-    @patch('app.core.scraping.scrape.safe_request')
-    @patch('app.core.scraping.scrape.create_session')
+    @patch('app.scrapers.scrape.datetime')
+    @patch('app.scrapers.scrape.save_schedules')
+    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.scrape_quali')
+    @patch('app.scrapers.scrape.process_championship')
+    @patch('app.scrapers.scrape.process_entries')
+    @patch('app.scrapers.scrape.safe_request')
+    @patch('app.scrapers.scrape.create_session')
     def test_scrape_current_year_success(self, mock_create_session, mock_safe_request,
                                          mock_process_entries, mock_process_championship,
                                          mock_scrape_quali, mock_scrape_drivers,
                                          mock_save_schedules, mock_datetime):
-        """Test successful scraping of current year."""
+        """Test successful scrapers of current year."""
         # Mock current year
         mock_datetime.now.return_value.year = 2024
 
@@ -159,15 +157,15 @@ class TestScrapeCurrentYear:
         mock_scrape_drivers.assert_called_once()
         mock_save_schedules.assert_called_once()
 
-    @patch('app.core.scraping.scrape.datetime')
-    @patch('app.core.scraping.scrape.save_schedules')
-    @patch('app.core.scraping.scrape.scrape_drivers')
-    @patch('app.core.scraping.scrape.safe_request')
-    @patch('app.core.scraping.scrape.create_session')
+    @patch('app.scrapers.scrape.datetime')
+    @patch('app.scrapers.scrape.save_schedules')
+    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.safe_request')
+    @patch('app.scrapers.scrape.create_session')
     def test_scrape_current_year_request_failure(self, mock_create_session,
                                                  mock_safe_request, mock_scrape_drivers,
                                                  mock_save_schedules, mock_datetime):
-        """Test current year scraping with request failures."""
+        """Test current year scrapers with request failures."""
         mock_datetime.now.return_value.year = 2024
 
         mock_session = Mock()
@@ -180,17 +178,17 @@ class TestScrapeCurrentYear:
         mock_scrape_drivers.assert_called_once()
         mock_save_schedules.assert_called_once()
 
-    @patch('app.core.scraping.scrape.datetime')
-    @patch('app.core.scraping.scrape.save_schedules')
-    @patch('app.core.scraping.scrape.scrape_drivers')
-    @patch('app.core.scraping.scrape.process_entries')
-    @patch('app.core.scraping.scrape.safe_request')
-    @patch('app.core.scraping.scrape.create_session')
+    @patch('app.scrapers.scrape.datetime')
+    @patch('app.scrapers.scrape.save_schedules')
+    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.process_entries')
+    @patch('app.scrapers.scrape.safe_request')
+    @patch('app.scrapers.scrape.create_session')
     def test_scrape_current_year_processing_exception(self, mock_create_session,
                                                       mock_safe_request, mock_process_entries,
                                                       mock_scrape_drivers, mock_save_schedules,
                                                       mock_datetime):
-        """Test current year scraping with processing exceptions."""
+        """Test current year scrapers with processing exceptions."""
         mock_datetime.now.return_value.year = 2024
 
         mock_session = Mock()

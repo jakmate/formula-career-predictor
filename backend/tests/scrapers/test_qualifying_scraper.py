@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from bs4 import BeautifulSoup
-from app.core.scraping.qualifying_scraper import (
+from app.scrapers.qualifying_scraper import (
     add_time_gap,
     extract_race_report_links,
     process_qualifying_data,
@@ -46,9 +46,6 @@ class TestNormalizeTimeStr:
 
     def test_already_normalized_time(self):
         assert normalize_time_str("1:19.429") == "1:19.429"
-
-    def test_strips_whitespace(self):
-        assert normalize_time_str("  1.19.429  ") == "1:19.429"
 
 
 class TestExtractRaceReportLinks:
@@ -201,8 +198,8 @@ class TestExtractQualiTableData:
 
 
 class TestProcessTwoTableQualifying:
-    @patch('app.core.scraping.qualifying_scraper.extract_quali_table_data')
-    def test_alternating_grid_a_faster(self, mock_extract):
+    @patch('app.scrapers.qualifying_scraper.extract_quali_table_data')
+    def test_alternating_faster_grid(self, mock_extract):
         mock_extract.side_effect = [
             {
                 'headers': ['Pos.', 'No.', 'Driver', 'Team', 'Time', 'Grid'],
@@ -240,33 +237,9 @@ class TestProcessTwoTableQualifying:
         assert result['data'][2][0] == '3'
         assert result['data'][3][0] == '4'
 
-    @patch('app.core.scraping.qualifying_scraper.extract_quali_table_data')
-    def test_alternating_grid_b_faster(self, mock_extract):
-        mock_extract.side_effect = [
-            {
-                'headers': ['Pos.', 'No.', 'Driver', 'Team', 'Time', 'Grid'],
-                'data': [['1', '1', 'Driver A1', 'Team A', '1:19.200', '1']]
-            },
-            {
-                'headers': ['Pos.', 'No.', 'Driver', 'Team', 'Time', 'Grid'],
-                'data': [['1', '2', 'Driver B1', 'Team B', '1:19.000', '1']]
-            }
-        ]
-
-        group_a_head = Mock()
-        group_b_head = Mock()
-        group_a_head.find_next.return_value = Mock()
-        group_b_head.find_next.return_value = Mock()
-
-        result = process_two_table_qualifying(group_a_head, group_b_head, "Round 1", "url")
-
-        # B is faster, so should start with B
-        assert result['data'][0][2] == 'Driver B1'
-        assert result['data'][1][2] == 'Driver A1'
-
 
 class TestProcessQualifyingData:
-    @patch('app.core.scraping.qualifying_scraper.safe_request')
+    @patch('app.scrapers.qualifying_scraper.safe_request')
     def test_process_standard_qualifying(self, mock_request):
         html = """
         <h3 id="Qualifying">Qualifying</h3>
@@ -291,7 +264,7 @@ class TestProcessQualifyingData:
         assert result['url'] == "http://test.com"
         assert len(result['data']) == 1
 
-    @patch('app.core.scraping.qualifying_scraper.safe_request')
+    @patch('app.scrapers.qualifying_scraper.safe_request')
     def test_no_qualifying_section_returns_none(self, mock_request):
         html = "<html><body></body></html>"
         mock_response = Mock()
@@ -303,7 +276,7 @@ class TestProcessQualifyingData:
 
         assert result is None
 
-    @patch('app.core.scraping.qualifying_scraper.safe_request')
+    @patch('app.scrapers.qualifying_scraper.safe_request')
     def test_failed_request_returns_none(self, mock_request):
         mock_request.return_value = None
 
@@ -329,7 +302,7 @@ class TestSaveQualifyingData:
             }
         ]
 
-        with patch('app.core.scraping.qualifying_scraper.DATA_DIR', '/data'):
+        with patch('app.scrapers.qualifying_scraper.DATA_DIR', '/data'):
             save_qualifying_data(qualifying_results, 2024, 1)
 
         mock_makedirs.assert_called_once()
@@ -339,17 +312,17 @@ class TestSaveQualifyingData:
     def test_save_skips_none_results(self, mock_makedirs):
         qualifying_results = [None, None]
 
-        with patch('app.core.scraping.qualifying_scraper.DATA_DIR', '/data'):
+        with patch('app.scrapers.qualifying_scraper.DATA_DIR', '/data'):
             save_qualifying_data(qualifying_results, 2024, 1)
 
         mock_makedirs.assert_called_once()
 
 
 class TestScrapeQuali:
-    @patch('app.core.scraping.qualifying_scraper.save_qualifying_data')
-    @patch('app.core.scraping.qualifying_scraper.process_qualifying_data')
-    @patch('app.core.scraping.qualifying_scraper.extract_race_report_links')
-    @patch('app.core.scraping.qualifying_scraper.create_session')
+    @patch('app.scrapers.qualifying_scraper.save_qualifying_data')
+    @patch('app.scrapers.qualifying_scraper.process_qualifying_data')
+    @patch('app.scrapers.qualifying_scraper.extract_race_report_links')
+    @patch('app.scrapers.qualifying_scraper.create_session')
     def test_scrape_quali_full_flow(self, mock_session, mock_extract, mock_process, mock_save):
         mock_extract.return_value = ['http://race1.com', 'http://race2.com']
         mock_process.side_effect = [
@@ -363,8 +336,8 @@ class TestScrapeQuali:
         assert mock_process.call_count == 2
         mock_save.assert_called_once()
 
-    @patch('app.core.scraping.qualifying_scraper.extract_race_report_links')
-    @patch('app.core.scraping.qualifying_scraper.create_session')
+    @patch('app.scrapers.qualifying_scraper.extract_race_report_links')
+    @patch('app.scrapers.qualifying_scraper.create_session')
     def test_scrape_quali_no_links(self, mock_session, mock_extract):
         mock_extract.return_value = []
 

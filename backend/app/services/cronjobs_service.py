@@ -4,10 +4,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.core.state import AppState
 from app.config import CURRENT_YEAR, LOGGER, SEASON_END_MONTH
-from app.core.scraping.scrape import scrape_current_year
+from app.scrapers.scrape import scrape_current_year
 
 
-class SchedulerService:
+class CronjobService:
     def __init__(self, app_state: AppState, model_service, data_service):
         self.app_state = app_state
         self.model_service = model_service

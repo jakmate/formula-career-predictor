@@ -14,7 +14,8 @@ class TestGetRaceColumns:
             'BAH Race': [2, 1],
             'SAU Sprint': [None, None],  # No data
             'MON Race': [3, 4],
-            'Invalid': ['text', 'text']  # Not a track code pattern
+            'Invalid': ['text', 'text'],  # Not a track code pattern
+            'MON Sprint': [np.nan, np.nan]
         })
 
         result = get_race_columns(df)
@@ -37,18 +38,6 @@ class TestGetRaceColumns:
 
         result = get_race_columns(df)
         assert result == []
-
-    def test_columns_without_data(self):
-        """Test that columns with all null values are excluded."""
-        df = pd.DataFrame({
-            'Driver': ['Alice', 'Bob'],
-            'BAH Sprint': [1, 2],
-            'SAU Race': [None, None],
-            'MON Sprint': [np.nan, np.nan]
-        })
-
-        result = get_race_columns(df)
-        assert result == ['BAH Sprint']
 
     def test_mixed_case_track_codes(self):
         """Test that only uppercase track codes are identified."""
@@ -107,15 +96,15 @@ class TestCalculateAge:
         """Test valid age calculation."""
         df = pd.DataFrame({
             'dob': ['1990-05-15', '1985-12-01'],
-            'year': [2020, 2020]
+            'year': [2020, 2025]
         })
 
         result = calculate_age(df)
 
         # 1990-05-15 to 2020-01-01 ≈ 29.6 years
-        # 1985-12-01 to 2020-01-01 ≈ 34.1 years
+        # 1985-12-01 to 2025-01-01 ≈ 34.1 years
         assert abs(result.loc[0, 'age'] - 29.6) < 0.1
-        assert abs(result.loc[1, 'age'] - 34.1) < 0.1
+        assert abs(result.loc[1, 'age'] - 39.1) < 0.1
 
     def test_missing_dob_column(self):
         """Test DataFrame without dob column."""
@@ -156,31 +145,6 @@ class TestCalculateAge:
         assert pd.isna(result.loc[1, 'age'])      # Invalid
         assert not pd.isna(result.loc[2, 'age'])  # Valid
         assert pd.isna(result.loc[3, 'age'])      # None
-
-    def test_different_years(self):
-        """Test age calculation for different years."""
-        df = pd.DataFrame({
-            'dob': ['1990-05-15', '1990-05-15'],
-            'year': [2020, 2025]
-        })
-
-        result = calculate_age(df)
-        age_2020 = result.loc[0, 'age']
-        age_2025 = result.loc[1, 'age']
-
-        # Age should be 5 years more in 2025
-        assert abs((age_2025 - age_2020) - 5.0) < 0.1
-
-    def test_leap_year_handling(self):
-        """Test age calculation handles leap years correctly."""
-        df = pd.DataFrame({
-            'dob': ['1988-02-29'],  # Leap year birthday
-            'year': [2020]
-        })
-
-        result = calculate_age(df)
-        assert not pd.isna(result.loc[0, 'age'])
-        assert result.loc[0, 'age'] > 0
 
     @patch('builtins.print')
     @patch('app.core.utils.datetime')

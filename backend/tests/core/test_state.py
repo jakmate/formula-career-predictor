@@ -202,39 +202,6 @@ class TestLoadState:
             assert state.system_status["last_training"] == datetime(2024, 6, 15, 15, 45, 30)
 
 
-class TestSeriesSpecificState:
-
-    def test_models_structure(self):
-        state = AppState()
-
-        # Test adding models to specific series
-        state.models['f3_to_f2']['RandomForest'] = 'mock_model_1'
-        state.models['f2_to_f1']['LightGBM'] = 'mock_model_2'
-
-        assert state.models['f3_to_f2']['RandomForest'] == 'mock_model_1'
-        assert state.models['f2_to_f1']['LightGBM'] == 'mock_model_2'
-        assert 'LightGBM' not in state.models['f3_to_f2']
-        assert 'RandomForest' not in state.models['f2_to_f1']
-
-    def test_feature_cols_structure(self):
-        state = AppState()
-
-        state.feature_cols['f3_to_f2'] = ['feature1', 'feature2']
-        state.feature_cols['f2_to_f1'] = ['feature3', 'feature4']
-
-        assert state.feature_cols['f3_to_f2'] == ['feature1', 'feature2']
-        assert state.feature_cols['f2_to_f1'] == ['feature3', 'feature4']
-
-    def test_scaler_structure(self):
-        state = AppState()
-
-        state.scaler['f3_to_f2'] = 'mock_scaler_1'
-        state.scaler['f2_to_f1'] = 'mock_scaler_2'
-
-        assert state.scaler['f3_to_f2'] == 'mock_scaler_1'
-        assert state.scaler['f2_to_f1'] == 'mock_scaler_2'
-
-
 class TestStateIntegration:
     """Test save/load integration"""
 

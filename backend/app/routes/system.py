@@ -3,7 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.dependencies import get_scheduler_service
 from app.models.system import RefreshResponse
-from app.core.scheduler import SchedulerService
+from app.services.cronjobs_service import CronjobService
 
 
 router = APIRouter()
@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("/refresh", response_model=RefreshResponse)
 async def refresh_data(
     background_tasks: BackgroundTasks,
-    scheduler_service: SchedulerService = Depends(get_scheduler_service)
+    scheduler_service: CronjobService = Depends(get_scheduler_service)
 ):
     """Trigger data refresh and model retraining"""
     background_tasks.add_task(scheduler_service.scrape_and_train_task)

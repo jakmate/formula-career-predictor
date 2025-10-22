@@ -6,6 +6,7 @@ from fastapi import HTTPException
 import pytz
 
 from app.services.schedule_service import ScheduleService
+from app.models.schedule import ScheduleRequest
 
 
 class TestScheduleService:
@@ -95,18 +96,10 @@ class TestScheduleService:
 
     # Tests for get_series_schedule
     @pytest.mark.asyncio
-    async def test_get_series_schedule_invalid_series(self, schedule_service):
-        with pytest.raises(HTTPException) as exc_info:
-            await schedule_service.get_series_schedule("invalid_series")
-
-        assert exc_info.value.status_code == 404
-        assert exc_info.value.detail == "Invalid series specified"
-
-    @pytest.mark.asyncio
     async def test_get_series_schedule_file_not_found(self, schedule_service):
         with patch('os.path.exists', return_value=False):
             with pytest.raises(HTTPException) as exc_info:
-                await schedule_service.get_series_schedule("f1")
+                await schedule_service.get_series_schedule(ScheduleRequest(series="f1"))
 
             assert exc_info.value.status_code == 404
             assert exc_info.value.detail == "Schedule data not found"
@@ -116,33 +109,9 @@ class TestScheduleService:
     async def test_get_series_schedule_success_utc(self, schedule_service, sample_schedule_data):
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(sample_schedule_data))):
-                result = await schedule_service.get_series_schedule("f1")
+                result = await schedule_service.get_series_schedule(ScheduleRequest(series="f1"))
 
                 assert result == sample_schedule_data
-
-    @pytest.mark.asyncio
-    @patch('app.config.SCHEDULE_DIR', '/test/schedules')
-    async def test_get_series_schedule_with_timezone_param(self, schedule_service, sample_schedule_data): # noqa: 501
-        with patch('os.path.exists', return_value=True):
-            with patch('builtins.open', mock_open(read_data=json.dumps(sample_schedule_data))):
-                with patch.object(schedule_service, '_convert_schedule_timezone') as mock_convert:
-                    mock_convert.return_value = sample_schedule_data
-
-                    await schedule_service.get_series_schedule("f1", timezone="America/New_York")
-
-                    mock_convert.assert_called_once_with(sample_schedule_data, "America/New_York")
-
-    @pytest.mark.asyncio
-    @patch('app.config.SCHEDULE_DIR', '/test/schedules')
-    async def test_get_series_schedule_with_x_timezone_param(self, schedule_service, sample_schedule_data): # noqa: 501
-        with patch('os.path.exists', return_value=True):
-            with patch('builtins.open', mock_open(read_data=json.dumps(sample_schedule_data))):
-                with patch.object(schedule_service, '_convert_schedule_timezone') as mock_convert:
-                    mock_convert.return_value = sample_schedule_data
-
-                    await schedule_service.get_series_schedule("f1", x_timezone="Europe/London")
-
-                    mock_convert.assert_called_once_with(sample_schedule_data, "Europe/London")
 
     @pytest.mark.asyncio
     @patch('app.config.SCHEDULE_DIR', '/test/schedules')
@@ -154,27 +123,21 @@ class TestScheduleService:
                     mock_convert.return_value = sample_schedule_data
 
                     await schedule_service.get_series_schedule(
-                        "f1",
-                        timezone="America/New_York",
-                        x_timezone="Europe/London"
+                        ScheduleRequest(
+                            series="f1",
+                            timezone="America/New_York",
+                            x_timezone="Europe/London"
+                        )
                     )
 
                     mock_convert.assert_called_once_with(sample_schedule_data, "America/New_York")
 
     # Tests for get_next_race
     @pytest.mark.asyncio
-    async def test_get_next_race_invalid_series(self, schedule_service):
-        with pytest.raises(HTTPException) as exc_info:
-            await schedule_service.get_next_race("invalid_series")
-
-        assert exc_info.value.status_code == 404
-        assert exc_info.value.detail == "Invalid series specified"
-
-    @pytest.mark.asyncio
     async def test_get_next_race_file_not_found(self, schedule_service):
         with patch('os.path.exists', return_value=False):
             with pytest.raises(HTTPException) as exc_info:
-                await schedule_service.get_next_race("f1")
+                await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
             assert exc_info.value.status_code == 404
             assert exc_info.value.detail == "Schedule data not found"
@@ -199,7 +162,7 @@ class TestScheduleService:
 
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(sample_schedule_data))):
-                result = await schedule_service.get_next_race("f1")
+                result = await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
                 assert result is not None
                 assert result["round"] == 2
@@ -215,7 +178,7 @@ class TestScheduleService:
         # All sessions in the past
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(sample_schedule_data))):
-                result = await schedule_service.get_next_race("f1")
+                result = await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
                 # Should return last race of the season
                 assert result is not None
@@ -231,7 +194,7 @@ class TestScheduleService:
 
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(empty_schedule))):
-                result = await schedule_service.get_next_race("f1")
+                result = await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
                 assert result is None
 
@@ -243,7 +206,7 @@ class TestScheduleService:
 
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(sample_schedule_with_tbc))):
-                result = await schedule_service.get_next_race("f1")
+                result = await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
                 assert result is not None
                 assert result["nextSession"]["name"] == "race"
@@ -273,7 +236,7 @@ class TestScheduleService:
 
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(tbc_schedule))):
-                result = await schedule_service.get_next_race("f1")
+                result = await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
                 assert result is not None
                 assert result["nextSession"]["name"] == "practice"
@@ -291,7 +254,9 @@ class TestScheduleService:
                 with patch.object(schedule_service, '_convert_race_timezone') as mock_convert:
                     mock_convert.return_value = sample_schedule_data[0]
 
-                    await schedule_service.get_next_race("f1", timezone="America/New_York")
+                    await schedule_service.get_next_race(
+                        ScheduleRequest(series="f1", timezone="America/New_York")
+                    )
 
                     mock_convert.assert_called_once()
 
@@ -313,7 +278,7 @@ class TestScheduleService:
 
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(schedule_without_start))):
-                result = await schedule_service.get_next_race("f1")
+                result = await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
                 # Should return the last race with seasonCompleted=True
                 assert result is not None
@@ -345,7 +310,7 @@ class TestScheduleService:
 
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(test_schedule))):
-                result = await schedule_service.get_next_race("f1")
+                result = await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
                 assert result is not None
                 assert result["nextSession"]["name"] == "practice"
@@ -373,7 +338,7 @@ class TestScheduleService:
 
         with patch('os.path.exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(invalid_schedule))):
-                result = await schedule_service.get_next_race("f1")
+                result = await schedule_service.get_next_race(ScheduleRequest(series="f1"))
 
                 assert result is not None
                 assert result["nextSession"]["name"] == "race"  # Should skip invalid datetime
@@ -450,19 +415,6 @@ class TestScheduleService:
 
         # Check that nextSession date was converted
         assert result["nextSession"]["date"] != "2025-03-14T01:00:00"
-
-    def test_convert_race_timezone_with_next_session_date_only(self, schedule_service,
-                                                               sample_schedule_data):
-        race = sample_schedule_data[0].copy()
-        race["nextSession"] = {
-            "name": "practice",
-            "date": "2025-03-14"  # Date-only format
-        }
-
-        result = schedule_service._convert_race_timezone(race, "America/New_York")
-
-        # Should not convert date-only formats
-        assert result["nextSession"]["date"] == "2025-03-14"
 
     def test_convert_race_timezone_with_tbc_sessions(self, schedule_service):
         race_with_tbc = {

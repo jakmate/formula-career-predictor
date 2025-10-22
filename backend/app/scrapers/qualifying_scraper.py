@@ -2,7 +2,7 @@ import csv
 import os
 from bs4 import BeautifulSoup, SoupStrainer
 from app.config import DATA_DIR
-from app.core.scraping.scraping_utils import create_session, remove_superscripts, safe_request
+from app.scrapers.scraping_utils import create_session, remove_superscripts, safe_request
 
 COLUMN_MAPPING = {
     'Name': 'Driver',

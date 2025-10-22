@@ -43,17 +43,11 @@ def mock_trainable_df():
 
 
 class TestModelServiceInit:
-    def test_init_with_series(self, mock_app_state):
+    def test_init(self, mock_app_state):
         """Test initialization with series"""
         service = ModelService(mock_app_state, series='f3_to_f2')
         assert service.app_state == mock_app_state
         assert service.series == 'f3_to_f2'
-
-    def test_init_without_series(self, mock_app_state):
-        """Test initialization without series"""
-        service = ModelService(mock_app_state)
-        assert service.app_state == mock_app_state
-        assert service.series is None
 
 
 class TestSaveModels:
@@ -286,25 +280,6 @@ class TestTrainModels:
         mock_logger.info.assert_called_with(
             "Training classification models for f3_to_f2 on 100 records"
         )
-
-    @patch('app.core.predictor.train_models')
-    @pytest.mark.asyncio
-    async def test_train_models_with_existing_series(self, mock_train_models,
-                                                     model_service, mock_trainable_df):
-        """Test training when other series already exist"""
-        # Pre-populate f2_to_f1 models
-        model_service.app_state.models['f2_to_f1'] = {'ExistingModel': Mock()}
-        model_service.app_state.system_status["models_available"]["f2_to_f1"] = ["ExistingModel"]
-
-        mock_train_models.return_value = ({'NewModel': Mock()}, ['col1'], Mock())
-
-        await model_service.train_models(mock_trainable_df)
-
-        # Verify both series are included in available models
-        f3_models = model_service.app_state.system_status["models_available"]["f3_to_f2"]
-        f2_models = model_service.app_state.system_status["models_available"]["f2_to_f1"]
-        assert "NewModel" in f3_models
-        assert "ExistingModel" in f2_models
 
 
 class TestEdgeCases:

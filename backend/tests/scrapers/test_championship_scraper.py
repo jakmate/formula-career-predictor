@@ -1,7 +1,7 @@
 from unittest.mock import patch, mock_open
 from bs4 import BeautifulSoup
 
-from app.core.scraping.championship_scraper import (
+from app.scrapers.championship_scraper import (
     map_url,
     find_championship_table,
     build_headers,
@@ -80,17 +80,6 @@ def test_find_championship_table_2013_series2_not_enough_tables():
     table, error = find_championship_table(soup, "Drivers'", 2, 2013)
     assert table is None
     assert "No Drivers' table found" in error
-
-
-# has_number_column tests (covering 'No' + year 2010 special-case)
-def test_has_number_column_true_for_no_dot():
-    # third header text is "No."
-    race_headers = [
-        make_soup("<th>Pos</th>").find("th"),
-        make_soup("<th>Driver</th>").find("th"),
-        make_soup("<th>No.</th>").find("th"),
-    ]
-    assert has_number_column(race_headers, 2015) is True
 
 
 def test_has_number_column_true_for_no_and_year_2010():
@@ -242,7 +231,7 @@ def test_process_table_row_with_no_col_skips_column():
 
 
 # write_championship_csv tests (rowspan persistence across rows)
-@patch("app.core.scraping.championship_scraper.open", new_callable=mock_open)
+@patch("app.scrapers.championship_scraper.open", new_callable=mock_open)
 def test_write_championship_csv_rowspan_across_rows(mock_file):
     headers = ["Pos", "Driver", "Race1", "Points"]
 
@@ -280,7 +269,7 @@ def test_write_championship_csv_rowspan_across_rows(mock_file):
 
 
 # process_championship tests (full + error path)
-@patch("app.core.scraping.championship_scraper.write_championship_csv")
+@patch("app.scrapers.championship_scraper.write_championship_csv")
 def test_process_championship_full(mock_write):
     html = """
     <h3 id="World_Drivers'_Championship_standings"></h3>

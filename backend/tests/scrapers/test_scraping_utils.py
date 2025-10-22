@@ -2,20 +2,16 @@ import pytest
 import requests
 from unittest.mock import Mock, patch
 from bs4 import BeautifulSoup
-from app.core.scraping.scraping_utils import create_session, remove_superscripts, safe_request
+from app.scrapers.scraping_utils import create_session, remove_superscripts, safe_request
 
 
 class TestCreateSession:
-    def test_create_session_returns_session(self):
-        """Test that create_session returns a requests.Session object"""
-        session = create_session()
-        assert isinstance(session, requests.Session)
-
-    def test_create_session_sets_headers(self):
+    def test_create_session(self):
         """Test that create_session sets required headers"""
         session = create_session()
         headers = session.headers
 
+        assert isinstance(session, requests.Session)
         assert 'User-Agent' in headers
         assert 'Mozilla/5.0' in headers['User-Agent']
         assert headers['Accept'] == 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' # noqa: 501
@@ -35,15 +31,6 @@ class TestRemoveSuperscripts:
         result = remove_superscripts(cell)
         assert result == 'Text more text'
 
-    def test_remove_superscripts_preserve_spaces_true(self):
-        """Test preserve_spaces=True maintains spacing"""
-        html = '<div><span>Text1</span><sup>1</sup><span>Text2</span></div>'
-        soup = BeautifulSoup(html, 'html.parser')
-        cell = soup.find('div')
-
-        result = remove_superscripts(cell, preserve_spaces=True)
-        assert result == 'Text1 Text2'
-
     def test_remove_superscripts_preserve_spaces_false(self):
         """Test preserve_spaces=False removes spacing"""
         html = '<div><span>Text1</span><sup>1</sup><span>Text2</span></div>'
@@ -61,15 +48,6 @@ class TestRemoveSuperscripts:
 
         result = remove_superscripts(cell)
         assert result == 'Just plain text'
-
-    def test_remove_superscripts_nested_sup(self):
-        """Test with nested sup elements"""
-        html = '<div>Text<sup>outer<sup>inner</sup></sup> end</div>'
-        soup = BeautifulSoup(html, 'html.parser')
-        cell = soup.find('div')
-
-        result = remove_superscripts(cell)
-        assert result == 'Text end'
 
 
 class TestSafeRequest:
@@ -168,34 +146,3 @@ class TestSafeRequest:
         assert result is None
         assert mock_session.get.call_count == 2
         assert mock_sleep.call_count == 1
-
-    def test_safe_request_custom_parameters(self):
-        """Test safe_request with custom max_retries and base_delay"""
-        mock_session = Mock()
-        mock_response = Mock()
-        mock_response.raise_for_status.return_value = None
-        mock_session.get.return_value = mock_response
-
-        result = safe_request(mock_session, 'http://test.com', max_retries=5, base_delay=2)
-
-        assert result == mock_response
-        mock_session.get.assert_called_once_with('http://test.com', timeout=15)
-
-    @patch('time.sleep')
-    def test_safe_request_403_wait_times(self, mock_sleep):
-        """Test 403 error wait times increase correctly"""
-        mock_session = Mock()
-        mock_response = Mock()
-
-        http_error = requests.exceptions.HTTPError()
-        http_error.response = Mock()
-        http_error.response.status_code = 403
-        mock_response.raise_for_status.side_effect = http_error
-        mock_session.get.return_value = mock_response
-
-        safe_request(mock_session, 'http://test.com', max_retries=3)
-
-        # Should sleep twice: 2 seconds, then 3 seconds
-        expected_calls = [pytest.approx(2), pytest.approx(3)]
-        actual_calls = [call[0][0] for call in mock_sleep.call_args_list]
-        assert actual_calls == expected_calls

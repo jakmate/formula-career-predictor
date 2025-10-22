@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 
 from app.config import PROFILES_DIR
-from app.core.scraping.scraping_utils import create_session
+from app.scrapers.scraping_utils import create_session
 
 SPARQL_ENDPOINT = "https://query.wikidata.org/sparql"
 DRIVER_ALIASES = {

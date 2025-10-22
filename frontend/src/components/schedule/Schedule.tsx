@@ -26,6 +26,7 @@ export const Schedule = () => {
             <select
               value={selectedSeries}
               onChange={(e) => setSelectedSeries(e.target.value)}
+              disabled={loading}
               className="px-4 py-2 bg-gray-800/60 border border-cyan-500/30 rounded-lg text-white backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-cyan-500 shadow-sm"
             >
               {series.map((s) => (

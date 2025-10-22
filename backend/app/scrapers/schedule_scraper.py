@@ -9,7 +9,7 @@ from timezonefinder import TimezoneFinder
 from urllib.parse import urljoin
 
 from app.config import CURRENT_YEAR, SCHEDULE_DIR
-from app.core.scraping.scraping_utils import create_session
+from app.scrapers.scraping_utils import create_session
 
 F1_MAIN_STRAINER = SoupStrainer("a", class_="group", href=re.compile(r'/en/racing/\d{4}/')) # noqa: 501
 F1_SESSION_STRAINER = SoupStrainer("ul", class_=re.compile(r"grid"))

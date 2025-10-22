@@ -1,12 +1,12 @@
 import gc
 from bs4 import BeautifulSoup
 from datetime import datetime
-from app.core.scraping.schedule_scraper import save_schedules
-from app.core.scraping.championship_scraper import process_championship
-from app.core.scraping.entries_scraper import process_entries
-from app.core.scraping.qualifying_scraper import scrape_quali
-from app.core.scraping.driver_scraper import scrape_drivers
-from app.core.scraping.scraping_utils import create_session, safe_request
+from app.scrapers.schedule_scraper import save_schedules
+from app.scrapers.championship_scraper import process_championship
+from app.scrapers.entries_scraper import process_entries
+from app.scrapers.qualifying_scraper import scrape_quali
+from app.scrapers.driver_scraper import scrape_drivers
+from app.scrapers.scraping_utils import create_session, safe_request
 
 BASE_URL = "https://en.wikipedia.org/wiki/"
 

@@ -1,5 +1,5 @@
 import csv
-from app.core.scraping.scraping_utils import create_output_file, remove_superscripts
+from app.scrapers.scraping_utils import create_output_file, remove_superscripts
 
 
 def map_url(championship_type, series, year):

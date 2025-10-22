@@ -17,7 +17,7 @@ def mock_services():
     with patch("app.dependencies.AppState") as mock_app_state, \
          patch("app.dependencies.ModelService") as mock_model_service, \
          patch("app.dependencies.DataService") as mock_data_service, \
-         patch("app.dependencies.SchedulerService") as mock_scheduler_service:
+         patch("app.dependencies.CronjobService") as mock_scheduler_service:
 
         # Configure mocks
         mock_app_state_instance = MagicMock()

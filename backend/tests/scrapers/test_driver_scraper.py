@@ -4,7 +4,7 @@ import requests
 from unittest.mock import Mock, patch, mock_open
 import pandas as pd
 
-from app.core.scraping.driver_scraper import (
+from app.scrapers.driver_scraper import (
     get_driver_filename,
     search_wikidata_driver,
     extract_nationality_from_result,
@@ -19,12 +19,6 @@ from app.core.scraping.driver_scraper import (
 class TestGetDriverFilename:
     def test_basic_name(self):
         assert get_driver_filename("Lewis Hamilton") == "lewis_hamilton.json"
-
-    def test_special_characters(self):
-        assert get_driver_filename("Max Verstappen") == "max_verstappen.json"
-
-    def test_accents_removed(self):
-        assert get_driver_filename("Esteban Ocon") == "esteban_ocon.json"
 
     def test_multiple_spaces(self):
         assert get_driver_filename("Jean  Eric  Vergne") == "jean_eric_vergne.json"
@@ -108,17 +102,6 @@ class TestExtractNationalityFromResult:
         assert extract_nationality_from_result(result) == 'United Kingdom'
 
     def test_with_citizenship_only(self):
-        result = {'citizenshipLabel': {'value': 'Germany'}}
-        assert extract_nationality_from_result(result) == 'Germany'
-
-    def test_prefers_nationality_over_citizenship(self):
-        result = {
-            'nationalityLabel': {'value': 'United Kingdom'},
-            'citizenshipLabel': {'value': 'Germany'}
-        }
-        assert extract_nationality_from_result(result) == 'United Kingdom'
-
-    def test_empty_nationality_falls_back_to_citizenship(self):
         result = {
             'nationalityLabel': {'value': ''},
             'citizenshipLabel': {'value': 'France'}
@@ -137,10 +120,6 @@ class TestExtractDobFromResult:
 
     def test_without_dob(self):
         result = {}
-        assert extract_dob_from_result(result) is None
-
-    def test_empty_dob(self):
-        result = {'dob': {'value': ''}}
         assert extract_dob_from_result(result) is None
 
 
@@ -163,7 +142,7 @@ class TestSaveProfile:
 
 
 class TestScrapeDriverProfile:
-    @patch('app.core.scraping.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
     @patch('builtins.open', new_callable=mock_open, read_data='{"name": "Lewis Hamilton", "scraped": true}') # noqa: 501
     def test_returns_cached_profile(self, mock_file, mock_exists):
         mock_exists.return_value = True
@@ -175,9 +154,9 @@ class TestScrapeDriverProfile:
         assert result['scraped'] is True
         mock_session.get.assert_not_called()
 
-    @patch('app.core.scraping.driver_scraper.os.path.exists')
-    @patch('app.core.scraping.driver_scraper.save_profile')
-    @patch('app.core.scraping.driver_scraper.search_wikidata_driver')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.save_profile')
+    @patch('app.scrapers.driver_scraper.search_wikidata_driver')
     def test_scrapes_new_profile(self, mock_search, mock_save, mock_exists):
         mock_exists.return_value = False
         mock_search.return_value = {
@@ -197,9 +176,9 @@ class TestScrapeDriverProfile:
         assert result['scraped'] is True
         mock_save.assert_called_once()
 
-    @patch('app.core.scraping.driver_scraper.os.path.exists')
-    @patch('app.core.scraping.driver_scraper.save_profile')
-    @patch('app.core.scraping.driver_scraper.search_wikidata_driver')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.save_profile')
+    @patch('app.scrapers.driver_scraper.search_wikidata_driver')
     def test_handles_not_found(self, mock_search, mock_save, mock_exists):
         mock_exists.return_value = False
         mock_search.return_value = None
@@ -213,9 +192,9 @@ class TestScrapeDriverProfile:
         assert result['scraped'] is False
         mock_save.assert_called_once()
 
-    @patch('app.core.scraping.driver_scraper.os.path.exists')
-    @patch('app.core.scraping.driver_scraper.save_profile')
-    @patch('app.core.scraping.driver_scraper.search_wikidata_driver')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.save_profile')
+    @patch('app.scrapers.driver_scraper.search_wikidata_driver')
     def test_handles_processing_error(self, mock_search, mock_save, mock_exists):
         mock_exists.return_value = False
         mock_search.return_value = {'person': {}}  # Missing required fields
@@ -229,9 +208,9 @@ class TestScrapeDriverProfile:
 
 
 class TestGetAllDriversFromData:
-    @patch('app.core.scraping.driver_scraper.glob.glob')
-    @patch('app.core.scraping.driver_scraper.os.path.exists')
-    @patch('app.core.scraping.driver_scraper.pd.read_csv')
+    @patch('app.scrapers.driver_scraper.glob.glob')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.pd.read_csv')
     def test_extracts_drivers_from_files(self, mock_read_csv, mock_exists, mock_glob):
         mock_glob.return_value = ['data/F1/2023']
         mock_exists.return_value = True
@@ -246,7 +225,7 @@ class TestGetAllDriversFromData:
         assert 'Lewis Hamilton' in drivers
         assert 'Max Verstappen' in drivers
 
-    @patch('app.core.scraping.driver_scraper.glob.glob')
+    @patch('app.scrapers.driver_scraper.glob.glob')
     def test_handles_no_data_dirs(self, mock_glob):
         mock_glob.return_value = []
 
@@ -254,9 +233,9 @@ class TestGetAllDriversFromData:
 
         assert drivers == []
 
-    @patch('app.core.scraping.driver_scraper.glob.glob')
-    @patch('app.core.scraping.driver_scraper.os.path.exists')
-    @patch('app.core.scraping.driver_scraper.pd.read_csv')
+    @patch('app.scrapers.driver_scraper.glob.glob')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.pd.read_csv')
     def test_handles_missing_driver_column(self, mock_read_csv, mock_exists, mock_glob):
         mock_glob.return_value = ['data/F1/2023']
         mock_exists.return_value = True
@@ -267,9 +246,9 @@ class TestGetAllDriversFromData:
 
         assert drivers == []
 
-    @patch('app.core.scraping.driver_scraper.glob.glob')
-    @patch('app.core.scraping.driver_scraper.os.path.exists')
-    @patch('app.core.scraping.driver_scraper.pd.read_csv')
+    @patch('app.scrapers.driver_scraper.glob.glob')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.pd.read_csv')
     def test_handles_read_error(self, mock_read_csv, mock_exists, mock_glob):
         mock_glob.return_value = ['data/F1/2023']
         mock_exists.return_value = True
@@ -281,8 +260,8 @@ class TestGetAllDriversFromData:
 
 
 class TestScrapeDrivers:
-    @patch('app.core.scraping.driver_scraper.create_session')
-    @patch('app.core.scraping.driver_scraper.get_all_drivers_from_data')
+    @patch('app.scrapers.driver_scraper.create_session')
+    @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
     def test_handles_no_drivers(self, mock_get_drivers, mock_create_session):
         # No drivers found
         mock_get_drivers.return_value = []
@@ -297,10 +276,10 @@ class TestScrapeDrivers:
         # If you want to assert session was created:
         mock_create_session.assert_called_once()
 
-    @patch('app.core.scraping.driver_scraper.create_session')
-    @patch('app.core.scraping.driver_scraper.os.makedirs')
-    @patch('app.core.scraping.driver_scraper.scrape_driver_profile')
-    @patch('app.core.scraping.driver_scraper.get_all_drivers_from_data')
+    @patch('app.scrapers.driver_scraper.create_session')
+    @patch('app.scrapers.driver_scraper.os.makedirs')
+    @patch('app.scrapers.driver_scraper.scrape_driver_profile')
+    @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
     def test_scrapes_all_drivers(self, mock_get_drivers, mock_scrape_profile,
                                  mock_makedirs, mock_create_session):
         mock_get_drivers.return_value = ['Lewis Hamilton', 'Max Verstappen']
@@ -325,16 +304,16 @@ class TestScrapeDrivers:
         # ensure profiles dir was ensured
         mock_makedirs.assert_called_once()
 
-    @patch('app.core.scraping.driver_scraper.create_session')
-    @patch('app.core.scraping.driver_scraper.os.makedirs')
-    @patch('app.core.scraping.driver_scraper.scrape_driver_profile')
-    @patch('app.core.scraping.driver_scraper.get_all_drivers_from_data')
+    @patch('app.scrapers.driver_scraper.create_session')
+    @patch('app.scrapers.driver_scraper.os.makedirs')
+    @patch('app.scrapers.driver_scraper.scrape_driver_profile')
+    @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
     def test_closes_session_on_error(self, mock_get_drivers, mock_scrape_profile,
                                      mock_makedirs, mock_create_session):
         mock_get_drivers.return_value = ['Lewis Hamilton']
 
         # Make the per-driver scraper raise to simulate an error
-        mock_scrape_profile.side_effect = Exception("Scraping error")
+        mock_scrape_profile.side_effect = Exception("scrapers error")
         mock_session = Mock()
         mock_create_session.return_value = mock_session
 

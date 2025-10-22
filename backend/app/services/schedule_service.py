@@ -1,50 +1,34 @@
 import json
 import os
 from datetime import datetime
-from typing import Optional
 from fastapi import HTTPException
 import pytz
 
 from app.config import SCHEDULE_DIR
+from app.models.schedule import ScheduleRequest
 
 
 class ScheduleService:
 
-    async def get_series_schedule(
-        self,
-        series: str,
-        timezone: Optional[str] = None,
-        x_timezone: Optional[str] = None
-    ):
+    async def get_series_schedule(self, request: ScheduleRequest):
         """Get schedule for a specific racing series with timezone conversion"""
-        if series not in ['f1', 'f2', 'f3']:
-            raise HTTPException(status_code=404, detail="Invalid series specified")
-
-        file_path = os.path.join(SCHEDULE_DIR, f"{series}.json")
+        file_path = os.path.join(SCHEDULE_DIR, f"{request.series}.json")
         if not os.path.exists(file_path):
             raise HTTPException(status_code=404, detail="Schedule data not found")
 
         with open(file_path, 'r') as f:
             schedule = json.load(f)
 
-        user_timezone = timezone or x_timezone or 'UTC'
+        user_timezone = request.get_timezone()
         if user_timezone != 'UTC':
             schedule = self._convert_schedule_timezone(schedule, user_timezone)
 
         return schedule
 
-    async def get_next_race(
-        self,
-        series: str,
-        timezone: Optional[str] = None,
-        x_timezone: Optional[str] = None
-    ):
+    async def get_next_race(self, request: ScheduleRequest):
         """Get the next upcoming race for a series with timezone conversion.
         If no upcoming races, return the last race of the season."""
-        if series not in ['f1', 'f2', 'f3']:
-            raise HTTPException(status_code=404, detail="Invalid series specified")
-
-        file_path = os.path.join(SCHEDULE_DIR, f"{series}.json")
+        file_path = os.path.join(SCHEDULE_DIR, f"{request.series}.json")
         if not os.path.exists(file_path):
             raise HTTPException(status_code=404, detail="Schedule data not found")
 
@@ -173,7 +157,7 @@ class ScheduleService:
             if not next_race.get('seasonCompleted') and next_session:
                 next_race['nextSession'] = next_session
 
-            user_timezone = timezone or x_timezone or 'UTC'
+            user_timezone = request.get_timezone()
             if user_timezone != 'UTC':
                 next_race = self._convert_race_timezone(next_race, user_timezone)
 
