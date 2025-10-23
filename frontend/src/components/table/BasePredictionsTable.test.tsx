@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BasePredictionsTable } from './BasePredictionsTable';
+import type { SeriesType } from '../../hooks/usePredictions';
 
 // Mock components
 vi.mock('../ErrorDisplay', () => ({
@@ -10,7 +11,7 @@ vi.mock('../ErrorDisplay', () => ({
 }));
 
 vi.mock('./TableContent', () => ({
-  BaseTableContent: ({ predictions }: { predictions: unknown[] }) => (
+  TableContent: ({ predictions }: { predictions: unknown[] }) => (
     <div data-testid="table-content">
       <div data-testid="predictions-count">{predictions.length}</div>
     </div>
@@ -49,7 +50,7 @@ vi.mock('../../hooks/usePredictions', () => ({
 
 describe('BasePredictionsTable', () => {
   const defaultProps = {
-    defaultSeries: 'f3_to_f2',
+    defaultSeries: 'f3_to_f2' as SeriesType,
     seriesOptions: [
       { value: 'f3_to_f2', label: 'F3 → F2' },
       { value: 'f2_to_f1', label: 'F2 → F1' },

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import type { Driver } from '../../types/Driver';
-import { BaseTableContent } from './TableContent';
+import { TableContent } from './TableContent';
 
 // Mock dependencies
 vi.mock('../TableHeader', () => ({
@@ -21,7 +21,7 @@ vi.mock('../TableHeader', () => ({
   ),
 }));
 
-// Don't mock BaseTableRow - test with real component
+// Don't mock TableRow - test with real component
 
 vi.mock('../../../hooks/useSorting', () => ({
   useSorting: vi.fn((data) => ({
@@ -68,9 +68,9 @@ const mockDrivers: Driver[] = [
   },
 ];
 
-describe('BaseTableContent', () => {
+describe('TableContent', () => {
   it('renders with default variant', () => {
-    render(<BaseTableContent predictions={mockDrivers} />);
+    render(<TableContent predictions={mockDrivers} />);
 
     expect(screen.getByText('Driver')).toBeInTheDocument();
     expect(screen.getByText('Position')).toBeInTheDocument();
@@ -80,7 +80,7 @@ describe('BaseTableContent', () => {
   });
 
   it('renders all standard headers', () => {
-    render(<BaseTableContent predictions={mockDrivers} />);
+    render(<TableContent predictions={mockDrivers} />);
 
     expect(screen.getByText('Driver')).toBeInTheDocument();
     expect(screen.getByText('Points')).toBeInTheDocument();
@@ -91,14 +91,14 @@ describe('BaseTableContent', () => {
   });
 
   it('renders correct number of table headers', () => {
-    render(<BaseTableContent predictions={mockDrivers} />);
+    render(<TableContent predictions={mockDrivers} />);
 
     const headers = screen.getAllByRole('columnheader');
     expect(headers).toHaveLength(8); // 8 columns total
   });
 
   it('renders table structure correctly', () => {
-    render(<BaseTableContent predictions={mockDrivers} />);
+    render(<TableContent predictions={mockDrivers} />);
 
     const table = screen.getByRole('table');
     expect(table).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe('BaseTableContent', () => {
   });
 
   it('handles empty predictions array', () => {
-    render(<BaseTableContent predictions={[]} />);
+    render(<TableContent predictions={[]} />);
 
     const table = screen.getByRole('table');
     expect(table).toBeInTheDocument();
@@ -126,16 +126,14 @@ describe('BaseTableContent', () => {
   });
 
   it('renders overflow container', () => {
-    const { container } = render(
-      <BaseTableContent predictions={mockDrivers} />
-    );
+    const { container } = render(<TableContent predictions={mockDrivers} />);
 
     const overflowDiv = container.querySelector('.overflow-x-auto');
     expect(overflowDiv).toBeInTheDocument();
   });
 
   it('renders all header columns in correct order', () => {
-    render(<BaseTableContent predictions={mockDrivers} />);
+    render(<TableContent predictions={mockDrivers} />);
 
     const headers = screen.getAllByRole('columnheader');
     const expectedHeaders = [
@@ -156,9 +154,7 @@ describe('BaseTableContent', () => {
   });
 
   it('applies correct CSS classes to table row', () => {
-    const { container } = render(
-      <BaseTableContent predictions={mockDrivers} />
-    );
+    const { container } = render(<TableContent predictions={mockDrivers} />);
 
     const headerRow = container.querySelector('thead tr');
     expect(headerRow).toHaveClass('text-left', 'text-white/90');

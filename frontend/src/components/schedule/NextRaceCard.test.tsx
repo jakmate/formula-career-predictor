@@ -297,11 +297,11 @@ describe('NextRaceCard', () => {
 
     const practice1Session = screen
       .getByText('PRACTICE 1')
-      .closest('.rounded-xl') as HTMLElement;
+      .closest('.rounded-md') as HTMLElement;
 
     // Target specific element by class
     const timeElement = within(practice1Session).getByText('Invalid Date', {
-      selector: '.text-xl',
+      selector: '.text-sm',
     });
     expect(timeElement).toBeInTheDocument();
   });
@@ -322,7 +322,7 @@ describe('NextRaceCard', () => {
     // Find date text specifically in the PRACTICE 1 session
     const practice1Session = screen
       .getByText('PRACTICE 1')
-      .closest('.rounded-xl') as HTMLElement;
+      .closest('.rounded-md') as HTMLElement;
     const dateElement = within(practice1Session).getByText('Fri, 24 May');
     expect(dateElement).toBeInTheDocument();
   });
@@ -445,7 +445,7 @@ describe('NextRaceCard', () => {
 
       const practice1Session = screen
         .getByText('PRACTICE 1')
-        .closest('.rounded-xl') as HTMLElement;
+        .closest('.rounded-md') as HTMLElement;
       const withinSession = within(practice1Session);
 
       // Verify status texts

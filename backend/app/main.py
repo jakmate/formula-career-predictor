@@ -40,7 +40,7 @@ def create_app() -> FastAPI:
         allow_origins=[
             "http://localhost:5173",
             "http://localhost:3000",
-            "https://formula-predictions-frontend.onrender.com"
+            os.getenv("CORS_ORIGINS", "")
         ],
         allow_credentials=True,
         allow_methods=["*"],

@@ -6,7 +6,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { ErrorDisplay } from '../ErrorDisplay';
-import { BaseTableContent } from './TableContent';
+import { TableContent } from './TableContent';
 import { usePredictions, type SeriesType } from '../../hooks/usePredictions';
 import { Header } from '../Header';
 import { useState } from 'react';
@@ -50,7 +50,7 @@ export const BasePredictionsTable = ({
         title={getTitle(selectedSeries)}
         description={getDescription(selectedSeries)}
         rightContent={
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
             <select
               value={selectedSeries}
               onChange={(e) => setSelectedSeries(e.target.value as SeriesType)}
@@ -100,7 +100,7 @@ export const BasePredictionsTable = ({
         }
         bottomContent={
           status && (
-            <div className="flex flex-wrap gap-4 text-sm text-cyan-300">
+            <div className="flex flex-wrap gap-4 text-cyan-300">
               {status.last_scrape && (
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
@@ -140,7 +140,7 @@ export const BasePredictionsTable = ({
             <p>No predictions available. Select a model and refresh data.</p>
           </div>
         ) : (
-          <BaseTableContent predictions={currentPredictions} />
+          <TableContent predictions={currentPredictions} />
         )}
       </div>
     </div>

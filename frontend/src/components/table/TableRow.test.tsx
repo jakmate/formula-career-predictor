@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import type { Driver } from '../../types/Driver';
-import { BaseTableRow } from './TableRow';
+import { TableRow } from './TableRow';
 
 // Mock child components
 vi.mock('../ProbabilityBar', () => ({
@@ -34,12 +34,12 @@ const mockDriver: Driver = {
   team_points: 0,
 };
 
-describe('BaseTableRow', () => {
+describe('TableRow', () => {
   it('renders driver data correctly in default variant', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={mockDriver} />
+          <TableRow driver={mockDriver} />
         </tbody>
       </table>
     );
@@ -58,7 +58,7 @@ describe('BaseTableRow', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={mockDriver} />
+          <TableRow driver={mockDriver} />
         </tbody>
       </table>
     );
@@ -77,7 +77,7 @@ describe('BaseTableRow', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={highPercentageDriver} />
+          <TableRow driver={highPercentageDriver} />
         </tbody>
       </table>
     );
@@ -96,7 +96,7 @@ describe('BaseTableRow', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={lowPercentageDriver} />
+          <TableRow driver={lowPercentageDriver} />
         </tbody>
       </table>
     );
@@ -111,7 +111,7 @@ describe('BaseTableRow', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={nullPercentageDriver} />
+          <TableRow driver={nullPercentageDriver} />
         </tbody>
       </table>
     );
@@ -123,7 +123,7 @@ describe('BaseTableRow', () => {
     render(
       <table>
         <tbody>
-          <BaseTableRow driver={mockDriver} className="custom-class" />
+          <TableRow driver={mockDriver} className="custom-class" />
         </tbody>
       </table>
     );

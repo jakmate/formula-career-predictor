@@ -19,7 +19,7 @@ const renderFallback = (className: string) => {
 
 export const CountryFlag: React.FC<CountryFlagProps> = ({
   nationality,
-  className = 'w-6 h-4',
+  className = 'w-6 md:w-8',
 }) => {
   if (!nationality || nationality === 'Unknown') {
     return renderFallback(className);

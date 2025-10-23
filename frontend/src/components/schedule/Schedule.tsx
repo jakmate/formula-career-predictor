@@ -55,7 +55,7 @@ export const Schedule = () => {
       {nextRace && <NextRaceCard nextRace={nextRace} />}
 
       <div className="bg-gray-800/40 backdrop-blur-lg rounded-xl border border-cyan-500/30 overflow-hidden shadow-lg shadow-cyan-500/10">
-        <h2 className="text-xl font-semibold text-white p-6 border-b border-cyan-500/20">
+        <h2 className="text-lg md:text-xl font-semibold text-white p-6 border-b border-cyan-500/20">
           Full Season Schedule
         </h2>
 
@@ -66,7 +66,7 @@ export const Schedule = () => {
           </div>
         ) : (
           <div className="p-4">
-            <RaceScheduleList races={races} />
+            <RaceScheduleList races={races} selectedSeries={selectedSeries} />
           </div>
         )}
       </div>

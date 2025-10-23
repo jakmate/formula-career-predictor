@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { RaceScheduleList } from './RaceScheduleList';
+import { RaceScheduleList, type Race } from './RaceScheduleList';
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
@@ -61,8 +61,15 @@ describe('RaceScheduleList', () => {
     vi.setSystemTime(new Date('2024-02-01T12:00:00Z'));
   });
 
+  // Helper to render with default series
+  const renderWithSeries = (races: Race[], selectedSeries = 'f1') => {
+    return render(
+      <RaceScheduleList races={races} selectedSeries={selectedSeries} />
+    );
+  };
+
   it('renders empty state when no races provided', () => {
-    render(<RaceScheduleList races={[]} />);
+    renderWithSeries([]);
 
     expect(screen.getByTestId('calendar-icon')).toBeInTheDocument();
     expect(
@@ -70,17 +77,29 @@ describe('RaceScheduleList', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders races correctly', () => {
-    render(<RaceScheduleList races={mockRaces} />);
+  it('renders races with "GRAND PRIX" for F1', () => {
+    renderWithSeries(mockRaces, 'f1');
+
+    expect(screen.getByText('Bahrain GRAND PRIX')).toBeInTheDocument();
+    expect(screen.getByText('Saudi Arabian GRAND PRIX')).toBeInTheDocument();
+  });
+
+  it('renders races with "Grand Prix" for F2', () => {
+    renderWithSeries(mockRaces, 'f2');
 
     expect(screen.getByText('Bahrain Grand Prix')).toBeInTheDocument();
     expect(screen.getByText('Saudi Arabian Grand Prix')).toBeInTheDocument();
-    expect(screen.getByText('Round 1')).toBeInTheDocument();
-    expect(screen.getByText('Round 2')).toBeInTheDocument();
+  });
+
+  it('renders races with "Grand Prix" for F3', () => {
+    renderWithSeries(mockRaces, 'f3');
+
+    expect(screen.getByText('Bahrain Grand Prix')).toBeInTheDocument();
+    expect(screen.getByText('Saudi Arabian Grand Prix')).toBeInTheDocument();
   });
 
   it('displays timezone information', () => {
-    render(<RaceScheduleList races={mockRaces} />);
+    renderWithSeries(mockRaces);
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     expect(
@@ -89,7 +108,7 @@ describe('RaceScheduleList', () => {
   });
 
   it('formats dates and times correctly', () => {
-    render(<RaceScheduleList races={mockRaces} />);
+    renderWithSeries(mockRaces);
 
     // The exact format depends on the system timezone, but we can check structure
     const dateElements = screen.getAllByText(/Mar \d+/);
@@ -109,7 +128,7 @@ describe('RaceScheduleList', () => {
       },
     ];
 
-    render(<RaceScheduleList races={racesWithTBC} />);
+    renderWithSeries(racesWithTBC);
 
     expect(screen.getByText('TBC')).toBeInTheDocument();
   });
@@ -118,7 +137,7 @@ describe('RaceScheduleList', () => {
     // Set current date to be after the races
     vi.setSystemTime(new Date('2024-03-15T12:00:00Z'));
 
-    render(<RaceScheduleList races={mockRaces} />);
+    renderWithSeries(mockRaces);
 
     expect(screen.getAllByText('COMPLETED')).toHaveLength(2);
   });
@@ -163,11 +182,10 @@ describe('RaceScheduleList', () => {
       },
     ];
 
-    render(<RaceScheduleList races={futureMockRaces} />);
+    renderWithSeries(futureMockRaces);
 
     expect(screen.getByText('COMPLETED')).toBeInTheDocument();
     expect(screen.getByText('NEXT RACE')).toBeInTheDocument();
-    // Should only have one "NEXT RACE" label
     expect(screen.getAllByText('NEXT RACE')).toHaveLength(1);
   });
 
@@ -186,10 +204,9 @@ describe('RaceScheduleList', () => {
       },
     ];
 
-    render(<RaceScheduleList races={racesWithoutStart} />);
+    renderWithSeries(racesWithoutStart);
 
-    expect(screen.getByText('No Start Grand Prix')).toBeInTheDocument();
-    // Should not crash and should render the race
+    expect(screen.getByText('No Start GRAND PRIX')).toBeInTheDocument();
   });
 
   it('handles date-only strings (10 characters)', () => {
@@ -208,9 +225,9 @@ describe('RaceScheduleList', () => {
       },
     ];
 
-    render(<RaceScheduleList races={racesWithDateOnly} />);
+    renderWithSeries(racesWithDateOnly);
 
-    expect(screen.getByText('Date Only Grand Prix')).toBeInTheDocument();
+    expect(screen.getByText('Date Only GRAND PRIX')).toBeInTheDocument();
   });
 
   it('handles invalid date strings gracefully', () => {
@@ -229,10 +246,9 @@ describe('RaceScheduleList', () => {
       },
     ];
 
-    render(<RaceScheduleList races={racesWithInvalidDate} />);
+    renderWithSeries(racesWithInvalidDate);
 
-    expect(screen.getByText('Invalid Date Grand Prix')).toBeInTheDocument();
-    // Should not crash
+    expect(screen.getByText('Invalid Date GRAND PRIX')).toBeInTheDocument();
   });
 
   it('applies correct CSS classes for different race states', () => {
@@ -263,10 +279,10 @@ describe('RaceScheduleList', () => {
       },
     ];
 
-    render(<RaceScheduleList races={mixedRaces} />);
+    renderWithSeries(mixedRaces);
 
     const raceCards = screen
-      .getAllByText(/Grand Prix/)
+      .getAllByText(/GRAND PRIX/)
       .map((el) => el.closest('[class*="backdrop-blur-lg"]'));
 
     // Past race should have gray styling
@@ -293,10 +309,10 @@ describe('RaceScheduleList', () => {
       },
     ];
 
-    render(<RaceScheduleList races={racesWithAndWithoutSlug} />);
+    renderWithSeries(racesWithAndWithoutSlug);
 
     // Should render without errors
-    expect(screen.getByText('With Slug Grand Prix')).toBeInTheDocument();
-    expect(screen.getByText('Without Slug Grand Prix')).toBeInTheDocument();
+    expect(screen.getByText('With Slug GRAND PRIX')).toBeInTheDocument();
+    expect(screen.getByText('Without Slug GRAND PRIX')).toBeInTheDocument();
   });
 });

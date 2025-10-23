@@ -10,7 +10,7 @@ interface Session {
   race?: SessionDetails;
 }
 
-interface Race {
+export interface Race {
   slug?: string;
   round: number;
   name: string;
@@ -20,9 +20,13 @@ interface Race {
 
 interface RaceScheduleListProps {
   races: Race[];
+  selectedSeries: string;
 }
 
-export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
+export const RaceScheduleList = ({
+  races,
+  selectedSeries,
+}: RaceScheduleListProps) => {
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const formatDate = (dateString: string) => {
@@ -57,6 +61,10 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
     } catch {
       return false;
     }
+  };
+
+  const getGrandPrixText = (series: string) => {
+    return series === 'f1' ? 'GRAND PRIX' : 'Grand Prix';
   };
 
   let nextUpcomingFound = false;
@@ -119,8 +127,8 @@ export const RaceScheduleList = ({ races }: RaceScheduleListProps) => {
                   </div>
                 </div>
 
-                <h3 className="text-white font-semibold text-lg mb-2">
-                  {race.name} Grand Prix
+                <h3 className="text-white font-semibold mb-2">
+                  {race.name} {getGrandPrixText(selectedSeries)}
                 </h3>
 
                 <div className="flex items-center mb-3 text-white/70">

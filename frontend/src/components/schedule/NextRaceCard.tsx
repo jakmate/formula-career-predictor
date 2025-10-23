@@ -204,12 +204,12 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
               </>
             ) : (
               <>
-                <Trophy className="w-8 h-8 text-amber-300 z-10 relative" />
+                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-amber-300 z-10 relative" />
                 <div className="absolute inset-0 bg-amber-400 rounded-full blur-sm opacity-40"></div>
               </>
             )}
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">
             {isSeasonCompleted ? 'LAST RACE' : 'NEXT RACE'}: {nextRace.name} GP
           </h2>
           <div className="ml-2 mt-1">{getFlagComponent(nextRace.location)}</div>
@@ -223,7 +223,7 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
           }`}
         >
           <span
-            className={`text-sm font-medium ${
+            className={`text-xs sm:text-sm font-medium ${
               isSeasonCompleted ? 'text-green-300' : 'text-cyan-300'
             }`}
           >
@@ -236,9 +236,11 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
         <div className="flex flex-col items-center max-w-xs text-center">
           <div className="flex items-center mb-2">
             <MapPin className="w-6 h-6 mr-2 text-red-400" />
-            <h3 className="text-white/80 text-sm font-medium">Location</h3>
+            <h3 className="text-white/80 text-xs sm:text-sm font-medium">
+              Location
+            </h3>
           </div>
-          <p className="text-white text-xl font-semibold">
+          <p className="text-white sm:text-xl font-semibold">
             {nextRace.location}
           </p>
         </div>
@@ -246,9 +248,11 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
         <div className="flex flex-col items-center max-w-xs text-center">
           <div className="flex items-center mb-2">
             <Calendar className="w-6 h-6 mr-2 text-green-400" />
-            <h3 className="text-white/80 text-sm font-medium">Race Day</h3>
+            <h3 className="text-white/80 text-xs sm:text-sm font-medium">
+              Race Day
+            </h3>
           </div>
-          <p className="text-white text-xl font-semibold">
+          <p className="text-white sm:text-xl font-semibold">
             {formatDate(nextRace.sessions.race.start)}
           </p>
         </div>
@@ -257,11 +261,11 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
           <div className="flex flex-col items-center max-w-xs text-center">
             <div className="flex items-center mb-2">
               <Clock className="w-6 h-6 mr-2 text-cyan-400" />
-              <h3 className="text-white/80 text-sm font-medium">
+              <h3 className="text-white/80 text-xs sm:text-sm font-medium">
                 {isSeasonCompleted ? 'Status' : 'Next Session'}
               </h3>
             </div>
-            <p className="text-white text-xl font-semibold">
+            <p className="text-white sm:text-xl font-semibold">
               {isSeasonCompleted ? (
                 <span className="text-green-300 font-bold">
                   SEASON COMPLETED
@@ -303,7 +307,7 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
             {Object.entries(nextRace.sessions).map(
               ([sessionKey, sessionInfo]) => {
                 const sessionName =
@@ -337,19 +341,19 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
                 return (
                   <div
                     key={sessionKey}
-                    className={`rounded-xl p-5 border flex flex-col items-center min-w-[160px] ${sessionStyle} ${glowStyle}`}
+                    className={`rounded-md sm:rounded-lg p-2 sm:p-3 lg:p-4 border flex flex-col items-center min-w-[80px] sm:min-w-[100px] md:min-w-[120px] lg:min-w-[160px] ${sessionStyle} ${glowStyle}`}
                   >
-                    <div className="text-lg text-white font-bold uppercase mb-1">
+                    <div className="text-sm lg:text-lg text-white font-bold uppercase mb-1">
                       {sessionName}
                     </div>
 
                     {isTBC ? (
                       <>
-                        <div className="text-white text-xl font-bold mb-1">
+                        <div className="text-white text-lg sm:text-xl font-bold mb-1">
                           TBC
                         </div>
-                        <div className="mt-2 text-center">
-                          <div className="text-white/70 text-sm">
+                        <div className="mt-1 sm:mt-2 text-center">
+                          <div className="text-white/70 text-xs sm:text-sm">
                             {formatShortDate(sessionInfo.start)}
                           </div>
                           <div className="mt-1 text-xs font-bold text-yellow-400">
@@ -360,21 +364,23 @@ export const NextRaceCard = ({ nextRace, userTimezone }: NextRaceCardProps) => {
                     ) : (
                       <>
                         <div className="flex flex-col items-center">
-                          <div className="text-white text-xl font-bold">
+                          <div className="text-white text-sm sm:text-lg font-bold">
                             {formatTime(sessionInfo.start)}
                           </div>
                           {sessionInfo.end && (
                             <>
-                              <div className="text-white/70 text-sm">to</div>
-                              <div className="text-white text-xl font-bold">
+                              <div className="text-white/70 text-xs md:text-sm">
+                                to
+                              </div>
+                              <div className="text-white text-sm md:text-lg font-bold">
                                 {formatTime(sessionInfo.end)}
                               </div>
                             </>
                           )}
                         </div>
 
-                        <div className="mt-2 text-center">
-                          <div className="text-white/70 text-sm">
+                        <div className="mt-1 sm:mt-2 text-center">
+                          <div className="text-white/70 text-xs sm:text-sm">
                             {formatShortDate(sessionInfo.start)}
                           </div>
                           {status === 'live' && (

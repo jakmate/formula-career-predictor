@@ -2,12 +2,12 @@ import type { Driver } from '../../types/Driver';
 import { ProbabilityBar } from '../ProbabilityBar';
 import { DriverHoverCard } from './DriverHoverCard';
 
-interface BaseTableRowProps {
+interface TableRowProps {
   driver: Driver;
   className?: string;
 }
 
-export const BaseTableRow = ({ driver, className = '' }: BaseTableRowProps) => {
+export const TableRow = ({ driver, className = '' }: TableRowProps) => {
   const empiricalPercentage = driver.empirical_percentage ?? 0;
   const formatPercentage = (value: number) => (value * 100).toFixed(1) + '%';
 

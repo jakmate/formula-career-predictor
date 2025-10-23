@@ -38,7 +38,7 @@ describe('CountryFlag', () => {
     const flag = screen.getByTestId('us-flag');
 
     expect(flag).toBeTruthy();
-    expect(flag.className).toContain('w-6 h-4');
+    expect(flag.className).toContain('w-6 md:w-8');
   });
 
   it('applies custom className', () => {
@@ -65,7 +65,7 @@ describe('CountryFlag', () => {
     render(<CountryFlag nationality="French" />);
     const flag = screen.getByTestId('fr-flag');
 
-    expect(flag.className).toBe('w-6 h-4');
+    expect(flag.className).toBe('w-6 md:w-8');
   });
 
   it('renders fallback when nationality is "Unknown"', () => {

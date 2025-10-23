@@ -1,20 +1,20 @@
 import type { Driver } from '../../types/Driver';
 import { TableHeader } from './TableHeader';
 import { useSorting } from '../../hooks/useSorting';
-import { BaseTableRow } from './TableRow';
+import { TableRow } from './TableRow';
 
-interface BaseTableContentProps {
+interface TableContentProps {
   predictions: Driver[];
 }
 
-export const BaseTableContent = ({ predictions }: BaseTableContentProps) => {
+export const TableContent = ({ predictions }: TableContentProps) => {
   const { sortedData, sortConfig, handleSort } = useSorting(predictions);
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead className="bg-gray-900/50">
-          <tr className="text-left text-white/90">
+          <tr className="text-sm lg:text-base text-left text-white/90">
             <TableHeader
               field="driver"
               sortConfig={sortConfig}
@@ -73,9 +73,9 @@ export const BaseTableContent = ({ predictions }: BaseTableContentProps) => {
             </TableHeader>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-sm lg:text-base">
           {sortedData.map((driver: Driver) => (
-            <BaseTableRow key={driver.driver} driver={driver} />
+            <TableRow key={driver.driver} driver={driver} />
           ))}
         </tbody>
       </table>
