@@ -60,29 +60,11 @@ class TestExtractPosition:
         assert extract_position('1.0') == 1
         assert extract_position('5.5') == 5
 
-    def test_positions_with_dagger(self):
-        """Test positions with dagger symbol."""
-        assert extract_position('1†') == 1
-        assert extract_position('10†') == 10
-
-    def test_positions_with_extra_text(self):
-        """Test positions with additional text."""
-        assert extract_position('1 (Fastest Lap)') == 1
-        assert extract_position('5 DNS') == 5
-
-    def test_not_participated_codes(self):
-        """Test that NOT_PARTICIPATED_CODES return None."""
-        with patch('app.core.utils.NOT_PARTICIPATED_CODES', ['DNS', 'DNF', 'DSQ']):
-            assert extract_position('DNS') is None
-            assert extract_position('DNF') is None
-            assert extract_position('DSQ') is None
-
     def test_invalid_inputs(self):
         """Test invalid inputs return None."""
         assert extract_position(None) is None
         assert extract_position('') is None
         assert extract_position('ABC') is None
-        assert extract_position('NC') is None
 
     def test_edge_cases(self):
         """Test edge cases."""

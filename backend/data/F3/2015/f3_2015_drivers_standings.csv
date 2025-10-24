@@ -3,7 +3,7 @@ Pos,Driver,CAT R1,CAT R2,RBR R1,RBR R2,SIL R1,SIL R2,HUN R1,HUN R2,SPA R1,SPA R2
 2,Luca Ghiotto,2,8,1,3,4,7,1,4,5,1,Ret,3,1,8,4,1,5,4,245
 3,Marvin Kirchhöfer,5,1,6,2,1,8,3,5,3,Ret,4,1,9,7,1,6,1,7,200
 4,Emil Bernstorff,3,5,4,4,2,6,4,Ret,1,Ret,1,Ret,3,6,2,4,2,6,194
-5,Jimmy Eriksson,6,2,20†,10,5,4,6,6,13,16,5,5,8,1,5,7,3,5,118
+5,Jimmy Eriksson,6,2,20,10,5,4,6,6,13,16,5,5,8,1,5,7,3,5,118
 6,Antonio Fuoco,8,4,2,Ret,18,23,8,Ret,4,Ret,Ret,11,6,4,9,5,7,2,88
 7,Kevin Ceccon,7,6,Ret,DNS,7,1,7,1,Ret,13,3,4,Ret,DNS,14,18,Ret,10,77
 8,Matt Parry,13,9,13,7,3,5,5,3,Ret,Ret,DSQ,Ret,7,Ret,11,3,6,24,67
@@ -20,7 +20,7 @@ Pos,Driver,CAT R1,CAT R2,RBR R1,RBR R2,SIL R1,SIL R2,HUN R1,HUN R2,SPA R1,SPA R2
 19,Pål Varhaug,21,18,11,Ret,16,19,9,7,Ret,10,Ret,14,Ret,14,Ret,Ret,11,8,5
 20,Aleksander Bosak,19,23,16,15,14,16,17,19,8,Ret,15,Ret,Ret,20,Ret,16,18,23,4
 21,Matevos Isaakyan,,,,,,,,,,,,,,,Ret,14,9,12,2
-22,Mitchell Gilbert,22†,22,Ret,11,20,21,11,10,11,11,10,9,12,15,15,11,14,17,1
+22,Mitchell Gilbert,22,22,Ret,11,20,21,11,10,11,11,10,9,12,15,15,11,14,17,1
 23,Adderly Fong,17,21,17,12,12,14,15,11,15,9,,,15,18,,,Ret,22,0
 24,Zaid Ashkanani,11,15,18,14,21,22,20,16,14,18,13,15,20,19,17,13,19,21,0
 25,Brandon Maïsano,,,,,,,,,,,12,13,,,,,,,0

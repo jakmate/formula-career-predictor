@@ -1,8 +1,6 @@
 import numpy as np
 from datetime import datetime
 
-from app.config import NOT_PARTICIPATED_CODES
-
 
 def get_race_columns(df):
     """Identify race result columns based on track code patterns and data presence."""
@@ -33,12 +31,11 @@ def get_race_columns(df):
 
 def extract_position(result_str):
     """Extract numeric position from result string."""
-    if not result_str or result_str in NOT_PARTICIPATED_CODES:
+    if not result_str:
         return None
 
     try:
-        clean_str = result_str.split()[0].replace('†', '')
-        return int(float(clean_str))
+        return int(float(result_str))
     except (ValueError, IndexError):
         return None
 

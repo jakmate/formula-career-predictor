@@ -1,6 +1,6 @@
 Pos,Team,CAT R1,CAT R2,MON R1,MON R2,IST R1,IST R2,VAL R1,VAL R2,SIL R1,SIL R2,HOC R1,HOC R2,HUN R1,HUN R2,SPA R1,SPA R2,MNZ R1,MNZ R2,YMC R1,YMC R2,Points
 1,Rapax,7,2,7,5,5,2,Ret,Ret,Ret,15,Ret,13,10,Ret,16,10,Ret,10,7,2,115
-1,Rapax,6,3,2,11,1,6,1,4,1,4,1,20†,1,DSQ,1,Ret,Ret,Ret,17,9,115
+1,Rapax,6,3,2,11,1,6,1,4,1,4,1,20,1,DSQ,1,Ret,Ret,Ret,17,9,115
 2,Barwa Addax Team,20,9,6,2,4,3,4,2,9,7,12,9,5,4,9,2,Ret,Ret,Ret,19,110
 2,Barwa Addax Team,4,Ret,1,6,DSQ,7,11,16,5,1,2,1,3,Ret,7,1,Ret,13,1,Ret,110
 3,ART Grand Prix,Ret,12,4,3,Ret,13,2,Ret,2,5,5,4,Ret,DNS,14,Ret,2,4,18,7,100
@@ -9,17 +9,17 @@ Pos,Team,CAT R1,CAT R2,MON R1,MON R2,IST R1,IST R2,VAL R1,VAL R2,SIL R1,SIL R2,H
 4,Racing Engineering,Ret,18,14,DNS,7,Ret,12,Ret,6,10,Ret,10,2,2,11,Ret,4,1,Ret,13,80
 5,iSport International,5,5,15,15,14,18,Ret,12,8,2,8,2,4,5,6,5,3,6,2,17,78
 5,iSport International,10,11,Ret,16,2,4,10,6,7,6,17,18,9,3,18,8,9,16,5,1,78
-6,DAMS,Ret,13,8,1,10,8,Ret,8,11,11,20,19†,6,Ret,Ret,Ret,5,2,14,8,35
-6,DAMS,13,10,Ret,Ret,11,9,Ret,13,Ret,15,Ret,14,Ret,DNS,3,6,13,17†,6,3,35
+6,DAMS,Ret,13,8,1,10,8,Ret,8,11,11,20,19,6,Ret,Ret,Ret,5,2,14,8,35
+6,DAMS,13,10,Ret,Ret,11,9,Ret,13,Ret,15,Ret,14,Ret,DNS,3,6,13,17,6,3,35
 7,Arden International,1,7,11,7,Ret,DNS,6,5,10,8,3,17,11,9,4,Ret,11,8,20,11,32
 7,Arden International,15,14,10,Ret,16,16,Ret,Ret,16,20,18,Ret,Ret,15,8,4,Ret,Ret,10,16,32
 8,DPR,17,21,16,Ret,6,5,8,3,22,14,9,8,7,Ret,Ret,13,Ret,Ret,16,10,28
-8,DPR,2,8,17,Ret,Ret,17,Ret,Ret,13,12,16†,11,8,1,Ret,14,10,15,13,14,28
+8,DPR,2,8,17,Ret,Ret,17,Ret,Ret,13,12,16,11,8,1,Ret,14,10,15,13,14,28
 9,Super Nova Racing,12,19,13,8,15,14,Ret,Ret,20,9,10,7,14,6,5,Ret,Ret,14,8,5,19
 9,Super Nova Racing,11,Ret,12,9,Ret,Ret,7,1,12,18,6,Ret,12,10,13,7,Ret,11,11,Ret,19
-10,Scuderia Coloni,14,Ret,5,Ret,17†,19,9,Ret,14,22,11,12,Ret,12,2,3,12,9,15,18,18
-10,Scuderia Coloni,19,20,Ret,13,Ret,Ret,13†,9,21,17,15,15,18,14,19,Ret,Ret,Ret,9,6,18
+10,Scuderia Coloni,14,Ret,5,Ret,17,19,9,Ret,14,22,11,12,Ret,12,2,3,12,9,15,18,18
+10,Scuderia Coloni,19,20,Ret,13,Ret,Ret,13,9,21,17,15,15,18,14,19,Ret,Ret,Ret,9,6,18
 11,Trident Racing,Ret,17,9,4,12,12,Ret,14,18,23,13,Ret,Ret,13,10,Ret,7,Ret,19,Ret,14
 11,Trident Racing,16,15,Ret,12,Ret,Ret,14,15,15,21,7,3,15,8,15,9,6,7,Ret,DNS,14
 12,Ocean Racing Technology,18,16,Ret,14,9,11,Ret,11,19,19,19,16,17,16,17,11,8,5,12,12,11
-12,Ocean Racing Technology,8,1,Ret,17,13,15,Ret,Ret,17,13,21†,Ret,Ret,11,12,Ret,Ret,DNS,Ret,15,11
+12,Ocean Racing Technology,8,1,Ret,17,13,15,Ret,Ret,17,13,21,Ret,Ret,11,12,Ret,Ret,DNS,Ret,15,11

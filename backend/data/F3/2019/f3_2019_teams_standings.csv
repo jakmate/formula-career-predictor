@@ -1,29 +1,29 @@
 Pos,Team,CAT R1,CAT R2,LEC R1,LEC R2,RBR R1,RBR R2,SIL R1,SIL R2,HUN R1,HUN R2,SPA R1,SPA R2,MNZ R1,MNZ R2,SOC R1,SOC R2,Points
 1,Prema Racing,3,5,6,6,3,19,3,4,8,1,8,1,21,14,1,2,527
-1,Prema Racing,7,1,1,3,4,2,2,28†,11,7,3,5,2,13,5,14,527
+1,Prema Racing,7,1,1,3,4,2,2,28,11,7,3,5,2,13,5,14,527
 1,Prema Racing,1,4,2,1,5,3,5,2,5,Ret,2,3,1,8,2,3,527
 2,Hitech Grand Prix,20,21,Ret,12,9,5,4,1,7,2,7,7,10,6,4,16,223
 2,Hitech Grand Prix,6,2,4,17,1,6,1,15,4,4,5,21,Ret,11,8,1,223
 2,Hitech Grand Prix,22,Ret,13,22,20,Ret,12,11,18,22,15,10,Ret,19,13,6,223
-3,ART Grand Prix,4,7,10,Ret,15,10,11,6,28†,19,10,12,Ret,28†,,,174
+3,ART Grand Prix,4,7,10,Ret,15,10,11,6,28,19,10,12,Ret,28,,,174
 3,ART Grand Prix,5,8,Ret,18,2,4,19,12,2,24,9,Ret,14,21,11,11,174
 3,ART Grand Prix,2,6,Ret,15,26,17,7,5,1,5,4,4,13,9,14,9,174
-4,Trident,23,20,21†,21,17,9,27,17,12,11,29,Ret,12,16,23,12,134
-4,Trident,26,16,3,2,6,15,6,27†,Ret,27,1,6,5,5,6,Ret,134
-4,Trident,8,3,18,24†,11,8,18,19,14,12,19,Ret,Ret,15,3,5,134
-5,HWA Racelab,13,13,5,20,13,Ret,22,20,19,10,20,14,17,27†,Ret,17,100
+4,Trident,23,20,21,21,17,9,27,17,12,11,29,Ret,12,16,23,12,134
+4,Trident,26,16,3,2,6,15,6,27,Ret,27,1,6,5,5,6,Ret,134
+4,Trident,8,3,18,24,11,8,18,19,14,12,19,Ret,Ret,15,3,5,134
+5,HWA Racelab,13,13,5,20,13,Ret,22,20,19,10,20,14,17,27,Ret,17,100
 5,HWA Racelab,17,Ret,Ret,7,7,1,9,Ret,3,3,21,Ret,6,3,7,4,100
 5,HWA Racelab,28,18,DNS,19,27,13,21,26,23,14,14,16,19,22,19,23,100
 6,MP Motorsport,NC,17,9,5,14,25,8,3,16,9,12,19,7,2,18,8,77
-6,MP Motorsport,9,Ret,20†,Ret,18,18,18,24,17,18,24,Ret,20,20,17,Ret,77
-6,MP Motorsport,19,19,14,4,10,12,17,21,27†,17,17,11,4,4,10,7,77
-7,Jenzer Motorsport,10,9,7,9,16,11,14,7,9,6,6,2,3,1,12,25†,67
+6,MP Motorsport,9,Ret,20,Ret,18,18,18,24,17,18,24,Ret,20,20,17,Ret,77
+6,MP Motorsport,19,19,14,4,10,12,17,21,27,17,17,11,4,4,10,7,77
+7,Jenzer Motorsport,10,9,7,9,16,11,14,7,9,6,6,2,3,1,12,25,67
 7,Jenzer Motorsport,18,Ret,,,28,21,Ret,23,25,21,16,Ret,Ret,23,Ret,21,67
 7,Jenzer Motorsport,25,22,11,11,23,20,23,22,21,15,23,17,22,24,24,18,67
-8,Sauber Junior Team by Charouz,14,11,Ret,16,8,7,15,9,Ret,20,22,22†,Ret,18,DNS,DNS,15
+8,Sauber Junior Team by Charouz,14,11,Ret,16,8,7,15,9,Ret,20,22,22,Ret,18,DNS,DNS,15
 8,Sauber Junior Team by Charouz,27,Ret,15,Ret,Ret,23,16,8,15,13,27,18,8,7,Ret,Ret,15
 8,Sauber Junior Team by Charouz,21,Ret,17,13,19,16,Ret,18,22,25,26,Ret,15,17,9,13,15
-9,Carlin Buzz Racing,24,15,Ret,Ret,Ret,22,25,16,20,Ret,11,8,11,29†,20,19,14
+9,Carlin Buzz Racing,24,15,Ret,Ret,Ret,22,25,16,20,Ret,11,8,11,29,20,19,14
 9,Carlin Buzz Racing,11,10,19,10,12,14,13,10,6,Ret,18,9,16,12,25,15,14
 9,Carlin Buzz Racing,15,14,12,8,22,26,26,13,10,8,13,Ret,9,10,15,10,14
 10,Campos Racing,12,24,8,14,21,Ret,10,Ret,26,16,Ret,15,Ret,DNS,22,20,5

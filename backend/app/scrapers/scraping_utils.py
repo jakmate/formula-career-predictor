@@ -59,7 +59,10 @@ def remove_superscripts(cell, preserve_spaces=True):
 
     # Get clean text with or without spaces between elements
     separator = ' ' if preserve_spaces else ''
-    return cell.get_text(separator=separator, strip=True)
+    text = cell.get_text(separator=separator, strip=True)
+
+    # Remove dagger symbols
+    return text.replace('†', '')
 
 
 def create_output_file(series, year, filename):

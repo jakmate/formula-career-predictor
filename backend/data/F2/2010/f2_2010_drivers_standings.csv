@@ -1,5 +1,5 @@
 Pos,Driver,CAT R1,CAT R2,MON R1,MON R2,IST R1,IST R2,VAL R1,VAL R2,SIL R1,SIL R2,HOC R1,HOC R2,HUN R1,HUN R2,SPA R1,SPA R2,MNZ R1,MNZ R2,YMC R1,YMC R2,Points
-1,Pastor Maldonado,6,3,2,11,1,6,1,4,1,4,1,20†,1,DSQ,1,Ret,Ret,Ret,17,9,87
+1,Pastor Maldonado,6,3,2,11,1,6,1,4,1,4,1,20,1,DSQ,1,Ret,Ret,Ret,17,9,87
 2,Sergio Pérez,4,Ret,1,6,DSQ,7,11,16,5,1,2,1,3,Ret,7,1,Ret,13,1,Ret,71
 3,Jules Bianchi,Ret,12,4,3,Ret,13,2,Ret,2,5,5,4,Ret,DNS,14,Ret,2,4,18,7,52
 4,Dani Clos,3,6,3,Ret,8,1,5,7,3,3,4,6,16,7,Ret,DNS,Ret,12,4,4,51
@@ -11,23 +11,23 @@ Pos,Driver,CAT R1,CAT R2,MON R1,MON R2,IST R1,IST R2,VAL R1,VAL R2,SIL R1,SIL R2
 10,Charles Pic,1,7,11,7,Ret,DNS,6,5,10,8,3,17,11,9,4,Ret,11,8,20,11,28
 11,Luiz Razia,7,2,7,5,5,2,Ret,Ret,Ret,15,Ret,13,10,Ret,16,10,Ret,10,7,2,28
 12,Jérôme d'Ambrosio,Ret,13,8,1,10,8,Ret,8,11,11,,,6,Ret,Ret,Ret,5,2,14,8,21
-13,Giacomo Ricci,2,8,17,Ret,Ret,17,Ret,Ret,13,12,16†,11,8,1,,,,,,,16
-14,Romain Grosjean,,,,,,,,,,,20,19†,,,3,6,13,17†,6,3,14
+13,Giacomo Ricci,2,8,17,Ret,Ret,17,Ret,Ret,13,12,16,11,8,1,,,,,,,16
+14,Romain Grosjean,,,,,,,,,,,20,19,,,3,6,13,17,6,3,14
 15,Álvaro Parente,,,,,,,,,,,,,,,2,3,12,9,,,13
 16,Michael Herck,17,21,16,Ret,6,5,8,3,22,14,9,8,7,Ret,Ret,13,Ret,Ret,16,10,12
 17,Marcus Ericsson,11,Ret,12,9,Ret,Ret,7,1,12,18,6,Ret,12,10,13,7,Ret,11,11,Ret,11
 18,Adrian Zaugg,16,15,Ret,12,Ret,Ret,14,15,15,21,7,3,15,8,15,9,6,7,Ret,DNS,9
-19,Fabio Leimer,8,1,Ret,17,13,15,Ret,Ret,17,13,21†,Ret,Ret,11,12,Ret,Ret,DNS,Ret,15,8
+19,Fabio Leimer,8,1,Ret,17,13,15,Ret,Ret,17,13,21,Ret,Ret,11,12,Ret,Ret,DNS,Ret,15,8
 20,Luca Filippi,,,,,,,,,20,9,10,7,14,6,5,Ret,Ret,14,,,5
 21,Rodolfo González,15,14,10,Ret,16,16,Ret,Ret,16,20,18,Ret,Ret,15,8,4,Ret,Ret,10,16,4
-22,Alberto Valerio,14,Ret,5,Ret,17†,19,9,Ret,14,22,11,12,Ret,12,,,,,,,4
+22,Alberto Valerio,14,Ret,5,Ret,17,19,9,Ret,14,22,11,12,Ret,12,,,,,,,4
 23,Johnny Cecotto Jr.,Ret,17,9,4,12,12,Ret,14,18,23,13,Ret,Ret,13,10,Ret,,,,,3
 24,Josef Král,12,19,13,8,15,14,Ret,Ret,,,,,,,,,,,8,5,3
 25,Max Chilton,18,16,Ret,14,9,11,Ret,11,19,19,19,16,17,16,17,11,8,5,12,12,3
 26,Edoardo Piscopo,,,,,,,,,,,,,,,,,7,Ret,,,2
 27,Brendon Hartley,,,,,,,,,,,,,,,,,Ret,Ret,9,6,1
 28,Ho-Pin Tung,13,10,Ret,Ret,11,9,Ret,13,Ret,15,Ret,14,Ret,DNS,,,,,Ret,13,0
-29,Vladimir Arabadzhiev,19,20,Ret,13,Ret,Ret,13†,9,21,17,15,15,18,14,19,Ret,,,,,0
+29,Vladimir Arabadzhiev,19,20,Ret,13,Ret,Ret,13,9,21,17,15,15,18,14,19,Ret,,,,,0
 30,Fabrizio Crestani,,,,,,,,,,,,,,,Ret,14,10,15,13,14,0
 31,James Jakes,,,,,,,,,,,,,,,,,,,15,18,0
 32,Federico Leo,,,,,,,,,,,,,,,,,,,19,Ret,0

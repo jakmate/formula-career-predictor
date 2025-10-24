@@ -340,57 +340,51 @@ def engineer_features(df):
             if any(x in result for x in RETIREMENT_CODES):
                 if result != 'NC':
                     stats['dnfs'] += 1
+
+            # Determine race type category
+            is_sprint = (row['year'] == 2021 and race_type == 'race12') or \
+                        (row['year'] != 2021 and race_type == 'sprint')
+
+            # Count participation
+            if is_sprint:
+                stats['sprint_races'] += 1
+            else:
+                stats['feature_races'] += 1
+
+            # Skip further processing for retirements
+            if any(x in result for x in RETIREMENT_CODES):
                 continue
 
+            # Extract position
             pos = extract_position(result)
             if not pos:
                 continue
 
             stats['finish_positions'].append(pos)
+
+            # Get appropriate points system
             if row['year'] == 2021:
-                if race_type == 'race3':
-                    stats['feature_races'] += 1
-                    if pos <= len(points_system['race3_positions']):
-                        stats['feature_points'] += points_system['race3_positions'][pos - 1]
-                        stats['feature_point_finishes'] += 1
-                    if pos == 1:
-                        stats['feature_wins'] += 1
-                    if pos <= 3:
-                        stats['feature_podiums'] += 1
-                else:  # race12
-                    stats['sprint_races'] += 1
-                    if pos <= len(points_system['race12_positions']):
-                        stats['sprint_points'] += points_system['race12_positions'][pos - 1]
-                        stats['sprint_point_finishes'] += 1
-                    if pos == 1:
-                        stats['sprint_wins'] += 1
-                    if pos <= 3:
-                        stats['sprint_podiums'] += 1
+                positions = points_system['race12_positions' if is_sprint else 'race3_positions']
             else:
                 positions = points_system.get(f'{race_type}_positions', [])
-                if race_type == 'sprint':
-                    stats['sprint_races'] += 1
-                    if pos <= len(positions):
-                        stats['sprint_points'] += positions[pos - 1]
-                        stats['sprint_point_finishes'] += 1
-                    if pos == 1:
-                        stats['sprint_wins'] += 1
-                    if pos <= 3:
-                        stats['sprint_podiums'] += 1
-                else:  # feature
-                    stats['feature_races'] += 1
-                    if pos <= len(positions):
-                        stats['feature_points'] += positions[pos - 1]
-                        stats['feature_point_finishes'] += 1
-                    if pos == 1:
-                        stats['feature_wins'] += 1
-                    if pos <= 3:
-                        stats['feature_podiums'] += 1
+
+            # Calculate points and achievements
+            if pos <= len(positions):
+                points = positions[pos - 1]
+                if is_sprint:
+                    stats['sprint_points'] += points
+                    stats['sprint_point_finishes'] += 1
+                else:
+                    stats['feature_points'] += points
+                    stats['feature_point_finishes'] += 1
+
+            if pos == 1:
+                stats['sprint_wins' if is_sprint else 'feature_wins'] += 1
+            if pos <= 3:
+                stats['sprint_podiums' if is_sprint else 'feature_podiums'] += 1
 
         stats['races_completed'] = stats['feature_races'] + stats['sprint_races']
         stats['participation_rate'] = stats['races_completed'] / len(race_cols) if race_cols else 0
-        stats['avg_finish_pos'] = np.mean(stats['finish_positions']) if stats['finish_positions'] else np.nan # noqa: 501
-        stats['std_finish_pos'] = np.std(stats['finish_positions']) if stats['finish_positions'] else np.nan # noqa: 501
 
         race_stats.append(stats)
 

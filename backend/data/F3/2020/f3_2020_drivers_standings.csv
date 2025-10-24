@@ -1,8 +1,8 @@
 Pos,Driver,RBR1 R1,RBR1 R2,RBR2 R1,RBR2 R2,HUN R1,HUN R2,SIL1 R1,SIL1 R2,SIL2 R1,SIL2 R2,CAT R1,CAT R2,SPA R1,SPA R2,MNZ R1,MNZ R2,MUG R1,MUG R2,Points
 1,Oscar Piastri,1,8,4,5,2,2,2,Ret,7,6,6,1,5,6,3,Ret,11,7,164
 2,Théo Pourchaire,13,26,9,1,1,6,12,8,6,3,7,6,2,5,2,2,3,3,161
-3,Logan Sargeant,2,27,6,2,6,4,3,5,1,Ret,3,5,8,1,26,24†,6,Ret,160
-4,Frederik Vesti,4,6,1,8,Ret,Ret,5,4,4,8,Ret,21,6,2,1,23†,1,9,146.5
+3,Logan Sargeant,2,27,6,2,6,4,3,5,1,Ret,3,5,8,1,26,24,6,Ret,160
+4,Frederik Vesti,4,6,1,8,Ret,Ret,5,4,4,8,Ret,21,6,2,1,23,1,9,146.5
 5,Liam Lawson,6,1,8,Ret,Ret,Ret,1,7,3,5,2,7,9,3,6,7,10,1,143
 6,David Beckmann,7,4,3,3,10,1,9,1,5,4,5,9,3,9,4,Ret,8,2,139.5
 7,Jake Hughes,28,12,10,Ret,24,19,4,10,2,7,1,10,Ret,17,5,1,2,6,111.5
@@ -16,10 +16,10 @@ Pos,Driver,RBR1 R1,RBR1 R2,RBR2 R1,RBR2 R2,HUN R1,HUN R2,SIL1 R1,SIL1 R2,SIL2 R1
 15,Enzo Fittipaldi,18,9,15,13,19,9,18,19,17,17,13,8,26,12,9,19,5,4,27
 16,Olli Caldwell,20,19,5,6,21,18,Ret,26,21,22,20,Ret,7,11,Ret,9,17,16,18
 17,Dennis Hauger,15,22,18,12,8,3,16,17,Ret,20,18,26,15,19,12,15,14,12,14
-18,Matteo Nannini,27,18,23,NC,22,24†,24,23,27†,16,10,3,13,26,Ret,20,16,15,11
+18,Matteo Nannini,27,18,23,NC,22,24,24,23,27,16,10,3,13,26,Ret,20,16,15,11
 19,Pierre-Louis Chovet,,,,,,,,,,,,,22,Ret,18,6,,,5
 20,Max Fewtrell,12,10,14,7,11,11,Ret,20,16,12,17,Ret,,,,,,,5
-21,Roman Staněk,17,23,17,24,23,20,17,18,22,15,22,19,24,18,11,8,26†,18,3
+21,Roman Staněk,17,23,17,24,23,20,17,18,22,15,22,19,24,18,11,8,26,18,3
 22,Ben Barnicoat,,,,,,,20,12,10,Ret,,,,,,,,,1
 23,Michael Belov,,,,,,,,,,,,,20,Ret,10,13,27,23,1
 24,Igor Fraga,16,25,26,14,15,Ret,15,Ret,18,10,24,18,19,27,24,17,,,1

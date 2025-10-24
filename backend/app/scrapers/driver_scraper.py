@@ -104,16 +104,50 @@ def save_profile(filename, profile):
         json.dump(profile, f, indent=2, ensure_ascii=False)
 
 
-def scrape_driver_profile(driver_name, session):
+def needs_rescrape(existing_profile, new_data):
+    """Check if profile needs to be rescraped based on data changes."""
+    if not existing_profile.get('scraped', False):
+        # If previous scrape failed, try again
+        return True
+
+    # Extract new values
+    new_dob = extract_dob_from_result(new_data)
+    new_nationality = extract_nationality_from_result(new_data)
+
+    # Compare with existing values
+    dob_changed = existing_profile.get('dob') != new_dob
+    nationality_changed = existing_profile.get('nationality') != new_nationality
+
+    return dob_changed or nationality_changed
+
+
+def scrape_driver_profile(driver_name, session, force_rescrape=False):
     """Scrape individual driver profile from Wikidata."""
     profile_file = os.path.join(PROFILES_DIR, get_driver_filename(driver_name))
 
     # Check if already scraped
-    if os.path.exists(profile_file):
+    if os.path.exists(profile_file) and not force_rescrape:
         with open(profile_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            existing_profile = json.load(f)
 
-    print(f"Scraping profile for {driver_name}...")
+        # Check for known invalid drivers
+        if driver_name in DRIVER_ALIASES and DRIVER_ALIASES[driver_name] is None:
+            return existing_profile
+
+        # Query Wikidata to check for changes
+        result = search_wikidata_driver(driver_name, session)
+
+        if not result:
+            # No data found, keep existing profile
+            return existing_profile
+
+        # Check if rescrape is needed
+        if not needs_rescrape(existing_profile, result):
+            return existing_profile
+
+        print(f"Data changed for {driver_name}, updating profile...")
+    else:
+        print(f"Scraping profile for {driver_name}...")
 
     # Check for known invalid drivers
     if driver_name in DRIVER_ALIASES and DRIVER_ALIASES[driver_name] is None:
@@ -203,7 +237,7 @@ def get_all_drivers_from_data():
     return sorted(list(all_drivers))
 
 
-def scrape_drivers(session):
+def scrape_drivers(session=None):
     """Main function to scrape all driver profiles."""
     if not session:
         session = create_session()

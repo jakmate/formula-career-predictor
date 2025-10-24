@@ -1,24 +1,24 @@
 Pos,Driver,CAT R1,CAT R2,MON R1,MON R2,BAK R1,BAK R2,RBR R1,RBR R2,SIL R1,SIL R2,HUN R1,HUN R2,HOC R1,HOC R2,SPA R1,SPA R2,MNZ R1,MNZ R2,SEP R1,SEP R2,YMC R1,YMC R2,Points
 1,Pierre Gasly,3,2,15,13,Ret,2,Ret,7,1,7,1,7,DSQ,6,1,4,4,2,11,3,1,9,219
-2,Antonio Giovinazzi,18,Ret,11,18,1,1,Ret,5,2,4,2,17†,8,Ret,6,1,1,3,1,4,5,6,211
+2,Antonio Giovinazzi,18,Ret,11,18,1,1,Ret,5,2,4,2,17,8,Ret,6,1,1,3,1,4,5,6,211
 3,Sergey Sirotkin,Ret,11,Ret,Ret,2,3,12,6,18,21,3,1,1,2,9,16,14,Ret,2,Ret,4,3,159
 4,Raffaele Marciello,8,5,6,3,3,11,3,4,9,6,4,8,3,7,4,5,2,14,6,2,10,13,159
-5,Norman Nato,1,16,2,6,Ret,Ret,7,12,7,22†,7,3,Ret,18,Ret,8,5,1,3,Ret,6,5,136
+5,Norman Nato,1,16,2,6,Ret,Ret,7,12,7,22,7,3,Ret,18,Ret,8,5,1,3,Ret,6,5,136
 6,Alex Lynn,6,1,4,5,Ret,9,11,3,16,14,12,Ret,7,1,3,10,12,5,4,12,8,1,124
-7,Jordan King,7,3,Ret,16,12†,4,8,1,8,1,8,2,15,11,2,12,7,4,5,14,13,10,122
+7,Jordan King,7,3,Ret,16,12,4,8,1,8,1,8,2,15,11,2,12,7,4,5,14,13,10,122
 8,Luca Ghiotto,Ret,12,Ret,14,9,12,4,9,5,2,17,Ret,2,4,7,3,6,Ret,7,1,11,19,111
-9,Oliver Rowland,10,6,3,7,4,15†,6,2,3,3,11,6,5,5,10,6,9,9,12,8,Ret,11,107
-10,Artem Markelov,4,4,1,8,Ret,5,Ret,11,10,12,9,4,Ret,9,5,21†,10,10,DNS,13,3,7,97
+9,Oliver Rowland,10,6,3,7,4,15,6,2,3,3,11,6,5,5,10,6,9,9,12,8,Ret,11,107
+10,Artem Markelov,4,4,1,8,Ret,5,Ret,11,10,12,9,4,Ret,9,5,21,10,10,DNS,13,3,7,97
 11,Nobuharu Matsushita,11,8,8,1,6,Ret,EX,EX,6,5,6,Ret,9,12,11,11,11,6,Ret,7,2,4,92
 12,Mitch Evans,12,14,5,4,5,Ret,1,8,4,13,10,5,Ret,10,16,13,8,Ret,8,6,15,8,90
 13,Gustav Malja,9,10,14,12,10,Ret,13,16,22,19,13,14,6,8,8,2,3,7,9,5,Ret,14,53
-14,Arthur Pic,13,Ret,10,9,Ret,8,9,18,14,11,5,Ret,4,3,14,22†,Ret,11,,,,,36
+14,Arthur Pic,13,Ret,10,9,Ret,8,9,18,14,11,5,Ret,4,3,14,22,Ret,11,,,,,36
 15,Sean Gelael,17,13,13,Ret,7,Ret,2,Ret,21,18,22,10,Ret,Ret,18,15,DSQ,16,16,Ret,Ret,21,24
 16,Nicholas Latifi,2,7,Ret,Ret,Ret,13,10,Ret,11,10,16,12,14,17,13,9,16,15,14,10,9,12,23
 17,Marvin Kirchhöfer,15,15,7,2,Ret,10,Ret,19,12,8,14,13,10,14,Ret,14,18,8,15,11,,,21
 18,Johnny Cecotto Jr.,,,,,,,,,,,,,,,,,,,13,9,7,2,18
 19,Sergio Canamasas,5,9,12,10,Ret,6,Ret,10,13,9,18,9,,,12,7,Ret,13,10,15,12,16,17
-20,Jimmy Eriksson,16,19,Ret,15,11†,Ret,5,13,15,17,21†,Ret,12,13,15,20,15,18†,,,,,10
+20,Jimmy Eriksson,16,19,Ret,15,11,Ret,5,13,15,17,21,Ret,12,13,15,20,15,18,,,,,10
 21,Daniël de Jong,14,17,9,11,8,14,14,20,19,16,15,11,Ret,16,17,17,17,19,17,Ret,14,Ret,6
 22,Nabil Jeffri,19,18,Ret,17,Ret,7,Ret,17,17,15,20,16,11,Ret,19,18,13,12,18,Ret,Ret,20,2
 23,René Binder,,,,,,,16,15,,,,,13,15,,,,,,,,,0

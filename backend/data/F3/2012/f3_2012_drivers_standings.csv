@@ -3,7 +3,7 @@ Pos,Driver,CAT R1,CAT R2,MON R1,MON R2,VAL R1,VAL R2,SIL R1,SIL R2,HOC R1,HOC R2
 2,Daniel Abt,13,6,6,3,6,2,4,Ret,7,2,2,11,1,5,1,2,149.5
 3,António Félix da Costa,14,7,7,2,Ret,8,1,6,Ret,Ret,1,1,2,2,15,5,132
 4,Aaro Vainio,3,4,1,7,2,7,3,Ret,5,6,5,7,6,14,11,14,123
-5,Matias Laine,5,3,21,16,5,3,9,18†,4,5,7,6,5,1,3,6,111
+5,Matias Laine,5,3,21,16,5,3,9,18,4,5,7,6,5,1,3,6,111
 6,Conor Daly,6,1,23,Ret,11,Ret,5,2,2,3,6,9,7,3,4,11,106
 7,Patric Niederhauser,4,5,Ret,15,8,1,10,3,1,9,16,2,11,6,5,Ret,101
 8,Tio Ellinas,7,15,9,8,4,5,6,4,10,7,13,4,4,Ret,2,1,99
@@ -21,12 +21,12 @@ Pos,Driver,CAT R1,CAT R2,MON R1,MON R2,VAL R1,VAL R2,SIL R1,SIL R2,HOC R1,HOC R2
 20,Fabio Gamberini,,,,,,,23,8,,,,,,,,,1
 21,Fabiano Machado,16,Ret,15,17,Ret,19,19,9,Ret,Ret,DNS,DNS,25,21,Ret,16,0
 22,Robert Cregan,15,Ret,18,11,15,13,20,15,11,NC,21,14,21,DNS,20,17,0
-23,Dmitry Suranovich,11,Ret,16,DSQ,Ret,15,22,20†,15,14,Ret,16,22,18,22†,DNS,0
+23,Dmitry Suranovich,11,Ret,16,DSQ,Ret,15,22,20,15,14,Ret,16,22,18,22,DNS,0
 24,Kotaro Sakurai,18,12,13,20,,,15,13,,,,,,,,,0
 25,John Wartique,21,13,17,13,12,Ret,,,,,,,23,17,17,18,0
-26,Vicky Piria,22,16,19,12,17,18,18,21†,14,Ret,20,19,16,19,16,Ret,0
+26,Vicky Piria,22,16,19,12,17,18,18,21,14,Ret,20,19,16,19,16,Ret,0
 27,Facu Regalia,,,,,,,14,12,,,18,18,,,,,0
-28,Carmen Jordá,20,21,Ret,21,13,Ret,DNQ,DNQ,20,Ret,24†,Ret,26,23,21,19,0
+28,Carmen Jordá,20,21,Ret,21,13,Ret,DNQ,DNQ,20,Ret,24,Ret,26,23,21,19,0
 29,Ethan Ringel,Ret,18,Ret,18,14,Ret,Ret,17,18,16,22,17,24,22,18,Ret,0
 30,Antonio Spavone,17,Ret,20,14,Ret,17,21,18,,,,,,,,,0
 31,Jakub Klášterka,19,14,22,19,,,,,,,,,,,,,0

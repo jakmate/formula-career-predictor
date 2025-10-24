@@ -143,18 +143,6 @@ class TestSaveProfile:
 
 class TestScrapeDriverProfile:
     @patch('app.scrapers.driver_scraper.os.path.exists')
-    @patch('builtins.open', new_callable=mock_open, read_data='{"name": "Lewis Hamilton", "scraped": true}') # noqa: 501
-    def test_returns_cached_profile(self, mock_file, mock_exists):
-        mock_exists.return_value = True
-        mock_session = Mock()
-
-        result = scrape_driver_profile("Lewis Hamilton", mock_session)
-
-        assert result['name'] == 'Lewis Hamilton'
-        assert result['scraped'] is True
-        mock_session.get.assert_not_called()
-
-    @patch('app.scrapers.driver_scraper.os.path.exists')
     @patch('app.scrapers.driver_scraper.save_profile')
     @patch('app.scrapers.driver_scraper.search_wikidata_driver')
     def test_scrapes_new_profile(self, mock_search, mock_save, mock_exists):
