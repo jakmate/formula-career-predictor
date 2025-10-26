@@ -1,16 +1,14 @@
 import json
-import pytest
-import requests
 from unittest.mock import Mock, patch, mock_open
 import pandas as pd
 
 from app.scrapers.driver_scraper import (
     get_driver_filename,
-    search_wikidata_driver,
+    needs_rescrape,
+    search_wikidata_drivers,
     extract_nationality_from_result,
     extract_dob_from_result,
     save_profile,
-    scrape_driver_profile,
     get_all_drivers_from_data,
     scrape_drivers
 )
@@ -25,75 +23,6 @@ class TestGetDriverFilename:
 
     def test_hyphens(self):
         assert get_driver_filename("Jean-Eric Vergne") == "jean_eric_vergne.json"
-
-
-class TestSearchWikidataDriver:
-    def test_successful_search(self):
-        mock_session = Mock()
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            'results': {
-                'bindings': [{
-                    'person': {'value': 'http://www.wikidata.org/entity/Q1'},
-                    'personLabel': {'value': 'Lewis Hamilton'},
-                    'dob': {'value': '1985-01-07T00:00:00Z'},
-                    'nationalityLabel': {'value': 'United Kingdom'}
-                }]
-            }
-        }
-        mock_session.get.return_value = mock_response
-
-        result = search_wikidata_driver("Lewis Hamilton", mock_session)
-
-        assert result is not None
-        assert result['personLabel']['value'] == 'Lewis Hamilton'
-        mock_session.get.assert_called_once()
-
-    def test_driver_with_alias(self):
-        mock_session = Mock()
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            'results': {'bindings': [{'personLabel': {'value': 'Lucas Di Grassi'}}]}
-        }
-        mock_session.get.return_value = mock_response
-
-        result = search_wikidata_driver("Lucas di Grassi", mock_session)
-
-        assert result is not None
-        # Check that the query used the alias
-        call_args = mock_session.get.call_args
-        assert 'Lucas Di Grassi' in call_args[1]['params']['query']
-
-    def test_no_results(self):
-        mock_session = Mock()
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'results': {'bindings': []}}
-        mock_session.get.return_value = mock_response
-
-        result = search_wikidata_driver("Unknown Driver", mock_session)
-
-        assert result is None
-
-    def test_request_exception(self):
-        mock_session = Mock()
-        mock_session.get.side_effect = requests.exceptions.Timeout()
-
-        result = search_wikidata_driver("Lewis Hamilton", mock_session)
-
-        assert result is None
-
-    def test_non_200_status(self):
-        mock_session = Mock()
-        mock_response = Mock()
-        mock_response.status_code = 500
-        mock_session.get.return_value = mock_response
-
-        result = search_wikidata_driver("Lewis Hamilton", mock_session)
-
-        assert result is None
 
 
 class TestExtractNationalityFromResult:
@@ -141,58 +70,65 @@ class TestSaveProfile:
         assert parsed == profile
 
 
-class TestScrapeDriverProfile:
-    @patch('app.scrapers.driver_scraper.os.path.exists')
-    @patch('app.scrapers.driver_scraper.save_profile')
-    @patch('app.scrapers.driver_scraper.search_wikidata_driver')
-    def test_scrapes_new_profile(self, mock_search, mock_save, mock_exists):
-        mock_exists.return_value = False
-        mock_search.return_value = {
-            'person': {'value': 'http://www.wikidata.org/entity/Q1'},
-            'personLabel': {'value': 'Lewis Hamilton'},
-            'dob': {'value': '1985-01-07T00:00:00Z'},
-            'nationalityLabel': {'value': 'United Kingdom'}
+class TestSearchWikidataDrivers:
+    @patch('app.scrapers.driver_scraper.SPARQL_ENDPOINT', 'http://test.endpoint')
+    def test_successful_batch_query(self):
+        mock_session = Mock()
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'results': {
+                'bindings': [
+                    {
+                        'nameMatch': {'value': 'Lewis Hamilton'},
+                        'person': {'value': 'http://wikidata.org/entity/Q1'},
+                        'dob': {'value': '1985-01-07T00:00:00Z'},
+                        'nationalityLabel': {'value': 'United Kingdom'}
+                    }
+                ]
+            }
         }
+        mock_session.get.return_value = mock_response
+
+        results = search_wikidata_drivers(['Lewis Hamilton'], mock_session)
+
+        assert 'Lewis Hamilton' in results
+        assert results['Lewis Hamilton']['person']['value'] == 'http://wikidata.org/entity/Q1'
+
+    @patch('app.scrapers.driver_scraper.SPARQL_ENDPOINT', 'http://test.endpoint')
+    def test_failed_query(self):
         mock_session = Mock()
+        mock_response = Mock()
+        mock_response.status_code = 500
+        mock_session.get.return_value = mock_response
 
-        result = scrape_driver_profile("Lewis Hamilton", mock_session)
+        results = search_wikidata_drivers(['Lewis Hamilton'], mock_session)
 
-        assert result['name'] == 'Lewis Hamilton'
-        assert result['dob'] == '1985-01-07'
-        assert result['nationality'] == 'United Kingdom'
-        assert result['wikidata_id'] == 'Q1'
-        assert result['scraped'] is True
-        mock_save.assert_called_once()
+        assert results == {}
 
-    @patch('app.scrapers.driver_scraper.os.path.exists')
-    @patch('app.scrapers.driver_scraper.save_profile')
-    @patch('app.scrapers.driver_scraper.search_wikidata_driver')
-    def test_handles_not_found(self, mock_search, mock_save, mock_exists):
-        mock_exists.return_value = False
-        mock_search.return_value = None
+    @patch('app.scrapers.driver_scraper.SPARQL_ENDPOINT', 'http://test.endpoint')
+    def test_query_exception(self):
         mock_session = Mock()
+        mock_session.get.side_effect = Exception("Connection error")
 
-        result = scrape_driver_profile("Unknown Driver", mock_session)
+        results = search_wikidata_drivers(['Lewis Hamilton'], mock_session)
 
-        assert result['name'] == 'Unknown Driver'
-        assert result['dob'] is None
-        assert result['nationality'] is None
-        assert result['scraped'] is False
-        mock_save.assert_called_once()
+        assert results == {}
 
-    @patch('app.scrapers.driver_scraper.os.path.exists')
-    @patch('app.scrapers.driver_scraper.save_profile')
-    @patch('app.scrapers.driver_scraper.search_wikidata_driver')
-    def test_handles_processing_error(self, mock_search, mock_save, mock_exists):
-        mock_exists.return_value = False
-        mock_search.return_value = {'person': {}}  # Missing required fields
+    @patch('app.scrapers.driver_scraper.SPARQL_ENDPOINT', 'http://test.endpoint')
+    def test_batch_processing(self):
         mock_session = Mock()
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'results': {'bindings': []}}
+        mock_session.get.return_value = mock_response
 
-        result = scrape_driver_profile("Bad Data Driver", mock_session)
+        # Test with 150 drivers to trigger multiple batches
+        drivers = [f'Driver{i}' for i in range(150)]
+        search_wikidata_drivers(drivers, mock_session, batch_size=100)
 
-        assert result['name'] == 'Bad Data Driver'
-        assert result['scraped'] is False
-        assert 'error' in result
+        # Should be called twice (batch 0-99, 100-149)
+        assert mock_session.get.call_count == 2
 
 
 class TestGetAllDriversFromData:
@@ -250,63 +186,164 @@ class TestGetAllDriversFromData:
 class TestScrapeDrivers:
     @patch('app.scrapers.driver_scraper.create_session')
     @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
-    def test_handles_no_drivers(self, mock_get_drivers, mock_create_session):
-        # No drivers found
+    @patch('app.scrapers.driver_scraper.os.makedirs')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.search_wikidata_drivers')
+    @patch('app.scrapers.driver_scraper.save_profile')
+    def test_no_drivers_found(self, mock_save, mock_search, mock_exists,
+                              mock_makedirs, mock_get_drivers, mock_session):
         mock_get_drivers.return_value = []
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
+        mock_session.return_value = Mock()
 
-        # Call with None so function will call create_session()
-        scrape_drivers(None)  # Should not raise
+        scrape_drivers()
 
-        mock_get_drivers.assert_called_once()
-        # Because function returns before try/finally, session.close is NOT called here.
-        # If you want to assert session was created:
-        mock_create_session.assert_called_once()
+        mock_search.assert_not_called()
+        mock_save.assert_not_called()
 
     @patch('app.scrapers.driver_scraper.create_session')
-    @patch('app.scrapers.driver_scraper.os.makedirs')
-    @patch('app.scrapers.driver_scraper.scrape_driver_profile')
     @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
-    def test_scrapes_all_drivers(self, mock_get_drivers, mock_scrape_profile,
-                                 mock_makedirs, mock_create_session):
-        mock_get_drivers.return_value = ['Lewis Hamilton', 'Max Verstappen']
+    @patch('app.scrapers.driver_scraper.os.makedirs')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.search_wikidata_drivers')
+    @patch('app.scrapers.driver_scraper.save_profile')
+    @patch('app.scrapers.driver_scraper.PROFILES_DIR', '/profiles')
+    def test_new_driver_no_results(self, mock_save, mock_search, mock_exists,
+                                   mock_makedirs, mock_get_drivers, mock_session):
+        mock_get_drivers.return_value = ['New Driver']
+        mock_exists.return_value = False
+        mock_search.return_value = {}
+        session = Mock()
+        mock_session.return_value = session
 
-        # scrape_driver_profile returns a dict per driver
-        mock_scrape_profile.side_effect = [
-            {'name': 'Lewis Hamilton', 'scraped': True},
-            {'name': 'Max Verstappen', 'scraped': True}
-        ]
+        scrape_drivers()
 
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
-
-        scrape_drivers(None)
-
-        # We don't rely on order (set() used); just ensure both were called
-        assert mock_scrape_profile.call_count == 2
-
-        # session.close should be called once in the finally block
-        mock_session.close.assert_called_once()
-
-        # ensure profiles dir was ensured
-        mock_makedirs.assert_called_once()
+        # Should save profile with scraped=False
+        assert mock_save.called
+        saved_profile = mock_save.call_args[0][1]
+        assert saved_profile['scraped'] is False
+        assert saved_profile['name'] == 'New Driver'
 
     @patch('app.scrapers.driver_scraper.create_session')
-    @patch('app.scrapers.driver_scraper.os.makedirs')
-    @patch('app.scrapers.driver_scraper.scrape_driver_profile')
     @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
-    def test_closes_session_on_error(self, mock_get_drivers, mock_scrape_profile,
-                                     mock_makedirs, mock_create_session):
+    @patch('app.scrapers.driver_scraper.os.makedirs')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.search_wikidata_drivers')
+    @patch('app.scrapers.driver_scraper.save_profile')
+    @patch('app.scrapers.driver_scraper.PROFILES_DIR', '/profiles')
+    def test_new_driver_with_results(self, mock_save, mock_search, mock_exists,
+                                     mock_makedirs, mock_get_drivers, mock_session):
         mock_get_drivers.return_value = ['Lewis Hamilton']
+        mock_exists.return_value = False
+        mock_search.return_value = {
+            'Lewis Hamilton': {
+                'person': {'value': 'http://wikidata.org/entity/Q1'},
+                'dob': {'value': '1985-01-07T00:00:00Z'},
+                'nationalityLabel': {'value': 'United Kingdom'}
+            }
+        }
+        session = Mock()
+        mock_session.return_value = session
 
-        # Make the per-driver scraper raise to simulate an error
-        mock_scrape_profile.side_effect = Exception("scrapers error")
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
+        scrape_drivers()
 
-        with pytest.raises(Exception):
-            scrape_drivers(None)
+        saved_profile = mock_save.call_args[0][1]
+        assert saved_profile['scraped'] is True
+        assert saved_profile['dob'] == '1985-01-07'
+        assert saved_profile['wikidata_id'] == 'Q1'
 
-        # Even on error, session.close() must be called from finally
-        mock_session.close.assert_called_once()
+    @patch('app.scrapers.driver_scraper.create_session')
+    @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
+    @patch('app.scrapers.driver_scraper.os.makedirs')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.search_wikidata_drivers')
+    @patch('app.scrapers.driver_scraper.save_profile')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('app.scrapers.driver_scraper.PROFILES_DIR', '/profiles')
+    def test_existing_driver_needs_update(self, mock_file, mock_save, mock_search,
+                                          mock_exists, mock_makedirs, mock_get_drivers,
+                                          mock_session):
+        mock_get_drivers.return_value = ['Lewis Hamilton']
+        mock_exists.return_value = True
+
+        existing_profile = json.dumps({
+            'scraped': True,
+            'dob': '1985-01-07',
+            'nationality': 'UK'
+        })
+        mock_file.return_value.read.return_value = existing_profile
+
+        mock_search.return_value = {
+            'Lewis Hamilton': {
+                'person': {'value': 'http://wikidata.org/entity/Q1'},
+                'dob': {'value': '1985-01-07T00:00:00Z'},
+                'nationalityLabel': {'value': 'United Kingdom'}
+            }
+        }
+        session = Mock()
+        mock_session.return_value = session
+
+        scrape_drivers()
+
+        # Should update profile due to nationality change
+        assert mock_save.called
+
+    @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
+    def test_with_provided_session(self, mock_get_drivers):
+        mock_get_drivers.return_value = []
+        session = Mock()
+
+        scrape_drivers(session=session)
+
+        session.close.assert_not_called()
+
+    @patch('app.scrapers.driver_scraper.create_session')
+    @patch('app.scrapers.driver_scraper.get_all_drivers_from_data')
+    @patch('app.scrapers.driver_scraper.os.makedirs')
+    @patch('app.scrapers.driver_scraper.os.path.exists')
+    @patch('app.scrapers.driver_scraper.search_wikidata_drivers')
+    @patch('app.scrapers.driver_scraper.DRIVER_ALIASES', {'Test Driver': 'Aliased Driver'})
+    def test_driver_alias_mapping(self, mock_search, mock_exists, mock_makedirs,
+                                  mock_get_drivers, mock_session):
+        mock_get_drivers.return_value = ['Test Driver']
+        mock_exists.return_value = False
+        mock_search.return_value = {}
+        session = Mock()
+        mock_session.return_value = session
+
+        scrape_drivers()
+
+        # Should search with aliased name
+        call_args = mock_search.call_args[0][0]
+        assert 'Aliased Driver' in call_args
+
+
+class TestNeedsRescrape:
+    def test_failed_scrape_needs_rescrape(self):
+        existing = {'scraped': False, 'dob': None, 'nationality': None}
+        new_data = {'dob': {'value': '1985-01-07T00:00:00Z'}}
+
+        assert needs_rescrape(existing, new_data) is True
+
+    def test_dob_changed(self):
+        existing = {'scraped': True, 'dob': '1985-01-07', 'nationality': 'UK'}
+        new_data = {'dob': {'value': '1986-01-07T00:00:00Z'}}
+
+        assert needs_rescrape(existing, new_data) is True
+
+    def test_nationality_changed(self):
+        existing = {'scraped': True, 'dob': '1985-01-07', 'nationality': 'UK'}
+        new_data = {
+            'dob': {'value': '1985-01-07T00:00:00Z'},
+            'nationalityLabel': {'value': 'France'}
+        }
+
+        assert needs_rescrape(existing, new_data) is True
+
+    def test_no_changes(self):
+        existing = {'scraped': True, 'dob': '1985-01-07', 'nationality': 'United Kingdom'}
+        new_data = {
+            'dob': {'value': '1985-01-07T00:00:00Z'},
+            'nationalityLabel': {'value': 'United Kingdom'}
+        }
+
+        assert needs_rescrape(existing, new_data) is False

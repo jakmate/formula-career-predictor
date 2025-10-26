@@ -12,14 +12,12 @@ SPARQL_ENDPOINT = "https://query.wikidata.org/sparql"
 DRIVER_ALIASES = {
     "Lucas di Grassi": "Lucas Di Grassi",
     "Alfonso Celis Jr.": "Alfonso Celis",
-    "Rodolfo González": "Rodolfo Gonzalez",
     "Keyvan Andres": "Keyvan Andres Soori",
     "Gabriel Bortoleto": "Gabriel Lourenzo Bortoleto Oliveira",
-    "Mitch Gilbert": "Mitchell Gilbert",
     "Gabriel Chaves": "Gabby Chaves",
-    "Gabriele Minì": "Gabriele Mini",
     "Robert Kubica": "Robert Jozef Kubica",
-    "Yifei Ye": "Ye Yifei"
+    "Yifei Ye": "Ye Yifei",
+    "Frederik Vesti": "Frederik Stamm Vesti"
 }
 
 
@@ -30,54 +28,62 @@ def get_driver_filename(driver_name):
     return f"{safe_name.lower()}.json"
 
 
-def search_wikidata_driver(driver_name, session):
-    """Search for racing driver in Wikidata using SPARQL."""
-    # Check for known aliases first
-    if driver_name in DRIVER_ALIASES:
-        alias = DRIVER_ALIASES[driver_name]
-        if alias is None:  # Explicitly marked as invalid
-            return None
-        driver_name = alias
+def search_wikidata_drivers(driver_names, session, batch_size=100):
+    """Search for racing drivers in Wikidata using batched SPARQL."""
+    results = {}
 
-    # SPARQL query to find racing drivers by name
-    query = f"""
-    SELECT ?person ?personLabel ?dob ?nationality ?nationalityLabel
-        ?citizenship ?citizenshipLabel WHERE {{
-      {{
-        ?person rdfs:label "{driver_name}"@en .
-      }} UNION {{
-        ?person skos:altLabel "{driver_name}"@en .
-      }}
-      ?person wdt:P106 ?occupation .
-      # racing automobile driver or racing driver or Formula One driver
-      FILTER(?occupation = wd:Q10349745 ||
-        ?occupation = wd:Q378622 || ?occupation = wd:Q10841764)
+    # Process in batches
+    for i in range(0, len(driver_names), batch_size):
+        batch = driver_names[i:i + batch_size]
 
-      OPTIONAL {{ ?person wdt:P569 ?dob }}
-      OPTIONAL {{ ?person wdt:P1532 ?nationality }}  # country for sport
-      OPTIONAL {{ ?person wdt:P27 ?citizenship }}    # country of citizenship
+        # Build VALUES clause for batch
+        values_list = []
+        for name in batch:
+            values_list.extend([f'"{name}"@en', f'"{name}"@mul'])
+        values_clause = " ".join(values_list)
 
-      SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
-    }}
-    """
+        query = f"""
+        SELECT ?person ?personLabel ?dob ?nationality ?nationalityLabel
+            ?citizenship ?citizenshipLabel ?nameMatch WHERE {{
+          VALUES ?nameMatch {{ {values_clause} }}
+          {{
+            ?person rdfs:label ?nameMatch .
+          }} UNION {{
+            ?person skos:altLabel ?nameMatch .
+          }}
+          ?person wdt:P106 ?occupation .
+          FILTER(?occupation = wd:Q10349745 ||
+            ?occupation = wd:Q378622 || ?occupation = wd:Q10841764)
 
-    try:
-        response = session.get(
-            SPARQL_ENDPOINT,
-            params={'query': query, 'format': 'json'},
-            headers={'User-Agent': 'DriverProfileScraper/1.0'},
-            timeout=10
-        )
+          OPTIONAL {{ ?person wdt:P569 ?dob }}
+          OPTIONAL {{ ?person wdt:P1532 ?nationality }}
+          OPTIONAL {{ ?person wdt:P27 ?citizenship }}
 
-        if response.status_code == 200:
-            data = response.json()
-            if data['results']['bindings']:
-                return data['results']['bindings'][0]  # Return first match
+          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
+        }}
+        """
 
-    except Exception as e:
-        print(f"Wikidata query error for {driver_name}: {e}")
+        try:
+            response = session.get(
+                SPARQL_ENDPOINT,
+                params={'query': query, 'format': 'json'},
+                timeout=30
+            )
 
-    return None
+            if response.status_code == 200:
+                data = response.json()
+                # Group results by matched name
+                for binding in data['results']['bindings']:
+                    name = binding['nameMatch']['value']
+                    if name not in results:
+                        results[name] = binding
+            else:
+                print(response.status_code)
+
+        except Exception as e:
+            print(f"Batch query error for batch {i//batch_size + 1}: {e}")
+
+    return results
 
 
 def extract_nationality_from_result(result):
@@ -121,91 +127,6 @@ def needs_rescrape(existing_profile, new_data):
     return dob_changed or nationality_changed
 
 
-def scrape_driver_profile(driver_name, session, force_rescrape=False):
-    """Scrape individual driver profile from Wikidata."""
-    profile_file = os.path.join(PROFILES_DIR, get_driver_filename(driver_name))
-
-    # Check if already scraped
-    if os.path.exists(profile_file) and not force_rescrape:
-        with open(profile_file, 'r', encoding='utf-8') as f:
-            existing_profile = json.load(f)
-
-        # Check for known invalid drivers
-        if driver_name in DRIVER_ALIASES and DRIVER_ALIASES[driver_name] is None:
-            return existing_profile
-
-        # Query Wikidata to check for changes
-        result = search_wikidata_driver(driver_name, session)
-
-        if not result:
-            # No data found, keep existing profile
-            return existing_profile
-
-        # Check if rescrape is needed
-        if not needs_rescrape(existing_profile, result):
-            return existing_profile
-
-        print(f"Data changed for {driver_name}, updating profile...")
-    else:
-        print(f"Scraping profile for {driver_name}...")
-
-    # Check for known invalid drivers
-    if driver_name in DRIVER_ALIASES and DRIVER_ALIASES[driver_name] is None:
-        print(f"Skipping known invalid driver: {driver_name}")
-        profile = {
-            "name": driver_name,
-            "dob": None,
-            "nationality": None,
-            "scraped": False,
-        }
-        save_profile(profile_file, profile)
-        return profile
-
-    # Search Wikidata
-    result = search_wikidata_driver(driver_name, session)
-    if not result:
-        print(f"No Wikidata entry found for {driver_name}")
-        profile = {
-            "name": driver_name,
-            "dob": None,
-            "nationality": None,
-            "scraped": False
-        }
-        save_profile(profile_file, profile)
-        return profile
-
-    try:
-        # Extract data
-        dob = extract_dob_from_result(result)
-        nationality = extract_nationality_from_result(result)
-        wikidata_id = result['person']['value'].split('/')[-1]
-
-        profile = {
-            "name": driver_name,
-            "dob": dob,
-            "nationality": nationality,
-            "wikidata_id": wikidata_id,
-            "wikidata_url": result['person']['value'],
-            "scraped": True,
-            "scraped_date": datetime.now().isoformat()
-        }
-
-        save_profile(profile_file, profile)
-        return profile
-
-    except Exception as e:
-        print(f"Error processing {driver_name}: {e}")
-        profile = {
-            "name": driver_name,
-            "dob": None,
-            "nationality": None,
-            "scraped": False,
-            "error": str(e)
-        }
-        save_profile(profile_file, profile)
-        return profile
-
-
 def get_all_drivers_from_data():
     """Extract all driver names from data files."""
     all_drivers = set()
@@ -238,7 +159,7 @@ def get_all_drivers_from_data():
 
 
 def scrape_drivers(session=None):
-    """Main function to scrape all driver profiles."""
+    """Main function to scrape all driver profiles using batched queries."""
     if not session:
         session = create_session()
 
@@ -246,7 +167,7 @@ def scrape_drivers(session=None):
     all_drivers = get_all_drivers_from_data()
 
     if not all_drivers:
-        print("No drivers found. Check your data directory structure.")
+        print("No drivers found.")
         return
 
     print(f"Found {len(all_drivers)} unique drivers")
@@ -255,15 +176,103 @@ def scrape_drivers(session=None):
     os.makedirs(PROFILES_DIR, exist_ok=True)
 
     try:
-        print("Starting driver profile scraping...")
-        unique_drivers = list(set(all_drivers))
-        profiles = {}
+        # Create mapping of original name -> search name
+        driver_search_map = {}
+        for driver in all_drivers:
+            search_name = DRIVER_ALIASES.get(driver, driver)
+            if search_name is not None:  # Skip explicitly invalid drivers
+                driver_search_map[driver] = search_name
 
-        for i, driver in enumerate(unique_drivers, 1):
-            profiles[driver] = scrape_driver_profile(driver, session)
+        # Separate drivers into new and existing
+        new_drivers = []
+        existing_drivers = []
 
-        scraped_count = sum(1 for p in profiles.values() if p.get('scraped', False))
-        print(f"Scraping complete: {scraped_count}/{len(all_drivers)}")
+        for driver in driver_search_map.keys():
+            profile_file = os.path.join(PROFILES_DIR, get_driver_filename(driver))
+            if os.path.exists(profile_file):
+                existing_drivers.append(driver)
+            else:
+                new_drivers.append(driver)
+
+        print(f"New drivers: {len(new_drivers)}, Existing: {len(existing_drivers)}")
+
+        # Batch query for new drivers (use search names)
+        if new_drivers:
+            print(f"Querying {len(new_drivers)} new drivers in batches...")
+            search_names = [driver_search_map[d] for d in new_drivers]
+            new_results = search_wikidata_drivers(search_names, session)
+
+            # Map results back to original names
+            new_results_mapped = {}
+            for driver in new_drivers:
+                search_name = driver_search_map[driver]
+                if search_name in new_results:
+                    new_results_mapped[driver] = new_results[search_name]
+            new_results = new_results_mapped
+
+            for driver in new_drivers:
+                result = new_results.get(driver)
+
+                if not result:
+                    print(f"NO RESULTS FOR {driver}")
+                    profile = {
+                        "name": driver,
+                        "dob": None,
+                        "nationality": None,
+                        "scraped": False
+                    }
+                else:
+                    profile = {
+                        "name": driver,
+                        "dob": extract_dob_from_result(result),
+                        "nationality": extract_nationality_from_result(result),
+                        "wikidata_id": result['person']['value'].split('/')[-1],
+                        "wikidata_url": result['person']['value'],
+                        "scraped": True,
+                        "scraped_date": datetime.now().isoformat()
+                    }
+
+                profile_file = os.path.join(PROFILES_DIR, get_driver_filename(driver))
+                save_profile(profile_file, profile)
+
+        # Check existing drivers for updates
+        if existing_drivers:
+            print(f"Checking {len(existing_drivers)} existing drivers for updates...")
+            search_names = [driver_search_map[d] for d in existing_drivers]
+            existing_results = search_wikidata_drivers(search_names, session)
+
+            # Map results back to original names
+            existing_results_mapped = {}
+            for driver in existing_drivers:
+                search_name = driver_search_map[driver]
+                if search_name in existing_results:
+                    existing_results_mapped[driver] = existing_results[search_name]
+            existing_results = existing_results_mapped
+
+            updated_count = 0
+            for driver in existing_drivers:
+                profile_file = os.path.join(PROFILES_DIR, get_driver_filename(driver))
+                with open(profile_file, 'r', encoding='utf-8') as f:
+                    existing_profile = json.load(f)
+
+                result = existing_results.get(driver)
+                if result and needs_rescrape(existing_profile, result):
+                    print(f"Updating {driver}...")
+                    profile = {
+                        "name": driver,
+                        "dob": extract_dob_from_result(result),
+                        "nationality": extract_nationality_from_result(result),
+                        "wikidata_id": result['person']['value'].split('/')[-1],
+                        "wikidata_url": result['person']['value'],
+                        "scraped": True,
+                        "scraped_date": datetime.now().isoformat()
+                    }
+                    save_profile(profile_file, profile)
+                    updated_count += 1
+
+            print(f"Updated {updated_count} profiles")
+
+        print("Scraping complete")
 
     finally:
         session.close()
