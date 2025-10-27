@@ -10,7 +10,7 @@ from app.core.state import AppState
 def mock_app_state():
     app_state = Mock(spec=AppState)
     app_state.system_status = {
-        "last_scrape": None,
+        "last_scrape_full": None,
         "last_trained_season": 2022
     }
     app_state.save_state = Mock()
@@ -80,7 +80,7 @@ class TestSchedulerService:
         # Verify scraping happened
         mock_scrape.assert_called_once()
         scheduler_service.app_state.save_state.assert_called_once()
-        assert scheduler_service.app_state.system_status["last_scrape"] == mock_now
+        assert scheduler_service.app_state.system_status["last_scrape_full"] == mock_now
 
     @pytest.mark.asyncio
     @patch('app.services.cronjobs_service.scrape_current_year')

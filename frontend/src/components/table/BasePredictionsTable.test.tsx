@@ -71,7 +71,7 @@ describe('BasePredictionsTable', () => {
       models_available: ['model1', 'model2'],
     },
     error: null,
-    handleRefresh: vi.fn(),
+    refreshPredictions: vi.fn(),
     currentPredictions: [{ id: 1 }, { id: 2 }],
   };
 
@@ -157,7 +157,7 @@ describe('BasePredictionsTable', () => {
     const refreshButton = screen.getByText('Refresh');
     fireEvent.click(refreshButton);
 
-    expect(mockHookReturn.handleRefresh).toHaveBeenCalled();
+    expect(mockHookReturn.refreshPredictions).toHaveBeenCalled();
   });
 
   it('shows loading state on refresh button when loading', () => {

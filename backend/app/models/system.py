@@ -11,10 +11,13 @@ class HealthResponse(BaseModel):
 
 
 class SystemStatus(BaseModel):
-    last_scrape: Optional[datetime]
-    last_training: Optional[datetime]
+    last_scrape_full: Optional[datetime] = None
+    last_scrape_predictions: Optional[datetime] = None
+    last_scrape_schedule: Optional[datetime] = None
+    last_training: Optional[datetime] = None
+    last_trained_season: Optional[int] = None
     models_available: Dict[str, List[str]]
-    data_health: Dict[str, Dict[str, int]]
+    data_health: Dict[str, Dict[str, int]] = {}
 
 
 class RefreshResponse(BaseModel):

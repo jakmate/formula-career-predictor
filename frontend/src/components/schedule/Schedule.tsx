@@ -14,7 +14,7 @@ export const Schedule = () => {
     series,
     loading,
     error,
-    refetch,
+    refreshSchedule,
   } = useSchedule();
 
   return (
@@ -37,7 +37,7 @@ export const Schedule = () => {
             </select>
 
             <button
-              onClick={refetch}
+              onClick={refreshSchedule}
               disabled={loading}
               className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 disabled:opacity-50 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30"
             >

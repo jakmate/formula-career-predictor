@@ -104,7 +104,7 @@ describe('Schedule', () => {
       series: mockSeries,
       loading: false,
       error: null,
-      refetch: vi.fn(),
+      refreshSchedule: vi.fn(),
     });
   });
 
@@ -155,7 +155,7 @@ describe('Schedule', () => {
     expect(mockSetSelectedSeries).toHaveBeenCalledWith('f2');
   });
 
-  it('calls refetch when refresh button is clicked', () => {
+  it('calls refreshSchedule when refresh button is clicked', () => {
     const mockRefetch = vi.fn();
     mockUseSchedule.mockReturnValue({
       races: mockRaces,
@@ -165,7 +165,7 @@ describe('Schedule', () => {
       series: mockSeries,
       loading: false,
       error: null,
-      refetch: mockRefetch,
+      refreshSchedule: mockRefetch,
     });
 
     render(<Schedule />);
@@ -192,7 +192,7 @@ describe('Schedule', () => {
       series: mockSeries,
       loading: false,
       error: null,
-      refetch: vi.fn(),
+      refreshSchedule: vi.fn(),
     });
 
     render(<Schedule />);
@@ -210,7 +210,7 @@ describe('Schedule', () => {
       series: mockSeries,
       loading: false,
       error: mockError,
-      refetch: vi.fn(),
+      refreshSchedule: vi.fn(),
     });
 
     render(<Schedule />);
@@ -228,7 +228,7 @@ describe('Schedule', () => {
       series: mockSeries,
       loading: true,
       error: null,
-      refetch: vi.fn(),
+      refreshSchedule: vi.fn(),
     });
 
     render(<Schedule />);
@@ -250,7 +250,7 @@ describe('Schedule', () => {
       series: mockSeries,
       loading: true,
       error: null,
-      refetch: vi.fn(),
+      refreshSchedule: vi.fn(),
     });
 
     render(<Schedule />);
@@ -281,7 +281,7 @@ describe('Schedule', () => {
       series: mockSeries,
       loading: false,
       error: null,
-      refetch: vi.fn(),
+      refreshSchedule: vi.fn(),
     });
 
     render(<Schedule />);
@@ -298,7 +298,7 @@ describe('Schedule', () => {
       series: [],
       loading: false,
       error: null,
-      refetch: vi.fn(),
+      refreshSchedule: vi.fn(),
     });
 
     render(<Schedule />);
@@ -339,7 +339,7 @@ describe('Schedule', () => {
       series: mockSeries,
       loading: true,
       error: null,
-      refetch: vi.fn(),
+      refreshSchedule: vi.fn(),
     });
 
     render(<Schedule />);

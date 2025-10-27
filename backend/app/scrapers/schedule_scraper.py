@@ -486,7 +486,7 @@ def scrape_fia_formula_schedule(session, series_name, existing_races_by_round=No
         return []
 
 
-def save_schedules(session=None):
+def scrape_schedules(session=None):
     if not session:
         session = create_session()
 
@@ -533,4 +533,4 @@ def save_schedules(session=None):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    save_schedules()
+    scrape_schedules()

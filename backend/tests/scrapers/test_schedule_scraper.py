@@ -10,7 +10,7 @@ from app.scrapers.schedule_scraper import (
     parse_time_to_datetime,
     scrape_f1_schedule,
     scrape_fia_formula_schedule,
-    save_schedules
+    scrape_schedules
 )
 
 
@@ -239,7 +239,7 @@ class TestScrapeFiaFormulaSchedule:
         assert races == []
 
 
-# Tests for save_schedules
+# Tests for scrape_schedules
 class TestSaveSchedules:
     @patch('app.scrapers.schedule_scraper.scrape_f1_schedule')
     @patch('app.scrapers.schedule_scraper.scrape_fia_formula_schedule')
@@ -260,7 +260,7 @@ class TestSaveSchedules:
              "sessions": {"race": {"start": "2025-03-02T14:00:00"}}}
         ]
 
-        save_schedules(mock_session)
+        scrape_schedules(mock_session)
 
         # Verify scrapers were called
         assert mock_f1_scraper.called
@@ -294,7 +294,7 @@ class TestSaveSchedules:
         ]
         mock_f2_scraper.return_value = []
 
-        save_schedules(mock_session)
+        scrape_schedules(mock_session)
 
         expected_existing = {1: existing_race}
         mock_f1_scraper.assert_called_once_with(mock_session, expected_existing)
@@ -310,7 +310,7 @@ class TestSaveSchedules:
         mock_f2_scraper.return_value = []
 
         # Should not raise exception
-        save_schedules(mock_session)
+        scrape_schedules(mock_session)
 
     @patch('app.scrapers.schedule_scraper.scrape_f1_schedule')
     @patch('app.scrapers.schedule_scraper.scrape_fia_formula_schedule')
@@ -326,4 +326,4 @@ class TestSaveSchedules:
         mock_f2_scraper.return_value = []
 
         # Should not raise exception
-        save_schedules(mock_session)
+        scrape_schedules(mock_session)

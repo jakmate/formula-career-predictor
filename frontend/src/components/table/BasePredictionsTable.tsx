@@ -40,7 +40,7 @@ export const BasePredictionsTable = ({
     loading,
     status,
     error,
-    handleRefresh,
+    refreshPredictions,
     currentPredictions,
   } = usePredictions(selectedSeries);
 
@@ -87,7 +87,7 @@ export const BasePredictionsTable = ({
             </select>
 
             <button
-              onClick={handleRefresh}
+              onClick={refreshPredictions}
               disabled={loading}
               className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 disabled:opacity-50 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30"
             >
@@ -101,10 +101,11 @@ export const BasePredictionsTable = ({
         bottomContent={
           status && (
             <div className="flex flex-wrap gap-4 text-cyan-300">
-              {status.last_scrape && (
+              {status.last_scrape_predictions && (
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  Last scrape: {new Date(status.last_scrape).toLocaleString()}
+                  Last scrape:{' '}
+                  {new Date(status.last_scrape_predictions).toLocaleString()}
                 </div>
               )}
               {status.last_training && (

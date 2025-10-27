@@ -70,14 +70,39 @@ export const useSchedule = () => {
     [API_BASE, userTimezone]
   );
 
+  const refreshSchedule = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/system/refresh/schedule`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to trigger schedule refresh');
+      }
+
+      // Wait a bit for the backend to scrape, then refetch
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await fetchSchedule(selectedSeries);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+      setLoading(false);
+    }
+  }, [API_BASE, fetchSchedule, selectedSeries]);
+
   // Fetch when selectedSeries changes
   useEffect(() => {
     fetchSchedule(selectedSeries);
   }, [selectedSeries, fetchSchedule]);
-
-  const refetch = useCallback(() => {
-    fetchSchedule(selectedSeries);
-  }, [fetchSchedule, selectedSeries]);
 
   return {
     races,
@@ -87,7 +112,7 @@ export const useSchedule = () => {
     series,
     loading,
     error,
-    refetch,
     userTimezone,
+    refreshSchedule,
   };
 };

@@ -7,7 +7,7 @@ from app.dependencies import (
     get_app_state,
     get_model_service,
     get_data_service,
-    get_scheduler_service
+    get_cronjob_service
 )
 
 
@@ -17,7 +17,7 @@ def mock_services():
     with patch("app.dependencies.AppState") as mock_app_state, \
          patch("app.dependencies.ModelService") as mock_model_service, \
          patch("app.dependencies.DataService") as mock_data_service, \
-         patch("app.dependencies.CronjobService") as mock_scheduler_service:
+         patch("app.dependencies.CronjobService") as mock_cronjob_service:
 
         # Configure mocks
         mock_app_state_instance = MagicMock()
@@ -29,18 +29,18 @@ def mock_services():
         mock_data_service_instance = AsyncMock()
         mock_data_service.return_value = mock_data_service_instance
 
-        mock_scheduler_service_instance = AsyncMock()
-        mock_scheduler_service.return_value = mock_scheduler_service_instance
+        mock_cronjob_service_instance = AsyncMock()
+        mock_cronjob_service.return_value = mock_cronjob_service_instance
 
         yield {
             "app_state": mock_app_state,
             "model_service": mock_model_service,
             "data_service": mock_data_service,
-            "scheduler_service": mock_scheduler_service,
+            "cronjob_service": mock_cronjob_service,
             "app_state_instance": mock_app_state_instance,
             "model_service_instance": mock_model_service_instance,
             "data_service_instance": mock_data_service_instance,
-            "scheduler_service_instance": mock_scheduler_service_instance
+            "cronjob_service_instance": mock_cronjob_service_instance
         }
 
 
@@ -51,13 +51,13 @@ def reset_global_state():
     app.dependencies.app_state = None
     app.dependencies.model_service = None
     app.dependencies.data_service = None
-    app.dependencies.scheduler_service = None
+    app.dependencies.cronjob_service = None
     yield
     # Reset after test
     app.dependencies.app_state = None
     app.dependencies.model_service = None
     app.dependencies.data_service = None
-    app.dependencies.scheduler_service = None
+    app.dependencies.cronjob_service = None
 
 
 class TestInitializeAppState:
@@ -73,7 +73,7 @@ class TestInitializeAppState:
         mocks["app_state_instance"].load_state.assert_called_once()
         mocks["model_service"].assert_called_once()
         mocks["data_service"].assert_called_once()
-        mocks["scheduler_service"].assert_called_once()
+        mocks["cronjob_service"].assert_called_once()
 
         # Verify model loading was attempted
         mocks["model_service_instance"].load_models.assert_called_once()
@@ -81,8 +81,8 @@ class TestInitializeAppState:
         # Verify data service initialization was NOT called
         mocks["data_service_instance"].initialize_system.assert_not_called()
 
-        # Verify scheduler was started
-        mocks["scheduler_service_instance"].start.assert_called_once()
+        # Verify cronjob was started
+        mocks["cronjob_service_instance"].start.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_initialize_app_state_without_models(self, mock_services):
@@ -101,8 +101,8 @@ class TestInitializeAppState:
         # Verify logger was called
         mock_logger.info.assert_called_with("No models found. Initializing system...")
 
-        # Verify scheduler was started
-        mocks["scheduler_service_instance"].start.assert_called_once()
+        # Verify cronjob was started
+        mocks["cronjob_service_instance"].start.assert_called_once()
 
 
 class TestCleanupAppState:
@@ -113,8 +113,8 @@ class TestCleanupAppState:
 
         await cleanup_app_state()
 
-        # Verify scheduler was stopped
-        mock_services["scheduler_service_instance"].stop.assert_called_once()
+        # Verify cronjob was stopped
+        mock_services["cronjob_service_instance"].stop.assert_called_once()
 
         # Verify state was saved
         mock_services["app_state_instance"].save_state.assert_called_once()
@@ -162,16 +162,16 @@ class TestGetDependencies:
         with pytest.raises(RuntimeError, match="Data service not initialized"):
             get_data_service()
 
-    def test_get_scheduler_service_success(self, mock_services):
+    def test_get_cronjob_service_success(self, mock_services):
         import app.dependencies
-        app.dependencies.scheduler_service = mock_services["scheduler_service_instance"]
+        app.dependencies.cronjob_service = mock_services["cronjob_service_instance"]
 
-        result = get_scheduler_service()
-        assert result == mock_services["scheduler_service_instance"]
+        result = get_cronjob_service()
+        assert result == mock_services["cronjob_service_instance"]
 
-    def test_get_scheduler_service_not_initialized(self):
-        with pytest.raises(RuntimeError, match="Scheduler service not initialized"):
-            get_scheduler_service()
+    def test_get_cronjob_service_not_initialized(self):
+        with pytest.raises(RuntimeError, match="Cronjob service not initialized"):
+            get_cronjob_service()
 
 
 class TestFullLifecycle:
@@ -188,11 +188,11 @@ class TestFullLifecycle:
         assert get_app_state() == mocks["app_state_instance"]
         assert get_model_service() == mocks["model_service_instance"]
         assert get_data_service() == mocks["data_service_instance"]
-        assert get_scheduler_service() == mocks["scheduler_service_instance"]
+        assert get_cronjob_service() == mocks["cronjob_service_instance"]
 
         # Cleanup
         await cleanup_app_state()
 
         # Verify cleanup was called
-        mocks["scheduler_service_instance"].stop.assert_called_once()
+        mocks["cronjob_service_instance"].stop.assert_called_once()
         mocks["app_state_instance"].save_state.assert_called_once()

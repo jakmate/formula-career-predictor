@@ -4,7 +4,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.core.state import AppState
 from app.config import CURRENT_YEAR, LOGGER, SEASON_END_MONTH
-from app.scrapers.scrape import scrape_current_year
+from app.scrapers.scrape import scrape_current_year, scrape_wiki
+from app.scrapers.schedule_scraper import scrape_schedules
 
 
 class CronjobService:
@@ -33,7 +34,9 @@ class CronjobService:
         try:
             LOGGER.info("Starting data scraping task...")
             await asyncio.get_event_loop().run_in_executor(None, scrape_current_year)
-            self.app_state.system_status["last_scrape"] = datetime.now()
+            self.app_state.system_status["last_scrape_full"] = datetime.now()
+            self.app_state.system_status["last_scrape_predictions"] = datetime.now()
+            self.app_state.system_status["last_scrape_schedule"] = datetime.now()
             LOGGER.info("Data scraping completed")
 
             if (self._is_season_complete() and CURRENT_YEAR >
@@ -66,3 +69,40 @@ class CronjobService:
         """Check if current season is complete based on date"""
         now = datetime.now()
         return now.month > SEASON_END_MONTH and now.year == CURRENT_YEAR
+
+    async def scrape_predictions(self):
+        """Scrape prediction-related data"""
+        try:
+            LOGGER.info("Starting predictions scraping task...")
+            await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: scrape_wiki(start_year=CURRENT_YEAR)
+            )
+            self.app_state.system_status["last_scrape_predictions"] = datetime.now()
+            LOGGER.info("Predictions scraping completed")
+
+            # Update predictions without training
+            from app.services.prediction_service import PredictionService
+            for series in ['f3_to_f2', 'f2_to_f1']:
+                prediction_service = PredictionService(
+                    self.app_state,
+                    series,
+                    self.data_service
+                )
+                await prediction_service.update_predictions()
+        except Exception as e:
+            LOGGER.error(f"Predictions scrape task failed: {e}")
+        finally:
+            self.app_state.save_state()
+
+    async def scrape_schedule(self):
+        """Scrape schedule data"""
+        try:
+            LOGGER.info("Starting schedule scraping task...")
+            await asyncio.get_event_loop().run_in_executor(None, scrape_schedules)
+            self.app_state.system_status["last_scrape_schedule"] = datetime.now()
+            LOGGER.info("Schedule scraping completed")
+        except Exception as e:
+            LOGGER.error(f"Schedule scrape task failed: {e}")
+        finally:
+            self.app_state.save_state()

@@ -17,7 +17,7 @@ describe('usePredictions', () => {
       model2: { predictions: [{ id: 2 }] },
     },
     system_status: {
-      last_scrape: '2023-01-01T00:00:00Z',
+      last_scrape_predictions: '2023-01-01T00:00:00Z',
       last_training: '2023-01-02T00:00:00Z',
     },
   };
@@ -122,7 +122,7 @@ describe('usePredictions', () => {
     });
 
     await act(async () => {
-      result.current.handleRefresh();
+      result.current.refreshPredictions();
     });
 
     await waitFor(() => {
@@ -159,7 +159,7 @@ describe('usePredictions', () => {
       models: ['model1'],
       predictions: { model1: { predictions: [{ id: 1 }] } },
       system_status: {
-        last_scrape: '2023-01-01T00:00:00Z',
+        last_scrape_predictions: '2023-01-01T00:00:00Z',
         last_training: '2023-01-02T00:00:00Z',
       },
     };
@@ -185,7 +185,7 @@ describe('usePredictions', () => {
     const updatedResponse = {
       ...initialResponse,
       system_status: {
-        last_scrape: '2023-01-01T01:00:00Z', // Updated timestamp
+        last_scrape_predictions: '2023-01-01T01:00:00Z', // Updated timestamp
         last_training: '2023-01-02T00:00:00Z',
       },
     };
@@ -196,16 +196,18 @@ describe('usePredictions', () => {
     });
 
     await act(async () => {
-      result.current.handleRefresh();
+      result.current.refreshPredictions();
     });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.status?.last_scrape).toBe('2023-01-01T01:00:00Z');
+    expect(result.current.status?.last_scrape_predictions).toBe(
+      '2023-01-01T01:00:00Z'
+    );
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/system/refresh',
+      'http://localhost:8000/api/system/refresh/predictions',
       { method: 'POST' }
     );
 
@@ -245,7 +247,7 @@ describe('usePredictions', () => {
     }
 
     await act(async () => {
-      result.current.handleRefresh();
+      result.current.refreshPredictions();
     });
 
     await waitFor(

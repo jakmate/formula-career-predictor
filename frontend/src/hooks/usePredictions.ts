@@ -56,15 +56,18 @@ export const usePredictions = (series: SeriesType = 'f3_to_f2') => {
     }
   }, [allData?.models, selectedModel]);
 
-  const handleRefresh = async () => {
+  const refreshPredictions = async () => {
     try {
       setLoading(true);
       setError(null);
       refreshStatusRef.current = allData?.system_status || null;
 
-      const refreshResponse = await fetch(`${API_BASE}/api/system/refresh`, {
-        method: 'POST',
-      });
+      const refreshResponse = await fetch(
+        `${API_BASE}/api/system/refresh/predictions`,
+        {
+          method: 'POST',
+        }
+      );
       if (!refreshResponse.ok) {
         throw new Error('Refresh request failed');
       }
@@ -78,10 +81,10 @@ export const usePredictions = (series: SeriesType = 'f3_to_f2') => {
           setAllData(newData);
 
           const hasNewData =
-            newData.system_status?.last_scrape !==
-              refreshStatusRef.current?.last_scrape ||
-            newData.system_status?.last_training !==
-              refreshStatusRef.current?.last_training;
+            newData.system_status?.last_scrape_full !==
+              refreshStatusRef.current?.last_scrape_full ||
+            newData.system_status?.last_scrape_predictions !==
+              refreshStatusRef.current?.last_scrape_predictions;
 
           if (hasNewData) {
             setLoading(false);
@@ -125,7 +128,7 @@ export const usePredictions = (series: SeriesType = 'f3_to_f2') => {
     loading,
     status: allData?.system_status || null,
     error,
-    handleRefresh,
+    refreshPredictions,
     currentPredictions:
       allData?.predictions?.[selectedModel]?.predictions || [],
   };

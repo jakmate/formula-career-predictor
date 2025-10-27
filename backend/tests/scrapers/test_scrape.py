@@ -1,5 +1,7 @@
 from unittest.mock import Mock, patch
-from app.scrapers.scrape import map_url, scrape, scrape_current_year
+
+import pytest
+from app.scrapers.scrape import map_url, scrape, scrape_current_year, scrape_wiki
 
 
 class TestMapUrl:
@@ -37,171 +39,112 @@ class TestMapUrl:
         assert map_url(-1, 2020) is None
 
 
-class TestScrape:
-    """Test the main scrape function."""
+class TestScrapeWiki:
+    """Test scrape_wiki function."""
 
-    @patch('app.scrapers.scrape.save_schedules')
-    @patch('app.scrapers.scrape.scrape_drivers')
-    @patch('app.scrapers.scrape.scrape_quali')
+    @patch('app.scrapers.scrape.create_session')
+    @patch('app.scrapers.scrape.safe_request')
+    @patch('app.scrapers.scrape.process_entries')
     @patch('app.scrapers.scrape.process_championship')
-    @patch('app.scrapers.scrape.process_entries')
-    @patch('app.scrapers.scrape.safe_request')
-    @patch('app.scrapers.scrape.create_session')
-    def test_scrape_success(self, mock_create_session, mock_safe_request,
-                            mock_process_entries, mock_process_championship,
-                            mock_scrape_quali, mock_scrape_drivers, mock_save_schedules):
-        """Test successful scrapers of all series."""
-        # Setup mocks
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
-
-        mock_response = Mock()
-        mock_response.text = "<html><body>Test content</body></html>"
-        mock_safe_request.return_value = mock_response
-
-        # Run scrape function with limited year range for testing
-        with patch('app.scrapers.scrape.range', return_value=[2020, 2021]):
-            scrape()
-
-        # Verify session creation and closure
-        mock_create_session.assert_called_once()
-        mock_session.close.assert_called_once()
-
-        # Verify final functions called
-        mock_scrape_drivers.assert_called()
-        mock_save_schedules.assert_called()
-
-    @patch('app.scrapers.scrape.save_schedules')
-    @patch('app.scrapers.scrape.scrape_drivers')
-    @patch('app.scrapers.scrape.safe_request')
-    @patch('app.scrapers.scrape.create_session')
-    def test_scrape_request_failure(self, mock_create_session, mock_safe_request,
-                                    mock_scrape_drivers, mock_save_schedules):
-        """Test scrape behavior when safe_request returns None."""
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
-        mock_safe_request.return_value = None
-
-        with patch('app.scrapers.scrape.range', return_value=[2020]):
-            scrape()
-
-        mock_session.close.assert_called_once()
-        mock_scrape_drivers.assert_called()
-        mock_save_schedules.assert_called()
-
-    @patch('app.scrapers.scrape.save_schedules')
-    @patch('app.scrapers.scrape.scrape_drivers')
-    @patch('app.scrapers.scrape.process_entries')
-    @patch('app.scrapers.scrape.safe_request')
-    @patch('app.scrapers.scrape.create_session')
-    def test_scrape_processing_exception(self, mock_create_session, mock_safe_request,
-                                         mock_process_entries, mock_scrape_drivers,
-                                         mock_save_schedules):
-        """Test scrape behavior when processing raises an exception."""
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
-
-        mock_response = Mock()
-        mock_response.text = "<html><body>Test content</body></html>"
-        mock_safe_request.return_value = mock_response
-
-        # Make process_entries raise an exception
-        mock_process_entries.side_effect = Exception("Processing error")
-
-        with patch('app.scrapers.scrape.range', return_value=[2020]):
-            scrape()
-
-        mock_session.close.assert_called_once()
-        mock_scrape_drivers.assert_called()
-        mock_save_schedules.assert_called()
-
-
-class TestScrapeCurrentYear:
-    """Test the scrape_current_year function."""
-
-    @patch('app.scrapers.scrape.datetime')
-    @patch('app.scrapers.scrape.save_schedules')
-    @patch('app.scrapers.scrape.scrape_drivers')
     @patch('app.scrapers.scrape.scrape_quali')
-    @patch('app.scrapers.scrape.process_championship')
-    @patch('app.scrapers.scrape.process_entries')
-    @patch('app.scrapers.scrape.safe_request')
-    @patch('app.scrapers.scrape.create_session')
-    def test_scrape_current_year_success(self, mock_create_session, mock_safe_request,
-                                         mock_process_entries, mock_process_championship,
-                                         mock_scrape_quali, mock_scrape_drivers,
-                                         mock_save_schedules, mock_datetime):
-        """Test successful scrapers of current year."""
-        # Mock current year
-        mock_datetime.now.return_value.year = 2024
-
-        # Setup mocks
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
+    def test_scrape_wiki_successful(
+        self, mock_quali, mock_championship, mock_entries,
+        mock_request, mock_session
+    ):
+        """Test successful scraping for a year range."""
+        mock_sess = Mock()
+        mock_session.return_value = mock_sess
 
         mock_response = Mock()
-        mock_response.text = "<html><body>Current year content</body></html>"
-        mock_safe_request.return_value = mock_response
+        mock_response.text = "<html><body></body></html>"
+        mock_request.return_value = mock_response
 
-        scrape_current_year()
+        scrape_wiki(mock_sess, formulas=[1], start_year=2020, end_year=2021)
 
-        # Verify session handling
-        mock_create_session.assert_called_once()
-        mock_session.close.assert_called_once()
+        assert mock_request.call_count == 1
+        assert mock_entries.call_count == 1
+        assert mock_championship.call_count == 2  # Teams and Drivers
+        assert mock_quali.call_count == 1
 
-        # Verify all three series processed
-        assert mock_safe_request.call_count == 3
-        assert mock_process_entries.call_count == 3
-
-        # Verify final functions called
-        mock_scrape_drivers.assert_called_once()
-        mock_save_schedules.assert_called_once()
-
-    @patch('app.scrapers.scrape.datetime')
-    @patch('app.scrapers.scrape.save_schedules')
-    @patch('app.scrapers.scrape.scrape_drivers')
-    @patch('app.scrapers.scrape.safe_request')
     @patch('app.scrapers.scrape.create_session')
-    def test_scrape_current_year_request_failure(self, mock_create_session,
-                                                 mock_safe_request, mock_scrape_drivers,
-                                                 mock_save_schedules, mock_datetime):
-        """Test current year scrapers with request failures."""
-        mock_datetime.now.return_value.year = 2024
+    @patch('app.scrapers.scrape.safe_request')
+    def test_scrape_wiki_request_failure(self, mock_request, mock_session):
+        """Test handling of request failures."""
+        mock_sess = Mock()
+        mock_session.return_value = mock_sess
+        mock_request.return_value = None  # Simulate failure
 
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
-        mock_safe_request.return_value = None
+        scrape_wiki(mock_sess, formulas=[1], start_year=2020, end_year=2021)
 
-        scrape_current_year()
+        assert mock_request.call_count == 1
 
-        mock_session.close.assert_called_once()
-        mock_scrape_drivers.assert_called_once()
-        mock_save_schedules.assert_called_once()
-
-    @patch('app.scrapers.scrape.datetime')
-    @patch('app.scrapers.scrape.save_schedules')
-    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.create_session')
+    @patch('app.scrapers.scrape.safe_request')
     @patch('app.scrapers.scrape.process_entries')
-    @patch('app.scrapers.scrape.safe_request')
-    @patch('app.scrapers.scrape.create_session')
-    def test_scrape_current_year_processing_exception(self, mock_create_session,
-                                                      mock_safe_request, mock_process_entries,
-                                                      mock_scrape_drivers, mock_save_schedules,
-                                                      mock_datetime):
-        """Test current year scrapers with processing exceptions."""
-        mock_datetime.now.return_value.year = 2024
-
-        mock_session = Mock()
-        mock_create_session.return_value = mock_session
+    def test_scrape_wiki_processing_error(
+        self, mock_entries, mock_request, mock_session
+    ):
+        """Test handling of processing errors."""
+        mock_sess = Mock()
+        mock_session.return_value = mock_sess
 
         mock_response = Mock()
-        mock_response.text = "<html><body>Content</body></html>"
-        mock_safe_request.return_value = mock_response
+        mock_response.text = "<html><body></body></html>"
+        mock_request.return_value = mock_response
 
-        mock_process_entries.side_effect = Exception("Processing error")
+        mock_entries.side_effect = Exception("Processing error")
+
+        # Should not raise, just log error
+        scrape_wiki(mock_sess, formulas=[1], start_year=2020, end_year=2021)
+
+
+class TestScrapeFunctions:
+    """Test main scrape functions."""
+
+    @patch('app.scrapers.scrape.create_session')
+    @patch('app.scrapers.scrape.scrape_wiki')
+    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.scrape_schedules')
+    def test_scrape(self, mock_schedules, mock_drivers, mock_wiki, mock_session):
+        """Test scrape function calls all scrapers."""
+        mock_sess = Mock()
+        mock_session.return_value = mock_sess
+
+        scrape()
+
+        mock_wiki.assert_called_once_with(mock_sess)
+        mock_drivers.assert_called_once_with(mock_sess)
+        mock_schedules.assert_called_once_with(mock_sess)
+        mock_sess.close.assert_called_once()
+
+    @patch('app.scrapers.scrape.create_session')
+    @patch('app.scrapers.scrape.scrape_wiki')
+    @patch('app.scrapers.scrape.scrape_drivers')
+    @patch('app.scrapers.scrape.scrape_schedules')
+    @patch('app.scrapers.scrape.CURRENT_YEAR', 2024)
+    def test_scrape_current_year(
+        self, mock_schedules, mock_drivers, mock_wiki, mock_session
+    ):
+        """Test scrape_current_year only scrapes current year."""
+        mock_sess = Mock()
+        mock_session.return_value = mock_sess
 
         scrape_current_year()
 
-        mock_session.close.assert_called_once()
-        mock_scrape_drivers.assert_called_once()
-        mock_save_schedules.assert_called_once()
+        mock_wiki.assert_called_once_with(mock_sess, start_year=2024)
+        mock_drivers.assert_called_once_with(mock_sess)
+        mock_schedules.assert_called_once_with(mock_sess)
+        mock_sess.close.assert_called_once()
+
+    @patch('app.scrapers.scrape.create_session')
+    @patch('app.scrapers.scrape.scrape_wiki')
+    def test_scrape_closes_session_on_error(self, mock_wiki, mock_session):
+        """Test session closes even if scraping fails."""
+        mock_sess = Mock()
+        mock_session.return_value = mock_sess
+        mock_wiki.side_effect = Exception("Scrape failed")
+
+        with pytest.raises(Exception):
+            scrape()
+
+        mock_sess.close.assert_called_once()

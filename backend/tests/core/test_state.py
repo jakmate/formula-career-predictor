@@ -15,7 +15,9 @@ def mock_state_file():
 @pytest.fixture
 def sample_state_data():
     return {
-        "last_scrape": "2024-01-01T12:00:00",
+        "last_scrape_full": "2024-01-01T12:00:00",
+        "last_scrape_predictions": "2024-01-01T12:00:00",
+        "last_scrape_schedule": "2024-01-01T12:00:00",
         "last_training": "2024-01-01T13:00:00",
         "last_trained_season": "2024",
         "models_available": {
@@ -45,7 +47,9 @@ class TestAppStateInit:
 
         # Test other default values
         assert state.current_predictions == {}
-        assert state.system_status["last_scrape"] is None
+        assert state.system_status["last_scrape_full"] is None
+        assert state.system_status["last_scrape_predictions"] is None
+        assert state.system_status["last_scrape_schedule"] is None
         assert state.system_status["last_training"] is None
         assert state.system_status["last_trained_season"] is None
         assert state.system_status["models_available"] == {
@@ -61,7 +65,9 @@ class TestSaveState:
         state = AppState()
         test_time = datetime(2024, 1, 1, 12, 0, 0)
 
-        state.system_status["last_scrape"] = test_time
+        state.system_status["last_scrape_full"] = test_time
+        state.system_status["last_scrape_predictions"] = test_time
+        state.system_status["last_scrape_schedule"] = test_time
         state.system_status["last_training"] = test_time
         state.system_status["last_trained_season"] = "2024"
         state.system_status["models_available"] = {
@@ -79,7 +85,9 @@ class TestSaveState:
             written_data = ''.join(call.args[0] for call in handle.write.call_args_list)
             saved_data = json.loads(written_data)
 
-            assert saved_data["last_scrape"] == "2024-01-01T12:00:00"
+            assert saved_data["last_scrape_full"] == "2024-01-01T12:00:00"
+            assert saved_data["last_scrape_predictions"] == "2024-01-01T12:00:00"
+            assert saved_data["last_scrape_schedule"] == "2024-01-01T12:00:00"
             assert saved_data["last_training"] == "2024-01-01T12:00:00"
             assert saved_data["last_trained_season"] == "2024"
             assert saved_data["models_available"] == {
@@ -97,7 +105,9 @@ class TestSaveState:
             written_data = ''.join(call.args[0] for call in handle.write.call_args_list)
             saved_data = json.loads(written_data)
 
-            assert saved_data["last_scrape"] is None
+            assert saved_data["last_scrape_full"] is None
+            assert saved_data["last_scrape_predictions"] is None
+            assert saved_data["last_scrape_schedule"] is None
             assert saved_data["last_training"] is None
             assert saved_data["last_trained_season"] is None
             assert saved_data["models_available"] == {
@@ -116,7 +126,7 @@ class TestLoadState:
             result = state.load_state()
 
             assert result is True
-            assert state.system_status["last_scrape"] == datetime(2024, 1, 1, 12, 0, 0)
+            assert state.system_status["last_scrape_full"] == datetime(2024, 1, 1, 12, 0, 0)
             assert state.system_status["last_training"] == datetime(2024, 1, 1, 13, 0, 0)
             assert state.system_status["last_trained_season"] == "2024"
             assert state.system_status["models_available"] == {
@@ -132,7 +142,7 @@ class TestLoadState:
 
             assert result is False
             # State should remain at default values
-            assert state.system_status["last_scrape"] is None
+            assert state.system_status["last_scrape_full"] is None
             assert state.models == {
                 'f3_to_f2': {},
                 'f2_to_f1': {}
@@ -141,7 +151,7 @@ class TestLoadState:
     def test_load_state_none_datetime_values(self):
         state = AppState()
         state_data = {
-            "last_scrape": None,
+            "last_scrape_full": None,
             "last_training": None,
             "last_trained_season": "2024",
             "models_available": ["f3_to_f2_model1"]
@@ -153,7 +163,7 @@ class TestLoadState:
             result = state.load_state()
 
             assert result is True
-            assert state.system_status["last_scrape"] is None
+            assert state.system_status["last_scrape_full"] is None
             assert state.system_status["last_training"] is None
             assert state.system_status["last_trained_season"] == "2024"
 
@@ -186,7 +196,7 @@ class TestLoadState:
     def test_load_state_datetime_parsing(self):
         state = AppState()
         state_data = {
-            "last_scrape": "2024-06-15T14:30:45",
+            "last_scrape_full": "2024-06-15T14:30:45",
             "last_training": "2024-06-15T15:45:30",
             "last_trained_season": "2024",
             "models_available": []
@@ -198,7 +208,7 @@ class TestLoadState:
             result = state.load_state()
 
             assert result is True
-            assert state.system_status["last_scrape"] == datetime(2024, 6, 15, 14, 30, 45)
+            assert state.system_status["last_scrape_full"] == datetime(2024, 6, 15, 14, 30, 45)
             assert state.system_status["last_training"] == datetime(2024, 6, 15, 15, 45, 30)
 
 
@@ -211,7 +221,7 @@ class TestStateIntegration:
         test_time = datetime(2024, 1, 1, 12, 0, 0)
 
         # Set up state
-        state1.system_status["last_scrape"] = test_time
+        state1.system_status["last_scrape_full"] = test_time
         state1.system_status["last_training"] = test_time
         state1.system_status["last_trained_season"] = "2024"
         state1.system_status["models_available"] = {
@@ -234,7 +244,7 @@ class TestStateIntegration:
             result = state2.load_state()
 
             assert result is True
-            assert state2.system_status["last_scrape"] == test_time
+            assert state2.system_status["last_scrape_full"] == test_time
             assert state2.system_status["last_training"] == test_time
             assert state2.system_status["last_trained_season"] == "2024"
             assert state2.system_status["models_available"] == {

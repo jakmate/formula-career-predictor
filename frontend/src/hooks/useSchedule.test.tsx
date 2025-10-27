@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useSchedule } from './useSchedule';
 
 // Mock fetch globally
@@ -175,51 +175,5 @@ describe('useSchedule', () => {
         }),
       })
     );
-  });
-
-  it('calls fetch again when refetch is invoked', async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValue(mockRacesData),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValue(mockNextRaceData),
-      });
-
-    const { result } = renderHook(() => useSchedule());
-
-    // wait for initial fetch to finish
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-
-    // prepare mock for refetch
-    mockFetch.mockClear();
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValue(mockRacesData),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValue(mockNextRaceData),
-      });
-
-    await act(async () => {
-      result.current.refetch();
-    });
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-
-    expect(result.current.races).toEqual(mockRacesData);
-    expect(result.current.nextRace).toEqual(mockNextRaceData);
   });
 });

@@ -22,7 +22,9 @@ class AppState:
         }
         self.current_predictions = {}
         self.system_status = {
-            "last_scrape": None,
+            "last_scrape_full": None,
+            "last_scrape_predictions": None,
+            "last_scrape_schedule": None,
             "last_training": None,
             "last_trained_season": None,
             "models_available": {
@@ -36,8 +38,12 @@ class AppState:
     def save_state(self):
         """Save critical state to disk"""
         state = {
-            "last_scrape": self.system_status["last_scrape"].isoformat()
-            if self.system_status["last_scrape"] else None,
+            "last_scrape_full": self.system_status["last_scrape_full"].isoformat()
+            if self.system_status["last_scrape_full"] else None,
+            "last_scrape_predictions": self.system_status["last_scrape_predictions"].isoformat()
+            if self.system_status["last_scrape_predictions"] else None,
+            "last_scrape_schedule": self.system_status["last_scrape_schedule"].isoformat()
+            if self.system_status["last_scrape_schedule"] else None,
             "last_training": self.system_status["last_training"].isoformat()
             if self.system_status["last_training"] else None,
             "last_trained_season": self.system_status["last_trained_season"],
@@ -53,9 +59,9 @@ class AppState:
                 with open(STATE_FILE, 'r') as f:
                     state = json.load(f)
 
-                self.system_status["last_scrape"] = (
-                    datetime.fromisoformat(state["last_scrape"])
-                    if state["last_scrape"] else None
+                self.system_status["last_scrape_full"] = (
+                    datetime.fromisoformat(state["last_scrape_full"])
+                    if state.get("last_scrape_full") else None
                 )
                 self.system_status["last_training"] = (
                     datetime.fromisoformat(state["last_training"])

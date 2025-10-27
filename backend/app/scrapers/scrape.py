@@ -1,12 +1,12 @@
 import gc
 from bs4 import BeautifulSoup
-from datetime import datetime
-from app.scrapers.schedule_scraper import save_schedules
+from app.scrapers.schedule_scraper import scrape_schedules
 from app.scrapers.championship_scraper import process_championship
 from app.scrapers.entries_scraper import process_entries
 from app.scrapers.qualifying_scraper import scrape_quali
 from app.scrapers.driver_scraper import scrape_drivers
 from app.scrapers.scraping_utils import create_session, safe_request
+from app.config import CURRENT_YEAR
 
 BASE_URL = "https://en.wikipedia.org/wiki/"
 
@@ -23,60 +23,23 @@ def map_url(num, year):
     return None
 
 
-def scrape():
-    session = create_session()
+def scrape_wiki(
+        session=None,
+        formulas=[1, 2, 3],
+        start_year=2010,
+        end_year=CURRENT_YEAR + 1
+):
+    if not session:
+        session = create_session()
 
-    try:
-        # F1, F2/GP2 and F3/GP3 processing
-        for num in [1, 2, 3]:
-            for year in range(2010, 2026):
-                url = map_url(num, year)
-                print(f"Processing F{num} {year}...")
+    for num in formulas:
+        for year in range(start_year, end_year):
+            url = map_url(num, year)
+            print(f"Processing F{num} {year}...")
 
-                response = safe_request(session, url)
-                if response is None:
-                    print(f"Skipping F{num} {year} due to request failure")
-                    continue
-
-                try:
-                    soup = BeautifulSoup(response.text, "lxml")
-                    response.close()
-                    del response
-
-                    process_entries(soup, year, num)
-                    process_championship(soup, "Teams'", year, "teams_standings", num)
-                    process_championship(soup, "Drivers'", year, "drivers_standings", num)
-                    scrape_quali(soup, year, num)
-
-                    soup.decompose()
-                    gc.collect()
-
-                except Exception as e:
-                    print(f"Error processing data for F{num} {year}: {str(e)}")
-
-        scrape_drivers(session)
-        save_schedules(session)
-    finally:
-        session.close()
-
-
-def scrape_current_year():
-    current_year = datetime.now().year
-    session = create_session()
-
-    try:
-        for num in [1, 2, 3]:
-            if num == 1:
-                url = f"{BASE_URL}{current_year}_Formula_One_World_Championship"
-            elif num == 2:
-                url = f"{BASE_URL}{current_year}_Formula_{num}_Championship"
-            else:
-                url = f"{BASE_URL}{current_year}_FIA_Formula_{num}_Championship"
-
-            print(f"Processing current year F{num}...")
             response = safe_request(session, url)
             if response is None:
-                print(f"Skipping current year F{num} due to request failure")
+                print(f"Skipping F{num} {year} due to request failure")
                 continue
 
             try:
@@ -84,19 +47,34 @@ def scrape_current_year():
                 response.close()
                 del response
 
-                process_entries(soup, current_year, num)
-                process_championship(soup, "Teams'", current_year, "teams_standings", num)
-                process_championship(soup, "Drivers'", current_year, "drivers_standings", num)
-                scrape_quali(soup, current_year, num)
+                process_entries(soup, year, num)
+                process_championship(soup, "Teams'", year, "teams_standings", num)
+                process_championship(soup, "Drivers'", year, "drivers_standings", num)
+                scrape_quali(soup, year, num)
 
                 soup.decompose()
                 gc.collect()
 
             except Exception as e:
-                print(f"Error processing current year F{num}: {str(e)}")
+                print(f"Error processing data for F{num} {year}: {str(e)}")
 
+
+def scrape():
+    session = create_session()
+    try:
+        scrape_wiki(session)
         scrape_drivers(session)
-        save_schedules(session)
+        scrape_schedules(session)
+    finally:
+        session.close()
+
+
+def scrape_current_year():
+    session = create_session()
+    try:
+        scrape_wiki(session, start_year=CURRENT_YEAR)
+        scrape_drivers(session)
+        scrape_schedules(session)
     finally:
         session.close()
 
